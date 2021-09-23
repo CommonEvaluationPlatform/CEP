@@ -5,16 +5,16 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 <p align="center">
-    <img src="./doc/cep_logo.jpg" width="721" height="300">
+    <img src="./cep_docs/cep_logo.jpg" width="721" height="300">
 </p>
 <p align="center">
-    <img src="./doc/version3.41.jpg" width="98" height="60">
+    <img src="./cep_docs/version3.5.png" width="98" height="60">
 </p>
 <p align="center">
    Copyright 2021 Massachusetts Institute of Technology
 </p>
 <p align="center">
-    <img src="./doc/related_logos.jpg" width="450" height="71">
+    <img src="./cep_docs/related_logos.png" width="450" height="71">
 </p>
 
 The Common Evaluation Platform (CEP) is an Open Source Hardware (OSH) System on a Chip (SoC).  It has been developed to support the test and evluation of custom tools and techniques.  An extensive verification environment is provided to ensure the underlying functionality is maintained even after modification.
@@ -26,7 +26,7 @@ The Lincoln Laboratory Key Interface (LLKI) has been provided as a representativ
 <br/>
 
 <p align="center">
-    <img src="./doc/cep_v3.4_architecture.jpg">
+    <img src="./cep_docs/cep_v3.4_architecture.jpg">
 </p>
 
 The CEP is based on the SiFive U500 Platform which leverages the UCB Rocket Chip.  Much of the design is described in Chisel (https://github.com/freechipsproject/chisel3), a domain specific extension to Scala tailored towards constructing hardware.  The output of the Chisel generators is synthesizable verilog.
