@@ -14,7 +14,7 @@
    Copyright 2021 Massachusetts Institute of Technology
 </p>
 <p align="center">
-    <img src="./cep_docs/related_logos.png" width="450" height="124">
+    <img src="./cep_docs/related_logos.png" width="441" height="128">
 </p>
 
 The Common Evaluation Platform (CEP) is an Open Source Hardware (OSH) System on a Chip (SoC).  It has been developed to support the test and evluation of custom tools and techniques.  An extensive verification environment is provided to ensure the underlying functionality is maintained even after modification.
