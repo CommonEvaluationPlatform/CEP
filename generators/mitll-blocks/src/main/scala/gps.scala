@@ -26,11 +26,11 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the core
-case object PeripheryGPSKey extends Field[Seq[COREParams]]
+case object PeripheryGPSKey extends Field[Seq[COREParams]](Nil)
 
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
 // to the instantiation
-trait HasPeripheryGPS { this: BaseSubsystem =>
+trait CanHavePeripheryGPS { this: BaseSubsystem =>
   val gpsnode = p(PeripheryGPSKey).map { params =>
 
     // Initialize the attachment parameters
@@ -247,7 +247,27 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
 
     })
 
-	// Provide an optional override of the Blackbox module name
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/gps/gps_mock_tss.sv")
+    addResource("/vsrc/gps/gps.v")
+    addResource("/vsrc/gps/cacode.v")
+    addResource("/vsrc//gps/pcode.v")
+
+    //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
+  	// Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)
     }

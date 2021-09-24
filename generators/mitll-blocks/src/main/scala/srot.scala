@@ -26,29 +26,12 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 // BEGIN: SRoT "Periphery" connections
 //--------------------------------------------------------------------------------------
-
-// The following class is used to pass paramaters down into the SROT
-case class SROTParams(
-  slave_address       : BigInt,
-  slave_depth         : BigInt,
-  cep_cores_base_addr : BigInt,
-  cep_cores_depth     : BigInt,
-  llki_cores_array    : Array[BigInt]
-)
-
-// The following parameter pass attachment info to the lower level objects/classes/etc.
-case class SROTAttachParams(
-  srotparams        : SROTParams,
-  slave_bus         : TLBusWrapper,
-  master_bus        : TLBusWrapper
-)
-
 // Parameters associated with the SROT
-case object SROTKey extends Field[Seq[SROTParams]]
+case object SROTKey extends Field[Seq[SROTParams]](Nil)
 
 // This trait "connects" the SRoT to the Rocket Chip and passes the parameters down
 // to the instantiation
-trait HasSROT { this: BaseSubsystem =>
+trait CanHaveSROT { this: BaseSubsystem =>
   val SROTNodes = p(SROTKey).map { params =>
 
     // Initialize the attachment parameters
@@ -213,6 +196,23 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   val core_index_array_packed = srotparams.llki_cores_array.foldLeft(BigInt(0)) { 
     (packed, addr) => ((packed << 32) | addr)  }
   val num_cores = srotparams.llki_cores_array.length
+
+  // Add the SystemVerilog/Verilog associated with the module
+  // Relative to /src/main/resources
+  addResource("/vsrc/llki/srot_wrapper.sv")
+
+  //Common Resources used by all modules (LLKI, Opentitan, etc.)
+  addResource("/vsrc/llki/llki_pp_wrapper.sv")
+  addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+  addResource("/vsrc/llki/tlul_err.sv")
+  addResource("/vsrc/llki/tlul_adapter_reg.sv")
+  addResource("/vsrc/llki/tlul_fifo_sync.sv")
+  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+  addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+  addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
 
   // Instantiate the srot_wrapper
   val srot_wrapper_inst = Module(new srot_wrapper(srotparams.slave_address, srotparams.slave_depth, num_cores, core_index_array_packed))

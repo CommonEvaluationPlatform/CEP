@@ -27,11 +27,11 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the Scratchpad
-case object ScratchpadKey extends Field[Seq[ScratchpadParams]]
+case object ScratchpadKey extends Field[Seq[ScratchpadParams]](Nil)
 
 // This trait "connects" the Scratchpad to the Rocket Chip and passes the parameters down
 // to the instantiation
-trait HasScratchpad { this: BaseSubsystem =>
+trait CanHaveScratchpad { this: BaseSubsystem =>
   val ScratchpadNodes = p(ScratchpadKey).map { params =>
 
     // Initialize the attachment parameters
@@ -145,6 +145,24 @@ class scratchpadTLModuleImp(scratchpadparams: ScratchpadParams, outer: scratchpa
       val slave_d_ready     = Input(Bool())
 
     })
+
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/llki/scratchpad_wrapper.sv")
+
+    //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
   } // end class scratchpad_wrapper
 
   // Instantiate the scratchpad_wrapper

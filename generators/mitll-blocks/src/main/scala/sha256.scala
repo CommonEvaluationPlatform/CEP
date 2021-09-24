@@ -243,6 +243,26 @@ class sha256TLModuleImp(coreparams: COREParams, outer: sha256TLModule) extends L
 
     })
 
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/sha256/sha256_mock_tss.sv")
+    addResource("/vsrc/sha256/sha256.v")
+    addResource("/vsrc/sha256/sha256_k_constants.v")
+    addResource("/vsrc/sha256/sha256_w_mem.v")
+
+    //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
     // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)

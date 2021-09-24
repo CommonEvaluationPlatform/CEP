@@ -26,11 +26,11 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the core
-case object PeripheryCEPRegistersKey extends Field[Seq[CEPREGSParams]]
+case object PeripheryCEPRegistersKey extends Field[Seq[CEPREGSParams]](Nil)
 
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
 // to the instantiation
-trait HasPeripheryCEPRegisters { this: BaseSubsystem =>
+trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
   val cepregsnode = p(PeripheryCEPRegistersKey).map { params =>
 
     // Initialize the attachment parameters

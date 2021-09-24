@@ -26,13 +26,13 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the core
-case object PeripheryDES3Key extends Field[Seq[COREParams]]
+case object PeripheryDES3Key extends Field[Seq[COREParams]](Nil)
 
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
-// to the instantiation
-trait HasPeripheryDES3 { this: BaseSubsystem =>
+// to the instantiation IF the parameters have been initialized
+trait CanHavePeripheryDES3 { this: BaseSubsystem =>
   val des3node = p(PeripheryDES3Key).map { params =>
-
+    
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
       coreparams  = params,
@@ -62,7 +62,6 @@ trait HasPeripheryDES3 { this: BaseSubsystem =>
     InModuleBody { des3module.module.clock := coreattachparams.slave_bus.module.clock }
 
 }}
-
 //--------------------------------------------------------------------------------------
 // BEGIN: Module "Periphery" connections
 //--------------------------------------------------------------------------------------
@@ -216,7 +215,7 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class des3_mock_tss() extends BlackBox {
+  class des3_mock_tss() extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock
@@ -245,7 +244,35 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
 
     })
 
-	// Provide an optional override of the Blackbox module name
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/des/des3_mock_tss.sv")
+    addResource("/vsrc/des/des3.v")
+    addResource("/vsrc/des/key_sel3.v")
+    addResource("/vsrc/des/crp.v")
+    addResource("/vsrc/des/sbox1.v")
+    addResource("/vsrc/des/sbox2.v")
+    addResource("/vsrc/des/sbox3.v")
+    addResource("/vsrc/des/sbox4.v")
+    addResource("/vsrc/des/sbox5.v")
+    addResource("/vsrc/des/sbox6.v")
+    addResource("/vsrc/des/sbox7.v")
+    addResource("/vsrc/des/sbox8.v")
+
+    //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
+	  // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)
     }

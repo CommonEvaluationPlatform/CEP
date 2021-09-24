@@ -32,15 +32,6 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
 
-// Add all the LLKI SystemVerilog Modules (or customized OpenTitan modules)
-addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-addResource("/vsrc/llki/llki_pp_wrapper.sv")
-addResource("/vsrc/llki/srot_wrapper.sv")
-addResource("/vsrc/llki/scratchpad_wrapper.sv")
-addResource("/vsrc/llki/tlul_err.sv")
-addResource("/vsrc/llki/tlul_adapter_reg.sv")
-addResource("/vsrc/llki/tlul_fifo_sync.sv")
-
 object CEPBaseAddresses {
   val scratchpad_base_addr          = 0x64800000L
   val scratchpad_depth              = 0x0000FFFFL 
@@ -377,5 +368,21 @@ case class ScratchpadParams(
 case class ScratchpadAttachParams(
   scratchpadparams    : ScratchpadParams,
   slave_bus           : TLBusWrapper
+)
+
+// The following class is used to pass paramaters down into the SROT
+case class SROTParams(
+  slave_address       : BigInt,
+  slave_depth         : BigInt,
+  cep_cores_base_addr : BigInt,
+  cep_cores_depth     : BigInt,
+  llki_cores_array    : Array[BigInt]
+)
+
+// The following parameter pass attachment info to the lower level objects/classes/etc.
+case class SROTAttachParams(
+  srotparams        : SROTParams,
+  slave_bus         : TLBusWrapper,
+  master_bus        : TLBusWrapper
 )
 
