@@ -241,8 +241,12 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
 
     })
 
+    // Add the SystemVerilog/Verilog associated with the module
     // Relative to /src/main/resources
     addResource("/vsrc/aes/aes_192_mock_tss.sv")
+    addResource("/vsrc/aes/aes_192.v")
+    addResource("/vsrc/aes/round.s")
+    addResource("/vsrc/aes/table.v")
 
  	// Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
