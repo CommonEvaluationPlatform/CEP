@@ -327,6 +327,10 @@ lazy val fpga_platforms = (project in file("./fpga"))
 
 // Add the MIT LL Development Blocks
 lazy val mitllBlocks = (project in file("generators/mitll-blocks"))
-  .dependsOn(rocketchip)
+  .dependsOn(rocketchip, opentitan)
   .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+// Add OpenTitan
+lazy val opentitan = (project in file("generators/opentitan"))
   .settings(commonSettings)
