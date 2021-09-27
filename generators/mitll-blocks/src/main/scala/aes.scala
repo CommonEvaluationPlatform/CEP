@@ -179,15 +179,15 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
   //  - llkiEdge sink bits are 1, but masterEdge sink bits are 2 
   //  - llkiEdge size bits are 3, but masterEdge size bits are 4
   //
+  require(llkiEdge.bundle.sizeBits     == LLKITilelinkParameters.SizeBits, s"SROT: llkiEdge sizeBits exp/act ${LLKITilelinkParameters.SizeBits}/${llkiEdge.bundle.sizeBits}")
   require(llkiEdge.bundle.addressBits  == LLKITilelinkParameters.AddressBits - 1, s"SROT: llkiEdge addressBits exp/act ${LLKITilelinkParameters.AddressBits - 1}/${llkiEdge.bundle.addressBits}")
   require(llkiEdge.bundle.dataBits     == LLKITilelinkParameters.BeatBytes * 8, s"SROT: llkiEdge dataBits exp/act ${LLKITilelinkParameters.BeatBytes * 8}/${llkiEdge.bundle.dataBits}")
   require(llkiEdge.bundle.sourceBits   == LLKITilelinkParameters.SourceBits, s"SROT: llkiEdge sourceBits exp/act ${LLKITilelinkParameters.SourceBits}/${llkiEdge.bundle.sourceBits}")
   require(llkiEdge.bundle.sinkBits     == LLKITilelinkParameters.SinkBits - 1, s"SROT: llkiEdge sinkBits exp/act ${LLKITilelinkParameters.SinkBits - 1}/${llkiEdge.bundle.sinkBits}")
-  require(llkiEdge.bundle.sizeBits     == LLKITilelinkParameters.SizeBits, s"SROT: llkiEdge sizeBits exp/act ${LLKITilelinkParameters.SizeBits}/${llkiEdge.bundle.sizeBits}")
 
   // Connect the Clock and Reset
   llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset.asBool
+  llki_pp_inst.io.rst                 := reset
 
   // Connect the Slave A Channel to the Black box IO
   llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
@@ -219,7 +219,7 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Inputs
       val start               = Input(Bool())
@@ -292,7 +292,7 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
 
   // Map the core specific blackbox IO
   aes_192_inst.io.clk    := clock
-  aes_192_inst.io.rst    := reset.asBool
+  aes_192_inst.io.rst    := reset
   aes_192_inst.io.start  := start
   aes_192_inst.io.state  := Cat(state0, state1)
   aes_192_inst.io.key    := Cat(key0, key1, key2)
@@ -302,16 +302,16 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   outer.slave_node.regmap (
-    AESAddresses.aes_ctrlstatus_addr -> RegFieldGroup("aes_ctrlstatus", Some("AES Control/Status Register"),Seq(
+    AESAddresses.aes_ctrlstatus_addr -> RegFieldGroup("aes_ctrlstatus", Some("AES_Control_Status_Register"),Seq(
       RegField    (1, start,      RegFieldDesc("start", "")),
       RegField.r  (1, out_valid,  RegFieldDesc("out_valid", "", volatile=true)))),
-    AESAddresses.aes_pt0_addr -> RegFieldGroup("aes_pt0", Some("AES Plaintext Word 0"), Seq(RegField(64, state0))),
-    AESAddresses.aes_pt1_addr -> RegFieldGroup("aes_pt1", Some("AES Plaintext Word 1"), Seq(RegField(64, state1))),
-    AESAddresses.aes_ct0_addr -> RegFieldGroup("aes_ct0", Some("AES Ciphertext Word 0"), Seq(RegField.r(64, out(127,64)))),
-    AESAddresses.aes_ct1_addr -> RegFieldGroup("aes_ct1", Some("AES Ciphertext Word 1"), Seq(RegField.r(64, out(63,0)))),
-    AESAddresses.aes_key0_addr -> RegFieldGroup("aes_key0", Some("AES Key Word 0"), Seq(RegField(64, key0))),
-    AESAddresses.aes_key1_addr -> RegFieldGroup("aes_key1", Some("AES Key Word 1"), Seq(RegField(64, key1))),
-    AESAddresses.aes_key2_addr -> RegFieldGroup("aes_key2", Some("AES Key Word 2"), Seq(RegField(64, key2)))
+    AESAddresses.aes_pt0_addr -> RegFieldGroup("aes_pt0", Some(""), Seq(RegField(64, state0))),
+    AESAddresses.aes_pt1_addr -> RegFieldGroup("aes_pt1", Some(""), Seq(RegField(64, state1))),
+    AESAddresses.aes_ct0_addr -> RegFieldGroup("aes_ct0", Some(""), Seq(RegField.r(64, out(127,64)))),
+    AESAddresses.aes_ct1_addr -> RegFieldGroup("aes_ct1", Some(""), Seq(RegField.r(64, out(63,0)))),
+    AESAddresses.aes_key0_addr -> RegFieldGroup("aes_key0", Some(""), Seq(RegField(64, key0))),
+    AESAddresses.aes_key1_addr -> RegFieldGroup("aes_key1", Some(""), Seq(RegField(64, key1))),
+    AESAddresses.aes_key2_addr -> RegFieldGroup("aes_key2", Some(""), Seq(RegField(64, key2)))
   )  // regmap
 
 }

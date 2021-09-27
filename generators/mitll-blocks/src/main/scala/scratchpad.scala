@@ -108,17 +108,17 @@ class scratchpadTLModuleImp(scratchpadparams: ScratchpadParams, outer: scratchpa
   slave.e.ready   := true.B
 
   // Define scratchpad_wrapper blackbox and its associated IO
-  class scratchpad_wrapper(val address: BigInt, depth: BigInt) extends BlackBox(
+  class scratchpad_wrapper(val address: BigInt, depth: BigInt) extends BlackBox (
       Map(
         "ADDRESS"                       -> IntParam(address),   // Base address of the TL slave
         "DEPTH"                         -> IntParam(depth)      // Address depth of the TL slave
       )
-  ) {
+  ) with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
       val clk               = Input(Clock())
-      val rst               = Input(Bool())
+      val rst               = Input(Reset())
 
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode    = Input(UInt(3.W))

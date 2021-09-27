@@ -26,11 +26,11 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the core
-case object PeripherySHA256Key extends Field[Seq[COREParams]]
+case object PeripherySHA256Key extends Field[Seq[COREParams]](Nil)
 
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
 // to the instantiation
-trait HasPeripherySHA256 { this: BaseSubsystem =>
+trait CanHavePeripherySHA256 { this: BaseSubsystem =>
   val sha256node = p(PeripherySHA256Key).map { params =>
 
     // Initialize the attachment parameters
@@ -216,12 +216,12 @@ class sha256TLModuleImp(coreparams: COREParams, outer: sha256TLModule) extends L
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class sha256_mock_tss() extends BlackBox {
+  class sha256_mock_tss() extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Inputs
       val init                = Input(Bool())
@@ -317,22 +317,22 @@ class sha256TLModuleImp(coreparams: COREParams, outer: sha256TLModule) extends L
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   outer.slave_node.regmap (
-      SHA256Addresses.sha256_ctrlstatus_addr ->RegFieldGroup("sha256_ready", Some("sha256_ready Register"),Seq(RegField.r(1,  ready),
+      SHA256Addresses.sha256_ctrlstatus_addr ->RegFieldGroup("sha256_ready", Some("sha256_ready_Register"),Seq(RegField.r(1,  ready),
                                                                                                                RegField  (1,  init),
                                                                                                                RegField  (1,  next))),
-      SHA256Addresses.sha256_block_w0 -> RegFieldGroup("sha256 0", Some("sha256 msg input word 0"),        Seq(RegField  (64, block0))),
-      SHA256Addresses.sha256_block_w1 -> RegFieldGroup("sha256 1", Some("sha256 msg input word 1"),        Seq(RegField  (64, block1))),
-      SHA256Addresses.sha256_block_w2 -> RegFieldGroup("sha256 2", Some("sha256 msg input word 2"),        Seq(RegField  (64, block2))),
-      SHA256Addresses.sha256_block_w3 -> RegFieldGroup("sha256 3", Some("sha256 msg input word 3"),        Seq(RegField  (64, block3))),
-      SHA256Addresses.sha256_block_w4 -> RegFieldGroup("sha256 4", Some("sha256 msg input word 4"),        Seq(RegField  (64, block4))),
-      SHA256Addresses.sha256_block_w5 -> RegFieldGroup("sha256 5", Some("sha256 msg input word 5"),        Seq(RegField  (64, block5))),
-      SHA256Addresses.sha256_block_w6 -> RegFieldGroup("sha256 6", Some("sha256 msg input word 6"),        Seq(RegField  (64, block6))),
-      SHA256Addresses.sha256_block_w7 -> RegFieldGroup("sha256 7", Some("sha256 msg input word 7"),        Seq(RegField  (64, block7))),
-      SHA256Addresses.sha256_done     -> RegFieldGroup("sha256 done", Some("sha256 done"),                 Seq(RegField.r(1,  digest_valid))),
-      SHA256Addresses.sha256_digest_w0 -> RegFieldGroup("sha256 msg output0", Some("sha256 msg output0"),  Seq(RegField.r(64, digest(255,192)))),
-      SHA256Addresses.sha256_digest_w1 -> RegFieldGroup("sha256 msg output1", Some("sha256 msg output1"),  Seq(RegField.r(64, digest(191,128)))),
-      SHA256Addresses.sha256_digest_w2 -> RegFieldGroup("sha256 msg output2", Some("sha256 msg output2"),  Seq(RegField.r(64, digest(127, 64)))),
-      SHA256Addresses.sha256_digest_w3 -> RegFieldGroup("sha256 msg output3", Some("sha256 msg output3"),  Seq(RegField.r(64, digest( 63,  0))))               
+      SHA256Addresses.sha256_block_w0 -> RegFieldGroup("sha256_0", Some("sha256_msg_input_word_0"),        Seq(RegField  (64, block0))),
+      SHA256Addresses.sha256_block_w1 -> RegFieldGroup("sha256_1", Some("sha256_msg_input_word_1"),        Seq(RegField  (64, block1))),
+      SHA256Addresses.sha256_block_w2 -> RegFieldGroup("sha256_2", Some("sha256_msg_input_word_2"),        Seq(RegField  (64, block2))),
+      SHA256Addresses.sha256_block_w3 -> RegFieldGroup("sha256_3", Some("sha256_msg_input_word_3"),        Seq(RegField  (64, block3))),
+      SHA256Addresses.sha256_block_w4 -> RegFieldGroup("sha256_4", Some("sha256_msg_input_word_4"),        Seq(RegField  (64, block4))),
+      SHA256Addresses.sha256_block_w5 -> RegFieldGroup("sha256_5", Some("sha256_msg_input_word_5"),        Seq(RegField  (64, block5))),
+      SHA256Addresses.sha256_block_w6 -> RegFieldGroup("sha256_6", Some("sha256_msg_input_word_6"),        Seq(RegField  (64, block6))),
+      SHA256Addresses.sha256_block_w7 -> RegFieldGroup("sha256_7", Some("sha256_msg_input_word_7"),        Seq(RegField  (64, block7))),
+      SHA256Addresses.sha256_done     -> RegFieldGroup("sha256_done", Some("sha256_done"),                 Seq(RegField.r(1,  digest_valid))),
+      SHA256Addresses.sha256_digest_w0 -> RegFieldGroup("sha256_msg_output0", Some("sha256_msg_output0"),  Seq(RegField.r(64, digest(255,192)))),
+      SHA256Addresses.sha256_digest_w1 -> RegFieldGroup("sha256_msg_output1", Some("sha256_msg_output1"),  Seq(RegField.r(64, digest(191,128)))),
+      SHA256Addresses.sha256_digest_w2 -> RegFieldGroup("sha256_msg_output2", Some("sha256_msg_output2"),  Seq(RegField.r(64, digest(127, 64)))),
+      SHA256Addresses.sha256_digest_w3 -> RegFieldGroup("sha256_msg_output3", Some("sha256_msg_output3"),  Seq(RegField.r(64, digest( 63,  0))))               
   )  // regmap
 
 }

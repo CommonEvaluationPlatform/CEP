@@ -215,7 +215,7 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class modexp_core_mock_tss() extends BlackBox {
+  class modexp_core_mock_tss() extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
@@ -265,13 +265,13 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
     addResource("/vsrc/rsa/rtl/montprod.v")
     addResource("/vsrc/rsa/rtl/residue.v")
     addResource("/vsrc/rsa/rtl/blockmem2r1w.v")
-    addResource("/vsrc/rtl/blockmem2r1w.v")
-    addResource("/vsrc/rtl/blockmem2r1wptr.v")
-    addResource("/vsrc/rtl/blockmem2rptr1w.v")
-    addResource("/vsrc/rtl/blockmem1r1w.v")
-    addResource("/vsrc/rtl/shr.v")
-    addResource("/vsrc/rtl/shl.v")
-    addResource("/vsrc/rtl/adder.v")
+    addResource("/vsrc/rsa/rtl/blockmem2r1w.v")
+    addResource("/vsrc/rsa/rtl/blockmem2r1wptr.v")
+    addResource("/vsrc/rsa/rtl/blockmem2rptr1w.v")
+    addResource("/vsrc/rsa/rtl/blockmem1r1w.v")
+    addResource("/vsrc/rsa/rtl/shr.v")
+    addResource("/vsrc/rsa/rtl/shl.v")
+    addResource("/vsrc/rsa/rtl/adder.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
@@ -377,7 +377,7 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   outer.slave_node.regmap (
-    RSAAddresses.rsa_ctrlstatus_addr  ->    RegFieldGroup("rsa_ready", Some("rsa_ready Register"),Seq(RegField.r(1,  ready),
+    RSAAddresses.rsa_ctrlstatus_addr  ->    RegFieldGroup("rsa_ready", Some("rsa_ready_register"),Seq(RegField.r(1,  ready),
                                                                                                       RegField  (1,  start))),
     RSAAddresses.rsa_exp_data_addr    ->    Seq(RegField   (32, exponent_mem_api_write_data),
                                                 RegField.r (32, exponent_mem_api_read_data)), // [63;32]

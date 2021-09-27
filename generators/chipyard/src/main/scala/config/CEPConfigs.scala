@@ -4,7 +4,7 @@ import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 
 class CEPRocketConfig extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithIIR ++
@@ -18,4 +18,5 @@ class CEPRocketConfig extends Config(
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithScratchpad ++
   new chipyard.config.WithSROT ++
-  new chipyard.config.AbstractConfig)
+  new chipyard.config.AbstractCEPConfig
+)

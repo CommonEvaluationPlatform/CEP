@@ -222,7 +222,7 @@ class TLModuleImp(cepregsparams: CEPREGSParams, outer: TLModule) extends LazyMod
       RegField.r  (48, version_register.reserved),
       RegField.r  (8,  version_register.major),
       RegField.r  (8,  version_register.minor))),
-    CEPRegisterAddresses.testNset -> RegFieldGroup("test and set register", Some(""),Seq(
+    CEPRegisterAddresses.testNset -> RegFieldGroup("test_and_set_register", Some(""),Seq(
       RegField.r  (1,  lock0.isLocked),         // [7:0]
       RegField.r  (7,  lock0.coreId),           // 
       RegField.r  (1,  lock1.isLocked),         // [15:8]
@@ -237,18 +237,18 @@ class TLModuleImp(cepregsparams: CEPREGSParams, outer: TLModule) extends LazyMod
       RegField.r  (4,  0.U),           // [39:36]     
       RegField    (7,  reqId),         // [46:40]
     RegField.r  (17, 0.U))),         // [63:47]     
-      CEPRegisterAddresses.scratch_w0 -> RegFieldGroup("scratch_in0", Some("scratch word 0"),    Seq(RegField  (64, scratch.word0))),
-      CEPRegisterAddresses.scratch_w1 -> RegFieldGroup("scratch_in1", Some("scratch word 1"),    Seq(RegField  (64, scratch.word1))),
-      CEPRegisterAddresses.scratch_w2 -> RegFieldGroup("scratch_in2", Some("scratch word 2"),    Seq(RegField  (64, scratch.word2))),
-      CEPRegisterAddresses.scratch_w3 -> RegFieldGroup("scratch_in3", Some("scratch word 3"),    Seq(RegField  (64, scratch.word3))),
-      CEPRegisterAddresses.scratch_w4 -> RegFieldGroup("scratch_in4", Some("scratch word 4"),    Seq(RegField  (64, scratch.word4))),
-      CEPRegisterAddresses.scratch_w5 -> RegFieldGroup("scratch_in5", Some("scratch word 5"),    Seq(RegField  (64, scratch.word5))),
-      CEPRegisterAddresses.scratch_w6 -> RegFieldGroup("scratch_in6", Some("scratch word 6"),    Seq(RegField  (64, scratch.word6))),
-      CEPRegisterAddresses.scratch_w7 -> RegFieldGroup("scratch_in7", Some("scratch word 7"),    Seq(RegField  (64, scratch.word7))),
-      CEPRegisterAddresses.core0_status -> RegFieldGroup("core0 Status", Some("core0 status"),    Seq(RegField  (64, core0_status))),     
-      CEPRegisterAddresses.core1_status -> RegFieldGroup("core1 Status", Some("core0 status"),    Seq(RegField  (64, core1_status))),     
-      CEPRegisterAddresses.core2_status -> RegFieldGroup("core2 Status", Some("core0 status"),    Seq(RegField  (64, core2_status))),     
-      CEPRegisterAddresses.core3_status -> RegFieldGroup("core3 Status", Some("core0 status"),    Seq(RegField  (64, core3_status)))
+      CEPRegisterAddresses.scratch_w0 -> RegFieldGroup("scratch_in0", Some(""),    Seq(RegField  (64, scratch.word0))),
+      CEPRegisterAddresses.scratch_w1 -> RegFieldGroup("scratch_in1", Some(""),    Seq(RegField  (64, scratch.word1))),
+      CEPRegisterAddresses.scratch_w2 -> RegFieldGroup("scratch_in2", Some(""),    Seq(RegField  (64, scratch.word2))),
+      CEPRegisterAddresses.scratch_w3 -> RegFieldGroup("scratch_in3", Some(""),    Seq(RegField  (64, scratch.word3))),
+      CEPRegisterAddresses.scratch_w4 -> RegFieldGroup("scratch_in4", Some(""),    Seq(RegField  (64, scratch.word4))),
+      CEPRegisterAddresses.scratch_w5 -> RegFieldGroup("scratch_in5", Some(""),    Seq(RegField  (64, scratch.word5))),
+      CEPRegisterAddresses.scratch_w6 -> RegFieldGroup("scratch_in6", Some(""),    Seq(RegField  (64, scratch.word6))),
+      CEPRegisterAddresses.scratch_w7 -> RegFieldGroup("scratch_in7", Some(""),    Seq(RegField  (64, scratch.word7))),
+      CEPRegisterAddresses.core0_status -> RegFieldGroup("core0_status", Some(""),    Seq(RegField  (64, core0_status))),     
+      CEPRegisterAddresses.core1_status -> RegFieldGroup("core1_status", Some(""),    Seq(RegField  (64, core1_status))),     
+      CEPRegisterAddresses.core2_status -> RegFieldGroup("core2_status", Some(""),    Seq(RegField  (64, core2_status))),     
+      CEPRegisterAddresses.core3_status -> RegFieldGroup("core3_status", Some(""),    Seq(RegField  (64, core3_status)))
     ) // regmap
 }
 //--------------------------------------------------------------------------------------

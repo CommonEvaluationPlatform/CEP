@@ -131,7 +131,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode      = Input(UInt(3.W))
@@ -216,7 +216,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class gps_mock_tss () extends BlackBox {
+  class gps_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
@@ -252,7 +252,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
     addResource("/vsrc/gps/gps_mock_tss.sv")
     addResource("/vsrc/gps/gps.v")
     addResource("/vsrc/gps/cacode.v")
-    addResource("/vsrc//gps/pcode.v")
+    addResource("/vsrc/gps/pcode.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
@@ -318,7 +318,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
 
   // Map the blackbox I/O 
   gps_inst.io.sys_clk_50         := clock                                      // Implicit module clock
-  gps_inst.io.sync_rst_in        := reset.asBool
+  gps_inst.io.sync_rst_in        := reset
   gps_inst.io.sync_rst_in_dut    := (reset.asBool || gps_reset).asAsyncReset 
                                                                                         // Implicit module reset
   gps_inst.io.startRound         := startRound                                 // Start bit
@@ -341,27 +341,27 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   // Likewise, .w means Write Only
   outer.slave_node.regmap (
-    GPSAddresses.gps_ctrlstatus_addr -> RegFieldGroup("gps_ctrlstatus", Some("GPS Control/Status Register"),Seq(
+    GPSAddresses.gps_ctrlstatus_addr -> RegFieldGroup("gps_ctrlstatus", Some("GPS_Control_Status_Register"),Seq(
                     RegField    (1, startRound,      RegFieldDesc("start", "")),
                     RegField.r  (1, l_code_valid,  RegFieldDesc ("l_code_valid", "", volatile=true)))),
-    GPSAddresses.gps_sv_num_addr     -> RegFieldGroup("sv_num",     Some("GPS Set SV sv_num"),          Seq(RegField  (6,  sv_num))),
-    GPSAddresses.gps_aes_key_addr_w0 -> RegFieldGroup("aes_key",    Some("GPS Set AES Key upper bits"), Seq(RegField.w(64, aes_key0))),
-    GPSAddresses.gps_aes_key_addr_w1 -> RegFieldGroup("aes_key",    Some("GPS Set AES Key middle bits"),Seq(RegField.w(64, aes_key1))),
-    GPSAddresses.gps_aes_key_addr_w2 -> RegFieldGroup("aes_key",    Some("GPS Set AES Key low bits"),   Seq(RegField.w(64, aes_key2))),
-    GPSAddresses.gps_pcode_speed_addr-> RegFieldGroup("pcode_speed",Some("GPS PCode acceleration"),     Seq(
-                    RegField.w(12, pcode_xn_cnt_speed, RegFieldDesc("PCode Xn Counter Speed","")),
-                    RegField.w(19, pcode_z_cnt_speed,  RegFieldDesc("PCode Z Counter Speed","")) )),
-    GPSAddresses.gps_pcode_xini_addr -> RegFieldGroup("pcode_ini",  Some("GPS PCode x-lfsr inittial states"),Seq(
-                    RegField.w(12, pcode_ini_x1a, RegFieldDesc("PCode X1A Initial State","")),
-                    RegField.w(12, pcode_ini_x1b, RegFieldDesc("PCode X1B Initial State","")),
-                    RegField.w(12, pcode_ini_x2a, RegFieldDesc("PCode X2A Initial State","")),
-                    RegField.w(12, pcode_ini_x2b, RegFieldDesc("PCode X2B Initial State","")) )),
-    GPSAddresses.gps_ca_code_addr    -> RegFieldGroup("gps_cacode", Some("GPS CA code"),                Seq(RegField.r(64, ca_code))),
-    GPSAddresses.gps_reset_addr      -> RegFieldGroup("gps_reset",  Some("GPS addressable reset"),      Seq(RegField  (1,  gps_reset))),            
-    GPSAddresses.gps_p_code_addr_w0  -> RegFieldGroup("gps_pcode1", Some("GPS pcode upper bits"),       Seq(RegField.r(64, Cat(p_code0_u,p_code0_l)))),
-    GPSAddresses.gps_p_code_addr_w1  -> RegFieldGroup("gps_pcode1", Some("GPS pcode lower 64 bits"),    Seq(RegField.r(64, Cat(p_code1_u,p_code1_l)))),
-    GPSAddresses.gps_l_code_addr_w0  -> RegFieldGroup("gps_lcode1", Some("GPS lcode upper 64 bits"),    Seq(RegField.r(64, Cat(l_code0_u,l_code0_l)))),
-    GPSAddresses.gps_l_code_addr_w1  -> RegFieldGroup("gps_lcode1", Some("GPS lcode lower 64 bits"),    Seq(RegField.r(64, Cat(l_code1_u,l_code1_l))))
+    GPSAddresses.gps_sv_num_addr     -> RegFieldGroup("sv_num",     Some("GPS_Set_SV_sv_num"),          Seq(RegField  (6,  sv_num))),
+    GPSAddresses.gps_aes_key_addr_w0 -> RegFieldGroup("aes_key",    Some("GPS_Set_AES_Key_upper_bits"), Seq(RegField.w(64, aes_key0))),
+    GPSAddresses.gps_aes_key_addr_w1 -> RegFieldGroup("aes_key",    Some("GPS_Set_AES_Key_middle_bits"),Seq(RegField.w(64, aes_key1))),
+    GPSAddresses.gps_aes_key_addr_w2 -> RegFieldGroup("aes_key",    Some("GPS_Set_AES_Key_low_bits"),   Seq(RegField.w(64, aes_key2))),
+    GPSAddresses.gps_pcode_speed_addr-> RegFieldGroup("pcode_speed",Some("GPS_PCode_acceleration"),     Seq(
+                    RegField.w(12, pcode_xn_cnt_speed, RegFieldDesc("PCode_Xn_Counter_Speed","")),
+                    RegField.w(19, pcode_z_cnt_speed,  RegFieldDesc("PCode_Z_Counter_Speed","")) )),
+    GPSAddresses.gps_pcode_xini_addr -> RegFieldGroup("pcode_ini",  Some("GPS_PCode_x_lfsr_initial_states"),Seq(
+                    RegField.w(12, pcode_ini_x1a, RegFieldDesc("PCode_X1A_Initial_State","")),
+                    RegField.w(12, pcode_ini_x1b, RegFieldDesc("PCode_X1B_Initial_State","")),
+                    RegField.w(12, pcode_ini_x2a, RegFieldDesc("PCode_X2A_Initial_State","")),
+                    RegField.w(12, pcode_ini_x2b, RegFieldDesc("PCode_X2B_Initial_State","")) )),
+    GPSAddresses.gps_ca_code_addr    -> RegFieldGroup("gps_cacode", Some("GPS_CA_code"),                Seq(RegField.r(64, ca_code))),
+    GPSAddresses.gps_reset_addr      -> RegFieldGroup("gps_reset",  Some("GPS_addressable_reset"),      Seq(RegField  (1,  gps_reset))),            
+    GPSAddresses.gps_p_code_addr_w0  -> RegFieldGroup("gps_pcode1", Some("GPS_pcode_upper_bits"),       Seq(RegField.r(64, Cat(p_code0_u,p_code0_l)))),
+    GPSAddresses.gps_p_code_addr_w1  -> RegFieldGroup("gps_pcode1", Some("GPS_pcode_lower_64 bits"),    Seq(RegField.r(64, Cat(p_code1_u,p_code1_l)))),
+    GPSAddresses.gps_l_code_addr_w0  -> RegFieldGroup("gps_lcode1", Some("GPS_lcode_upper_64 bits"),    Seq(RegField.r(64, Cat(l_code0_u,l_code0_l)))),
+    GPSAddresses.gps_l_code_addr_w1  -> RegFieldGroup("gps_lcode1", Some("GPS_lcode_lower_64 bits"),    Seq(RegField.r(64, Cat(l_code1_u,l_code1_l))))
   )  // regmap
 }
 //--------------------------------------------------------------------------------------

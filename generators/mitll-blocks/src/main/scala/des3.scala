@@ -220,7 +220,7 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
     val io = IO(new Bundle {
       // Clock
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Inputs
       val start               = Input(Bool())
@@ -246,18 +246,18 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
 
     // Add the SystemVerilog/Verilog associated with the module
     // Relative to /src/main/resources
-    addResource("/vsrc/des/des3_mock_tss.sv")
-    addResource("/vsrc/des/des3.v")
-    addResource("/vsrc/des/key_sel3.v")
-    addResource("/vsrc/des/crp.v")
-    addResource("/vsrc/des/sbox1.v")
-    addResource("/vsrc/des/sbox2.v")
-    addResource("/vsrc/des/sbox3.v")
-    addResource("/vsrc/des/sbox4.v")
-    addResource("/vsrc/des/sbox5.v")
-    addResource("/vsrc/des/sbox6.v")
-    addResource("/vsrc/des/sbox7.v")
-    addResource("/vsrc/des/sbox8.v")
+    addResource("/vsrc/des3/des3_mock_tss.sv")
+    addResource("/vsrc/des3/des3.v")
+    addResource("/vsrc/des3/key_sel3.v")
+    addResource("/vsrc/des3/crp.v")
+    addResource("/vsrc/des3/sbox1.v")
+    addResource("/vsrc/des3/sbox2.v")
+    addResource("/vsrc/des3/sbox3.v")
+    addResource("/vsrc/des3/sbox4.v")
+    addResource("/vsrc/des3/sbox5.v")
+    addResource("/vsrc/des3/sbox6.v")
+    addResource("/vsrc/des3/sbox7.v")
+    addResource("/vsrc/des3/sbox8.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
@@ -319,14 +319,14 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   outer.slave_node.regmap (
-    DES3Addresses.des3_ctrlstatus_addr -> RegFieldGroup("des3_ctrlstatus", Some("DES3 Control/Status Register"),Seq(RegField  ( 1, start, RegFieldDesc("start", "")))),
-    DES3Addresses.des3_decrypt_addr    -> RegFieldGroup("des3_decrypt",    Some("DES3 Decrypt Bit"),            Seq(RegField  ( 1, decrypt))),
-    DES3Addresses.des3_desIn_addr      -> RegFieldGroup("des3_desIn",      Some("DES3 Plaintext Word 1"),       Seq(RegField  (64, desIn))),
-    DES3Addresses.des3_key1_addr       -> RegFieldGroup("des3_key0",       Some("DES3 Key Word 0"),             Seq(RegField  (56, key1))),
-    DES3Addresses.des3_key2_addr       -> RegFieldGroup("des3_key1",       Some("DES3 Key Word 1"),             Seq(RegField  (56, key2))),
-    DES3Addresses.des3_key3_addr       -> RegFieldGroup("des3_key2",       Some("DES3 Key Word 2"),             Seq(RegField  (56, key3))),                
-    DES3Addresses.des3_done            -> RegFieldGroup("des3_done",       Some("DES3 Done"),                   Seq(RegField.r( 1, out_valid))),
-    DES3Addresses.des3_desOut_addr     -> RegFieldGroup("des3_desOut",     Some("DES3 Plaintext Word 1"),       Seq(RegField.r(64, desOut)))
+    DES3Addresses.des3_ctrlstatus_addr -> RegFieldGroup("des3_ctrlstatus", Some(""), Seq(RegField  ( 1, start, RegFieldDesc("start", "")))),
+    DES3Addresses.des3_decrypt_addr    -> RegFieldGroup("des3_decrypt",    Some(""), Seq(RegField  ( 1, decrypt))),
+    DES3Addresses.des3_desIn_addr      -> RegFieldGroup("des3_desIn",      Some(""), Seq(RegField  (64, desIn))),
+    DES3Addresses.des3_key1_addr       -> RegFieldGroup("des3_key0",       Some(""), Seq(RegField  (56, key1))),
+    DES3Addresses.des3_key2_addr       -> RegFieldGroup("des3_key1",       Some(""), Seq(RegField  (56, key2))),
+    DES3Addresses.des3_key3_addr       -> RegFieldGroup("des3_key2",       Some(""), Seq(RegField  (56, key3))),                
+    DES3Addresses.des3_done            -> RegFieldGroup("des3_done",       Some(""), Seq(RegField.r( 1, out_valid))),
+    DES3Addresses.des3_desOut_addr     -> RegFieldGroup("des3_desOut",     Some(""), Seq(RegField.r(64, desOut)))
   )  // regmap
 
 }

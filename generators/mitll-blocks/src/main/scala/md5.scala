@@ -131,7 +131,7 @@ class md5TLModuleImp(coreparams: COREParams, outer: md5TLModule) extends LazyMod
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode      = Input(UInt(3.W))
@@ -216,7 +216,7 @@ class md5TLModuleImp(coreparams: COREParams, outer: md5TLModule) extends LazyMod
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class md5_mock_tss() extends BlackBox {
+  class md5_mock_tss() extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
@@ -245,8 +245,8 @@ class md5TLModuleImp(coreparams: COREParams, outer: md5TLModule) extends LazyMod
 
     // Add the SystemVerilog/Verilog associated with the module
     // Relative to /src/main/resources
-    addResource("/vsrc/md5_mock_tss.sv")
-    addResource("/vsrc/md5.v")
+    addResource("/vsrc/md5/md5_mock_tss.sv")
+    addResource("/vsrc/md5/md5.v")
     addResource("/vsrc/md5/pancham.v")
     addResource("/vsrc/md5/pancham_round.v")
 
@@ -313,19 +313,19 @@ class md5TLModuleImp(coreparams: COREParams, outer: md5TLModule) extends LazyMod
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
   outer.slave_node.regmap (
-      MD5Addresses.md5_ready         -> RegFieldGroup("md5_ready", Some("md5_ready Register"),    Seq(RegField.r(1,  ready           ))),
-      MD5Addresses.md5_msg_padded_w0 -> RegFieldGroup("md5_in0", Some("md5 msg input word 0"),    Seq(RegField  (64, msg_padded_w0))),
-      MD5Addresses.md5_msg_padded_w1 -> RegFieldGroup("md5_in1", Some("md5 msg input word 1"),    Seq(RegField  (64, msg_padded_w1))),
-      MD5Addresses.md5_msg_padded_w2 -> RegFieldGroup("md5_in2", Some("md5 msg input word 2"),    Seq(RegField  (64, msg_padded_w2))),
-      MD5Addresses.md5_msg_padded_w3 -> RegFieldGroup("md5_in3", Some("md5 msg input word 3"),    Seq(RegField  (64, msg_padded_w3))),
-      MD5Addresses.md5_msg_padded_w4 -> RegFieldGroup("md5_in4", Some("md5 msg input word 4"),    Seq(RegField  (64, msg_padded_w4))),
-      MD5Addresses.md5_msg_padded_w5 -> RegFieldGroup("md5_in5", Some("md5 msg input word 5"),    Seq(RegField  (64, msg_padded_w5))),
-      MD5Addresses.md5_msg_padded_w6 -> RegFieldGroup("md5_in6", Some("md5 msg input word 6"),    Seq(RegField  (64, msg_padded_w6))),
-      MD5Addresses.md5_msg_padded_w7 -> RegFieldGroup("md5_in7", Some("md5 msg input word 7"),    Seq(RegField  (64, msg_padded_w7))),
-      MD5Addresses.md5_msg_output_w0 -> RegFieldGroup("md5 msg output0", Some("md5 msg output1"), Seq(RegField.r(64, msg_output(127,64)))),
-      MD5Addresses.md5_msg_output_w1 -> RegFieldGroup("md5 msg output1", Some("md5 msg output1"), Seq(RegField.r(64, msg_output(63,0)))),
-      MD5Addresses.md5_in_valid      -> RegFieldGroup("md5 msg in valid", Some("md5 in valid"),   Seq(RegField  (1,  msg_in_valid))),
-      MD5Addresses.md5_out_valid     -> RegFieldGroup("md5 msg out valid", Some("md5 out valid"), Seq(RegField.r(1,  msg_out_valid))),
+      MD5Addresses.md5_ready         -> RegFieldGroup("md5_ready", Some("md5_ready_register"),    Seq(RegField.r(1,  ready           ))),
+      MD5Addresses.md5_msg_padded_w0 -> RegFieldGroup("md5_in0", Some("md5_msg_input_word_0"),    Seq(RegField  (64, msg_padded_w0))),
+      MD5Addresses.md5_msg_padded_w1 -> RegFieldGroup("md5_in1", Some("md5_msg_input_word_1"),    Seq(RegField  (64, msg_padded_w1))),
+      MD5Addresses.md5_msg_padded_w2 -> RegFieldGroup("md5_in2", Some("md5_msg_input_word_2"),    Seq(RegField  (64, msg_padded_w2))),
+      MD5Addresses.md5_msg_padded_w3 -> RegFieldGroup("md5_in3", Some("md5_msg_input_word_3"),    Seq(RegField  (64, msg_padded_w3))),
+      MD5Addresses.md5_msg_padded_w4 -> RegFieldGroup("md5_in4", Some("md5_msg_input_word_4"),    Seq(RegField  (64, msg_padded_w4))),
+      MD5Addresses.md5_msg_padded_w5 -> RegFieldGroup("md5_in5", Some("md5_msg_input_word_5"),    Seq(RegField  (64, msg_padded_w5))),
+      MD5Addresses.md5_msg_padded_w6 -> RegFieldGroup("md5_in6", Some("md5_msg_input_word_6"),    Seq(RegField  (64, msg_padded_w6))),
+      MD5Addresses.md5_msg_padded_w7 -> RegFieldGroup("md5_in7", Some("md5_msg_input_word_7"),    Seq(RegField  (64, msg_padded_w7))),
+      MD5Addresses.md5_msg_output_w0 -> RegFieldGroup("md5_msg_output0", Some("md5_msg_output1"), Seq(RegField.r(64, msg_output(127,64)))),
+      MD5Addresses.md5_msg_output_w1 -> RegFieldGroup("md5_msg_output1", Some("md5_msg_output1"), Seq(RegField.r(64, msg_output(63,0)))),
+      MD5Addresses.md5_in_valid      -> RegFieldGroup("md5_msg_in_valid", Some("md5_in_valid"),   Seq(RegField  (1,  msg_in_valid))),
+      MD5Addresses.md5_out_valid     -> RegFieldGroup("md5_msg_out_valid", Some("md5_out_valid"), Seq(RegField.r(1,  msg_out_valid))),
       MD5Addresses.md5_rst           -> RegFieldGroup("message_rst", Some("message_rst"),         Seq(RegField  (1, rst),
                                                                                                       RegField  (1, init)))
   )  // regmap

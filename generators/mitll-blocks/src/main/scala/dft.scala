@@ -135,7 +135,7 @@ class dftTLModuleImp(coreparams: COREParams, outer: dftTLModule) extends LazyMod
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode      = Input(UInt(3.W))
@@ -220,7 +220,7 @@ class dftTLModuleImp(coreparams: COREParams, outer: dftTLModule) extends LazyMod
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class dft_top_mock_tss () extends BlackBox {
+  class dft_top_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset

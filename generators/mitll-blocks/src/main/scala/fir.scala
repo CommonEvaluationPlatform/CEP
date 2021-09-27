@@ -135,7 +135,7 @@ class firTLModuleImp(coreparams: COREParams, outer: firTLModule) extends LazyMod
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Bool())
+      val rst                 = Input(Reset())
 
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode      = Input(UInt(3.W))
@@ -220,7 +220,7 @@ class firTLModuleImp(coreparams: COREParams, outer: firTLModule) extends LazyMod
   llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
   // Define blackbox and its associated IO
-  class FIR_filter_mock_tss () extends BlackBox {
+  class FIR_filter_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
@@ -357,7 +357,7 @@ class firTLModuleImp(coreparams: COREParams, outer: firTLModule) extends LazyMod
   // The FIR needs to be reset in between test vectors, thus a second reset
   // has been added in order to allow for the LLKI keys to persist
   FIR_filter_inst.io.clk       := clock
-  FIR_filter_inst.io.rst       := reset.asBool
+  FIR_filter_inst.io.rst       := reset
 //  FIR_filter_inst.io.rst_dut   := (reset.asBool || fir_reset_re).asAsyncReset 
   FIR_filter_inst.io.rst_dut   := (reset.asBool || fir_reset).asAsyncReset 
                                                                      

@@ -124,7 +124,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   val (master, masterEdge)  = outer.master_node.out(0)
 
   // Define srot_wrapper blackbox and its associated IO
-  class srot_wrapper(val address: BigInt, depth: BigInt, num_cores: BigInt, core_index_array_packed: BigInt) extends BlackBox(
+  class srot_wrapper(val address: BigInt, depth: BigInt, num_cores: BigInt, core_index_array_packed: BigInt) extends BlackBox (
       Map(
         "ADDRESS"                       -> IntParam(address), // Base address of the TL slave
         "DEPTH"                         -> IntParam(depth),   // Address depth of the TL slave
@@ -134,7 +134,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
             // MSB => address 0
         "LLKI_NUM_CORES"                -> IntParam(num_cores)  //number of LLKI cores
       )
-  ) {
+  ) with HasBlackBoxResource {
 
     val io = IO(new Bundle {
       // Clock and Reset
@@ -190,29 +190,30 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
       val master_d_ready    = Output(Bool())
 
     })
+
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/llki/srot_wrapper.sv")
+
+    // Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
   } // end class srot_wrapper
 
   // Pack core index array
   val core_index_array_packed = srotparams.llki_cores_array.foldLeft(BigInt(0)) { 
     (packed, addr) => ((packed << 32) | addr)  }
   val num_cores = srotparams.llki_cores_array.length
-
-  // Add the SystemVerilog/Verilog associated with the module
-  // Relative to /src/main/resources
-  addResource("/vsrc/llki/srot_wrapper.sv")
-
-  //Common Resources used by all modules (LLKI, Opentitan, etc.)
-  addResource("/vsrc/llki/llki_pp_wrapper.sv")
-  addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-  addResource("/vsrc/llki/tlul_err.sv")
-  addResource("/vsrc/llki/tlul_adapter_reg.sv")
-  addResource("/vsrc/llki/tlul_fifo_sync.sv")
-  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-  addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-  addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-  addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
 
   // Instantiate the srot_wrapper
   val srot_wrapper_inst = Module(new srot_wrapper(srotparams.slave_address, srotparams.slave_depth, num_cores, core_index_array_packed))
@@ -240,7 +241,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
 
   // Connect the Clock and Reset
   srot_wrapper_inst.io.clk                := clock
-  srot_wrapper_inst.io.rst                := reset
+  srot_wrapper_inst.io.rst                := reset.asBool
 
   // Connect the Slave A Channel to the Black box IO
   srot_wrapper_inst.io.slave_a_opcode     := slave.a.bits.opcode    
