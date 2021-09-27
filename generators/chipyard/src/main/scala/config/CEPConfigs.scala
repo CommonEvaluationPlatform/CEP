@@ -27,6 +27,13 @@ class CEPRocketConfig extends Config(
   new chipyard.config.WithScratchpad ++
   new chipyard.config.WithSROT ++
 
+  // Moved IO declerations from AbstractCEPConfig to here for readability
+  new chipyard.config.WithUART(address = 0x64000000L) ++
+  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+
+  // Override external memory size to be equal to that of the U500 on the VC707 (1 GB)
+  new freechips.rocketchip.subsystem.WithExtMemSize((1 << 30) * 1L) ++
+
   // Set the remainder of the configuration items
   new chipyard.config.AbstractCEPConfig
 )

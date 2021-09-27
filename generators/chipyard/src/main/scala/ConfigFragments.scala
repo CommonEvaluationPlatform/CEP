@@ -56,15 +56,15 @@ class WithBootROM extends Config((site, here, up) => {
 })
 
 // DOC include start: gpio config fragment
-class WithGPIO extends Config((site, here, up) => {
+class WithGPIO (address: BigInt = 0x1001200, width: Int = 4) extends Config((site, here, up) => {
   case PeripheryGPIOKey => Seq(
-    GPIOParams(address = 0x10012000, width = 4, includeIOF = false))
+    GPIOParams(address = address, width = width, includeIOF = false))
 })
 // DOC include end: gpio config fragment
 
-class WithUART(baudrate: BigInt = 115200) extends Config((site, here, up) => {
+class WithUART(address: BigInt = 0x54000000, baudrate: BigInt = 115200) extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
-    UARTParams(address = 0x54000000L, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+    UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
 })
 
 class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
