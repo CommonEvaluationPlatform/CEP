@@ -121,7 +121,7 @@ $(BIT_FILE): $(synth_list_f)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 			-board "$(BOARD)"
 
-MCS_FILE := $(build_dir)/obj/$(MODEL)_primary.mcs $(build_dir)/obj/$(MODEL)_secondary.mcs
+MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
 $(MCS_FILE): $(BIT_FILE)
 	cd $(build_dir)/obj; vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
 
@@ -141,6 +141,25 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(BOARD) \
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
+
+.PHONY: program-remote
+program-remote: mcs
+ifeq ($(SUB_PROJECT),vcu118)
+ifdef REMOTE_IP
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/vcu118_program.tcl \
+		-tclargs \
+			$(build_dir)/obj/$(MODEL) \
+			$(REMOTE_IP)
+else
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/vcu118_program.tcl \
+		-tclargs \
+			$(build_dir)/obj/$(MODEL)
+endif
+endif
 
 #########################################################################################
 # general cleanup rules
