@@ -88,11 +88,6 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++
 
-  // The configuration items have been inherited from the default configuration of the Freedom U500
-  new WithNMemoryChannels(1) ++
-  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
-  new WithoutTLMonitors ++ 
-
   // Additional chip configuration items
   new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithNoSubsystemDrivenClocks ++             // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks

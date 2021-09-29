@@ -121,6 +121,13 @@ $(BIT_FILE): $(synth_list_f)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 			-board "$(BOARD)"
 
+MCS_FILE := $(build_dir)/obj/$(MODEL)_primary.mcs $(build_dir)/obj/$(MODEL)_secondary.mcs
+$(MCS_FILE): $(BIT_FILE)
+	cd $(build_dir)/obj; vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
+
+.PHONY: mcs
+mcs: $(MCS_FILE)
+
 .PHONY: bitstream
 bitstream: $(BIT_FILE)
 
