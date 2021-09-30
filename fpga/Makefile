@@ -142,8 +142,8 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
 
-.PHONY: program-remote
-program-remote: mcs
+.PHONY: program
+program: mcs
 ifeq ($(SUB_PROJECT),vcu118)
 ifdef REMOTE_IP
 	cd $(build_dir); vivado \
