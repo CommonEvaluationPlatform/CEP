@@ -34,7 +34,7 @@ import freechips.rocketchip.tilelink._
 
 object CEPBaseAddresses {
   val scratchpad_base_addr          = 0x64800000L
-  val scratchpad_depth              = 0x0000FFFFL 
+  val scratchpad_depth              = 0x0001FFFFL 
 
   val cep_cores_base_addr           = 0x70000000L
     val aes_base_addr               = 0x70000000L
