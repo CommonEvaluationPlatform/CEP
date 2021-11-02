@@ -24,11 +24,22 @@
 `timescale 1ns/1ns
 
 module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
-  parameter int ADDRESS     = 32'h00000000,   // Currently unused as address selected occurs @ the SRoT Chisel Code
-  parameter int DEPTH       = 32'h00000100,   // Currently unused as address selected occurs @ the SRoT Chisel Code
-  parameter int FIFO_DEPTH  = 8,              // Define the depth of the LLKI FIFOs
+
+  parameter SLAVE_TL_SZW,
+  parameter SLAVE_TL_AIW,
+  parameter SLAVE_TL_AW,
+  parameter SLAVE_TL_DBW,
+  parameter SLAVE_TL_DW,
+  parameter SLAVE_TL_DIW,
+  parameter MASTER_TL_SZW,
+  parameter MASTER_TL_AIW,
+  parameter MASTER_TL_AW,
+  parameter MASTER_TL_DBW,
+  parameter MASTER_TL_DW,
+  parameter MASTER_TL_DIW,
   parameter LLKI_CORE_INDEX_ARRAY_PACKED,     // LLKI interface addresses
   parameter LLKI_NUM_CORES,
+  parameter int FIFO_DEPTH  = 8              // Define the depth of the LLKI FIFOs
   // Derived parameters
   localparam int DepthW     = prim_util_pkg::vbits(FIFO_DEPTH + 1)
  ) (
@@ -40,11 +51,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Slave interface A channel
   input [2:0]                   slave_a_opcode,
   input [2:0]                   slave_a_param,
-  input [top_pkg::TL_SZW-1:0]   slave_a_size,
-  input [top_pkg::TL_AIW-1:0]   slave_a_source,
-  input [top_pkg::TL_AW-1:00]   slave_a_address,
-  input [top_pkg::TL_DBW-1:0]   slave_a_mask,
-  input [top_pkg::TL_DW-1:0]    slave_a_data,
+  input [SLAVE_TL_SZW-1:0]      slave_a_size,
+  input [SLAVE_TL_AIW-1:0]      slave_a_source,
+  input [SLAVE_TL_AW-1:00]      slave_a_address,
+  input [SLAVE_TL_DBW-1:0]      slave_a_mask,
+  input [SLAVE_TL_DW-1:0]       slave_a_data,
   input                         slave_a_corrupt,
   input                         slave_a_valid,
   output                        slave_a_ready,
@@ -52,11 +63,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Slave interface D channel
   output [2:0]                  slave_d_opcode,
   output [2:0]                  slave_d_param,
-  output [top_pkg::TL_SZW-1:0]  slave_d_size,
-  output [top_pkg::TL_AIW-1:0]  slave_d_source,
-  output [top_pkg::TL_DIW-1:0]  slave_d_sink,
+  output [SLAVE_TL_SZW-1:0]     slave_d_size,
+  output [SLAVE_TL_AIW-1:0]     slave_d_source,
+  output [SLAVE_TL_DIW-1:0]     slave_d_sink,
   output                        slave_d_denied,
-  output [top_pkg::TL_DW-1:0]   slave_d_data,
+  output [SLAVE_TL_DW-1:0]      slave_d_data,
   output                        slave_d_corrupt,
   output                        slave_d_valid,
   input                         slave_d_ready,
@@ -64,11 +75,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Master interface A channel
   output [2:0]                  master_a_opcode,
   output [2:0]                  master_a_param,
-  output [top_pkg::TL_SZW-1:0]  master_a_size,
-  output [top_pkg::TL_AIW-1:0]  master_a_source,
-  output [top_pkg::TL_AW-1:00]  master_a_address,
-  output [top_pkg::TL_DBW-1:0]  master_a_mask,
-  output [top_pkg::TL_DW-1:0]   master_a_data,
+  output [MASTER_TL_SZW-1:0]    master_a_size,
+  output [MASTER_TL_AIW-1:0]    master_a_source,
+  output [MASTER_TL_AW-1:00]    master_a_address,
+  output [MASTER_TL_DBW-1:0]    master_a_mask,
+  output [MASTER_TL_DW-1:0]     master_a_data,
   output                        master_a_corrupt,
   output                        master_a_valid,
   input                         master_a_ready,
@@ -76,21 +87,20 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Master interface D channel
   input [2:0]                   master_d_opcode,
   input [2:0]                   master_d_param,
-  input [top_pkg::TL_SZW-1:0]   master_d_size,
-  input [top_pkg::TL_AIW-1:0]   master_d_source,
-  input [top_pkg::TL_DIW-1:0]   master_d_sink,
+  input [MASTER_TL_SZW-1:0]     master_d_size,
+  input [MASTER_TL_AIW-1:0]     master_d_source,
+  input [MASTER_TL_DIW-1:0]     master_d_sink,
   input                         master_d_denied,
-  input [top_pkg::TL_DW-1:0]    master_d_data,
+  input [MASTER_TL_DW-1:0]      master_d_data,
   input                         master_d_corrupt,
   input                         master_d_valid,
   output                        master_d_ready
 
 );
   
-  localparam [0:LLKI_NUM_CORES-1][31:0] LLKI_CORE_INDEX_ARRAY = LLKI_CORE_INDEX_ARRAY_PACKED;
   //We get this parameter from a verilog file, which does not support unpacked parameter arrays.
   //So, keep as a 2d packed array. 
-
+  localparam [0:LLKI_NUM_CORES-1][31:0] LLKI_CORE_INDEX_ARRAY = LLKI_CORE_INDEX_ARRAY_PACKED;
 
   // Create the structures for communicating with OpenTitan-based Tilelink
   tl_h2d_t                      slave_tl_h2d;
@@ -98,16 +108,46 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   tl_h2d_t                      master_tl_h2d;
   tl_d2h_t                      master_tl_d2h;
 
+  // In the OpenTitan world, TL buses are encapsulated with the structures instantitated above
+  // and as defined in top_pkg.sv.  This includes field widths.
+  //
+  // In the RocketChip world, some field widths will vary based on the other system components
+  // (e.g., source and sink widths).  In order to provide maximum flexibility, without breaking
+  // OpenTitan, top_pkg.sv is going to be defined with field maximum expected widths within
+  // the CEP ecosystem.
+  //
+  // The following assignments, coupled with the parameters passed to this component will 
+  // provide for a flexible assignment, when necessary.  Assertions will be used to capture
+  // a mismatch when the widths in the OpenTitan world are not large enough to encapsulate
+  // what is being passed from RocketChip.
+  //
+  // DW/DBW (Data bus width) must be equal in both worlds
+  `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW < SLAVE_TL_SZW)
+  `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW < SLAVE_TL_AIW)
+  `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW < SLAVE_TL_AW)
+  `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW != SLAVE_TL_DBW)
+  `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW != SLAVE_TL_DW)
+  always @
+  begin
+    slave_tl_h2d.a_size                         <= '0;
+    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;
+    slave_tl_h2d.a_source                       <= '0;
+    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     <= slave_a_source;
+    slave_tl_h2d.a_address                      <= '0;
+    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_source;
+    
+    slave_d_size                                <= slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
+    slave_d_source                              <= slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
+    slave_d_sink                                <= slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+  end
+
   // Make Slave A channel connections
   assign slave_tl_h2d.a_valid     = slave_a_valid;
   assign slave_tl_h2d.a_opcode    = ( slave_a_opcode == 3'h0) ? PutFullData : 
-                                  ((slave_a_opcode == 3'h1) ? PutPartialData : 
-                                  ((slave_a_opcode == 3'h4) ? Get : 
-                                    Get));                                   
+                                    ((slave_a_opcode == 3'h1) ? PutPartialData : 
+                                    ((slave_a_opcode == 3'h4) ? Get : 
+                                      Get));                                   
   assign slave_tl_h2d.a_param     = slave_a_param;
-  assign slave_tl_h2d.a_size      = slave_a_size;
-  assign slave_tl_h2d.a_source    = slave_a_source;
-  assign slave_tl_h2d.a_address   = slave_a_address;
   assign slave_tl_h2d.a_mask      = slave_a_mask;
   assign slave_tl_h2d.a_data      = slave_a_data;
   assign slave_tl_h2d.a_user      = tl_a_user_t'('0);  // User field is unused by Rocket Chip
@@ -119,39 +159,51 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
                                   ((slave_tl_d2h.d_opcode == AccessAckData) ? 3'h1 :
                                     3'h0);
   assign slave_d_param          = slave_tl_d2h.d_param;
-  assign slave_d_size           = slave_tl_d2h.d_size;
-  assign slave_d_source         = slave_tl_d2h.d_source;
-  assign slave_d_sink           = slave_tl_d2h.d_sink;
-  assign slave_d_denied         = slave_tl_d2h.d_error; // Open
-  assign slave_d_data           = slave_tl_d2h.d_data;
+  assign slave_d_denied         = slave_tl_d2h.d_error;
+  assign slave_d_data           = slave.tl_d2h.d_data;
   assign slave_d_corrupt        = slave_tl_d2h.d_error;
   assign slave_d_valid          = slave_tl_d2h.d_valid;
   assign slave_a_ready          = slave_tl_d2h.a_ready;
 
+
+  `ASSERT_INIT(srot_masterTlSzw, top_pkg::TL_SZW < MASTER_TL_SZW)
+  `ASSERT_INIT(srot_masterTlAiw, top_pkg::TL_AIW < MASTER_TL_AIW)
+  `ASSERT_INIT(srot_masterTlAw, top_pkg::TL_AW < MASTER_TL_AW)
+  `ASSERT_INIT(srot_masterTlDbw, top_pkg::TL_DBW != MASTER_TL_DBW)
+  `ASSERT_INIT(srot_masterTlDw, top_pkg::TL_DW != MASTER_TL_DW)
+
+  always @
+  begin
+    master_a_size                       <= master_tl_h2d.size[MASTER_TL_SZW-1:0];
+    master_a_source                     <= master_tl_h2d.source[MASTER_TL_AIW-1:0];
+    master_a_address                    <= master_tl_h2d.address[MASTER_TL_AW-1:0];
+
+    master_tl_d2h.d_size                    <= '0;
+    master_tl_d2h.d_size[MASTER_TL_SZW]     <= master_d_size;
+    master_tl_d2h.d_source                  <= '0;
+    master_tl_d2h.d_source[MASTER_TL_AIW]   <= master_d_source;
+    master_tl_d2h.d_sink                    <= '0;
+    master_tl_d2h.d_sink[MASTER_TL_DIW]     <= master_d_sink;
+  end
+
   // Make Master A channel connections
+  assign master_a_mask          = master_tl_h2d.a_mask;
+  assign master_a_data          = master_tl_h2d.a_data;
   assign master_a_opcode        = ( master_tl_h2d.a_opcode == PutFullData)    ? 3'h0 :
                                   ((master_tl_h2d.a_opcode == PutPartialData) ? 3'h1 :
                                   ((master_tl_h2d.a_opcode == Get)            ? 3'h4 :
                                     3'h4));
   assign master_a_param         = master_tl_h2d.a_param;
-  assign master_a_size          = master_tl_h2d.a_size;
-  assign master_a_source        = master_tl_h2d.a_source;
-  assign master_a_address       = master_tl_h2d.a_address;
-  assign master_a_mask          = master_tl_h2d.a_mask;
-  assign master_a_data          = master_tl_h2d.a_data;
   assign master_a_corrupt       = 0;
   assign master_a_valid         = master_tl_h2d.a_valid;
   assign master_d_ready         = master_tl_h2d.d_ready;
 
   // Make Master D channel connections
+  assign master_tl_d2h.d_data   = master_d_data;
   assign master_tl_d2h.d_opcode = ( master_d_opcode == 3'h0) ? AccessAck : 
                                   ((master_d_opcode == 3'h1) ? AccessAckData : 
                                     AccessAck); 
   assign master_tl_d2h.d_param  = master_d_param;
-  assign master_tl_d2h.d_size   = master_d_size;
-  assign master_tl_d2h.d_source = master_d_source;
-  assign master_tl_d2h.d_sink   = master_d_sink;
-  assign master_tl_d2h.d_data   = master_d_data;
   assign master_tl_d2h.d_user   = tl_a_user_t'('0);
   assign master_tl_d2h.d_error  = master_d_corrupt || master_d_denied;
   assign master_tl_d2h.d_valid  = master_d_valid;

@@ -44,7 +44,7 @@ ifeq ($(SUB_PROJECT),bringup)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),arty)
+ifeq ($(SUB_PROJECT),arty-35)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
@@ -59,13 +59,28 @@ ifeq ($(SUB_PROJECT),arty)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),arty-a7-100)
+ifeq ($(SUB_PROJECT),arty-100)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
 	VLOG_MODEL        ?= ArtyFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
 	CONFIG            ?= TinyRocketArtyConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),cep-arty-100)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= ArtyFPGATestHarness
+	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty
+	CONFIG            ?= TinyCEPRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused

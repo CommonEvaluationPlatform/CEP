@@ -123,16 +123,42 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   // "Connect" to Master Node's signals and parameters
   val (master, masterEdge)  = outer.master_node.out(0)
 
-  // Define srot_wrapper blackbox and its associated IO
-  class srot_wrapper(val address: BigInt, depth: BigInt, num_cores: BigInt, core_index_array_packed: BigInt) extends BlackBox (
+  // Define srot_wrapper blackbox and its associated IO.   Parameters are being
+  // used to pass vector sizes (vs constants in a package) to increase flexibility
+  // when some vectors might change depending on where the SRoT is instantiated
+  class srot_wrapper(   slave_tl_szw              : Int,
+                        slave_tl_aiw              : Int,
+                        slave_tl_aw               : Int,
+                        slave_tl_dbw              : Int,
+                        slave_tl_dw               : Int,
+                        slave_tl_diw              : Int,
+                        master_tl_szw             : Int,
+                        master_tl_aiw             : Int,
+                        master_tl_aw              : Int,
+                        master_tl_dbw             : Int,
+                        master_tl_dw              : Int,
+                        master_tl_diw             : Int,
+                        num_cores                 : BigInt, 
+                        core_index_array_packed   : BigInt) extends BlackBox (
       Map(
-        "ADDRESS"                       -> IntParam(address), // Base address of the TL slave
-        "DEPTH"                         -> IntParam(depth),   // Address depth of the TL slave
-        "LLKI_CORE_INDEX_ARRAY_PACKED"  -> IntParam(core_index_array_packed), 
-            // Array of LLKI base addresses, packed into single bitstream 
-            // Each address is 32bit
-            // MSB => address 0
-        "LLKI_NUM_CORES"                -> IntParam(num_cores)  //number of LLKI cores
+        "SLAVE_TL_SZW"                  -> IntParam(slave_tl_szw),
+        "SLAVE_TL_AIW"                  -> IntParam(slave_tl_aiw),
+        "SLAVE_TL_AW"                   -> IntParam(slave_tl_aw),
+        "SLAVE_TL_DBW"                  -> IntParam(slave_tl_dbw),
+        "SLAVE_TL_DW"                   -> IntParam(slave_tl_dw),
+        "SLAVE_TL_DIW"                  -> IntParam(slave_tl_diw),
+        "MASTER_TL_SZW"                 -> IntParam(master_tl_szw),
+        "MASTER_TL_AIW"                 -> IntParam(master_tl_aiw),
+        "MASTER_TL_AW"                  -> IntParam(master_tl_aw),
+        "MASTER_TL_DBW"                 -> IntParam(master_tl_dbw),
+        "MASTER_TL_DW"                  -> IntParam(master_tl_dw),
+        "MASTER_TL_DIW"                 -> IntParam(master_tl_diw),
+        // number of LLKI cores
+        "LLKI_NUM_CORES"                -> IntParam(num_cores),
+        // Array of LLKI base addresses, packed into single bitstream 
+        // Each address is 32bit
+        // MSB => address 0
+        "LLKI_CORE_INDEX_ARRAY_PACKED"  -> IntParam(core_index_array_packed) 
       )
   ) with HasBlackBoxResource {
 
@@ -144,11 +170,11 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode    = Input(UInt(3.W))
       val slave_a_param     = Input(UInt(3.W))
-      val slave_a_size      = Input(UInt(LLKITilelinkParameters.SizeBits.W))
-      val slave_a_source    = Input(UInt(LLKITilelinkParameters.SourceBits.W))
-      val slave_a_address   = Input(UInt(LLKITilelinkParameters.AddressBits.W))
-      val slave_a_mask      = Input(UInt(LLKITilelinkParameters.BeatBytes.W))
-      val slave_a_data      = Input(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val slave_a_size      = Input(UInt(slave_tl_szw.W))
+      val slave_a_source    = Input(UInt(slave_tl_aiw.W))
+      val slave_a_address   = Input(UInt(slave_tl_aw.W))
+      val slave_a_mask      = Input(UInt(slave_tl_dbw.W))
+      val slave_a_data      = Input(UInt(slave_tl_dw.W))
       val slave_a_corrupt   = Input(Bool())
       val slave_a_valid     = Input(Bool())
       val slave_a_ready     = Output(Bool())
@@ -156,11 +182,11 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
       // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_d_opcode    = Output(UInt(3.W))
       val slave_d_param     = Output(UInt(3.W))
-      val slave_d_size      = Output(UInt(LLKITilelinkParameters.SizeBits.W))
-      val slave_d_source    = Output(UInt(LLKITilelinkParameters.SourceBits.W))
-      val slave_d_sink      = Output(UInt(LLKITilelinkParameters.SinkBits.W))
+      val slave_d_size      = Output(UInt(slave_tl_szw.W))
+      val slave_d_source    = Output(UInt(slave_tl_aiw.W))
+      val slave_d_sink      = Output(UInt(slave_tl_diw.W))
       val slave_d_denied    = Output(Bool())
-      val slave_d_data      = Output(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val slave_d_data      = Output(UInt(slave_tl_dw.W))
       val slave_d_corrupt   = Output(Bool())
       val slave_d_valid     = Output(Bool())
       val slave_d_ready     = Input(Bool())
@@ -168,11 +194,11 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
       // Master - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val master_a_opcode   = Output(UInt(3.W))
       val master_a_param    = Output(UInt(3.W))
-      val master_a_size     = Output(UInt(LLKITilelinkParameters.SizeBits.W))
-      val master_a_source   = Output(UInt(LLKITilelinkParameters.SourceBits.W))
-      val master_a_address  = Output(UInt(LLKITilelinkParameters.AddressBits.W))
-      val master_a_mask     = Output(UInt(LLKITilelinkParameters.BeatBytes.W))
-      val master_a_data     = Output(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val master_a_size     = Output(UInt(master_tl_szw.W))
+      val master_a_source   = Output(UInt(master_tl_aiw.W))
+      val master_a_address  = Output(UInt(master_tl_aw.W))
+      val master_a_mask     = Output(UInt(master_tl_dbw.W))
+      val master_a_data     = Output(UInt(master_tl_dw.W))
       val master_a_corrupt  = Output(Bool())
       val master_a_valid    = Output(Bool())
       val master_a_ready    = Input(Bool())
@@ -180,11 +206,11 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
       // Master - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
       val master_d_opcode   = Input(UInt(3.W))
       val master_d_param    = Input(UInt(3.W))
-      val master_d_size     = Input(UInt(LLKITilelinkParameters.SizeBits.W))
-      val master_d_source   = Input(UInt(LLKITilelinkParameters.SourceBits.W))
-      val master_d_sink     = Input(UInt(LLKITilelinkParameters.SinkBits.W))
+      val master_d_size     = Input(UInt(master_tl_szw.W))
+      val master_d_source   = Input(UInt(master_tl_aiw.W))
+      val master_d_sink     = Input(UInt(master_tl_diw.W))
       val master_d_denied   = Input(Bool())
-      val master_d_data     = Input(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val master_d_data     = Input(UInt(master_tl_dw.W))
       val master_d_corrupt  = Input(Bool())
       val master_d_valid    = Input(Bool())
       val master_d_ready    = Output(Bool())
@@ -216,28 +242,22 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   val num_cores = srotparams.llki_cores_array.length
 
   // Instantiate the srot_wrapper
-  val srot_wrapper_inst = Module(new srot_wrapper(srotparams.slave_address, srotparams.slave_depth, num_cores, core_index_array_packed))
-
-  // The following "requires" are included to avoid size mismatches between the
-  // the Rocket Chip buses and the SRoT Black Box.  The expected values are inhereited
-  // from the cep_addresses package and must match those in "top_pkg.sv", borrowed from OpenTitan
-  //
-  // Exceptions:
-  //  - slaveEdge address gets optimized down to 31-bits during chisel generation
-  //  - slaveEdge sink bits are 1, but masterEdge sink bits are 2 
-  //  - slaveEdge size bits are 2, but masterEdge size bits are 4
-  //
-  require(slaveEdge.bundle.addressBits  == LLKITilelinkParameters.AddressBits - 1, s"SROT: slaveEdge addressBits exp/act ${LLKITilelinkParameters.AddressBits - 1}/${slaveEdge.bundle.addressBits}")
-  require(slaveEdge.bundle.dataBits     == LLKITilelinkParameters.BeatBytes * 8, s"SROT: slaveEdge dataBits exp/act ${LLKITilelinkParameters.BeatBytes * 8}/${slaveEdge.bundle.dataBits}")
-  require(slaveEdge.bundle.sourceBits   == LLKITilelinkParameters.SourceBits, s"SROT: slaveEdge sourceBits exp/act ${LLKITilelinkParameters.SourceBits}/${slaveEdge.bundle.sourceBits}")
-  require(slaveEdge.bundle.sinkBits     == LLKITilelinkParameters.SinkBits - 1, s"SROT: slaveEdge sinkBits exp/act ${LLKITilelinkParameters.SinkBits - 1}/${slaveEdge.bundle.sinkBits}")
-  require(slaveEdge.bundle.sizeBits     == LLKITilelinkParameters.SizeBits, s"SROT: slaveEdge sizeBits exp/act ${LLKITilelinkParameters.SizeBits}/${slaveEdge.bundle.sizeBits}")
-
-  require(masterEdge.bundle.addressBits == LLKITilelinkParameters.AddressBits, s"SROT: masterEdge addressBits exp/act ${LLKITilelinkParameters.AddressBits}/${masterEdge.bundle.addressBits}")
-  require(masterEdge.bundle.dataBits    == LLKITilelinkParameters.BeatBytes * 8, s"SROT: masterEdge dataBits exp/act ${LLKITilelinkParameters.BeatBytes * 8}/${masterEdge.bundle.dataBits}")
-  require(masterEdge.bundle.sourceBits  == LLKITilelinkParameters.SourceBits, s"SROT: masterEdge sourceBits exp/act ${LLKITilelinkParameters.SourceBits}/${masterEdge.bundle.sourceBits}")
-  require(masterEdge.bundle.sinkBits    == LLKITilelinkParameters.SinkBits, s"SROT: masterEdge sinkBits exp/act ${LLKITilelinkParameters.SinkBits}/${masterEdge.bundle.sinkBits}")
-  require(masterEdge.bundle.sizeBits    == LLKITilelinkParameters.SizeBits + 2, s"SROT: masterEdge sizeBits exp/act ${LLKITilelinkParameters.SizeBits + 2}/${masterEdge.bundle.sizeBits}")
+  val srot_wrapper_inst = Module(new srot_wrapper(
+    slaveEdge.bundle.sizeBits,
+    slaveEdge.bundle.sourceBits,
+    slaveEdge.bundle.addressBits,
+    slaveEdge.bundle.dataBits / 8,
+    slaveEdge.bundle.dataBits,
+    slaveEdge.bundle.sinkBits,
+    masterEdge.bundle.sizeBits,
+    masterEdge.bundle.sourceBits,
+    masterEdge.bundle.addressBits,
+    masterEdge.bundle.dataBits / 8,
+    masterEdge.bundle.dataBits,
+    masterEdge.bundle.sinkBits,
+    core_index_array_packed,
+    num_cores
+  ))
 
   // Connect the Clock and Reset
   srot_wrapper_inst.io.clk                := clock
@@ -248,7 +268,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   srot_wrapper_inst.io.slave_a_param      := slave.a.bits.param     
   srot_wrapper_inst.io.slave_a_size       := slave.a.bits.size
   srot_wrapper_inst.io.slave_a_source     := slave.a.bits.source    
-  srot_wrapper_inst.io.slave_a_address    := Cat(0.U(1.W), slave.a.bits.address)
+  srot_wrapper_inst.io.slave_a_address    := slave.a.bits.address
   srot_wrapper_inst.io.slave_a_mask       := slave.a.bits.mask      
   srot_wrapper_inst.io.slave_a_data       := slave.a.bits.data      
   srot_wrapper_inst.io.slave_a_corrupt    := slave.a.bits.corrupt   
@@ -260,7 +280,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   slave.d.bits.param                      := srot_wrapper_inst.io.slave_d_param
   slave.d.bits.size                       := srot_wrapper_inst.io.slave_d_size
   slave.d.bits.source                     := srot_wrapper_inst.io.slave_d_source
-  slave.d.bits.sink                       := srot_wrapper_inst.io.slave_d_sink(0)
+  slave.d.bits.sink                       := srot_wrapper_inst.io.slave_d_sink
   slave.d.bits.denied                     := srot_wrapper_inst.io.slave_d_denied
   slave.d.bits.data                       := srot_wrapper_inst.io.slave_d_data
   slave.d.bits.corrupt                    := srot_wrapper_inst.io.slave_d_corrupt
@@ -270,7 +290,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   // Connect the Master A channel to the Black Box IO
   master.a.bits.opcode                    := srot_wrapper_inst.io.master_a_opcode
   master.a.bits.param                     := srot_wrapper_inst.io.master_a_param
-  master.a.bits.size                      := Cat(0.U(2.W), srot_wrapper_inst.io.master_a_size)
+  master.a.bits.size                      := srot_wrapper_inst.io.master_a_size
   master.a.bits.source                    := srot_wrapper_inst.io.master_a_source
   master.a.bits.address                   := srot_wrapper_inst.io.master_a_address
   master.a.bits.mask                      := srot_wrapper_inst.io.master_a_mask
@@ -282,7 +302,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   // Connect the Master D channel to the Black Box IO
   srot_wrapper_inst.io.master_d_opcode    := master.d.bits.opcode
   srot_wrapper_inst.io.master_d_param     := master.d.bits.param
-  srot_wrapper_inst.io.master_d_size      := master.d.bits.size(1,0)
+  srot_wrapper_inst.io.master_d_size      := master.d.bits.size
   srot_wrapper_inst.io.master_d_source    := master.d.bits.source
   srot_wrapper_inst.io.master_d_sink      := master.d.bits.sink
   srot_wrapper_inst.io.master_d_denied    := master.d.bits.denied

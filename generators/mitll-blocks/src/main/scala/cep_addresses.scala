@@ -381,8 +381,8 @@ case class SROTParams(
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
 case class SROTAttachParams(
-  srotparams        : SROTParams,
-  slave_bus         : TLBusWrapper,
-  master_bus        : TLBusWrapper
+  srotparams          : SROTParams,
+  slave_bus           : TLBusWrapper,
+  master_bus          : TLBusWrapper
 )
 

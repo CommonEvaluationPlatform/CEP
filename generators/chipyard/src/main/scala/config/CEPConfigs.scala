@@ -45,3 +45,22 @@ class CEPRocketConfig extends Config(
   new chipyard.config.AbstractCEPConfig
 )
 
+class TinyCEPRocketConfig extends Config(
+
+  // Add the CEP Accelerator Cores
+  new chipyard.config.WithCEPRegisters ++
+  new chipyard.config.WithAES ++
+  new chipyard.config.WithSROT ++
+  
+  // Borrowed from the ScratchpadOnlyRocketConfig
+  new chipyard.config.WithTLSerialLocation(
+    freechips.rocketchip.subsystem.FBUS,
+    freechips.rocketchip.subsystem.PBUS) ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(0) ++
+  new freechips.rocketchip.subsystem.WithNBanks(0) ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithScratchpadsOnly ++
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractCEPConfig
+
+)
