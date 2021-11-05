@@ -251,6 +251,7 @@ class sha256TLModuleImp(coreparams: COREParams, outer: sha256TLModule) extends L
     addResource("/vsrc/sha256/sha256_w_mem.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pkg.sv")
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
     addResource("/vsrc/llki/prim_generic_ram_1p.sv")
     addResource("/vsrc/llki/tlul_err.sv")

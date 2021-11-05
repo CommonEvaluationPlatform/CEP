@@ -260,6 +260,7 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
     addResource("/vsrc/des3/sbox8.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pkg.sv")
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
     addResource("/vsrc/llki/prim_generic_ram_1p.sv")
     addResource("/vsrc/llki/tlul_err.sv")

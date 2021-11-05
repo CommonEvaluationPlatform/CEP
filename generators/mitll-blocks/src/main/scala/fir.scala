@@ -250,6 +250,7 @@ class firTLModuleImp(coreparams: COREParams, outer: firTLModule) extends LazyMod
     addResource("/vsrc/dsp/FIR_filter.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pkg.sv")
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
     addResource("/vsrc/llki/prim_generic_ram_1p.sv")
     addResource("/vsrc/llki/tlul_err.sv")

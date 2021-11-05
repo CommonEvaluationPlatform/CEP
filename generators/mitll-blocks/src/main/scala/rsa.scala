@@ -274,6 +274,7 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
     addResource("/vsrc/rsa/rtl/adder.v")
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    addResource("/vsrc/llki/llki_pkg.sv")
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
     addResource("/vsrc/llki/prim_generic_ram_1p.sv")
     addResource("/vsrc/llki/tlul_err.sv")

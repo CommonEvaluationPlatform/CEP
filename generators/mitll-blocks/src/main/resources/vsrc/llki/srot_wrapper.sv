@@ -40,8 +40,6 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter LLKI_CORE_INDEX_ARRAY_PACKED,     // LLKI interface addresses
   parameter LLKI_NUM_CORES,
   parameter int FIFO_DEPTH  = 8              // Define the depth of the LLKI FIFOs
-  // Derived parameters
-  localparam int DepthW     = prim_util_pkg::vbits(FIFO_DEPTH + 1)
  ) (
 
   // Clock and reset
@@ -98,6 +96,9 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 
 );
   
+  // Derived parameters
+  localparam int DepthW     = prim_util_pkg::vbits(FIFO_DEPTH + 1)
+
   //We get this parameter from a verilog file, which does not support unpacked parameter arrays.
   //So, keep as a 2d packed array. 
   localparam [0:LLKI_NUM_CORES-1][31:0] LLKI_CORE_INDEX_ARRAY = LLKI_CORE_INDEX_ARRAY_PACKED;
