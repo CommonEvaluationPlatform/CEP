@@ -120,6 +120,11 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
   // "Connect" to Slave Node's signals and parameters
   val (slave, slaveEdge)    = outer.slave_node.in(0)
 
+  // Ensure unused channels are tied off
+  slave.b.valid   := false.B
+  slave.c.ready   := true.B
+  slave.e.ready   := true.B
+
   // "Connect" to Master Node's signals and parameters
   val (master, masterEdge)  = outer.master_node.out(0)
 

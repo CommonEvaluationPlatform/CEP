@@ -42,7 +42,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with mitllBlocks.sha256.CanHavePeripherySHA256
   with mitllBlocks.rsa.CanHavePeripheryRSA
   with mitllBlocks.cep_registers.CanHavePeripheryCEPRegisters
-  with mitllBlocks.scratchpad.CanHaveScratchpad
+  with mitllBlocks.cep_scratchpad.CanHaveCEPScratchpad
   with mitllBlocks.srot.CanHaveSROT
 {
   override lazy val module = new DigitalTopModule(this)

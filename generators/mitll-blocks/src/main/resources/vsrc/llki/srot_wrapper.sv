@@ -16,7 +16,7 @@
 //                  The SRoT is a SINGLE THREADED DEVICE.
 //
 //                  As such, care should be taken when using the
-//                  SRoT in a multi-core environment.  Care should be
+//                  SRoT in a multi-core environment.  Care should ssewaa
 //                  take that multiple cores are NOT accessing the
 //                  SRoT at the same time.
 //
@@ -24,19 +24,18 @@
 `timescale 1ns/1ns
 
 module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
-
-  parameter SLAVE_TL_SZW,
-  parameter SLAVE_TL_AIW,
-  parameter SLAVE_TL_AW,
-  parameter SLAVE_TL_DBW,
-  parameter SLAVE_TL_DW,
-  parameter SLAVE_TL_DIW,
-  parameter MASTER_TL_SZW,
-  parameter MASTER_TL_AIW,
-  parameter MASTER_TL_AW,
-  parameter MASTER_TL_DBW,
-  parameter MASTER_TL_DW,
-  parameter MASTER_TL_DIW,
+  parameter SLAVE_TL_SZW    = top_pkg::TL_SZW,
+  parameter SLAVE_TL_AIW    = top_pkg::TL_AIW,
+  parameter SLAVE_TL_AW     = top_pkg::TL_AW,
+  parameter SLAVE_TL_DBW    = top_pkg::TL_DBW,
+  parameter SLAVE_TL_DW     = top_pkg::TL_DW,
+  parameter SLAVE_TL_DIW    = top_pkg::TL_DIW
+  parameter MASTER_TL_SZW   = top_pkg::TL_SZW,
+  parameter MASTER_TL_AIW   = top_pkg::TL_AIW,
+  parameter MASTER_TL_AW    = top_pkg::TL_AW,
+  parameter MASTER_TL_DBW   = top_pkg::TL_DBW,
+  parameter MASTER_TL_DW    = top_pkg::TL_DW,
+  parameter MASTER_TL_DIW   = top_pkg::TL_DIW,
   parameter LLKI_CORE_INDEX_ARRAY_PACKED,     // LLKI interface addresses
   parameter LLKI_NUM_CORES,
   parameter int FIFO_DEPTH  = 8              // Define the depth of the LLKI FIFOs

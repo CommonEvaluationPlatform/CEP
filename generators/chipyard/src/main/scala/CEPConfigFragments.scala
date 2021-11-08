@@ -16,7 +16,7 @@ import mitllBlocks.fir._
 import mitllBlocks.sha256._
 import mitllBlocks.rsa._
 import mitllBlocks.cep_registers._
-import mitllBlocks.scratchpad._
+import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
 
 //
@@ -223,11 +223,12 @@ class WithCEPRegisters extends Config((site, here, up) => {
     ))
 })
 
-class WithScratchpad extends Config((site, here, up) => {
-  case ScratchpadKey => List(
-    ScratchpadParams(
-      slave_address       = BigInt(CEPBaseAddresses.scratchpad_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.scratchpad_depth),
+class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_addr,
+                         size:      BigInt = CEPBaseAddresses.scratchpad_depth) extends Config((site, here, up) => {
+  case CEPScratchpadKey => List(
+    CEPScratchpadParams(
+      slave_address       = address,
+      slave_depth         = size,
       dev_name            = s"scratchpad"
     ))
 })

@@ -358,15 +358,15 @@ case class CEPREGSAttachParams(
 )
 
 // The following class is used to pass paramaters down into the Scratchpad
-case class ScratchpadParams(
+case class CEPScratchpadParams(
   slave_address       : BigInt,
   slave_depth         : BigInt,
   dev_name            : String
 )
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
-case class ScratchpadAttachParams(
-  scratchpadparams    : ScratchpadParams,
+case class CEPScratchpadAttachParams(
+  scratchpadparams    : CEPScratchpadParams,
   slave_bus           : TLBusWrapper
 )
 
