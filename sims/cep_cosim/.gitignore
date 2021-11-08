@@ -30,3 +30,4 @@ include/v2c_cmds.h
 lib/dll/libvpp.so
 lib/libvpp.so
 lib/.buildLibs
+generate_src/
