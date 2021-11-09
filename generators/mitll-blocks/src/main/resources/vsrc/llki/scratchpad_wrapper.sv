@@ -238,7 +238,6 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 
   //------------------------------------------------------------------------
   // Instantiate a generic single port RAM
-  //
   //------------------------------------------------------------------------
   prim_generic_ram_1p #(
     .Width              (top_pkg::TL_DW),

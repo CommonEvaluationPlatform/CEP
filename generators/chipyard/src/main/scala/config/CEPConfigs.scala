@@ -15,15 +15,15 @@ class CEPRocketConfig extends Config(
 
   // Add the CEP Accelerator Cores
   new chipyard.config.WithAES ++
-//  new chipyard.config.WithDES3 ++
-//  new chipyard.config.WithIIR ++
-//  new chipyard.config.WithIDFT ++
-//  new chipyard.config.WithGPS ++
-//  new chipyard.config.WithMD5 ++
-//  new chipyard.config.WithIIR ++
-//  new chipyard.config.WithFIR ++
-//  new chipyard.config.WithSHA256 ++
-//  new chipyard.config.WithRSA ++
+  new chipyard.config.WithDES3 ++
+  new chipyard.config.WithIIR ++
+  new chipyard.config.WithIDFT ++
+  new chipyard.config.WithGPS ++
+  new chipyard.config.WithMD5 ++
+  new chipyard.config.WithIIR ++
+  new chipyard.config.WithFIR ++
+  new chipyard.config.WithSHA256 ++
+  new chipyard.config.WithRSA ++
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithCEPScratchpad ++
   new chipyard.config.WithSROT ++
@@ -49,20 +49,21 @@ class CEPASICRocketConfig extends Config(
 
   // Add the CEP Accelerator Cores
   new chipyard.config.WithAES ++
-//  new chipyard.config.WithDES3 ++
-//  new chipyard.config.WithIIR ++
-//  new chipyard.config.WithIDFT ++
-//  new chipyard.config.WithGPS ++
-//  new chipyard.config.WithMD5 ++
-//  new chipyard.config.WithIIR ++
-//  new chipyard.config.WithFIR ++
-//  new chipyard.config.WithSHA256 ++
-//  new chipyard.config.WithRSA ++
+  new chipyard.config.WithDES3 ++
+  new chipyard.config.WithIIR ++
+  new chipyard.config.WithIDFT ++
+  new chipyard.config.WithGPS ++
+  new chipyard.config.WithMD5 ++
+  new chipyard.config.WithIIR ++
+  new chipyard.config.WithFIR ++
+  new chipyard.config.WithSHA256 ++
+  new chipyard.config.WithRSA ++
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithSROT ++
 
   // CEP Scratchpad memory @ the typical external memory base address
-  // Size is 128K x 64-bits (1MB)
+  // Address & Size are in terms of *bytes* even though the memory is
+  // 64-bits wide.  Thus, size of 0x1FFFF results in 16K x 64-bit
   new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x1FFFFL) ++
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
