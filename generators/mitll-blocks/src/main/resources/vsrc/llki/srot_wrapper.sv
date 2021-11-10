@@ -23,6 +23,8 @@
 //************************************************************************
 `timescale 1ns/1ns
 
+`include "prim_assert.sv"
+
 module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter SLAVE_TL_SZW    = top_pkg::TL_SZW,
   parameter SLAVE_TL_AIW    = top_pkg::TL_AIW,

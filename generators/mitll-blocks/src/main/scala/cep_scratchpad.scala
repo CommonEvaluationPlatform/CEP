@@ -163,20 +163,6 @@ class scratchpadTLModuleImp(scratchpadparams: CEPScratchpadParams, outer: scratc
     // Relative to /src/main/resources
     addResource("/vsrc/llki/scratchpad_wrapper.sv")
 
-    //Common Resources used by all modules (LLKI, Opentitan, etc.)
-    addResource("/vsrc/llki/llki_pkg.sv")
-    addResource("/vsrc/llki/llki_pp_wrapper.sv")
-    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-    addResource("/vsrc/llki/tlul_err.sv")
-    addResource("/vsrc/llki/tlul_adapter_reg.sv")
-    addResource("/vsrc/llki/tlul_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
-
   } // end class scratchpad_wrapper
 
   // Instantiate the scratchpad_wrapper

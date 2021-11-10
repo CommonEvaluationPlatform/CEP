@@ -259,20 +259,6 @@ class des3TLModuleImp(coreparams: COREParams, outer: des3TLModule) extends LazyM
     addResource("/vsrc/des3/sbox7.v")
     addResource("/vsrc/des3/sbox8.v")
 
-    //Common Resources used by all modules (LLKI, Opentitan, etc.)
-    addResource("/vsrc/llki/llki_pkg.sv")
-    addResource("/vsrc/llki/llki_pp_wrapper.sv")
-    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-    addResource("/vsrc/llki/tlul_err.sv")
-    addResource("/vsrc/llki/tlul_adapter_reg.sv")
-    addResource("/vsrc/llki/tlul_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
-
 	  // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)

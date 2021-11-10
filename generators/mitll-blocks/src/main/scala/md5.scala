@@ -250,20 +250,6 @@ class md5TLModuleImp(coreparams: COREParams, outer: md5TLModule) extends LazyMod
     addResource("/vsrc/md5/pancham.v")
     addResource("/vsrc/md5/pancham_round.v")
 
-    //Common Resources used by all modules (LLKI, Opentitan, etc.)
-    addResource("/vsrc/llki/llki_pkg.sv")
-    addResource("/vsrc/llki/llki_pp_wrapper.sv")
-    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-    addResource("/vsrc/llki/tlul_err.sv")
-    addResource("/vsrc/llki/tlul_adapter_reg.sv")
-    addResource("/vsrc/llki/tlul_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
-
 	  // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)

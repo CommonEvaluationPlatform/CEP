@@ -222,7 +222,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
 
     })
 
-    // Add packages first
+    // Packages and Supporting Files
     addResource("/vsrc/llki/llki_pkg.sv")
     addResource("/vsrc/llki/top_pkg.sv")
     addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
@@ -231,6 +231,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
     addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
     addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
     addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
 
     // LLKI Resources
     addResource("/vsrc/llki/llki_pp_wrapper.sv")

@@ -14,6 +14,8 @@
 //************************************************************************
 `timescale 1ns/1ns
 
+`include "prim_assert.sv"
+
 module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter int ADDRESS     = 32'h00000000,  // In terms of bytes
   parameter int DEPTH       = 32'h00000100,  // In terms of bytes
