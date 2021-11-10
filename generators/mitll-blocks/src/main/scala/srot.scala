@@ -228,6 +228,7 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
 
     // LLKI Resources
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/mock_tss_fsm.sv")
     addResource("/vsrc/llki/prim_generic_ram_1p.sv")
     addResource("/vsrc/llki/tlul_err.sv")
     addResource("/vsrc/llki/tlul_adapter_reg.sv")
