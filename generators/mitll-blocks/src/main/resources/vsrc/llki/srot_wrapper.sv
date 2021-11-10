@@ -31,7 +31,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter SLAVE_TL_AW     = top_pkg::TL_AW,
   parameter SLAVE_TL_DBW    = top_pkg::TL_DBW,
   parameter SLAVE_TL_DW     = top_pkg::TL_DW,
-  parameter SLAVE_TL_DIW    = top_pkg::TL_DIW
+  parameter SLAVE_TL_DIW    = top_pkg::TL_DIW,
   parameter MASTER_TL_SZW   = top_pkg::TL_SZW,
   parameter MASTER_TL_AIW   = top_pkg::TL_AIW,
   parameter MASTER_TL_AW    = top_pkg::TL_AW,
@@ -44,61 +44,61 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
  ) (
 
   // Clock and reset
-  input                         clk,
-  input                         rst,
+  input                           clk,
+  input                           rst,
 
   // Slave interface A channel
-  input [2:0]                   slave_a_opcode,
-  input [2:0]                   slave_a_param,
-  input [SLAVE_TL_SZW-1:0]      slave_a_size,
-  input [SLAVE_TL_AIW-1:0]      slave_a_source,
-  input [SLAVE_TL_AW-1:00]      slave_a_address,
-  input [SLAVE_TL_DBW-1:0]      slave_a_mask,
-  input [SLAVE_TL_DW-1:0]       slave_a_data,
-  input                         slave_a_corrupt,
-  input                         slave_a_valid,
-  output                        slave_a_ready,
+  input [2:0]                     slave_a_opcode,
+  input [2:0]                     slave_a_param,
+  input [SLAVE_TL_SZW-1:0]        slave_a_size,
+  input [SLAVE_TL_AIW-1:0]        slave_a_source,
+  input [SLAVE_TL_AW-1:00]        slave_a_address,
+  input [SLAVE_TL_DBW-1:0]        slave_a_mask,
+  input [SLAVE_TL_DW-1:0]         slave_a_data,
+  input                           slave_a_corrupt,
+  input                           slave_a_valid,
+  output                          slave_a_ready,
 
   // Slave interface D channel
-  output [2:0]                  slave_d_opcode,
-  output [2:0]                  slave_d_param,
-  output [SLAVE_TL_SZW-1:0]     slave_d_size,
-  output [SLAVE_TL_AIW-1:0]     slave_d_source,
-  output [SLAVE_TL_DIW-1:0]     slave_d_sink,
-  output                        slave_d_denied,
-  output [SLAVE_TL_DW-1:0]      slave_d_data,
-  output                        slave_d_corrupt,
-  output                        slave_d_valid,
-  input                         slave_d_ready,
+  output [2:0]                    slave_d_opcode,
+  output [2:0]                    slave_d_param,
+  output reg [SLAVE_TL_SZW-1:0]   slave_d_size,
+  output reg [SLAVE_TL_AIW-1:0]   slave_d_source,
+  output reg [SLAVE_TL_DIW-1:0]   slave_d_sink,
+  output                          slave_d_denied,
+  output [SLAVE_TL_DW-1:0]        slave_d_data,
+  output                          slave_d_corrupt,
+  output                          slave_d_valid,
+  input                           slave_d_ready,
 
   // Master interface A channel
-  output [2:0]                  master_a_opcode,
-  output [2:0]                  master_a_param,
-  output [MASTER_TL_SZW-1:0]    master_a_size,
-  output [MASTER_TL_AIW-1:0]    master_a_source,
-  output [MASTER_TL_AW-1:00]    master_a_address,
-  output [MASTER_TL_DBW-1:0]    master_a_mask,
-  output [MASTER_TL_DW-1:0]     master_a_data,
-  output                        master_a_corrupt,
-  output                        master_a_valid,
-  input                         master_a_ready,
+  output [2:0]                    master_a_opcode,
+  output [2:0]                    master_a_param,
+  output reg [MASTER_TL_SZW-1:0]  master_a_size,
+  output reg [MASTER_TL_AIW-1:0]  master_a_source,
+  output reg [MASTER_TL_AW-1:0]   master_a_address,
+  output [MASTER_TL_DBW-1:0]      master_a_mask,
+  output [MASTER_TL_DW-1:0]       master_a_data,
+  output                          master_a_corrupt,
+  output                          master_a_valid,
+  input                           master_a_ready,
 
   // Master interface D channel
-  input [2:0]                   master_d_opcode,
-  input [2:0]                   master_d_param,
-  input [MASTER_TL_SZW-1:0]     master_d_size,
-  input [MASTER_TL_AIW-1:0]     master_d_source,
-  input [MASTER_TL_DIW-1:0]     master_d_sink,
-  input                         master_d_denied,
-  input [MASTER_TL_DW-1:0]      master_d_data,
-  input                         master_d_corrupt,
-  input                         master_d_valid,
-  output                        master_d_ready
+  input [2:0]                     master_d_opcode,
+  input [2:0]                     master_d_param,
+  input [MASTER_TL_SZW-1:0]       master_d_size,
+  input [MASTER_TL_AIW-1:0]       master_d_source,
+  input [MASTER_TL_DIW-1:0]       master_d_sink,
+  input                           master_d_denied,
+  input [MASTER_TL_DW-1:0]        master_d_data,
+  input                           master_d_corrupt,
+  input                           master_d_valid,
+  output                          master_d_ready
 
 );
   
   // Derived parameters
-  localparam int DepthW     = prim_util_pkg::vbits(FIFO_DEPTH + 1)
+  localparam int DepthW     = prim_util_pkg::vbits(FIFO_DEPTH + 1);
 
   //We get this parameter from a verilog file, which does not support unpacked parameter arrays.
   //So, keep as a 2d packed array. 
@@ -124,12 +124,14 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // what is being passed from RocketChip.
   //
   // DW/DBW (Data bus width) must be equal in both worlds
+  
   `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW < SLAVE_TL_SZW)
   `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW < SLAVE_TL_AIW)
   `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW < SLAVE_TL_AW)
   `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW != SLAVE_TL_DBW)
   `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW != SLAVE_TL_DW)
-  always @
+  
+  always @*
   begin
     slave_tl_h2d.a_size                         <= '0;
     slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;
@@ -167,18 +169,17 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   assign slave_d_valid          = slave_tl_d2h.d_valid;
   assign slave_a_ready          = slave_tl_d2h.a_ready;
 
-
   `ASSERT_INIT(srot_masterTlSzw, top_pkg::TL_SZW < MASTER_TL_SZW)
   `ASSERT_INIT(srot_masterTlAiw, top_pkg::TL_AIW < MASTER_TL_AIW)
   `ASSERT_INIT(srot_masterTlAw, top_pkg::TL_AW < MASTER_TL_AW)
   `ASSERT_INIT(srot_masterTlDbw, top_pkg::TL_DBW != MASTER_TL_DBW)
   `ASSERT_INIT(srot_masterTlDw, top_pkg::TL_DW != MASTER_TL_DW)
 
-  always @
+  always @*
   begin
-    master_a_size                       <= master_tl_h2d.size[MASTER_TL_SZW-1:0];
-    master_a_source                     <= master_tl_h2d.source[MASTER_TL_AIW-1:0];
-    master_a_address                    <= master_tl_h2d.address[MASTER_TL_AW-1:0];
+    master_a_size                           <= master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
+    master_a_source                         <= master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
+    master_a_address                        <= master_tl_h2d.a_address[MASTER_TL_AW-1:0];
 
     master_tl_d2h.d_size                    <= '0;
     master_tl_d2h.d_size[MASTER_TL_SZW]     <= master_d_size;

@@ -28,36 +28,36 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 ) (
 
   // Clock and reset
-  input                         clk,
-  input                         rst,
+  input                           clk,
+  input                           rst,
 
   // Slave interface A channel
-  input [2:0]                   slave_a_opcode,
-  input [2:0]                   slave_a_param,
-  input [SLAVE_TL_SZW-1:0]      slave_a_size,
-  input [SLAVE_TL_AIW-1:0]      slave_a_source,
-  input [SLAVE_TL_AW-1:00]      slave_a_address,
-  input [SLAVE_TL_DBW-1:0]      slave_a_mask,
-  input [SLAVE_TL_DW-1:0]       slave_a_data,
-  input                         slave_a_corrupt,
-  input                         slave_a_valid,
-  output                        slave_a_ready,
+  input [2:0]                     slave_a_opcode,
+  input [2:0]                     slave_a_param,
+  input [SLAVE_TL_SZW-1:0]        slave_a_size,
+  input [SLAVE_TL_AIW-1:0]        slave_a_source,
+  input [SLAVE_TL_AW-1:00]        slave_a_address,
+  input [SLAVE_TL_DBW-1:0]        slave_a_mask,
+  input [SLAVE_TL_DW-1:0]         slave_a_data,
+  input                           slave_a_corrupt,
+  input                           slave_a_valid,
+  output                          slave_a_ready,
 
   // Slave interface D channel
-  output [2:0]                  slave_d_opcode,
-  output [2:0]                  slave_d_param,
-  output [SLAVE_TL_SZW-1:0]     slave_d_size,
-  output [SLAVE_TL_AIW-1:0]     slave_d_source,
-  output [SLAVE_TL_DIW-1:0]     slave_d_sink,
-  output                        slave_d_denied,
-  output [SLAVE_TL_DW-1:0]      slave_d_data,
-  output                        slave_d_corrupt,
-  output                        slave_d_valid,
-  input                         slave_d_ready
+  output [2:0]                    slave_d_opcode,
+  output [2:0]                    slave_d_param,
+  output reg [SLAVE_TL_SZW-1:0]   slave_d_size,
+  output reg [SLAVE_TL_AIW-1:0]   slave_d_source,
+  output reg [SLAVE_TL_DIW-1:0]   slave_d_sink,
+  output                          slave_d_denied,
+  output [SLAVE_TL_DW-1:0]        slave_d_data,
+  output                          slave_d_corrupt,
+  output                          slave_d_valid,
+  input                           slave_d_ready
 
 );
   
-  localparam int RegBw              = top_pkg::TL_DW/8
+  localparam int RegBw          = top_pkg::TL_DW/8;
 
   // Create the structures for communicating with OpenTitan-based Tilelink
   tl_h2d_t                      slave_tl_h2d_i;
@@ -85,7 +85,8 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   `ASSERT_INIT(scratchpad_slaveTlAw, top_pkg::TL_AW < SLAVE_TL_AW)
   `ASSERT_INIT(scratchpad_slaveTlDbw, top_pkg::TL_DBW != SLAVE_TL_DBW)
   `ASSERT_INIT(scratchpad_slaveTlDw, top_pkg::TL_DW != SLAVE_TL_DW)
-  always @
+  
+  always @*
   begin
     slave_tl_h2d.a_size                         <= '0;
     slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;

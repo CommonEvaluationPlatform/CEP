@@ -222,16 +222,9 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
 
     })
 
-    // Packages and Supporting Files
-    addResource("/vsrc/llki/llki_pkg.sv")
-    addResource("/vsrc/llki/top_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_secded_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/llki/srot_wrapper.sv")
 
     // LLKI Resources
     addResource("/vsrc/llki/llki_pp_wrapper.sv")
@@ -242,9 +235,15 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
     addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
     addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
 
-    // Add the SystemVerilog/Verilog associated with the module
-    // Relative to /src/main/resources
-    addResource("/vsrc/llki/srot_wrapper.sv")
+    // Packages and Supporting Files
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/llki/top_pkg.sv")
+    addResource("/vsrc/llki/llki_pkg.sv")
 
   } // end class srot_wrapper
 
