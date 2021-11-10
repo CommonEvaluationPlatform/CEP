@@ -18,15 +18,14 @@ all: runAll
 #
 # needed by common.make
 #
-COSIM_NAME  = $(shell cd ..; basename `pwd`)
-DUT_TOP_DIR = $(shell cd ../..; pwd | ./${COSIM_NAME}/bin/strip_net.pl )
+COSIM_TOP_DIR  = $(shell cd ..; basename `pwd`)
+REPO_TOP_DIR = $(shell cd ../..; pwd | ./${COSIM_TOP_DIR}/bin/strip_net.pl )
 BLD_DIR     = $(shell cd .; pwd | ../bin/strip_net.pl )
 TEST_SUITE  = $(shell basename ${BLD_DIR})
-SIM_DIR     = ${DUT_TOP_DIR}/${COSIM_NAME}
+SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_TOP_DIR}
 
 
 # Always in regression mode
-override REGRESS        = 1
 override DUT_SIM_MODE	= BARE
 #
 # Top target!!!

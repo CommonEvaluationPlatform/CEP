@@ -5,214 +5,138 @@
 #// File Name:      common.make
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    
-#// Notes:          
+#// Notes:          VERILATOR is not currently support by the CEP
+#//	 				Co-Simulator Environment
 #//
 #//************************************************************************
-# to avoid circular loop
+
+
+# Avoid redundant inclusions of common.make
 ifndef $(COMMON_MAKE_CALLED)
-COMMON_MAKE_CALLED=1
+COMMON_MAKE_CALLED	= 1
 
+# Set default tool locations
+VIVADO_PATH			?= /opt/Xilinx/Vivado/2018.3
+SIMULATOR_PATH		?= /opt/questa-2019.1/questasim/bin
 
-#
-# ============================================================================
-# DUT = CEP FPGA
-# ============================================================================
-#
-# Specify the target vendor: XILINX, TSMC, etc...
-# (no quote)
-#
-DUT_VENDOR 	?= XILINX
-#
-# Only pick 1!!!
-#
-MODELSIM        = 1
-CADENCE 	= 0
-VERILATOR 	= 0
+# Set some default variables
+DUT_VENDOR 			?= XILINX
 
-#
-# Only ONE
-#
-ifeq (${CADENCE},1)
-MODELSIM        = 0
-VERILATOR 	= 0
+# The following DEFINES identify what simulator the user
+# has chosen to run with, ensuring that only one is
+# selected at a time
+
+# Assign each DEFINE a default, if it is not defined.
+MODELSIM        	?= 1
+CADENCE 			?= 0
+VERILATOR 			?= 0
+
+# Ensure only ONE is set
+ifeq (${MODELSIM},1)
+CADENCE        		= 0
+VERILATOR 			= 0
+else ifeq (${CADENCE},1)
+MODELSIM       		= 0
+VERILATOR 			= 0
 endif
 
-#
-# BFM, BARE_METAL or LINUX
-# (no quote)
-#
-DUT_SIM_MODE	= BFM
-DUT_IN_VIRTUAL  = 0
-#
-# Some control flags
-#
-NOBUILD		= 0
-NOWAVE          = 0
-PROFILE         = 0
-COVERAGE        = 0
-USE_DPI         = 1
+# The following DEFINES control how the software is
+# compiled and if will be overriden by lower level
+# Makefiles as needed.
+# DUT_SIM_MODE must either be BFM or BARE
+DUT_SIM_MODE		= BFM
+# Enables virtual memory support when operating in BARE mode
+DUT_IN_VIRTUAL  	= 0
+
+# Set some default flag values
+NOWAVE          	= 0
+PROFILE         	= 0
+COVERAGE        	= 0
+USE_DPI         	= 1
 # transaction-level capturing
-TL_CAPTURE      = 0
+TL_CAPTURE      	= 0
 # cycle-by-cycle capturing
-C2C_CAPTURE     = 0
-
-#
-#
-# Tools
-# can be override with env. variables
-#
-VIVADO_PATH	?= /opt/Xilinx/Vivado/2018.3
-SIMULATOR_PATH	?= /opt/questa-2019.1/questasim/bin
-#
-# derived paths
-#
-SIM_DIR         ?= ${DUT_TOP_DIR}/cosim
-
-
+C2C_CAPTURE     	= 0
 
 # stupid VHDL package uses work.* inside so have no choice but to use work!!
-WORK_NAME       = ${TEST_SUITE}_work
-WORK_DIR        = ${BLD_DIR}/${WORK_NAME}
+WORK_NAME       	= ${TEST_SUITE}_work
+WORK_DIR        	= ${BLD_DIR}/${WORK_NAME}
 
-#
-# export for modelsim
-#
-export DUT_SIM_DIR := ${SIM_DIR}
-
-# ----------------------------------
-# something can be override at command line
-# ----------------------------------
-MKFILE_DIR      ?= ${SIM_DIR}
-
-#
 # more paths for C build
-#
-SHARE_DIR	= ${SIM_DIR}/share
-PLI_DIR		= ${SIM_DIR}/pli
-SIMDIAG_DIR	= ${SIM_DIR}/simDiag
-SRC_DIR		= ${SIM_DIR}/src
-DVT_DIR         = ${SIM_DIR}/dvt
-INC_DIR         = ${SIM_DIR}/include
-BHV_DIR         = ${DVT_DIR}/behav_models
-VENDOR_DIR      = ${DVT_DIR}/vendor_models
+SHARE_DIR			= ${COSIM_TOP_DIR}/share
+PLI_DIR				= ${COSIM_TOP_DIR}/pli
+SIMDIAG_DIR			= ${COSIM_TOP_DIR}/simDiag
+SRC_DIR				= ${COSIM_TOP_DIR}/src
+DVT_DIR         	= ${COSIM_TOP_DIR}/dvt
+INC_DIR         	= ${COSIM_TOP_DIR}/include
+BHV_DIR         	= ${DVT_DIR}/behav_models
+LIB_DIR				= ${COSIM_TOP_DIR}/lib
 
-# to store object file and archives
-LIB_DIR		= ${SIM_DIR}/lib
-DIAG_DIR        = ${LIB_DIR}/diag
-DLL_DIR        	= ${LIB_DIR}/dll
-SHLIB_DIR      	= ${LIB_DIR}/share
-PLILIB_DIR      = ${LIB_DIR}/pli
-SIMLIB_DIR      = ${LIB_DIR}/sim
-SRCLIB_DIR      = ${LIB_DIR}/src
-BARELIB_DIR     = ${LIB_DIR}/bare
-
-#
-# -------------------------------------------
 # can be override by other Makefile
-# -------------------------------------------
-#
-RE_USE_TEST        ?= 0
-XX_LIB_DIR         ?= ${LIB_DIR}
-XX_SIM_DIR         ?= ${SIM_DIR}
-V2C_TAB_FILE       ?= ${PLI_DIR}/v2c.tab
-RISCV_TEST_DIR     ?= ${DUT_TOP_DIR}/software/riscv-tests
-ISA_TEST_TEMPLATE  ?= ${BLD_DIR}/testTemplate
-BUILD_HW_MAKE_FILE ?= ${MKFILE_DIR}/cep_buildChips.make
-BUILD_SW_MAKE_FILE ?= ${MKFILE_DIR}/cep_buildSW.make
-CADENCE_MAKE_FILE  ?= ${MKFILE_DIR}/cadence.make
-#
-#
-V2C_LIB            ?= ${XX_LIB_DIR}/v2c_lib.a
-VPP_LIB            ?= ${XX_LIB_DIR}/libvpp.so
-RISCV_LIB          ?= ${XX_LIB_DIR}/riscv_lib.a
-BIN_DIR            ?= ${XX_SIM_DIR}/bin
+XX_LIB_DIR			?= ${LIB_DIR}
+V2C_TAB_FILE		?= ${PLI_DIR}/v2c.tab
+RISCV_TEST_DIR 		?= ${REPO_TOP_DIR}/software/riscv-tests
+ISA_TEST_TEMPLATE 	?= ${BLD_DIR}/testTemplate
+BUILD_HW_MAKE_FILE	?= ${COSIM_TOP_DIR}/cep_buildChips.make
+BUILD_SW_MAKE_FILE	?= ${COSIM_TOP_DIR}/cep_buildSW.make
+CADENCE_MAKE_FILE 	?= ${COSIM_TOP_DIR}/cadence.make
+VPP_LIB 			?= ${XX_LIB_DIR}/libvpp.so
+RISCV_LIB 			?= ${XX_LIB_DIR}/riscv_lib.a
+BIN_DIR 			?= ${COSIM_TOP_DIR}/bin
 
-#
-# -----------------------------------------------------------------------
-# should not touch anything below unless you know what you are doing!!!
-# -----------------------------------------------------------------------
-#
-# Commands
-#
-VLOG_CMD	= ${SIMULATOR_PATH}/vlog
-VCOM_CMD	= ${SIMULATOR_PATH}/vcom
-SCOM_CMD	= ${SIMULATOR_PATH}/scom
-VOPT_CMD	= ${SIMULATOR_PATH}/vopt
-VSIM_CMD        = ${SIMULATOR_PATH}/vsim
-VLIB_CMD	= ${SIMULATOR_PATH}/vlib
-VMAP_CMD	= ${SIMULATOR_PATH}/vmap
-VMAKE_CMD	= ${SIMULATOR_PATH}/vmake
-VCOVER_CMD      = ${SIMULATOR_PATH}/vcover
+# Questasim related commands
+VLOG_CMD			= ${SIMULATOR_PATH}/vlog
+VCOM_CMD			= ${SIMULATOR_PATH}/vcom
+VOPT_CMD			= ${SIMULATOR_PATH}/vopt
+VSIM_CMD 			= ${SIMULATOR_PATH}/vsim
+VLIB_CMD			= ${SIMULATOR_PATH}/vlib
+VMAP_CMD			= ${SIMULATOR_PATH}/vmap
+VMAKE_CMD			= ${SIMULATOR_PATH}/vmake
+VCOVER_CMD			= ${SIMULATOR_PATH}/vcover
 
-#
 # C/C+ tools
-#
-GCC      	= /usr/bin/g++
-#GCC      	= /usr/bin/gcc
-AR       	= /usr/bin/ar
-RANLIB   	= /usr/bin/ranlib
-share_GCC      	= ${GCC}
-RM       	= rm -f
-LD       	= ${GCC}
-LINKER       	= ${GCC}
-VPP_CMD	        = ${BIN_DIR}/vpp.pl
-MKDEPEND        = ${BIN_DIR}/mkDepend.pl
+GCC     			= /usr/bin/g++
+AR 					= /usr/bin/ar
+RANLIB  			= /usr/bin/ranlib
+RM    				= rm -f
+LD 					= ${GCC}
+VPP_CMD				= ${BIN_DIR}/vpp.pl
 
-#
 # Some variables 
-#
-ERROR_MESSAGE   = "OK"
-CHECK_FLAG      = ${BLD_DIR}/.is_checked
-CUR_CONFIG	= .CONFIG_${DUT_VENDOR}_${DUT_SIM_MODE}
-SIM_DEPEND_TARGET = .${WORK_NAME}_dependList
+ERROR_MESSAGE		= "OK"
+SIM_DEPEND_TARGET	= .${WORK_NAME}_dependList
 
-
-#
-# -------------------------------------------
 # Some derived switches
-# -------------------------------------------
-#
 DUT_VSIM_DO_FILE	= ${TEST_DIR}/vsim.do
-#
 
-#
-# --------------
-# Add more switches here is any
-# --------------
-#
+# Add switches based on environmental arguments
 ifeq (${PROFILE},1)
-DUT_VSIM_ARGS += -autoprofile=${TEST_NAME}_profile
+DUT_VSIM_ARGS 		+= -autoprofile=${TEST_NAME}_profile
 endif
 
-DUT_COVERAGE_PATH = ${BLD_DIR}/coverage
+DUT_COVERAGE_PATH	= ${BLD_DIR}/coverage
 ifeq (${COVERAGE},1)
-#DUT_VSIM_ARGS     += -notoggleints -testname ${TEST_SUITE}_${TEST_NAME} -coverstore ${DUT_COVERAGE_PATH} -coverage
-DUT_VSIM_ARGS     += -coverage 
-DUT_VLOG_ARGS     += +cover=sbceft +define+COVERAGE 
-DUT_VOPT_ARGS     += +cover=sbceft
+DUT_VSIM_ARGS		+= -coverage 
+DUT_VLOG_ARGS		+= +cover=sbceft +define+COVERAGE 
+DUT_VOPT_ARGS		+= +cover=sbceft
 endif
 
 ifeq (${NOWAVE},1)
-DUT_VLOG_ARGS     += +define+NOWAVE
+DUT_VLOG_ARGS		+= +define+NOWAVE
 endif
 
 # Use our gcc instead of builtin form questa
-DUT_VSIM_ARGS	  += -cpppath ${GCC}
+DUT_VSIM_ARGS	  	+= -cpppath ${GCC}
 
-#
-# -------------------------------------------
-# build the DUT's HW for simulation here
-# -------------------------------------------
-#
+# Include both the Hardware and Software makefiles
 include ${BUILD_HW_MAKE_FILE}
 include ${BUILD_SW_MAKE_FILE}
-#
+
+# Optionally include the CADENCE Makefile, if needed
 ifeq (${CADENCE},1)
 include ${CADENCE_MAKE_FILE}
 endif
 
-#
-#
 # run the simulation
 #
 # add +myplus=0 for stupid plus_arg
@@ -355,8 +279,8 @@ ifeq (${MODELSIM},1)
 endif
 
 # use "coverage open <file>.ucdb" under vsim to open and view
-MODELSIM_TOP_COVERAGE  = ${SIM_DIR}/coverage
-MODELSIM_COV_DO_SCRIPT = ${SIM_DIR}/modelsim_coverage.do
+MODELSIM_TOP_COVERAGE  = ${COSIM_TOP_DIR}/coverage
+MODELSIM_COV_DO_SCRIPT = ${COSIM_TOP_DIR}/modelsim_coverage.do
 
 mergeAll:: .force
 ifeq (${MODELSIM},1)
@@ -379,23 +303,23 @@ endif
 clean: cleanAll
 
 cleanAll:: cleanLibs
-	-rm -rf ${SIM_DIR}/*/*_work ${SIM_DIR}/*/.*work_dependList.make
-	-rm -rf ${SIM_DIR}/*/*.o* ${SIM_DIR}/*/*/*.bo* ${SIM_DIR}/*/*/*.o*
-	-rm -rf ${SIM_DIR}/*/*/status
-	-rm -rf ${SIM_DIR}/bareMetalTests/*/*.elf ${SIM_DIR}/bareMetalTests/*/*.dump
-	-rm -rf ${SIM_DIR}/*/.build*
+	-rm -rf ${COSIM_TOP_DIR}/*/*_work ${COSIM_TOP_DIR}/*/.*work_dependList.make
+	-rm -rf ${COSIM_TOP_DIR}/*/*.o* ${COSIM_TOP_DIR}/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*.o*
+	-rm -rf ${COSIM_TOP_DIR}/*/*/status
+	-rm -rf ${COSIM_TOP_DIR}/bareMetalTests/*/*.elf ${COSIM_TOP_DIR}/bareMetalTests/*/*.dump
+	-rm -rf ${COSIM_TOP_DIR}/*/.build*
 	-rm -rf ${LIB_DIR}/*/*.o* ${LIB_DIR}/*.a ${LIB_DIR}/*.so
-	-rm -rf ${SIM_DIR}/*/.*_dependList* ${SIM_DIR}/*/.is_checked
-	-rm -rf ${SIM_DIR}/*/*/C2V*
+	-rm -rf ${COSIM_TOP_DIR}/*/.*_dependList* ${COSIM_TOP_DIR}/*/.is_checked
+	-rm -rf ${COSIM_TOP_DIR}/*/*/C2V*
 	-rm -rf ${BHV_DIR}/VCShell*.v ${BHV_DIR}/ddr3.v
-	-rm -rf ${SIM_DIR}/*/xcelium.d ${SIM_DIR}/*/.cadenceBuild ${SIM_DIR}/*/*/cov_work ${SIM_DIR}/*/*/xrun.log
+	-rm -rf ${COSIM_TOP_DIR}/*/xcelium.d ${COSIM_TOP_DIR}/*/.cadenceBuild ${COSIM_TOP_DIR}/*/*/cov_work ${COSIM_TOP_DIR}/*/*/xrun.log
 ifeq (${COVERAGE},1)
 ifeq (${CADENCE},1)
-	-rm -rf ${SIM_DIR}/*/cad_coverage
+	-rm -rf ${COSIM_TOP_DIR}/*/cad_coverage
 endif
 ifeq (${MODELSIM},1)
-	-rm -rf ${SIM_DIR}/*/coverage
-	-rm -f ${SIM_DIR}/*/*/vsim.do
+	-rm -rf ${COSIM_TOP_DIR}/*/coverage
+	-rm -f ${COSIM_TOP_DIR}/*/*/vsim.do
 endif
 endif
 #
@@ -434,8 +358,5 @@ export MAKE_USAGE_HELP_BODY
 usage:
 	-echo "$$MAKE_USAGE_HELP_BODY"
 
-
-#
-# ----- ifdef $(COMMON_MAKE_CALLED)
-#
+# ifdef $(COMMON_MAKE_CALLED)
 endif

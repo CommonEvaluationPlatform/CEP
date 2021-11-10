@@ -11,13 +11,13 @@
 #
 #
 #
-COSIM_NAME  = $(shell cd ../..; basename `pwd`)
-DUT_TOP_DIR = $(shell cd ../../..; pwd )
+COSIM_TOP_DIR  = $(shell cd ../..; basename `pwd`)
+REPO_TOP_DIR = $(shell cd ../../..; pwd )
 BLD_DIR     = $(shell cd ..; pwd )
 TEST_SUITE  = $(shell basename ${BLD_DIR})
 TEST_DIR    = $(shell cd .; pwd )
 TEST_NAME   = $(shell basename `pwd`)
-SIM_DIR     = ${DUT_TOP_DIR}/${COSIM_NAME}
+SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_TOP_DIR}
 ELF_FILE    = ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 
 #

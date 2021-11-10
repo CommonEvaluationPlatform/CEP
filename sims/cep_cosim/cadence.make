@@ -41,12 +41,12 @@ endif
 XRUN_CMD = ${XCELIUM_INSTALL}/tools/bin/xrun
 IMC_CMD  = ${IMC_INSTALL}/tools/bin/imc
 #
-SAHANLDER_FILE 		= ${DUT_TOP_DIR}/cosim/sahandler.c
+SAHANLDER_FILE 		= ${REPO_TOP_DIR}/cosim/sahandler.c
 #
 # If coverage is on
 #
 ifeq (${COVERAGE},1)
-CADENCE_COV_COM_ARGS += -covfile ${DUT_TOP_DIR}/cosim/cadence_cov.ccf
+CADENCE_COV_COM_ARGS += -covfile ${REPO_TOP_DIR}/cosim/cadence_cov.ccf
 CADENCE_COV_RUN_ARGS += -write_metrics -covoverwrite -covworkdir ${DUT_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
 endif
 
@@ -54,7 +54,7 @@ endif
 # cd <...>/cosim
 # vivado -mode tcl
 # compile_simlib -simulator xcelium -simulator_exec_path {$XCELIUM_INSTALL/tools/bin} -family all -language all -library all -dir {./cad_xil_lib} -force -verbose
-CADENCE_XIL_LIB         := ${DUT_TOP_DIR}/cosim/cad_xil_lib
+CADENCE_XIL_LIB         := ${REPO_TOP_DIR}/cosim/cad_xil_lib
 #
 # something need to override
 #

@@ -4,38 +4,32 @@
 #//
 #// File Name:      Makefile
 #// Program:        Common Evaluation Platform (CEP)
-#// Description:    
+#// Description:    Top level makefile for the CEP co-simulation
+#//                 environment.  
 #// Notes:          
 #//
 #//************************************************************************
 
+# Default build target
 all: runAll
 
 # Always in regression mode
-override REGRESS = 1
 override NOWAVE  = 1
-override BOARD_SIM = 1
-#override COVERAGE  = 0
 UPDATE_INFO = 1
-#
-#
-COSIM_NAME  = $(shell basename `pwd`)
-#
-DUT_TOP_DIR = $(shell cd ..; pwd | ./${COSIM_NAME}/bin/strip_net.pl )
-BLD_DIR     = $(shell cd ./bfmTests; pwd | ../bin/strip_net.pl )
-TEST_SUITE  = $(shell basename ${BLD_DIR})
-TOP_DIR     = $(shell cd .; pwd | ./bin/strip_net.pl )
-SIM_DIR     = ${DUT_TOP_DIR}/${COSIM_NAME}
 
-#
-# Either run one at a time or batch the whole thing if supported (TBA)
-#
+# Basic test variables
+COSIM_TOP_DIR  	= $(shell basename `pwd`)
+REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_TOP_DIR}/bin/strip_net.pl )
+BLD_DIR     	= $(shell cd ./bfmTests; pwd | ../bin/strip_net.pl )
+TEST_SUITE  	= $(shell basename ${BLD_DIR})
 
+# Tests to run as part of the default build target
 TEST_GROUP  =  	bareMetalTests	\
 		bfmTests	\
 		isaTests	\
 		vBareTest	\
 
+# Run tests for all members of the test group
 runAll: 
 	make cleanAll
 	make buildLibs
@@ -44,16 +38,14 @@ runAll:
 		(cd $${i}; make STAND_ALONE=0 runAll); 		\
 	done
 
+# Print summary
 summary: .force
-	@date > ${TOP_DIR}/regressionSummary
+	@date > ${COSIM_TOP_DIR}/regressionSummary
 	@for i in ${TEST_GROUP}; do								\
-		(cd $${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${TOP_DIR}/regressionSummary);	\
+		(cd $${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
 	done
 
-#
-# override anything here before calling the common file
-#
-MKFILE_DIR ?= .
-include $(MKFILE_DIR)/common.make
+# Include the common makefile
+include $(COSIM_TOP_DIR)/common.make
 
 

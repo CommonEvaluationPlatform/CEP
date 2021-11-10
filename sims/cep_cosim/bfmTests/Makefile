@@ -15,17 +15,12 @@ STAND_ALONE = 1
 
 all: runAll
 
-#
-# needed by common.make
-#
-COSIM_NAME  = $(shell cd ..; basename `pwd`)
-DUT_TOP_DIR =  $(shell cd ../..; pwd | ./${COSIM_NAME}/bin/strip_net.pl )
-BLD_DIR     =  $(shell cd .; pwd | ../bin/strip_net.pl )
-TEST_SUITE  =  $(shell basename ${BLD_DIR})
-SIM_DIR     = ${DUT_TOP_DIR}/${COSIM_NAME}
-
-# Always in regression mode
-override REGRESS = 1
+# Variable needed by common.make
+COSIM_TOP_DIR  	= $(shell cd ..; basename `pwd`)
+REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_TOP_DIR}/bin/strip_net.pl )
+BLD_DIR     	= $(shell cd .; pwd | ../bin/strip_net.pl )
+TEST_SUITE  	= $(shell basename ${BLD_DIR})
+SIM_DIR     	= ${REPO_TOP_DIR}/${COSIM_TOP_DIR}
 
 #
 # Top target!!!
@@ -40,7 +35,7 @@ override REGRESS = 1
 # override anything here before calling the common file
 #
 
-include ../common.make
+include ${COSIM_TOP_DIR}/common.make
 
 #
 # List of test under this directory

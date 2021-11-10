@@ -14,7 +14,7 @@
 #
 DUT_BFM_XILINX_TOP_FILE  := ${BHV_DIR}/VCShell_bfm.v
 DUT_BARE_XILINX_TOP_FILE := ${BHV_DIR}/VCShell_bare.v
-DUT_RAW_XILINX_TOP_FILE  := ${DUT_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/sifive.freedom.unleashed.DevKitU500FPGADesign_WithDevKit50MHz.v
+DUT_RAW_XILINX_TOP_FILE  := ${REPO_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/sifive.freedom.unleashed.DevKitU500FPGADesign_WithDevKit50MHz.v
 
 # need to make local file with edit to support virtual mode
 DUT_DDR3_FILE            += ddr3.v
@@ -60,9 +60,9 @@ DUT_VLOG_ARGS           += +define+x1Gb+sg125+x8+den1024Mb
 # RISCV dependent stuffs
 # -----------------------------------------------------------------------
 #
-ROCKET_DIR	= ${DUT_TOP_DIR}/hdl_cores/freedom/rocket-chip/src/main
-FREEDOM_DIR     = ${DUT_TOP_DIR}/hdl_cores/freedom/src/main
-XLNX_IP_DIR     = ${DUT_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/obj/ip
+ROCKET_DIR	= ${REPO_TOP_DIR}/hdl_cores/freedom/rocket-chip/src/main
+FREEDOM_DIR     = ${REPO_TOP_DIR}/hdl_cores/freedom/src/main
+XLNX_IP_DIR     = ${REPO_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/obj/ip
 BARE_SRC_DIR    = ${SIM_DIR}/drivers/bare
 
 RISCV            ?= /opt/riscv
@@ -85,7 +85,7 @@ RISCV_VIRT_INC     += -I${XX_SIM_DIR}/drivers/virtual -I${RISCV_TEST_DIR}/isa/ma
 #
 
 # use the one build during verilog generation
-RICSV_BARE_BOOT_DIR       := ${DUT_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit
+RICSV_BARE_BOOT_DIR       := ${REPO_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit
 RISCV_BARE_BOOT_ROM       := sdboot_fpga_sim.hex
 
 %.hex: ${INC_DIR}/cep_adrMap.h %.c
@@ -108,19 +108,19 @@ RISCV_BARE_BOOT_ROM       := sdboot_fpga_sim.hex
 # vendor independent, strickly synthesizable RTL codes
 #
 # NOTE: dft_top.v and idft_top.v have duplicate modules such as memMod, memMod_dist, etc.. use -v for one of them
-DUT_COMMON_FILES = ${DUT_TOP_DIR}/hdl_cores/aes/table.v 	\
-	${DUT_TOP_DIR}/hdl_cores/aes/round.v			\
-	${DUT_TOP_DIR}/hdl_cores/aes/aes_192.v 			\
-	${DUT_TOP_DIR}/hdl_cores/llki/llki_pkg.sv 		\
-	${DUT_TOP_DIR}/hdl_cores/llki/top_pkg.sv 		\
-	$(DUT_TOP_DIR)/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv	\
-	$(DUT_TOP_DIR)/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv	\
-	${DUT_TOP_DIR}/hdl_cores/llki/tlul_err.sv 		\
-	${DUT_TOP_DIR}/hdl_cores/llki/tlul_adapter_reg.sv 	\
-	${DUT_TOP_DIR}/hdl_cores/llki/tlul_fifo_sync.sv 	\
-	${DUT_TOP_DIR}/hdl_cores/llki/prim_generic_ram_1p.sv 	\
-	${DUT_TOP_DIR}/generated_dsp_code/dft_top.v		\
-	-v ${DUT_TOP_DIR}/generated_dsp_code/idft_top.v		\
+DUT_COMMON_FILES = ${REPO_TOP_DIR}/hdl_cores/aes/table.v 	\
+	${REPO_TOP_DIR}/hdl_cores/aes/round.v			\
+	${REPO_TOP_DIR}/hdl_cores/aes/aes_192.v 			\
+	${REPO_TOP_DIR}/hdl_cores/llki/llki_pkg.sv 		\
+	${REPO_TOP_DIR}/hdl_cores/llki/top_pkg.sv 		\
+	$(REPO_TOP_DIR)/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv	\
+	$(REPO_TOP_DIR)/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv	\
+	${REPO_TOP_DIR}/hdl_cores/llki/tlul_err.sv 		\
+	${REPO_TOP_DIR}/hdl_cores/llki/tlul_adapter_reg.sv 	\
+	${REPO_TOP_DIR}/hdl_cores/llki/tlul_fifo_sync.sv 	\
+	${REPO_TOP_DIR}/hdl_cores/llki/prim_generic_ram_1p.sv 	\
+	${REPO_TOP_DIR}/generated_dsp_code/dft_top.v		\
+	-v ${REPO_TOP_DIR}/generated_dsp_code/idft_top.v		\
 	${BHV_DIR}/ddr3.v					\
 
 #
@@ -139,8 +139,8 @@ FREEDOM_FILES = ${FREEDOM_DIR}/resources/vsrc/AnalogToUInt.v \
 # ==================================
 #
 DUT_XILINX_FILES = ${VIVADO_PATH}/data/verilog/src/glbl.v	\
-	${DUT_TOP_DIR}/hdl_cores/freedom/fpga-shells/xilinx/common/vsrc/PowerOnResetFPGAOnly.v 	\
-	${DUT_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/sifive.freedom.unleashed.DevKitU500FPGADesign_WithDevKit50MHz.rom.v \
+	${REPO_TOP_DIR}/hdl_cores/freedom/fpga-shells/xilinx/common/vsrc/PowerOnResetFPGAOnly.v 	\
+	${REPO_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/sifive.freedom.unleashed.DevKitU500FPGADesign_WithDevKit50MHz.rom.v \
 	${XLNX_IP_DIR}/vc707mig1gb/vc707mig1gb/user_design/rtl/vc707mig1gb_mig_sim.v \
 	${XLNX_IP_DIR}/vc707mig1gb/vc707mig1gb/user_design/rtl/vc707mig1gb.v 
 #
@@ -190,8 +190,6 @@ DUT_TB_FILES_LIST  = ${DUT_XILINX_TOP_TB}
 # ===========================================
 # Search list
 # ===========================================
-#	${VENDOR_DIR}/micron 	\
-
 SEARCH_DIR_LIST := ${DVT_DIR}		\
 		${BLD_DIR} 		\
 		${XLNX_IP_DIR}/corePLL	\
@@ -203,22 +201,22 @@ SEARCH_DIR_LIST := ${DVT_DIR}		\
 		${XLNX_IP_DIR}/vc707mig1gb/vc707mig1gb/user_design/rtl/controller	\
 		${XLNX_IP_DIR}/vc707mig1gb/vc707mig1gb/user_design/rtl/clocking	\
 		${XLNX_IP_DIR}/vc707mig1gb/vc707mig1gb/user_design/rtl		\
-		${DUT_TOP_DIR}/hdl_cores/aes					\
-		${DUT_TOP_DIR}/hdl_cores/des3					\
-		${DUT_TOP_DIR}/hdl_cores/gps					\
-		${DUT_TOP_DIR}/hdl_cores/md5					\
-		${DUT_TOP_DIR}/hdl_cores/rsa/rtl				\
-		${DUT_TOP_DIR}/hdl_cores/sha256					\
-		${DUT_TOP_DIR}/hdl_cores/dsp					\
-		${DUT_TOP_DIR}/hdl_cores/llki 					\
-		$(DUT_TOP_DIR)/opentitan/hw/ip/tlul/rtl 			\
-		$(DUT_TOP_DIR)/opentitan/hw/ip/prim/rtl 			\
-		$(DUT_TOP_DIR)/opentitan/hw/ip/prim_generic/rtl 		\
+		${REPO_TOP_DIR}/hdl_cores/aes					\
+		${REPO_TOP_DIR}/hdl_cores/des3					\
+		${REPO_TOP_DIR}/hdl_cores/gps					\
+		${REPO_TOP_DIR}/hdl_cores/md5					\
+		${REPO_TOP_DIR}/hdl_cores/rsa/rtl				\
+		${REPO_TOP_DIR}/hdl_cores/sha256					\
+		${REPO_TOP_DIR}/hdl_cores/dsp					\
+		${REPO_TOP_DIR}/hdl_cores/llki 					\
+		$(REPO_TOP_DIR)/opentitan/hw/ip/tlul/rtl 			\
+		$(REPO_TOP_DIR)/opentitan/hw/ip/prim/rtl 			\
+		$(REPO_TOP_DIR)/opentitan/hw/ip/prim_generic/rtl 		\
 		${BHV_DIR} 		
 
 
 INCDIR_LIST     := ${SEARCH_DIR_LIST}	\
-		${DUT_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/obj/ip/corePLL
+		${REPO_TOP_DIR}/hdl_cores/freedom/builds/vc707-u500devkit/obj/ip/corePLL
 
 #
 # Create DUT_XILINX_BFM_FILE from raw for BFM mode

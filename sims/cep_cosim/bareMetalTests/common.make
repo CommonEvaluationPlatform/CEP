@@ -12,8 +12,8 @@
 #
 # must have this one for auto-dependentcy detection
 
-override DUT_SIM_MODE	 = BARE
-override DUT_ELF_MODE   = LOCAL
-override DUT_XILINX_TOP_MODULE = cep_tb
+override DUT_SIM_MODE	 		= BARE
+override DUT_ELF_MODE   		= LOCAL
+override DUT_XILINX_TOP_MODULE 	= cep_tb
 #
-include ${DUT_TOP_DIR}/${COSIM_NAME}/common.make
+include ${REPO_TOP_DIR}/${COSIM_TOP_DIR}/common.make

@@ -14,4 +14,4 @@
 override DUT_SIM_MODE	= BFM
 override DUT_XILINX_TOP_MODULE = cep_tb
 #
-include ${DUT_TOP_DIR}/${COSIM_NAME}/common.make
+include ${REPO_TOP_DIR}/${COSIM_TOP_DIR}/common.make

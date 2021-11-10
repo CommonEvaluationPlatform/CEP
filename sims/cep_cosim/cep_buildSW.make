@@ -269,10 +269,8 @@ ${BARE_LIB_DIR}/crt.bobj: ${RISCV_BARE_CRTFILE}
 # -----------------------------------------------------------------------
 #
 
-ifeq ($(RE_USE_TEST),0)
 riscv_wrapper.bobj: riscv_wrapper.cc
 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
-endif
 
 ifeq "$(findstring BUILTIN,${DUT_ELF_MODE})" "BUILTIN"
 # blank it
@@ -307,38 +305,32 @@ endif
 # v2c_lib.a : src/cep_tests/diag/share/simDiag
 #
 ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
-ifeq (${NOBUILD},0)
-	$(AR) crv $@ 					\
-		$(shell ls ${SRC_LIB_DIR}/*.o) 		\
-		$(shell ls ${APIS_LIB_DIR}/*.o) 	\
-		$(shell ls ${DIAG_LIB_DIR}/*.o)		\
-		$(shell ls ${SHARE_LIB_DIR}/*.o)	\
-		$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
-	$(RANLIB) $@
-endif
+$(AR) crv $@ 					\
+	$(shell ls ${SRC_LIB_DIR}/*.o) 		\
+	$(shell ls ${APIS_LIB_DIR}/*.o) 	\
+	$(shell ls ${DIAG_LIB_DIR}/*.o)		\
+	$(shell ls ${SHARE_LIB_DIR}/*.o)	\
+	$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
+$(RANLIB) $@
 
 #
 # libvpp.so : pli/share
 #
 ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
-ifeq (${NOBUILD},0)
-	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT  -fPIC -shared  -g  \
-		-o ${VPP_LIB}	\
-		$(shell ls ${SHARE_LIB_DIR}/*.obj) \
-		$(shell ls ${PLI_LIB_DIR}/*.obj) 
-endif	
+$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT  -fPIC -shared  -g  \
+	-o ${VPP_LIB}	\
+	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
+	$(shell ls ${PLI_LIB_DIR}/*.obj) 
 
 #
 # riscv_lib.a: bare/apis/diag
 #
 ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST} ${BARE_LIB_DIR}/crt.bobj
-ifeq (${NOBUILD},0)
-	$(RISCV_AR) crv $@ \
-		$(shell ls ${APIS_LIB_DIR}/*.bobj) \
-		$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
-		$(shell ls ${BARE_LIB_DIR}/*.bobj) 
-	$(RISCV_RANLIB) $@
-endif	
+$(RISCV_AR) crv $@ \
+	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
+	$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
+	$(shell ls ${BARE_LIB_DIR}/*.bobj) 
+$(RISCV_RANLIB) $@
 
 #
 # target
@@ -364,12 +356,8 @@ LOCAL_CC_FILES  := $(wildcard ./*.cc)
 LOCAL_H_FILES   += $(wildcard ./*.h)
 LOCAL_OBJ_FILES += $(LOCAL_CC_FILES:%.cc=%.o)
 
-
-ifeq ($(RE_USE_TEST),0) 
 c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${VERILOG_DEFINE_LIST}
 	$(GCC) $(SIM_SW_CFLAGS) $(LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${EXTRA_V2C_LIB} ${THREAD_SWITCH} 
-
-endif
 
 %.o: %.cc ${LOCAL_H_FILES} ${LIB_DIR}/v2c_lib.a  ${VERILOG_DEFINE_LIST} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
