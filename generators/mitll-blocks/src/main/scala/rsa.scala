@@ -120,10 +120,24 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
   val (llki, llkiEdge)    = outer.llki_node.in(0)
 
   // Define the LLKI Protocol Processing blackbox and its associated IO
-  class llki_pp_wrapper(val llki_ctrlsts_addr: BigInt, llki_sendrecv_addr: BigInt) extends BlackBox(
+  class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
+                          llki_sendrecv_addr    : BigInt,
+                          slave_tl_szw          : Int,
+                          slave_tl_aiw          : Int,
+                          slave_tl_aw           : Int,
+                          slave_tl_dbw          : Int,
+                          slave_tl_dw           : Int,
+                          slave_tl_diw          : Int) extends BlackBox (
+
       Map(
-        "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),  // Address of the LLKI PP Control/Status Register
-        "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr)  // Address of the LLKI PP Message Send/Receive interface
+        "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
+        "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
+        "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
+        "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
+        "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
+        "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
+        "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
+        "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
       )
   ) {
 
@@ -135,11 +149,11 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
       // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_a_opcode      = Input(UInt(3.W))
       val slave_a_param       = Input(UInt(3.W))
-      val slave_a_size        = Input(UInt(LLKITilelinkParameters.SizeBits.W))
-      val slave_a_source      = Input(UInt(LLKITilelinkParameters.SourceBits.W))
-      val slave_a_address     = Input(UInt(LLKITilelinkParameters.AddressBits.W))
-      val slave_a_mask        = Input(UInt(LLKITilelinkParameters.BeatBytes.W))
-      val slave_a_data        = Input(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val slave_a_size        = Input(UInt(slave_tl_szw.W))
+      val slave_a_source      = Input(UInt(slave_tl_aiw.W))
+      val slave_a_address     = Input(UInt(slave_tl_aw.W))
+      val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
+      val slave_a_data        = Input(UInt(slave_tl_dw.W))
       val slave_a_corrupt     = Input(Bool())
       val slave_a_valid       = Input(Bool())
       val slave_a_ready       = Output(Bool())
@@ -147,11 +161,11 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
       // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
       val slave_d_opcode      = Output(UInt(3.W))
       val slave_d_param       = Output(UInt(3.W))
-      val slave_d_size        = Output(UInt(LLKITilelinkParameters.SizeBits.W))
-      val slave_d_source      = Output(UInt(LLKITilelinkParameters.SourceBits.W))
-      val slave_d_sink        = Output(UInt(LLKITilelinkParameters.SinkBits.W))
+      val slave_d_size        = Output(UInt(slave_tl_szw.W))
+      val slave_d_source      = Output(UInt(slave_tl_aiw.W))
+      val slave_d_sink        = Output(UInt(slave_tl_diw.W))
       val slave_d_denied      = Output(Bool())
-      val slave_d_data        = Output(UInt((LLKITilelinkParameters.BeatBytes * 8).W))
+      val slave_d_data        = Output(UInt(slave_tl_dw.W))
       val slave_d_corrupt     = Output(Bool())
       val slave_d_valid       = Output(Bool())
       val slave_d_ready       = Input(Bool())
@@ -168,38 +182,31 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
   } // end class llki_pp_wrapper
 
   // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(coreparams.llki_ctrlsts_addr, 
-                                                coreparams.llki_sendrecv_addr))
-
-  // The following "requires" are included to avoid size mismatches between the
-  // the Rocket Chip buses and the SRoT Black Box.  The expected values are inhereited
-  // from the cep_addresses package and must match those in "top_pkg.sv", borrowed from OpenTitan
-  //
-  // Exceptions:
-  //  - llkiEdge address gets optimized down to 31-bits during chisel generation
-  //  - llkiEdge sink bits are 1, but masterEdge sink bits are 2 
-  //  - llkiEdge size bits are 3, but masterEdge size bits are 4
-  //
-  require(llkiEdge.bundle.addressBits  == LLKITilelinkParameters.AddressBits - 1, s"SROT: llkiEdge addressBits exp/act ${LLKITilelinkParameters.AddressBits - 1}/${llkiEdge.bundle.addressBits}")
-  require(llkiEdge.bundle.dataBits     == LLKITilelinkParameters.BeatBytes * 8, s"SROT: llkiEdge dataBits exp/act ${LLKITilelinkParameters.BeatBytes * 8}/${llkiEdge.bundle.dataBits}")
-  require(llkiEdge.bundle.sourceBits   == LLKITilelinkParameters.SourceBits, s"SROT: llkiEdge sourceBits exp/act ${LLKITilelinkParameters.SourceBits}/${llkiEdge.bundle.sourceBits}")
-  require(llkiEdge.bundle.sinkBits     == LLKITilelinkParameters.SinkBits - 1, s"SROT: llkiEdge sinkBits exp/act ${LLKITilelinkParameters.SinkBits - 1}/${llkiEdge.bundle.sinkBits}")
-  require(llkiEdge.bundle.sizeBits     == LLKITilelinkParameters.SizeBits, s"SROT: llkiEdge sizeBits exp/act ${LLKITilelinkParameters.SizeBits}/${llkiEdge.bundle.sizeBits}")
+  val llki_pp_inst = Module(new llki_pp_wrapper(
+    coreparams.llki_ctrlsts_addr, 
+    coreparams.llki_sendrecv_addr,
+    llkiEdge.bundle.sizeBits,
+    llkiEdge.bundle.sourceBits,
+    llkiEdge.bundle.addressBits,
+    llkiEdge.bundle.dataBits / 8,
+    llkiEdge.bundle.dataBits,
+    llkiEdge.bundle.sinkBits
+  ))
 
   // Connect the Clock and Reset
   llki_pp_inst.io.clk                 := clock
   llki_pp_inst.io.rst                 := reset
 
   // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode    
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param     
+  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
   llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source    
-  llki_pp_inst.io.slave_a_address     := Cat(0.U(1.W), llki.a.bits.address)
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask      
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data      
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt   
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid          
+  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+  llki_pp_inst.io.slave_a_valid       := llki.a.valid
   llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
 
   // Connect the Slave D Channel to the Black Box IO    
@@ -207,7 +214,7 @@ class rsaTLModuleImp(coreparams: COREParams, outer: rsaTLModule) extends LazyMod
   llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
   llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
   llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink(0)
+  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
   llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
   llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
   llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt

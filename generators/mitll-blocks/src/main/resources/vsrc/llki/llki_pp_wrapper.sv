@@ -11,10 +11,7 @@
 //                  It also implements the LLKI Protocol Processing
 //                  block's State Machine.
 // Notes:           The underlying TL-UL package is from the OpenTitan
-//                  project
-//
-//                  The "tl" parameters have been taken from the
-//                  OpenTitan ecosystem
+//                  project.
 //
 //                  Send / Recv FIFOs have specifically NOT been
 //                  implemented here in an effort to minimize the number
@@ -31,44 +28,50 @@
 
 module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter int CTRLSTS_ADDR    = 32'h00000000,   // These default values MUST be overwritten
-  parameter int SENDRECV_ADDR   = 32'h00000008    // These default values MUST be overwritten
+  parameter int SENDRECV_ADDR   = 32'h00000008,   // These default values MUST be overwritten
+  parameter SLAVE_TL_SZW        = top_pkg::TL_SZW,
+  parameter SLAVE_TL_AIW        = top_pkg::TL_AIW,
+  parameter SLAVE_TL_AW         = top_pkg::TL_AW,
+  parameter SLAVE_TL_DBW        = top_pkg::TL_DBW,
+  parameter SLAVE_TL_DW         = top_pkg::TL_DW,
+  parameter SLAVE_TL_DIW        = top_pkg::TL_DIW
  ) (
 
   // Clock and reset
   input                         clk,
   input                         rst,
 
-  // Slave Interface - A channel
-  input [2:0]                   slave_a_opcode,
-  input [2:0]                   slave_a_param,
-  input [top_pkg::TL_SZW-1:0]   slave_a_size,
-  input [top_pkg::TL_AIW-1:0]   slave_a_source,
-  input [top_pkg::TL_AW-1:00]   slave_a_address,
-  input [top_pkg::TL_DBW-1:0]   slave_a_mask,
-  input [top_pkg::TL_DW-1:0]    slave_a_data,
-  input                         slave_a_corrupt,
-  input                         slave_a_valid,
-  output                        slave_a_ready,
+  // Slave interface A channel
+  input [2:0]                     slave_a_opcode,
+  input [2:0]                     slave_a_param,
+  input [SLAVE_TL_SZW-1:0]        slave_a_size,
+  input [SLAVE_TL_AIW-1:0]        slave_a_source,
+  input [SLAVE_TL_AW-1:00]        slave_a_address,
+  input [SLAVE_TL_DBW-1:0]        slave_a_mask,
+  input [SLAVE_TL_DW-1:0]         slave_a_data,
+  input                           slave_a_corrupt,
+  input                           slave_a_valid,
+  output                          slave_a_ready,
 
   // Slave interface D channel
-  output [2:0]                  slave_d_opcode,
-  output [2:0]                  slave_d_param,
-  output [top_pkg::TL_SZW-1:0]  slave_d_size,
-  output [top_pkg::TL_AIW-1:0]  slave_d_source,
-  output [top_pkg::TL_DIW-1:0]  slave_d_sink,
-  output                        slave_d_denied,
-  output [top_pkg::TL_DW-1:0]   slave_d_data,
-  output                        slave_d_corrupt,
-  output                        slave_d_valid,
-  input                         slave_d_ready,
+  output [2:0]                    slave_d_opcode,
+  output [2:0]                    slave_d_param,
+  output reg [SLAVE_TL_SZW-1:0]   slave_d_size,
+  output reg [SLAVE_TL_AIW-1:0]   slave_d_source,
+  output reg [SLAVE_TL_DIW-1:0]   slave_d_sink,
+  output                          slave_d_denied,
+  output [SLAVE_TL_DW-1:0]        slave_d_data,
+  output                          slave_d_corrupt,
+  output                          slave_d_valid,
+  input                           slave_d_ready
 
   // LLKI discrete I/O
-  output reg [63:0]             llkid_key_data,
-  output reg                    llkid_key_valid,
-  input                         llkid_key_ready,
-  input                         llkid_key_complete,
-  output reg                    llkid_clear_key,
-  input                         llkid_clear_key_ack
+  output reg [63:0]               llkid_key_data,
+  output reg                      llkid_key_valid,
+  input                           llkid_key_ready,
+  input                           llkid_key_complete,
+  output reg                      llkid_clear_key,
+  input                           llkid_clear_key_ack
 
 );
 
@@ -76,16 +79,48 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   tl_h2d_t                      slave_tl_h2d;
   tl_d2h_t                      slave_tl_d2h;
 
+  // In the OpenTitan world, TL buses are encapsulated with the structures instantitated above
+  // and as defined in top_pkg.sv.  This includes field widths.
+  //
+  // In the RocketChip world, some field widths will vary based on the other system components
+  // (e.g., source and sink widths).  In order to provide maximum flexibility, without breaking
+  // OpenTitan, top_pkg.sv is going to be defined with field maximum expected widths within
+  // the CEP ecosystem.
+  //
+  // The following assignments, coupled with the parameters passed to this component will 
+  // provide for a flexible assignment, when necessary.  Assertions will be used to capture
+  // a mismatch when the widths in the OpenTitan world are not large enough to encapsulate
+  // what is being passed from RocketChip.
+  //
+  // DW/DBW (Data bus width) must be equal in both worlds
+  
+  `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW >= SLAVE_TL_SZW)
+  `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW >= SLAVE_TL_AIW)
+  `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW >= SLAVE_TL_AW)
+  `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
+  `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
+  
+  always @*
+  begin
+    slave_tl_h2d.a_size                         <= '0;
+    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;
+    slave_tl_h2d.a_source                       <= '0;
+    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     <= slave_a_source;
+    slave_tl_h2d.a_address                      <= '0;
+    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_source;
+    
+    slave_d_size                                <= slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
+    slave_d_source                              <= slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
+    slave_d_sink                                <= slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+  end
+
   // Make Slave A channel connections
   assign slave_tl_h2d.a_valid     = slave_a_valid;
   assign slave_tl_h2d.a_opcode    = ( slave_a_opcode == 3'h0) ? PutFullData : 
-                                  ((slave_a_opcode == 3'h1) ? PutPartialData : 
-                                  ((slave_a_opcode == 3'h4) ? Get : 
-                                    Get));                                   
+                                    ((slave_a_opcode == 3'h1) ? PutPartialData : 
+                                    ((slave_a_opcode == 3'h4) ? Get : 
+                                      Get));                                   
   assign slave_tl_h2d.a_param     = slave_a_param;
-  assign slave_tl_h2d.a_size      = slave_a_size;
-  assign slave_tl_h2d.a_source    = slave_a_source;
-  assign slave_tl_h2d.a_address   = slave_a_address;
   assign slave_tl_h2d.a_mask      = slave_a_mask;
   assign slave_tl_h2d.a_data      = slave_a_data;
   assign slave_tl_h2d.a_user      = tl_a_user_t'('0);  // User field is unused by Rocket Chip
@@ -97,10 +132,7 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
                                   ((slave_tl_d2h.d_opcode == AccessAckData) ? 3'h1 :
                                     3'h0);
   assign slave_d_param          = slave_tl_d2h.d_param;
-  assign slave_d_size           = slave_tl_d2h.d_size;
-  assign slave_d_source         = slave_tl_d2h.d_source;
-  assign slave_d_sink           = slave_tl_d2h.d_sink;
-  assign slave_d_denied         = slave_tl_d2h.d_error; // Open
+  assign slave_d_denied         = slave_tl_d2h.d_error;
   assign slave_d_data           = slave_tl_d2h.d_data;
   assign slave_d_corrupt        = slave_tl_d2h.d_error;
   assign slave_d_valid          = slave_tl_d2h.d_valid;
