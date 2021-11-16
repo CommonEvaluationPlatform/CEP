@@ -26,6 +26,8 @@
 //************************************************************************
 `timescale 1ns/1ns
 
+`include "prim_assert.sv"
+
 module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   parameter int CTRLSTS_ADDR    = 32'h00000000,   // These default values MUST be overwritten
   parameter int SENDRECV_ADDR   = 32'h00000008,   // These default values MUST be overwritten
@@ -63,7 +65,7 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   output [SLAVE_TL_DW-1:0]        slave_d_data,
   output                          slave_d_corrupt,
   output                          slave_d_valid,
-  input                           slave_d_ready
+  input                           slave_d_ready,
 
   // LLKI discrete I/O
   output reg [63:0]               llkid_key_data,
