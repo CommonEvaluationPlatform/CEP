@@ -80,11 +80,11 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // what is being passed from RocketChip.
   //
   // DW/DBW (Data bus width) must be equal in both worlds
-  `ASSERT_INIT(scratchpad_slaveTlSzw, top_pkg::TL_SZW < SLAVE_TL_SZW)
-  `ASSERT_INIT(scratchpad_slaveTlAiw, top_pkg::TL_AIW < SLAVE_TL_AIW)
-  `ASSERT_INIT(scratchpad_slaveTlAw, top_pkg::TL_AW < SLAVE_TL_AW)
-  `ASSERT_INIT(scratchpad_slaveTlDbw, top_pkg::TL_DBW != SLAVE_TL_DBW)
-  `ASSERT_INIT(scratchpad_slaveTlDw, top_pkg::TL_DW != SLAVE_TL_DW)
+  `ASSERT_INIT(scratchpad_slaveTlSzw, top_pkg::TL_SZW >= SLAVE_TL_SZW)
+  `ASSERT_INIT(scratchpad_slaveTlAiw, top_pkg::TL_AIW >= SLAVE_TL_AIW)
+  `ASSERT_INIT(scratchpad_slaveTlAw, top_pkg::TL_AW >= SLAVE_TL_AW)
+  `ASSERT_INIT(scratchpad_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
+  `ASSERT_INIT(scratchpad_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
   
   always @*
   begin

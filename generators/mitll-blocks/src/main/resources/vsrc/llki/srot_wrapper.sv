@@ -125,11 +125,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   //
   // DW/DBW (Data bus width) must be equal in both worlds
   
-  `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW < SLAVE_TL_SZW)
-  `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW < SLAVE_TL_AIW)
-  `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW < SLAVE_TL_AW)
-  `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW != SLAVE_TL_DBW)
-  `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW != SLAVE_TL_DW)
+  `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW >= SLAVE_TL_SZW)
+  `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW >= SLAVE_TL_AIW)
+  `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW >= SLAVE_TL_AW)
+  `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
+  `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
   
   always @*
   begin
@@ -169,11 +169,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   assign slave_d_valid          = slave_tl_d2h.d_valid;
   assign slave_a_ready          = slave_tl_d2h.a_ready;
 
-  `ASSERT_INIT(srot_masterTlSzw, top_pkg::TL_SZW < MASTER_TL_SZW)
-  `ASSERT_INIT(srot_masterTlAiw, top_pkg::TL_AIW < MASTER_TL_AIW)
-  `ASSERT_INIT(srot_masterTlAw, top_pkg::TL_AW < MASTER_TL_AW)
-  `ASSERT_INIT(srot_masterTlDbw, top_pkg::TL_DBW != MASTER_TL_DBW)
-  `ASSERT_INIT(srot_masterTlDw, top_pkg::TL_DW != MASTER_TL_DW)
+  `ASSERT_INIT(srot_masterTlSzw, top_pkg::TL_SZW >= MASTER_TL_SZW)
+  `ASSERT_INIT(srot_masterTlAiw, top_pkg::TL_AIW >= MASTER_TL_AIW)
+  `ASSERT_INIT(srot_masterTlAw, top_pkg::TL_AW >= MASTER_TL_AW)
+  `ASSERT_INIT(srot_masterTlDbw, top_pkg::TL_DBW == MASTER_TL_DBW)
+  `ASSERT_INIT(srot_masterTlDw, top_pkg::TL_DW == MASTER_TL_DW)
 
   always @*
   begin

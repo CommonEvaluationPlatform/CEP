@@ -2,9 +2,9 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_tb.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    Top Level Testbench for the CEP
 // Notes:          
 //
 //************************************************************************
@@ -610,9 +610,6 @@ module cep_tb;
    reg [256*8 - 1:0] path;
    initial begin
       repeat (100) @(posedge sys_clk_i);
-      //path = "/home/aduong/CEP/CEP-master/cosim/bin/bareboot.hex";
-      //path = "../../bin/bareboot.hex";
-      //path = "../../drivers/bootbare/bootbare.hex";
       path = "../../../hdl_cores/freedom/builds/vc707-u500devkit/sdboot_fpga_sim.hex";
       //
       `logI("=== Overriding bootROm with file %s ==",path);      
@@ -623,70 +620,36 @@ module cep_tb;
    end
    
   //===========================================================================
-  //  Device Under Test
+  // Device Under Test
+  //
+  // I/O manually copied from Chisel generated verilog
   //===========================================================================
   ChipTop ChipTop_inst ( 
-    .sys_clock_p    (sys_clk_i),
-    .sys_clock_n    (!sys_clk_i),
-     .jtag_jtag_TCK     (jtag_jtag_TCK),
-     .jtag_jtag_TMS (jtag_jtag_TMS),
-     .jtag_jtag_TDI (jtag_jtag_TDI),
-     .jtag_jtag_TDO (jtag_jtag_TDO),
-     .jtag_srst_n   (jtag_jtag_TRSTn),
-     .uart_txd      (uart_txd),
-     .uart_rxd      (uart_rxd),
-     .uart_rtsn     (uart_rtsn),
-     .uart_ctsn     (uart_ctsn),
-       //
-       .sdio_sdio_clk     (sdio_sdio_clk),
-       .sdio_sdio_cmd     (sdio_sdio_cmd),
-       .sdio_sdio_dat_0   (sdio_sdio_dat_0),
-       .sdio_sdio_dat_1   (sdio_sdio_dat_1),
-       .sdio_sdio_dat_2   (sdio_sdio_dat_2),
-       .sdio_sdio_dat_3   (sdio_sdio_dat_3),
-       // DDR3
-       .ddr_ddr3_dq              (ddr3_dq_fpga),
-       .ddr_ddr3_dqs_n           (ddr3_dqs_n_fpga),
-       .ddr_ddr3_dqs_p           (ddr3_dqs_p_fpga),
-       .ddr_ddr3_addr            (ddr3_addr_fpga),
-       .ddr_ddr3_ba              (ddr3_ba_fpga),
-       .ddr_ddr3_ras_n           (ddr3_ras_n_fpga),
-       .ddr_ddr3_cas_n           (ddr3_cas_n_fpga),
-       .ddr_ddr3_we_n            (ddr3_we_n_fpga),
-       .ddr_ddr3_reset_n         (ddr3_reset_n),
-       .ddr_ddr3_ck_p            (ddr3_ck_p_fpga),
-       .ddr_ddr3_ck_n            (ddr3_ck_n_fpga),
-       .ddr_ddr3_cke             (ddr3_cke_fpga),
-       .ddr_ddr3_cs_n            (ddr3_cs_n_fpga),
-       .ddr_ddr3_dm              (ddr3_dm_fpga),
-       .ddr_ddr3_odt             (ddr3_odt_fpga),
-       
-       .led_0       (led[0]),
-       .led_1       (led[1]),
-       .led_2       (led[2]),
-       .led_3       (led[3]),
-       .led_4       (led[4]),
-       .led_5       (led[5]),
-       .led_6       (led[6]),
-       .led_7       (led[7]),
+    .jtag_TCK           (jtag_jtag_TCK),
+    .jtag_TMS           (jtag_jtag_TMS),
+    .jtag_TDI           (jtag_jtag_TDI),
+    .jtag_TDO           (jtag_jtag_TDO),
+    .custom_boot        (),
+    .gpio_0_0           (),
+    .gpio_0_1           (),
+    .gpio_0_2           (),
+    .gpio_0_3           (),
+    .gpio_0_4           (),
+    .gpio_0_5           (),
+    .gpio_0_6           (),
+    .gpio_0_7           (),
+    .uart_0_txd         (uart_txd),
+    .uart_0_rxd         (uart_rxd),
+    .reset_wire_reset   (sys_rst || chipReset),
+    .clock              (sys_clk_i)
+  );
 
-       .reset       (sys_rst || chipReset)
-       );
-
-   /*
-    .sys_clk_i            (sys_clk_i),
-    
-    .init_calib_complete (init_calib_complete),
-    .tg_compare_error    (tg_compare_error),
-    .sys_rst             (sys_rst)
-    */
-   
-   //**************************************************************************//
-   // Memory Models instantiations
-   //**************************************************************************//
-   reg enableWrTrace = 0;
-   reg enableRdTrace = 0;   
-   reg calib_done = 0;
+  //**************************************************************************//
+  // Memory Models instantiations
+  //**************************************************************************//
+  reg   enableWrTrace   = 0;
+  reg   enableRdTrace   = 0;   
+  reg   calib_done      = 0;
    always @(posedge `MIG_PATH.init_calib_complete) begin
       $display("%t Calibration Done",$time);
       calib_done = 1;
