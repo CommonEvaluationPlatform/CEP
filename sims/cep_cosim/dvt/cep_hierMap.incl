@@ -10,57 +10,56 @@
 //
 //************************************************************************
 
-`define TOP_LEVEL_TB `TB_NAME
-`define DVT_PATH     `TB_NAME.v2cd
-`define TIME2DUMP    `TB_NAME.v2cd.time2Dump
-`define TGL_CLK      `TB_NAME.clk100
-`define SYS_CLK      `TB_NAME.clk100
+`define DVT_PATH            `TB_NAME.v2cd
+`define WAIT4RESTART_FLAG   `TB_NAME.waitForRestartFlag
+`define DVT_FLAG            `TB_NAME.v2cd.dvtFlags
 
-`define WAIT4RESTART_FLAG `TB_NAME.waitForRestartFlag
+`define DUT_TOP_LEVEL       `TB_NAME.ChipTop_inst
 
-`define DRIVER_PATH     `TB_NAME.driver
-
-`define DVT_FLAGS     `TB_NAME.driver.dvtFlags
-`define DVT_FLAG      `TB_NAME.v2cd.dvtFlags
-
-`define SHUTDOWN_PATH  `TB_NAME.driver.asicShutDown
 //
 // Path to cores
 //
-`define CORE0_PATH    cep_tb.fpga.topDesign.topMod.tile
-`define CORE1_PATH    cep_tb.fpga.topDesign.topMod.tile_1
-`define CORE2_PATH    cep_tb.fpga.topDesign.topMod.tile_2
-`define CORE3_PATH    cep_tb.fpga.topDesign.topMod.tile_3
+`define CORE0_PATH          `DUT_TOP_LEVEL.system.tile
+`define CORE1_PATH          `DUT_TOP_LEVEL.system.tile_1
+`define CORE2_PATH          `DUT_TOP_LEVEL.system.tile_2
+`define CORE3_PATH          `DUT_TOP_LEVEL.system.tile_3
 
-`define CORE0_TL_PATH    fpga.topDesign.topMod.tile.tl_master
-`define CORE1_TL_PATH    fpga.topDesign.topMod.tile_1.tl_master
-`define CORE2_TL_PATH    fpga.topDesign.topMod.tile_2.tl_master
-`define CORE3_TL_PATH    fpga.topDesign.topMod.tile_3.tl_master
-`define FPGA_RESET_PATH  fpga.topDesign.wrangler
-`define RESET_PATH       fpga.topDesign.wrangler
-`define FIR_PATH         fpga.topDesign.topMod.firmodule
-`define DDR_PATH         fpga.topDesign.topMod.mig
+`define CORE0_TL_PATH       `DUT_TOP_LEVEL.system.tile.tl_master
+`define CORE1_TL_PATH       `DUT_TOP_LEVEL.system.tile_1.tl_master
+`define CORE2_TL_PATH       `DUT_TOP_LEVEL.system.tile_2.tl_master
+`define CORE3_TL_PATH       `DUT_TOP_LEVEL.system.tile_3.tl_master
+`define FPGA_RESET_PATH     fpga.topDesign.wrangler
+`define RESET_PATH          fpga.topDesign.wrangler
+`define FIR_PATH            `DUT_TOP_LEVEL.system.firmodule
+`define DDR_PATH            `DUT_TOP_LEVEL.system.mig
 
-`define CORE0_PC      `CORE0_PATH.core.coreMonitorBundle_pc
-`define CORE1_PC      `CORE1_PATH.core.coreMonitorBundle_pc
-`define CORE2_PC      `CORE2_PATH.core.coreMonitorBundle_pc
-`define CORE3_PC      `CORE3_PATH.core.coreMonitorBundle_pc
+`define CORE0_PC            `CORE0_PATH.core.coreMonitorBundle_pc
+`define CORE1_PC            `CORE1_PATH.core.coreMonitorBundle_pc
+`define CORE2_PC            `CORE2_PATH.core.coreMonitorBundle_pc
+`define CORE3_PC            `CORE3_PATH.core.coreMonitorBundle_pc
 
-`define CORE0_VALID   `CORE0_PATH.core.coreMonitorBundle_valid
-`define CORE1_VALID   `CORE1_PATH.core.coreMonitorBundle_valid
-`define CORE2_VALID   `CORE2_PATH.core.coreMonitorBundle_valid
-`define CORE3_VALID   `CORE3_PATH.core.coreMonitorBundle_valid
+`define CORE0_VALID         `CORE0_PATH.core.coreMonitorBundle_valid
+`define CORE1_VALID         `CORE1_PATH.core.coreMonitorBundle_valid
+`define CORE2_VALID         `CORE2_PATH.core.coreMonitorBundle_valid
+`define CORE3_VALID         `CORE3_PATH.core.coreMonitorBundle_valid
 
-`define CORE0_DRIVER  cep_tb.driverX[0].driver
-`define CORE1_DRIVER  cep_tb.driverX[1].driver
-`define CORE2_DRIVER  cep_tb.driverX[2].driver
-`define CORE3_DRIVER  cep_tb.driverX[3].driver
+`define CORE0_DRIVER        `TB_NAME.driverX[0].driver
+`define CORE1_DRIVER        `TB_NAME.driverX[1].driver
+`define CORE2_DRIVER        `TB_NAME.driverX[2].driver
+`define CORE3_DRIVER        `TB_NAME.driverX[3].driver
 
-//
+`define PBUS_RESET          `DUT_TOP_LEVEL.system.pbus_reset
+`define PBUS_CLOCK          `DUT_TOP_LEVEL.system.pbus_clock
+`define DEBUG_NDRESET       `DUT_TOP_LEVEL.system_debug_ndreset
+`define JTAG_TDO            fpga.topDesign_auto_jtag_debug_source_out_TDO_data
+
+`define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
+`define MODEXP_CLK          `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk
+`define MODEXP_EXP_MODE_REG `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
+
 // in bare metal
-//
-`define MIG_PATH         fpga.topDesign.topMod.mig.island.blackbox
-`define BOOTROM_PATH     fpga.topDesign.topMod.maskROM.rom
+`define MIG_PATH            `DUT_TOP_LEVEL.system.mig.island.blackbox
+`define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
 
 

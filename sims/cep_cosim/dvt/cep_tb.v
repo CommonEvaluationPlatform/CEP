@@ -243,7 +243,7 @@ module cep_tb;
 
   localparam MEMORY_WIDTH            = 8;
   localparam NUM_COMP                = DQ_WIDTH/MEMORY_WIDTH;
-  localparam ECC_TEST 		   	= "OFF" ;
+  localparam ECC_TEST         = "OFF" ;
   localparam ERR_INSERT = (ECC_TEST == "ON") ? "OFF" : ECC ;
   
 
@@ -327,22 +327,22 @@ module cep_tb;
    reg chipReset = 0;
    
     always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) begin
-      wait (fpga.topDesign.topMod.pbus_reset==0);
-      @(negedge fpga.topDesign.topMod.pbus_clock);
+      wait (`PBUS_RESET==0);
+      @(negedge `PBUS_CLOCK);
       #2000;
       `logI("Asserting pbus_Reset");
-      force fpga.topDesign.topMod.pbus_reset = 1;
-      repeat (10) @(negedge fpga.topDesign.topMod.pbus_clock);
+      force `PBUS_RESET = 1;
+      repeat (10) @(negedge `PBUS_CLOCK);
       #2000;
-      release fpga.topDesign.topMod.pbus_reset;      
+      release `PBUS_RESET;      
       `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT] = 0;
    end
 
     always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) begin
       `logI("Forcing topMod_debug_ndreset");
-       force fpga.topDesign.topMod_debug_ndreset = 1;
-       repeat (10) @(negedge fpga.topDesign.topMod.pbus_clock);
-       release fpga.topDesign.topMod_debug_ndreset;
+       force `DEBUG_NDRESET = 1;
+       repeat (10) @(negedge `PBUS_CLOCK);
+       release `DEBUG_NDRESET;
        `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT] = 0;
    end
 
@@ -513,14 +513,14 @@ module cep_tb;
    wire uart_rtsn; pullup (weak1) (uart_rtsn);
 
    // add noise to uart_rxd;
-   reg 	noise = 0;
+   reg  noise = 0;
    
    always @(uart_txd) begin
       for (int i=0;i<3;i++) begin
-	 repeat (2) @(posedge sys_clk_i);
-	 noise = 1;
-	 repeat (2) @(posedge sys_clk_i);
-	 noise = 0;
+   repeat (2) @(posedge sys_clk_i);
+   noise = 1;
+   repeat (2) @(posedge sys_clk_i);
+   noise = 0;
       end
    end
    assign uart_rxd = uart_txd ^ noise;
@@ -533,7 +533,7 @@ module cep_tb;
    wire sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
    wire sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
 
-   reg 	spiResetL = 0;
+   reg  spiResetL = 0;
    initial begin
       spiResetL = 1;
       repeat (2) @(posedge sys_clk_i);
@@ -584,12 +584,12 @@ module cep_tb;
    defparam `CORE3_TL_PATH.CHIP_ID=3;
    `endif
    
-   integer 	j;
+   integer  j;
    
    initial begin
       for (j=0;j<32;j=j+1) begin
-	 `FIR_PATH.datain_mem[j] = 0;	 
-	 `FIR_PATH.dataout_mem[j] = 0;
+   `FIR_PATH.datain_mem[j] = 0;  
+   `FIR_PATH.dataout_mem[j] = 0;
       end
       //
       repeat (2) @(posedge sys_clk_i);            
@@ -623,28 +623,27 @@ module cep_tb;
    end
    
   //===========================================================================
-  //  FPGA
+  //  Device Under Test
   //===========================================================================
-   VC707BaseShell fpga
-     ( 
-       .sys_clock_p 		(sys_clk_i),
-       .sys_clock_n 		(!sys_clk_i),
-       .jtag_jtag_TCK 		(jtag_jtag_TCK),
-       .jtag_jtag_TMS 		(jtag_jtag_TMS),
-       .jtag_jtag_TDI 		(jtag_jtag_TDI),
-       .jtag_jtag_TDO 		(jtag_jtag_TDO),
-       .jtag_srst_n             (jtag_jtag_TRSTn),
-       .uart_txd 		(uart_txd),
-       .uart_rxd 		(uart_rxd),
-       .uart_rtsn 		(uart_rtsn),
-       .uart_ctsn 		(uart_ctsn),
+  ChipTop ChipTop_inst ( 
+    .sys_clock_p    (sys_clk_i),
+    .sys_clock_n    (!sys_clk_i),
+     .jtag_jtag_TCK     (jtag_jtag_TCK),
+     .jtag_jtag_TMS (jtag_jtag_TMS),
+     .jtag_jtag_TDI (jtag_jtag_TDI),
+     .jtag_jtag_TDO (jtag_jtag_TDO),
+     .jtag_srst_n   (jtag_jtag_TRSTn),
+     .uart_txd      (uart_txd),
+     .uart_rxd      (uart_rxd),
+     .uart_rtsn     (uart_rtsn),
+     .uart_ctsn     (uart_ctsn),
        //
-       .sdio_sdio_clk 		(sdio_sdio_clk),
-       .sdio_sdio_cmd 		(sdio_sdio_cmd),
-       .sdio_sdio_dat_0 	(sdio_sdio_dat_0),
-       .sdio_sdio_dat_1 	(sdio_sdio_dat_1),
-       .sdio_sdio_dat_2 	(sdio_sdio_dat_2),
-       .sdio_sdio_dat_3 	(sdio_sdio_dat_3),
+       .sdio_sdio_clk     (sdio_sdio_clk),
+       .sdio_sdio_cmd     (sdio_sdio_cmd),
+       .sdio_sdio_dat_0   (sdio_sdio_dat_0),
+       .sdio_sdio_dat_1   (sdio_sdio_dat_1),
+       .sdio_sdio_dat_2   (sdio_sdio_dat_2),
+       .sdio_sdio_dat_3   (sdio_sdio_dat_3),
        // DDR3
        .ddr_ddr3_dq              (ddr3_dq_fpga),
        .ddr_ddr3_dqs_n           (ddr3_dqs_n_fpga),
@@ -662,7 +661,7 @@ module cep_tb;
        .ddr_ddr3_dm              (ddr3_dm_fpga),
        .ddr_ddr3_odt             (ddr3_odt_fpga),
        
-       .led_0 			(led[0]),
+       .led_0       (led[0]),
        .led_1       (led[1]),
        .led_2       (led[2]),
        .led_3       (led[3]),
@@ -671,7 +670,7 @@ module cep_tb;
        .led_6       (led[6]),
        .led_7       (led[7]),
 
-       .reset 			(sys_rst || chipReset)
+       .reset       (sys_rst || chipReset)
        );
 
    /*
@@ -728,15 +727,15 @@ module cep_tb;
    int save_memory_used = 0;
    task putback_memory_used;
       begin
-	 `logI("Putback Memory Used=%d from %d",save_memory_used,mem_rnk[0].gen_mem[0].ddr3.memory_used);
-	 mem_rnk[0].gen_mem[0].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[1].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[2].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[3].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[4].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[5].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[6].ddr3.memory_used = save_memory_used;
-	 mem_rnk[0].gen_mem[7].ddr3.memory_used = save_memory_used;	 
+   `logI("Putback Memory Used=%d from %d",save_memory_used,mem_rnk[0].gen_mem[0].ddr3.memory_used);
+   mem_rnk[0].gen_mem[0].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[1].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[2].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[3].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[4].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[5].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[6].ddr3.memory_used = save_memory_used;
+   mem_rnk[0].gen_mem[7].ddr3.memory_used = save_memory_used;  
       end
    endtask
    always @(posedge `DVT_FLAG[`DVTF_PROGRAM_LOADED]) begin
@@ -757,43 +756,43 @@ module cep_tb;
    // always at the command line
 //   `define den1024Mb
    wire [CS_WIDTH*NUM_COMP-1:0] ddr3MemWr;
-   reg [CS_WIDTH*NUM_COMP-1:0] 	dq_in_valid_del=0;
+   reg [CS_WIDTH*NUM_COMP-1:0]  dq_in_valid_del=0;
    //
   genvar r,i;
   generate
     for (r = 0; r < CS_WIDTH; r = r + 1) begin: mem_rnk
       for (i = 0; i < NUM_COMP; i = i + 1) begin: gen_mem
-	 defparam ddr3.DEBUG=0;
-	 defparam ddr3.check_strict_mrbits=0;
-	 defparam ddr3.check_strict_timing=0;
-	 defparam ddr3.MEM_BITS= 16; // some how the new RISC (v2.6) has a lot more writes (14->16)	 	 
-	 defparam ddr3.TWLS = 2; // to remove the WARNING violation which can't be turned off from outside
-	 defparam ddr3.TWLH = 2; // to remove the WARNING violation   
-	 // for RHEL7: access beyond 1G ????
-	 defparam ddr3.STOP_ON_ERROR = 0;
-	 //
-	 // Write Monitor
-	 //
-	 always @(negedge ddr3.ck) begin	 
-	    dq_in_valid_del[(r*CS_WIDTH)+i] = ddr3.dq_in_valid; // delay version
-	 end
-	 assign ddr3MemWr[(r*CS_WIDTH)+i] = enableWrTrace && ddr3.ck && dq_in_valid_del[(r*CS_WIDTH)+i] && ((ddr3.burst_cntr % ddr3.BL_MIN) == 0);
-	 always @(posedge ddr3MemWr[(r*CS_WIDTH)+i]) begin
-	    if (ddr3MemWr[(r*CS_WIDTH)+i]) begin
-	       `logI("MemWr: @0x%x (%x/%x/%x) =0x%x",{ddr3.memory_write.bank, ddr3.memory_write.row, ddr3.memory_write.col}*8,
-		     ddr3.memory_write.bank,ddr3.memory_write.row,ddr3.memory_write.col,ddr3.memory_write.data);
-	    end
-	 end
-	 //
-	 //
-	 //
-	 always @(posedge `DVT_FLAG[`DVTF_SET_DEFAULTX_BIT]) begin
-	    #1;
-	    ddr3.defx = `DVT_FLAG[`DVTF_PAT_LO];
-	    `logI("== Setting default pattern for unused main memory to %d==",ddr3.defx);
-	    `DVT_FLAG[`DVTF_SET_DEFAULTX_BIT] = 0;
-	 end
-	 //
+   defparam ddr3.DEBUG=0;
+   defparam ddr3.check_strict_mrbits=0;
+   defparam ddr3.check_strict_timing=0;
+   defparam ddr3.MEM_BITS= 16; // some how the new RISC (v2.6) has a lot more writes (14->16)    
+   defparam ddr3.TWLS = 2; // to remove the WARNING violation which can't be turned off from outside
+   defparam ddr3.TWLH = 2; // to remove the WARNING violation   
+   // for RHEL7: access beyond 1G ????
+   defparam ddr3.STOP_ON_ERROR = 0;
+   //
+   // Write Monitor
+   //
+   always @(negedge ddr3.ck) begin   
+      dq_in_valid_del[(r*CS_WIDTH)+i] = ddr3.dq_in_valid; // delay version
+   end
+   assign ddr3MemWr[(r*CS_WIDTH)+i] = enableWrTrace && ddr3.ck && dq_in_valid_del[(r*CS_WIDTH)+i] && ((ddr3.burst_cntr % ddr3.BL_MIN) == 0);
+   always @(posedge ddr3MemWr[(r*CS_WIDTH)+i]) begin
+      if (ddr3MemWr[(r*CS_WIDTH)+i]) begin
+         `logI("MemWr: @0x%x (%x/%x/%x) =0x%x",{ddr3.memory_write.bank, ddr3.memory_write.row, ddr3.memory_write.col}*8,
+         ddr3.memory_write.bank,ddr3.memory_write.row,ddr3.memory_write.col,ddr3.memory_write.data);
+      end
+   end
+   //
+   //
+   //
+   always @(posedge `DVT_FLAG[`DVTF_SET_DEFAULTX_BIT]) begin
+      #1;
+      ddr3.defx = `DVT_FLAG[`DVTF_PAT_LO];
+      `logI("== Setting default pattern for unused main memory to %d==",ddr3.defx);
+      `DVT_FLAG[`DVTF_SET_DEFAULTX_BIT] = 0;
+   end
+   //
          ddr3 ddr3
           (
            .rst_n   (ddr3_reset_n),
@@ -811,8 +810,8 @@ module cep_tb;
            .dqs     (ddr3_dqs_p_sdram[i]),
            .dqs_n   (ddr3_dqs_n_sdram[i]),
            .tdqs_n  (),
-//	   .enableRdTrace(enableRdTrace && calib_done),
-//	   .enableWrTrace(enableWrTrace && calib_done),	   
+//     .enableRdTrace(enableRdTrace && calib_done),
+//     .enableWrTrace(enableWrTrace && calib_done),    
            .odt     (ddr3_odt_sdram[((i*MEMORY_WIDTH)/72)+(1*r)])
            );
       end
@@ -832,39 +831,39 @@ module cep_tb;
       reg [BA_BITS-1:0] bank;
       reg [ROW_BITS-1:0] row;
       reg [COL_BITS-1:0] col;
-      reg [63:0] 	 mask;
+      reg [63:0]   mask;
       
       begin
-	 if (calib_done == 0) @(posedge calib_done); // wait as soon as it is done
-	 //
-	 // put in the cache (little endian on 4-bytes (32-bits)
-	 //
-	 mask = 'hFF << (a[5:3]*8);
-	 cache[7] = (cache[7] & ~mask) | (d[63:56] << (a[5:3]*8));
-	 cache[6] = (cache[6] & ~mask) | (d[55:48] << (a[5:3]*8));
-	 cache[5] = (cache[5] & ~mask) | (d[47:40] << (a[5:3]*8));
-	 cache[4] = (cache[4] & ~mask) | (d[39:32] << (a[5:3]*8));
-	 //
-	 cache[3] = (cache[3] & ~mask) | (d[31:24] << (a[5:3]*8));
-	 cache[2] = (cache[2] & ~mask) | (d[23:16] << (a[5:3]*8));
-	 cache[1] = (cache[1] & ~mask) | (d[15:8]  << (a[5:3]*8));
-	 cache[0] = (cache[0] & ~mask) | (d[7:0]   << (a[5:3]*8));
-	 //
-	 // flush when got the whole cahce	 
-	 //
-	 if (a[5:3] == 3'h7) begin // end of cache line
-	    `logI("== Backdooring adr=0x%x data=0x%x",a,d);
-	    {bank,row,col} = {a[29:6],3'b0}; // cache line
-	    //
-	    mem_rnk[0].gen_mem[0].ddr3.memory_write(bank,row,col,cache[0]);   
-	    mem_rnk[0].gen_mem[1].ddr3.memory_write(bank,row,col,cache[1]);
-	    mem_rnk[0].gen_mem[2].ddr3.memory_write(bank,row,col,cache[2]);
-	    mem_rnk[0].gen_mem[3].ddr3.memory_write(bank,row,col,cache[3]);
-	    mem_rnk[0].gen_mem[4].ddr3.memory_write(bank,row,col,cache[4]);
-	    mem_rnk[0].gen_mem[5].ddr3.memory_write(bank,row,col,cache[5]);
-	    mem_rnk[0].gen_mem[6].ddr3.memory_write(bank,row,col,cache[6]);
-	    mem_rnk[0].gen_mem[7].ddr3.memory_write(bank,row,col,cache[7]);
-	 end // if (a[5:3] == 3'h7)
+   if (calib_done == 0) @(posedge calib_done); // wait as soon as it is done
+   //
+   // put in the cache (little endian on 4-bytes (32-bits)
+   //
+   mask = 'hFF << (a[5:3]*8);
+   cache[7] = (cache[7] & ~mask) | (d[63:56] << (a[5:3]*8));
+   cache[6] = (cache[6] & ~mask) | (d[55:48] << (a[5:3]*8));
+   cache[5] = (cache[5] & ~mask) | (d[47:40] << (a[5:3]*8));
+   cache[4] = (cache[4] & ~mask) | (d[39:32] << (a[5:3]*8));
+   //
+   cache[3] = (cache[3] & ~mask) | (d[31:24] << (a[5:3]*8));
+   cache[2] = (cache[2] & ~mask) | (d[23:16] << (a[5:3]*8));
+   cache[1] = (cache[1] & ~mask) | (d[15:8]  << (a[5:3]*8));
+   cache[0] = (cache[0] & ~mask) | (d[7:0]   << (a[5:3]*8));
+   //
+   // flush when got the whole cahce   
+   //
+   if (a[5:3] == 3'h7) begin // end of cache line
+      `logI("== Backdooring adr=0x%x data=0x%x",a,d);
+      {bank,row,col} = {a[29:6],3'b0}; // cache line
+      //
+      mem_rnk[0].gen_mem[0].ddr3.memory_write(bank,row,col,cache[0]);   
+      mem_rnk[0].gen_mem[1].ddr3.memory_write(bank,row,col,cache[1]);
+      mem_rnk[0].gen_mem[2].ddr3.memory_write(bank,row,col,cache[2]);
+      mem_rnk[0].gen_mem[3].ddr3.memory_write(bank,row,col,cache[3]);
+      mem_rnk[0].gen_mem[4].ddr3.memory_write(bank,row,col,cache[4]);
+      mem_rnk[0].gen_mem[5].ddr3.memory_write(bank,row,col,cache[5]);
+      mem_rnk[0].gen_mem[6].ddr3.memory_write(bank,row,col,cache[6]);
+      mem_rnk[0].gen_mem[7].ddr3.memory_write(bank,row,col,cache[7]);
+   end // if (a[5:3] == 3'h7)
       end
    endtask // WRITE32_64_TASK
 
@@ -874,31 +873,31 @@ module cep_tb;
       reg [BA_BITS-1:0] bank;
       reg [ROW_BITS-1:0] row;
       reg [COL_BITS-1:0] col;
-      reg [63:0] 	 mask;      
+      reg [63:0]   mask;      
       begin
-	 //
-	 {bank,row,col} = {a[29:6],3'b0}; // cache line
-	 //
-	 mem_rnk[0].gen_mem[0].ddr3.memory_read(bank,row,col,cache[0]);   
-	 mem_rnk[0].gen_mem[1].ddr3.memory_read(bank,row,col,cache[1]);
-	 mem_rnk[0].gen_mem[2].ddr3.memory_read(bank,row,col,cache[2]);
-	 mem_rnk[0].gen_mem[3].ddr3.memory_read(bank,row,col,cache[3]);
-	 mem_rnk[0].gen_mem[4].ddr3.memory_read(bank,row,col,cache[4]);
-	 mem_rnk[0].gen_mem[5].ddr3.memory_read(bank,row,col,cache[5]);
-	 mem_rnk[0].gen_mem[6].ddr3.memory_read(bank,row,col,cache[6]);
-	 mem_rnk[0].gen_mem[7].ddr3.memory_read(bank,row,col,cache[7]);
-	 // shift
-	 d[63:56] = (cache[7] >> (a[5:3]*8));
-	 d[55:48] = (cache[6] >> (a[5:3]*8));
-	 d[47:40] = (cache[5] >> (a[5:3]*8));
-	 d[39:32] = (cache[4] >> (a[5:3]*8));
-	          
-	 d[31:24] = (cache[3] >> (a[5:3]*8));
-	 d[23:16] = (cache[2] >> (a[5:3]*8));
-	 d[15:8]  = (cache[1] >> (a[5:3]*8));
-	 d[7:0]   = (cache[0] >> (a[5:3]*8));
-	 //
-	 //`logI("== Backdooring adr=0x%x data=0x%x",a,d);
+   //
+   {bank,row,col} = {a[29:6],3'b0}; // cache line
+   //
+   mem_rnk[0].gen_mem[0].ddr3.memory_read(bank,row,col,cache[0]);   
+   mem_rnk[0].gen_mem[1].ddr3.memory_read(bank,row,col,cache[1]);
+   mem_rnk[0].gen_mem[2].ddr3.memory_read(bank,row,col,cache[2]);
+   mem_rnk[0].gen_mem[3].ddr3.memory_read(bank,row,col,cache[3]);
+   mem_rnk[0].gen_mem[4].ddr3.memory_read(bank,row,col,cache[4]);
+   mem_rnk[0].gen_mem[5].ddr3.memory_read(bank,row,col,cache[5]);
+   mem_rnk[0].gen_mem[6].ddr3.memory_read(bank,row,col,cache[6]);
+   mem_rnk[0].gen_mem[7].ddr3.memory_read(bank,row,col,cache[7]);
+   // shift
+   d[63:56] = (cache[7] >> (a[5:3]*8));
+   d[55:48] = (cache[6] >> (a[5:3]*8));
+   d[47:40] = (cache[5] >> (a[5:3]*8));
+   d[39:32] = (cache[4] >> (a[5:3]*8));
+            
+   d[31:24] = (cache[3] >> (a[5:3]*8));
+   d[23:16] = (cache[2] >> (a[5:3]*8));
+   d[15:8]  = (cache[1] >> (a[5:3]*8));
+   d[7:0]   = (cache[0] >> (a[5:3]*8));
+   //
+   //`logI("== Backdooring adr=0x%x data=0x%x",a,d);
       end
    endtask // for
 
@@ -909,44 +908,44 @@ module cep_tb;
       reg [BA_BITS-1:0] bank;
       reg [ROW_BITS-1:0] row;
       reg [COL_BITS-1:0] col;
-      reg [63:0] 	 d64;
+      reg [63:0]   d64;
       integer i;
       
       begin
-	 //
-	 {bank,row,col} = {a[29:6],3'b0}; // cache line
-	 //
-	 mem_rnk[0].gen_mem[0].ddr3.memory_read(bank,row,col,cache[0]);   
-	 mem_rnk[0].gen_mem[1].ddr3.memory_read(bank,row,col,cache[1]);
-	 mem_rnk[0].gen_mem[2].ddr3.memory_read(bank,row,col,cache[2]);
-	 mem_rnk[0].gen_mem[3].ddr3.memory_read(bank,row,col,cache[3]);
-	 mem_rnk[0].gen_mem[4].ddr3.memory_read(bank,row,col,cache[4]);
-	 mem_rnk[0].gen_mem[5].ddr3.memory_read(bank,row,col,cache[5]);
-	 mem_rnk[0].gen_mem[6].ddr3.memory_read(bank,row,col,cache[6]);
-	 mem_rnk[0].gen_mem[7].ddr3.memory_read(bank,row,col,cache[7]);
-	 //
-	 mem_rnk[0].gen_mem[0].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[1].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[2].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[3].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[4].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[5].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[6].ddr3.memory_write(bank,row,col,0);
-	 mem_rnk[0].gen_mem[7].ddr3.memory_write(bank,row,col,0);	 
-	 // fill the buffer
-	 for (i=0;i<8;i=i+1) begin
-	    // shift
-	    d64[63:56] = (cache[0] >> (i*8));
-	    d64[55:48] = (cache[1] >> (i*8));
-	    d64[47:40] = (cache[2] >> (i*8));
-	    d64[39:32] = (cache[3] >> (i*8));
-	    //
-	    d64[31:24] = (cache[4] >> (i*8));
-	    d64[23:16] = (cache[5] >> (i*8));
-	    d64[15:8]  = (cache[6] >> (i*8));
-	    d64[7:0]   = (cache[7] >> (i*8));
-	    pbuf = (pbuf << 64) | d64;
-	 end
+   //
+   {bank,row,col} = {a[29:6],3'b0}; // cache line
+   //
+   mem_rnk[0].gen_mem[0].ddr3.memory_read(bank,row,col,cache[0]);   
+   mem_rnk[0].gen_mem[1].ddr3.memory_read(bank,row,col,cache[1]);
+   mem_rnk[0].gen_mem[2].ddr3.memory_read(bank,row,col,cache[2]);
+   mem_rnk[0].gen_mem[3].ddr3.memory_read(bank,row,col,cache[3]);
+   mem_rnk[0].gen_mem[4].ddr3.memory_read(bank,row,col,cache[4]);
+   mem_rnk[0].gen_mem[5].ddr3.memory_read(bank,row,col,cache[5]);
+   mem_rnk[0].gen_mem[6].ddr3.memory_read(bank,row,col,cache[6]);
+   mem_rnk[0].gen_mem[7].ddr3.memory_read(bank,row,col,cache[7]);
+   //
+   mem_rnk[0].gen_mem[0].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[1].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[2].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[3].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[4].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[5].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[6].ddr3.memory_write(bank,row,col,0);
+   mem_rnk[0].gen_mem[7].ddr3.memory_write(bank,row,col,0);  
+   // fill the buffer
+   for (i=0;i<8;i=i+1) begin
+      // shift
+      d64[63:56] = (cache[0] >> (i*8));
+      d64[55:48] = (cache[1] >> (i*8));
+      d64[47:40] = (cache[2] >> (i*8));
+      d64[39:32] = (cache[3] >> (i*8));
+      //
+      d64[31:24] = (cache[4] >> (i*8));
+      d64[23:16] = (cache[5] >> (i*8));
+      d64[15:8]  = (cache[6] >> (i*8));
+      d64[7:0]   = (cache[7] >> (i*8));
+      pbuf = (pbuf << 64) | d64;
+   end
       end
    endtask // for
    
@@ -972,15 +971,15 @@ module cep_tb;
       `logI("**** passMask=0x%x *****\n",passMask);
    end
    generate
-      for (c=0;c<4;c=c+1) begin : driverX	 
-	 cep_driver #(.MY_SLOT_ID(0),.MY_LOCAL_ID(c))
-	 driver(
-		.clk 		(sys_clk_i), // clk100),	 
-		.reset 	        (sys_rst),
-		.enableMe       (enableMask[c]),
-		.__simTime	()
-		);
-	 assign passMask[c] = driver.PassStatus;
+      for (c=0;c<4;c=c+1) begin : driverX  
+   cep_driver #(.MY_SLOT_ID(0),.MY_LOCAL_ID(c))
+   driver(
+    .clk    (sys_clk_i), // clk100),   
+    .reset          (sys_rst),
+    .enableMe       (enableMask[c]),
+    .__simTime  ()
+    );
+   assign passMask[c] = driver.PassStatus;
       end
    endgenerate
 
@@ -1001,12 +1000,12 @@ module cep_tb;
    // OpenOCD interface to drive JTAG via DPI
    // =============================   
    //
-   reg 	      enable_jtag=0;
-   reg 	      quit_jtag=0;  
-   reg 	      enableDel = 0;
-   int 	      junk;
-   int 	      jtag_encode;
-   wire       dpi_jtag_tdo = fpga.topDesign_auto_jtag_debug_source_out_TDO_data; // jtag_jtag_TDO;
+   reg        enable_jtag=0;
+   reg        quit_jtag=0;  
+   reg        enableDel = 0;
+   int        junk;
+   int        jtag_encode;
+   wire       dpi_jtag_tdo = `JTAG_TDO; // jtag_jtag_TDO;
    always @(posedge `DVT_FLAG[`DVTF_ENABLE_REMOTE_BITBANG_BIT]) begin
       enable_jtag=1;
       @(negedge `DVT_FLAG[`DVTF_ENABLE_REMOTE_BITBANG_BIT]);
@@ -1019,7 +1018,7 @@ module cep_tb;
       junk = jtag_quit();
    end
    //
-   reg [15:0] 	clkCnt;
+   reg [15:0]   clkCnt;
    initial begin
       junk = jtag_init();
       jtag_TRSTn = 0;
@@ -1031,20 +1030,20 @@ module cep_tb;
 
    always @(posedge sys_clk_i) begin
       if (sys_rst) begin
-	 enableDel <= 0;
-	 clkCnt <= 5;
+   enableDel <= 0;
+   clkCnt <= 5;
       end else begin
-	 enableDel <= enable_jtag;
+   enableDel <= enable_jtag;
          if (enableDel) begin
             clkCnt <= clkCnt - 1;
-	    if (clkCnt == 0) begin
-	       clkCnt <= 5;
+      if (clkCnt == 0) begin
+         clkCnt <= 5;
                if (!quit_jtag) begin
-		  junk = jtag_cmd(dpi_jtag_tdo, // see bug
-				  jtag_encode);
-		  {jtag_TRSTn,jtag_TCK,jtag_TMS,jtag_TDI} = jtag_encode ^ 'h8; // flip the TRSN
+      junk = jtag_cmd(dpi_jtag_tdo, // see bug
+          jtag_encode);
+      {jtag_TRSTn,jtag_TCK,jtag_TMS,jtag_TDI} = jtag_encode ^ 'h8; // flip the TRSN
                end
-	    end // if (clkCnt == 0)
+      end // if (clkCnt == 0)
          end // if (enable && init_done_sticky)
       end // else: !if(reset || r_reset)
    end // always @ (posedge clock)
@@ -1055,17 +1054,17 @@ module cep_tb;
    //
    initial begin
       // no secure mode
-      @(posedge fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n);
-      @(posedge fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk);
-      fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg = 1;
+      @(posedge `MODEXP_RESET_N);
+      @(posedge `MODEXP_CLK);
+      `MODEXP_EXP_MODE_REG = 1;
    end
    //
    //
    //
    reg [`DVTF_FIR_CAPTURE_EN_BIT:`DVTF_AES_CAPTURE_EN_BIT] c2c_capture_enable=0;
-   reg 							   srot_start_capture = 0;
-   reg 							   srot_stop_capture = 0;
-   reg 							   srot_capture_done = 0;   
+   reg                 srot_start_capture = 0;
+   reg                 srot_stop_capture = 0;
+   reg                 srot_capture_done = 0;   
    
    //
    `include "aes_capture.incl"
@@ -1087,45 +1086,45 @@ module cep_tb;
 `ifdef VIRTUAL_MODE
 ptw_monitor ptwC0R0
   (
-   .clk					(`CORE0_PATH.ptw.clock		    ),
+   .clk         (`CORE0_PATH.ptw.clock        ),
    .trace_valid                         (`CORE0_PATH.core.csr_io_trace_0_valid   ),
    .pc_valid                            (`CORE0_PATH.core.coreMonitorBundle_valid),
    .pc                                  (`CORE0_PATH.core.coreMonitorBundle_pc   ),
-   .io_requestor_x_req_ready		(`CORE0_PATH.ptw.io_requestor_0_req_ready	),
-   .io_requestor_x_req_valid		(`CORE0_PATH.ptw.io_requestor_0_req_valid		),
-   .io_requestor_x_req_bits_bits_addr	(`CORE0_PATH.ptw.io_requestor_0_req_bits_bits_addr	),
-   .io_requestor_x_resp_valid		(`CORE0_PATH.ptw.io_requestor_0_resp_valid		),
-   .io_requestor_x_resp_bits_ae		(`CORE0_PATH.ptw.io_requestor_0_resp_bits_ae	),
-   .io_requestor_x_resp_bits_pte_ppn	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_ppn	),
-   .io_requestor_x_resp_bits_pte_d	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_d	),
-   .io_requestor_x_resp_bits_pte_a	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_a	),
-   .io_requestor_x_resp_bits_pte_g	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_g	),
-   .io_requestor_x_resp_bits_pte_u	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_u	),
-   .io_requestor_x_resp_bits_pte_x	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_x	),
-   .io_requestor_x_resp_bits_pte_w	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_w	),
-   .io_requestor_x_resp_bits_pte_r	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_r	),
-   .io_requestor_x_resp_bits_pte_v	(`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_v	)
+   .io_requestor_x_req_ready    (`CORE0_PATH.ptw.io_requestor_0_req_ready ),
+   .io_requestor_x_req_valid    (`CORE0_PATH.ptw.io_requestor_0_req_valid   ),
+   .io_requestor_x_req_bits_bits_addr (`CORE0_PATH.ptw.io_requestor_0_req_bits_bits_addr  ),
+   .io_requestor_x_resp_valid   (`CORE0_PATH.ptw.io_requestor_0_resp_valid    ),
+   .io_requestor_x_resp_bits_ae   (`CORE0_PATH.ptw.io_requestor_0_resp_bits_ae  ),
+   .io_requestor_x_resp_bits_pte_ppn  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_ppn ),
+   .io_requestor_x_resp_bits_pte_d  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_d ),
+   .io_requestor_x_resp_bits_pte_a  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_a ),
+   .io_requestor_x_resp_bits_pte_g  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_g ),
+   .io_requestor_x_resp_bits_pte_u  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_u ),
+   .io_requestor_x_resp_bits_pte_x  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_x ),
+   .io_requestor_x_resp_bits_pte_w  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_w ),
+   .io_requestor_x_resp_bits_pte_r  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_r ),
+   .io_requestor_x_resp_bits_pte_v  (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_v )
    );
 ptw_monitor ptwC0R1
   (
-   .clk					(`CORE0_PATH.ptw.clock		),
+   .clk         (`CORE0_PATH.ptw.clock    ),
    .trace_valid                         (1'b0),
    .pc_valid                            (1'b0),
    .pc                                  (64'h0),
-   .io_requestor_x_req_ready		(`CORE0_PATH.ptw.io_requestor_1_req_ready	),
-   .io_requestor_x_req_valid		(`CORE0_PATH.ptw.io_requestor_1_req_valid		),
-   .io_requestor_x_req_bits_bits_addr	(`CORE0_PATH.ptw.io_requestor_1_req_bits_bits_addr	),
-   .io_requestor_x_resp_valid		(`CORE0_PATH.ptw.io_requestor_1_resp_valid		),
-   .io_requestor_x_resp_bits_ae		(`CORE0_PATH.ptw.io_requestor_1_resp_bits_ae	),
-   .io_requestor_x_resp_bits_pte_ppn	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_ppn	),
-   .io_requestor_x_resp_bits_pte_d	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_d	),
-   .io_requestor_x_resp_bits_pte_a	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_a	),
-   .io_requestor_x_resp_bits_pte_g	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_g	),
-   .io_requestor_x_resp_bits_pte_u	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_u	),
-   .io_requestor_x_resp_bits_pte_x	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_x	),
-   .io_requestor_x_resp_bits_pte_w	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_w	),
-   .io_requestor_x_resp_bits_pte_r	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_r	),
-   .io_requestor_x_resp_bits_pte_v	(`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_v	)
+   .io_requestor_x_req_ready    (`CORE0_PATH.ptw.io_requestor_1_req_ready ),
+   .io_requestor_x_req_valid    (`CORE0_PATH.ptw.io_requestor_1_req_valid   ),
+   .io_requestor_x_req_bits_bits_addr (`CORE0_PATH.ptw.io_requestor_1_req_bits_bits_addr  ),
+   .io_requestor_x_resp_valid   (`CORE0_PATH.ptw.io_requestor_1_resp_valid    ),
+   .io_requestor_x_resp_bits_ae   (`CORE0_PATH.ptw.io_requestor_1_resp_bits_ae  ),
+   .io_requestor_x_resp_bits_pte_ppn  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_ppn ),
+   .io_requestor_x_resp_bits_pte_d  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_d ),
+   .io_requestor_x_resp_bits_pte_a  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_a ),
+   .io_requestor_x_resp_bits_pte_g  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_g ),
+   .io_requestor_x_resp_bits_pte_u  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_u ),
+   .io_requestor_x_resp_bits_pte_x  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_x ),
+   .io_requestor_x_resp_bits_pte_w  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_w ),
+   .io_requestor_x_resp_bits_pte_r  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_r ),
+   .io_requestor_x_resp_bits_pte_v  (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_v )
    );
 `endif
    
