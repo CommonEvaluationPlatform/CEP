@@ -164,7 +164,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
                                     3'h0);
   assign slave_d_param          = slave_tl_d2h.d_param;
   assign slave_d_denied         = slave_tl_d2h.d_error;
-  assign slave_d_data           = slave.tl_d2h.d_data;
+  assign slave_d_data           = slave_tl_d2h.d_data;
   assign slave_d_corrupt        = slave_tl_d2h.d_error;
   assign slave_d_valid          = slave_tl_d2h.d_valid;
   assign slave_a_ready          = slave_tl_d2h.a_ready;
