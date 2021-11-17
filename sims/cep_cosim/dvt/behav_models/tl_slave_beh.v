@@ -2,9 +2,10 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      tl_slave_beh.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    Tilelink Slave Bus Functional Model for the
+//                 CEP Co-Simulation Environment
 // Notes:          
 //
 //************************************************************************

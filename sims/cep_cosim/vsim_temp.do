@@ -7,4 +7,5 @@ vlog -sv chipyard.TestHarness.CEPASICRocketConfig.top.mems.v
 vlog -sv chipyard.TestHarness.CEPASICRocketConfig.top.v
 vopt +acc work.ChipTop -o debugver
 vsim debugver -cpppath "/usr/bin/g++"
+do ../../vsim_wave_temp.do
 run 1ns

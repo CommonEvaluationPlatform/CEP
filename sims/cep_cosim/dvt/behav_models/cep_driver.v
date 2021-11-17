@@ -2,9 +2,13 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_driver.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    Provides the BFM_MODE connections between
+//                 the Tilelink masters and DPI mailboxes
+//
+//                 Also provides some monitoring functions when
+//                 the RISCV_TESTS are enabled (in BARE_MODE)
 // Notes:          
 //
 //************************************************************************
@@ -753,6 +757,7 @@ endtask // READ32_64_TASK
    //
    reg 	PassStatus=0;
    reg 	FailStatus=0;   
+
 `ifdef RISCV_TESTS
    wire pcPass, pcFail;
    reg 	checkToHost=0;

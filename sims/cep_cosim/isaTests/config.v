@@ -1,9 +1,9 @@
 //************************************************************************
 // Copyright 2021 Massachusetts Institute of Technology
 //
-// File Name:      
+// File Name:      config.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    Testbench Defines for isaTests category
 // Notes:          
 //
 //************************************************************************
