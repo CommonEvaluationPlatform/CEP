@@ -14,9 +14,9 @@
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"
 `include "v2c_top.incl"
-//
 `include "config.v"
 
+// JTAG related DPI imports
 import "DPI-C" function int jtag_getSocketPortId();
 import "DPI-C" function int jtag_cmd(input int tdo_in, output int encode);   
 import "DPI-C" function int jtag_init();
@@ -25,15 +25,6 @@ import "DPI-C" function int jtag_quit();
 `timescale 1ps/100fs
 
 module cep_tb;
-
-
-   //***************************************************************************
-   // Traffic Gen related parameters
-   //***************************************************************************
-   parameter SIMULATION            = "TRUE";
-   parameter BEGIN_ADDRESS         = 32'h00000000;
-   parameter END_ADDRESS           = 32'h00000fff;
-   parameter PRBS_EADDR_MASK_POS   = 32'hff000000;
 
    //***************************************************************************
    // The following parameters refer to width of various ports
@@ -80,7 +71,6 @@ module cep_tb;
    // The following parameters are multiplier and divisor factors for PLLE2.
    // Based on the selected design frequency these parameters vary.
    //***************************************************************************
-   parameter CLKIN_PERIOD          = 5000;
                                      // Input Clock Period
 
 
@@ -173,361 +163,155 @@ module cep_tb;
   localparam ECC_TEST         = "OFF" ;
   localparam ERR_INSERT = (ECC_TEST == "ON") ? "OFF" : ECC ;
   
+  parameter   CLKIN_PERIOD          = 5000;
+  localparam  RESET_PERIOD          = 200000; // in ps
+   
 
-  localparam real REFCLK_PERIOD = (1000000.0/(2*REFCLK_FREQ));
-  localparam RESET_PERIOD = 200000; //in pSec  
-  localparam real SYSCLK_PERIOD = tCK;
-    
-    
-
-  //**************************************************************************//
+  //--------------------------------------------------------------------------------------
   // Wire Declarations
-  //**************************************************************************//
-  reg                                sys_rst_n;
-  wire                               sys_rst;
+  //--------------------------------------------------------------------------------------
+  reg                 sys_rst_n;
+  reg                 sys_clk_i;  
+    
+  wire                jtag_TCK;
+  wire                jtag_TMS;
+  wire                jtag_TDI;
+  wire                jtag_TDO;   
+
+  wire                uart_rxd; pullup (weak1) (uart_rxd);
+  wire                uart_txd; 
+
+  wire                sdio_sdio_clk; 
+  wire                sdio_sdio_cmd;    
+  wire                sdio_sdio_dat_0; pullup (weak1) (sdio_sdio_dat_0);
+  wire                sdio_sdio_dat_1; pullup (weak1) (sdio_sdio_dat_1);
+  wire                sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
+  wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
+  //--------------------------------------------------------------------------------------
 
 
-  reg                     sys_clk_i;
 
-  reg clk_ref_i;
-
-  
-  wire                               ddr3_reset_n;
-  wire [DQ_WIDTH-1:0]                ddr3_dq_fpga;
-  wire [DQS_WIDTH-1:0]               ddr3_dqs_p_fpga;
-  wire [DQS_WIDTH-1:0]               ddr3_dqs_n_fpga;
-  wire [ROW_WIDTH-1:0]               ddr3_addr_fpga;
-  wire [3-1:0]              ddr3_ba_fpga;
-  wire                               ddr3_ras_n_fpga;
-  wire                               ddr3_cas_n_fpga;
-  wire                               ddr3_we_n_fpga;
-  wire [1-1:0]               ddr3_cke_fpga;
-  wire [1-1:0]                ddr3_ck_p_fpga;
-  wire [1-1:0]                ddr3_ck_n_fpga;
-    
-  
-  wire                               init_calib_complete;
-  wire                               tg_compare_error;
-  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_fpga;
-    
-  wire [DM_WIDTH-1:0]                ddr3_dm_fpga;
-    
-  wire [ODT_WIDTH-1:0]               ddr3_odt_fpga;
-    
-  
-  reg [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram_tmp;
-    
-  reg [DM_WIDTH-1:0]                 ddr3_dm_sdram_tmp;
-    
-  reg [ODT_WIDTH-1:0]                ddr3_odt_sdram_tmp;
-    
-
-  
-  wire [DQ_WIDTH-1:0]                ddr3_dq_sdram;
-  reg [ROW_WIDTH-1:0]                ddr3_addr_sdram [0:1];
-  reg [3-1:0]               ddr3_ba_sdram [0:1];
-  reg                                ddr3_ras_n_sdram;
-  reg                                ddr3_cas_n_sdram;
-  reg                                ddr3_we_n_sdram;
-  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram;
-  wire [ODT_WIDTH-1:0]               ddr3_odt_sdram;
-  reg [1-1:0]                ddr3_cke_sdram;
-  wire [DM_WIDTH-1:0]                ddr3_dm_sdram;
-  wire [DQS_WIDTH-1:0]               ddr3_dqs_p_sdram;
-  wire [DQS_WIDTH-1:0]               ddr3_dqs_n_sdram;
-  reg [1-1:0]                 ddr3_ck_p_sdram;
-  reg [1-1:0]                 ddr3_ck_n_sdram;
-  
-    
-
-//**************************************************************************//
-
-  //**************************************************************************//
+  //--------------------------------------------------------------------------------------
   // Reset Generation
-  //**************************************************************************//
+  //--------------------------------------------------------------------------------------
   initial begin
     sys_rst_n = 1'b0;
+
     #RESET_PERIOD
-      sys_rst_n = 1'b1;
+
+    sys_rst_n = 1'b1;
   end
-   //
-   reg chipReset = 0;
-   
-    always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) begin
-      wait (`PBUS_RESET==0);
-      @(negedge `PBUS_CLOCK);
-      #2000;
-      `logI("Asserting pbus_Reset");
-      force `PBUS_RESET = 1;
-      repeat (10) @(negedge `PBUS_CLOCK);
-      #2000;
-      release `PBUS_RESET;      
-      `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT] = 0;
-   end
+  //--------------------------------------------------------------------------------------
 
-    always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) begin
-      `logI("Forcing topMod_debug_ndreset");
-       force `DEBUG_NDRESET = 1;
-       repeat (10) @(negedge `PBUS_CLOCK);
-       release `DEBUG_NDRESET;
-       `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT] = 0;
-   end
+  
 
-   always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT]) begin
-      `logI("DVTF_GET_SOCKET_ID_BIT");
-      `ifdef OPENOCD_ENABLE
-      `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO] = jtag_getSocketPortId();
-      `endif
-      `logI("SocketId=0x%08x",`DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO]);
-      `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
-   end
-   
-   assign sys_rst = RST_ACT_LOW ? sys_rst_n : ~sys_rst_n;
-
-  //**************************************************************************//
+  //--------------------------------------------------------------------------------------
   // Clock Generation
-  //**************************************************************************//
-
+  //--------------------------------------------------------------------------------------
   initial
     sys_clk_i = 1'b0;
   always
     sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
-
-
-  initial
-    clk_ref_i = 1'b0;
-  always
-    clk_ref_i = #REFCLK_PERIOD ~clk_ref_i;
+  //--------------------------------------------------------------------------------------
 
 
 
-
-  always @( * ) begin
-    ddr3_ck_p_sdram      <=  #(TPROP_PCB_CTRL) ddr3_ck_p_fpga;
-    ddr3_ck_n_sdram      <=  #(TPROP_PCB_CTRL) ddr3_ck_n_fpga;
-    ddr3_addr_sdram[0]   <=  #(TPROP_PCB_CTRL) ddr3_addr_fpga;
-    ddr3_addr_sdram[1]   <=  #(TPROP_PCB_CTRL) (CA_MIRROR == "ON") ?
-                                                 {ddr3_addr_fpga[ROW_WIDTH-1:9],
-                                                  ddr3_addr_fpga[7], ddr3_addr_fpga[8],
-                                                  ddr3_addr_fpga[5], ddr3_addr_fpga[6],
-                                                  ddr3_addr_fpga[3], ddr3_addr_fpga[4],
-                                                  ddr3_addr_fpga[2:0]} :
-                                                 ddr3_addr_fpga;
-    ddr3_ba_sdram[0]     <=  #(TPROP_PCB_CTRL) ddr3_ba_fpga;
-    ddr3_ba_sdram[1]     <=  #(TPROP_PCB_CTRL) (CA_MIRROR == "ON") ?
-                                                 {ddr3_ba_fpga[3-1:2],
-                                                  ddr3_ba_fpga[0],
-                                                  ddr3_ba_fpga[1]} :
-                                                 ddr3_ba_fpga;
-    ddr3_ras_n_sdram     <=  #(TPROP_PCB_CTRL) ddr3_ras_n_fpga;
-    ddr3_cas_n_sdram     <=  #(TPROP_PCB_CTRL) ddr3_cas_n_fpga;
-    ddr3_we_n_sdram      <=  #(TPROP_PCB_CTRL) ddr3_we_n_fpga;
-    ddr3_cke_sdram       <=  #(TPROP_PCB_CTRL) ddr3_cke_fpga;
+  //--------------------------------------------------------------------------------------
+  // UART Loopback Driver with noise insertion
+  //--------------------------------------------------------------------------------------
+  reg  noise = 0;
+   
+  always @(uart_txd) 
+  begin
+    for (int i = 0; i < 3; i++) begin
+      repeat (2) @(posedge sys_clk_i);
+      noise = 1;
+      repeat (2) @(posedge sys_clk_i);
+      noise = 0;
+    end
   end
-    
+  assign uart_rxd = uart_txd ^ noise;
+  //--------------------------------------------------------------------------------------
+  
 
-  always @( * )
-    ddr3_cs_n_sdram_tmp   <=  #(TPROP_PCB_CTRL) ddr3_cs_n_fpga;
-  assign ddr3_cs_n_sdram =  ddr3_cs_n_sdram_tmp;
-    
 
-  always @( * )
-    ddr3_dm_sdram_tmp <=  #(TPROP_PCB_DATA) ddr3_dm_fpga;//DM signal generation
-  assign ddr3_dm_sdram = ddr3_dm_sdram_tmp;
-    
+  //--------------------------------------------------------------------------------------
+  // SPI loopback instantiation
+  //--------------------------------------------------------------------------------------
+  spi_loopback spi_loopback_inst (
+    .SCK    (sdio_sdio_clk  ),
+    .CS_n   (sdio_sdio_dat_3),
+    .MOSI   (sdio_sdio_cmd  ),
+    .MISO   (sdio_sdio_dat_0) 
+  );
+  //--------------------------------------------------------------------------------------
 
-  always @( * )
-    ddr3_odt_sdram_tmp  <=  #(TPROP_PCB_CTRL) ddr3_odt_fpga;
-  assign ddr3_odt_sdram =  ddr3_odt_sdram_tmp;
-    
 
-   wire pullHi = 1'b1;
+
+  //--------------------------------------------------------------------------------------
+  // C <--> Verilog Deamon and backdoor support are here
+  //--------------------------------------------------------------------------------------
+  wire [31:0] __simTime;
+
+  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
+  begin
+    wait (`PBUS_RESET==0);
+    @(negedge `PBUS_CLOCK);
+    #2000;
+    `logI("Asserting pbus_Reset");
+    force `PBUS_RESET = 1;
+    repeat (10) @(negedge `PBUS_CLOCK);
+    #2000;
+    release `PBUS_RESET;      
+    `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
+
+  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
+  begin
+    `logI("Forcing topMod_debug_ndreset");
+    force `DEBUG_NDRESET = 1;
+    repeat (10) @(negedge `PBUS_CLOCK);
+    release `DEBUG_NDRESET;
+    `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
+
+  always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT]) 
+  begin
+    `logI("DVTF_GET_SOCKET_ID_BIT");
+    `ifdef OPENOCD_ENABLE
+      `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO] = jtag_getSocketPortId();
+    `endif
+    `logI("SocketId=0x%08x",`DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO]);
+    `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
+
+  v2c_top v2c_inst(.clk(sys_clk_i),.__simTime(__simTime));
+
+  // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
+  `ifdef BFM_MODE
+    defparam `CORE0_TL_PATH.CHIP_ID = 0;
+    defparam `CORE1_TL_PATH.CHIP_ID = 1;
+    defparam `CORE2_TL_PATH.CHIP_ID = 2;
+    defparam `CORE3_TL_PATH.CHIP_ID = 3;
+  `endif
+  //--------------------------------------------------------------------------------------
+
    
-// Controlling the bi-directional BUS
 
-  genvar dqwd;
-  generate
-    for (dqwd = 1;dqwd < DQ_WIDTH;dqwd = dqwd+1) begin : dq_delay
-      WireDelay #
-       (
-        .Delay_g    (TPROP_PCB_DATA),
-        .Delay_rd   (TPROP_PCB_DATA_RD),
-        .ERR_INSERT ("OFF")
-       )
-      u_delay_dq
-       (
-        .A             (ddr3_dq_fpga[dqwd]),
-        .B             (ddr3_dq_sdram[dqwd]),
-        .reset         (sys_rst_n),
-        .phy_init_done (init_calib_complete)
-       );
+  //--------------------------------------------------------------------------------------
+  // Initialize the FIR memories Note: the IIR memories are NOT initialized)
+  //--------------------------------------------------------------------------------------
+  initial begin
+    
+    for (int j = 0; j < 32; j = j + 1) begin
+      `FIR_PATH.datain_mem[j]   = 0;  
+      `FIR_PATH.dataout_mem[j]  = 0;
     end
-    // For ECC ON case error is inserted on LSB bit from DRAM to FPGA
-          WireDelay #
-       (
-        .Delay_g    (TPROP_PCB_DATA),
-        .Delay_rd   (TPROP_PCB_DATA_RD),
-        .ERR_INSERT (ERR_INSERT)
-       )
-      u_delay_dq_0
-       (
-        .A             (ddr3_dq_fpga[0]),
-        .B             (ddr3_dq_sdram[0]),
-        .reset         (sys_rst_n),
-        .phy_init_done (init_calib_complete)
-       );
-  endgenerate
 
-  genvar dqswd;
-  generate
-    for (dqswd = 0;dqswd < DQS_WIDTH;dqswd = dqswd+1) begin : dqs_delay
-      WireDelay #
-       (
-        .Delay_g    (TPROP_DQS),
-        .Delay_rd   (TPROP_DQS_RD),
-        .ERR_INSERT ("OFF")
-       )
-      u_delay_dqs_p
-       (
-        .A             (ddr3_dqs_p_fpga[dqswd]),
-        .B             (ddr3_dqs_p_sdram[dqswd]),
-        .reset         (sys_rst_n),
-        .phy_init_done (init_calib_complete)
-       );
-
-      WireDelay #
-       (
-        .Delay_g    (TPROP_DQS),
-        .Delay_rd   (TPROP_DQS_RD),
-        .ERR_INSERT ("OFF")
-       )
-      u_delay_dqs_n
-       (
-        .A             (ddr3_dqs_n_fpga[dqswd]),
-        .B             (ddr3_dqs_n_sdram[dqswd]),
-        .reset         (sys_rst_n),
-        .phy_init_done (init_calib_complete)
-       );
-    end
-  endgenerate
-
-   wire [7:0] led;
-   wire jtag_jtag_TCK;
-   wire jtag_jtag_TMS;
-   wire jtag_jtag_TDI;
-   wire jtag_jtag_TRSTn;
-   pullup (weak1) (jtag_jtag_TRSTn);
-   wire jtag_jtag_TDO; 
-   
-   /*
-   initial begin
-      forever #20 JTCK = !JTCK;
-   end
-   initial begin
-      @(negedge cep_tb.fpga.topDesign.topMod.debug_1.io_dmi_dmiReset);
-      repeat (10) @(posedge JTCK);
-      //
-      //`logI("== Resetting JTAG ==\n");
-      JTMS = 1;
-      repeat (10) @(posedge JTCK);
-      JTMS = 0;
-   end
-    */
-   //
-   wire uart_rxd;   pullup (weak1) (uart_rxd);
-   wire uart_ctsn;  pullup (weak1) (uart_ctsn);
-   wire uart_txd; 
-   wire uart_rtsn; pullup (weak1) (uart_rtsn);
-
-   // add noise to uart_rxd;
-   reg  noise = 0;
-   
-   always @(uart_txd) begin
-      for (int i=0;i<3;i++) begin
-   repeat (2) @(posedge sys_clk_i);
-   noise = 1;
-   repeat (2) @(posedge sys_clk_i);
-   noise = 0;
-      end
-   end
-   assign uart_rxd = uart_txd ^ noise;
-   // no flow control support
-   //
-   wire sdio_sdio_clk; 
-   wire sdio_sdio_cmd;    
-   wire sdio_sdio_dat_0; pullup (weak1) (sdio_sdio_dat_0);
-   wire sdio_sdio_dat_1; pullup (weak1) (sdio_sdio_dat_1);
-   wire sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
-   wire sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
-
-   reg  spiResetL = 0;
-   initial begin
-      spiResetL = 1;
-      repeat (2) @(posedge sys_clk_i);
-      spiResetL = 0;
-      repeat (2) @(posedge sys_clk_i);
-      spiResetL = 1;
-   end
-   // 512Mbit
-   /*
-   s25fl512s spiFlash
-     (
-      .SCK    (sdio_sdio_clk  ), // topDesign_auto_topMod_spi_source_out_sck
-      .CSNeg  (sdio_sdio_dat_3), // topDesign_auto_topMod_spi_source_out_cs_0
-      .SI     (sdio_sdio_cmd  ), // topDesign_auto_topMod_spi_source_out_dq_0_o
-      .SO     (sdio_sdio_dat_0), // topDesign_auto_topMod_spi_source_out_dq_1_i
-      .WPNeg  (1'b1), // sdio_sdio_dat_1), // not used!!!
-      .HOLDNeg(1'b1), // sdio_sdio_dat_2), // not used
-      .RSTNeg (spiResetL      ) // 
-      );
-   */
-   spi_loopback spiFlash
-     (
-      .SCK    (sdio_sdio_clk  ), // topDesign_auto_topMod_spi_source_out_sck
-      .CS_n   (sdio_sdio_dat_3), // topDesign_auto_topMod_spi_source_out_cs_0
-      .MOSI   (sdio_sdio_cmd  ), // topDesign_auto_topMod_spi_source_out_dq_0_o
-      .MISO   (sdio_sdio_dat_0)  // topDesign_auto_topMod_spi_source_out_dq_1_i
-      );
-   
-   //
-   // ############################################
-   // C <-> Verilog Deamon and backdoor support are here
-   // ############################################
-   //
-   //
-   // Instantiate V<->C deamon    here
-   //
-   wire [31:0] __simTime;
-   
-   v2c_top v2cd(.clk(sys_clk_i),.__simTime(__simTime));
-
-   //
-   // sdome overrides
-   //
-   `ifdef BFM_MODE
-   defparam `CORE0_TL_PATH.CHIP_ID=0;
-   defparam `CORE1_TL_PATH.CHIP_ID=1;
-   defparam `CORE2_TL_PATH.CHIP_ID=2;
-   defparam `CORE3_TL_PATH.CHIP_ID=3;
-   `endif
-   
-   integer  j;
-   
-   initial begin
-      for (j=0;j<32;j=j+1) begin
-   `FIR_PATH.datain_mem[j] = 0;  
-   `FIR_PATH.dataout_mem[j] = 0;
-      end
-      //
-      repeat (2) @(posedge sys_clk_i);            
-      @(negedge sys_rst);
-      // force FPGA to get out of reset faster
-      repeat (100) @(posedge sys_clk_i);      
-      force `RESET_PATH.auto_out_1_reset = 0;
-      force `RESET_PATH.auto_out_0_reset = 0;
-      //
-      repeat (100) @(posedge sys_clk_i);
    end // initial begin
+  //--------------------------------------------------------------------------------------
+
+
 
    //
    //===========================================================================   
@@ -552,10 +336,10 @@ module cep_tb;
   // I/O manually copied from Chisel generated verilog
   //===========================================================================
   ChipTop ChipTop_inst ( 
-    .jtag_TCK           (jtag_jtag_TCK),
-    .jtag_TMS           (jtag_jtag_TMS),
-    .jtag_TDI           (jtag_jtag_TDI),
-    .jtag_TDO           (jtag_jtag_TDO),
+    .jtag_TCK           (jtag_TCK),
+    .jtag_TMS           (jtag_TMS),
+    .jtag_TDI           (jtag_TDI),
+    .jtag_TDO           (jtag_TDO),
     .custom_boot        (),
     .gpio_0_0           (),
     .gpio_0_1           (),
@@ -567,7 +351,7 @@ module cep_tb;
     .gpio_0_7           (),
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
-    .reset_wire_reset   (sys_rst || chipReset),
+    .reset_wire_reset   (~sys_rst_n),
     .clock              (sys_clk_i)
   );
 
@@ -865,7 +649,7 @@ module cep_tb;
    cep_driver #(.MY_SLOT_ID(0),.MY_LOCAL_ID(c))
    driver(
     .clk    (sys_clk_i), // clk100),   
-    .reset          (sys_rst),
+    .reset          (~sys_rst_n),
     .enableMe       (enableMask[c]),
     .__simTime  ()
     );
@@ -873,18 +657,6 @@ module cep_tb;
       end
    endgenerate
 
-
-   bit jtag_TCK   = 0;
-   bit jtag_TMS   = 0;  
-   bit jtag_TDI   = 0;
-   bit jtag_TRSTn = 0;
-   assign jtag_jtag_TCK = jtag_TCK;
-   assign jtag_jtag_TMS = jtag_TMS;
-   assign jtag_jtag_TDI = jtag_TDI;
-   assign jtag_jtag_TRSTn = jtag_TRSTn;
-   
-   //pullup (weak1) (jtag_jtag_TRSTn);
-   
    //
    // =============================
    // OpenOCD interface to drive JTAG via DPI

@@ -5,7 +5,8 @@ vlog -sv -f firrtl_black_box_resource_files.top.f
 vlog -sv EICG_wrapper.v
 vlog -sv chipyard.TestHarness.CEPASICRocketConfig.top.mems.v
 vlog -sv chipyard.TestHarness.CEPASICRocketConfig.top.v
-vopt +acc work.ChipTop -o debugver
+vlog -sv ../../cep_tb_temp.v
+vopt +acc work.cep_tb -o debugver
 vsim debugver -cpppath "/usr/bin/g++"
 do ../../vsim_wave_temp.do
-run 1ns
+run 100ns

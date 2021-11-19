@@ -18,8 +18,8 @@ override NOWAVE  = 1
 UPDATE_INFO = 1
 
 # Basic test variables
-COSIM_TOP_DIR  	= $(shell basename `pwd`)
-REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_TOP_DIR}/bin/strip_net.pl )
+COSIM_DIR_NAME  	= $(shell basename `pwd`)
+REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
 BLD_DIR     	= $(shell cd ./bfmTests; pwd | ../bin/strip_net.pl )
 TEST_SUITE  	= $(shell basename ${BLD_DIR})
 
@@ -40,12 +40,12 @@ runAll:
 
 # Print summary
 summary: .force
-	@date > ${COSIM_TOP_DIR}/regressionSummary
+	@date > ${COSIM_DIR_NAME}/regressionSummary
 	@for i in ${TEST_GROUP}; do								\
-		(cd $${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
+		(cd $${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_DIR_NAME}/regressionSummary);	\
 	done
 
 # Include the common makefile
-include $(COSIM_TOP_DIR)/common.make
+include $(COSIM_DIR_NAME)/common.make
 
 

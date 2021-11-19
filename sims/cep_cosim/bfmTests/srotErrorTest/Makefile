@@ -11,13 +11,13 @@
 #
 #
 #
-COSIM_TOP_DIR  = $(shell cd ../..; basename `pwd`)
-REPO_TOP_DIR =  $(shell cd ../../..; pwd | ./${COSIM_TOP_DIR}/bin/strip_net.pl )
+COSIM_DIR_NAME  = $(shell cd ../..; basename `pwd`)
+REPO_TOP_DIR =  $(shell cd ../../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
 BLD_DIR     =  $(shell cd ..; pwd | ../bin/strip_net.pl )
 TEST_SUITE  =  $(shell basename ${BLD_DIR})
 TEST_DIR    =  $(shell cd .; pwd | ../../bin/strip_net.pl )
 TEST_NAME   =  $(shell basename `pwd`)
-SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_TOP_DIR}
+SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_DIR_NAME}
 
 #
 # Top target!!!

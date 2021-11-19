@@ -9,7 +9,7 @@
 //************************************************************************
 `timescale 1ns/1ns
 
-module modexp_core_mock_tss import llki_pkg::*; (
+module modexp_core_mock_tss import import llki_pkg::*; (
 
     // Clock and Reset
     input wire            clk,

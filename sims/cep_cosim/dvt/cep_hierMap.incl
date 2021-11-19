@@ -10,14 +10,12 @@
 //
 //--------------------------------------------------------------------------------------
 
-`define DVT_PATH            `TB_NAME.v2cd
+`define DVT_PATH            `TB_NAME.v2c_inst
 `define WAIT4RESTART_FLAG   `TB_NAME.waitForRestartFlag
 `define DVT_FLAG            `TB_NAME.v2cd.dvtFlags
 `define DUT_TOP_LEVEL       `TB_NAME.ChipTop_inst
 
-`define RESET_PATH          fpga.topDesign.wrangler
 `define FIR_PATH            `DUT_TOP_LEVEL.system.firmodule
-`define DDR_PATH            `DUT_TOP_LEVEL.system.mig
 `define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
 `define MODEXP_CLK          `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk
 `define MODEXP_EXP_MODE_REG `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
@@ -28,7 +26,7 @@
 `define CORE2_PATH          `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
 `define CORE3_PATH          `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
 
-// Paths to RocketTile constructs in Bare Metal Mode
+// Paths to RocketTile constructs in Bare Metal Mode 
 `define CORE0_PC            `CORE0_PATH.core.coreMonitorBundle_pc
 `define CORE1_PC            `CORE1_PATH.core.coreMonitorBundle_pc
 `define CORE2_PC            `CORE2_PATH.core.coreMonitorBundle_pc
@@ -54,7 +52,6 @@
 `define DEBUG_NDRESET       `DUT_TOP_LEVEL.system_debug_ndreset
 
 // in bare metal
-`define MIG_PATH            `DUT_TOP_LEVEL.system.mig.island.blackbox
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
 

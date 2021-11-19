@@ -155,14 +155,9 @@ DUT_XILINX_VLOG_ARGS	= +acc -64 -sv +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INI
 DUT_XILINX_VCOM_ARGS	= -64 -93 -modelsimini ${XILINX_MODELSIM_INI}
 DUT_XILINX_VSIM_ARGS	= -64 -modelsimini ${XILINX_MODELSIM_INI} ${XILINX_LIBRARY_LIST} -warning 3363 -warning 3053 -warning 8630
 
-#
 # ===========================================
 # Derived path/files based on DUT_VENDOR and mode of sim
 # ===========================================
-#
-# default is XILINX for now
-#
-ifeq "$(findstring XILINX,${DUT_VENDOR})" "XILINX"
 DUT_TOP_TB  	  := ${DUT_XILINX_TOP_TB}
 DUT_VERILOG_FLIST := ${DUT_COMMON_FILES} ${FREEDOM_FILES} ${RISCV_FILES} ${DUT_XILINX_FILES} ${DUT_XILINX_TOP_FILE}
 DUT_MODULE	  := ${DUT_XILINX_TOP_MODULE}
@@ -171,9 +166,6 @@ DUT_VOPT_ARGS	  += ${DUT_XILINX_VOPT_ARGS}
 DUT_VLOG_ARGS	  += ${DUT_XILINX_VLOG_ARGS}
 DUT_VSIM_ARGS	  += ${DUT_XILINX_VSIM_ARGS} +initreg+0 +initmem+0
 else
-# For ASIC with TSMC or standard ASIC library!!!
-ERROR_MESSAGE   = "DUT_VENDOR=${DUT_VENDOR} is either not supported or please check spelling"
-endif
 
 # add config file
 DUT_TB_FILES_LIST  = ${DUT_XILINX_TOP_TB} 

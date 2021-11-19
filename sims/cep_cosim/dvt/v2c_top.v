@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      v2c_top.v
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -17,13 +17,12 @@
 `include "cep_adrMap.incl"
 `include "cep_hierMap.incl"
 `include "config.v"
-module v2c_top
-  (
+module v2c_top (
    input      clk,
    output reg [31:0] __simTime=0
-   );
+);
 
-`include "v2c_top.incl"
+   `include "v2c_top.incl"
    
    integer vpp_cmd;
    

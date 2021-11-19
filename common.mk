@@ -159,6 +159,9 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 #########################################################################################
 .PHONY: verilog
 verilog: $(sim_vsrcs)
+# Save the name of some of the files needed by the CEP Cosimulation enviornment
+	@echo "TOP_FILE = $(TOP_FILE)" >> TOP_FILES.make
+	@echo "TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> TOP_FILES.make
 
 #########################################################################################
 # helper rules to run simulations
