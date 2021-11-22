@@ -4,7 +4,7 @@
 #//
 #// File Name:      cadence.make
 #// Program:        Common Evaluation Platform (CEP)
-#// Description:    
+#// Description:	CEP CoSimulation makefile for Cadence toolset
 #// Notes:          
 #//
 #//************************************************************************

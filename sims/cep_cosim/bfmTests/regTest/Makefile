@@ -19,8 +19,8 @@ TEST_DIR			= $(strip $(shell cd .; pwd))
 # default target
 #all: .vrun_flag
 all:
-ifeq (,$(wildcard $(COSIM_TOP_DIR)/TOP_FILES.make))
-	$(error "TOP_FILE does not exist. run make -f Makefile.chipyard in $(COSIM_TOP_DIR)")
+ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
+	$(error "CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(COSIM_TOP_DIR)")
 endif
 
 # override anything here before calling the common file

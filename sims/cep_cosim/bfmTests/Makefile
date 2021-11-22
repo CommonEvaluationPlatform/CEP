@@ -16,7 +16,7 @@ STAND_ALONE = 1
 all: runAll
 
 # Variable needed by common.make
-COSIM_DIR_NAME  	= $(shell cd ..; basename `pwd`)
+COSIM_DIR_NAME  = $(shell cd ..; basename `pwd`)
 REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
 BLD_DIR     	= $(shell cd .; pwd | ../bin/strip_net.pl )
 TEST_SUITE  	= $(shell basename ${BLD_DIR})
