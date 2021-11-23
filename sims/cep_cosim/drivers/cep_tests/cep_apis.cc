@@ -26,30 +26,6 @@
 #include "encoding.h"
 #endif
 
-
-
-//
-//
-//
-int calibrate_ddr3(int maxTimeOut) {
-  //
-  int calibDone = 0;
-#ifdef SIM_ENV_ONLY
-  int to=0;  
-  while (!calibDone && (to < maxTimeOut)) {
-    calibDone = DUT_READ_DVT(DVTF_READ_CALIBRATION_DONE, DVTF_READ_CALIBRATION_DONE);
-    DUT_RUNCLK(1000);
-    to++;
-  }
-  if (!calibDone) {
-    LOGI("ERROR: Calibration is not done\n");
-  } else {
-    LOGI("OK: DDR3 calibration is completed\n");    
-  }
-#endif
-  return calibDone;
-}
-
 int is_program_loaded(int maxTimeOut) {
   //
   int loaded = 0;

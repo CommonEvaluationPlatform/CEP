@@ -1,4 +1,4 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
@@ -11,86 +11,66 @@
 //                 the RISCV_TESTS are enabled (in BARE_MODE)
 // Notes:          
 //
-//************************************************************************
-
-`include "v2c_cmds.incl"
+//--------------------------------------------------------------------------------------
+`timescale 1ns/10ps
+`include "suite_config.v"
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"
-`include "config.v"
+`include "v2c_cmds.incl"
 `include "v2c_top.incl"
-`timescale 1ns/1ns
-module cep_driver
-  (
-   input clk,
-   input reset,
-   input enableMe,
-   output reg [31:0] __simTime
-   );
 
+module cep_driver #(
+) (
+  input               clk,
+  input               reset,
+  input               enableMe
+);
 
+  // Overriden at instantiation
+  parameter MY_SLOT_ID  = 4'h0;
+  parameter MY_LOCAL_ID = 4'h0;
 
-//
-// Added by script
-parameter MY_SLOT_ID  = 4'h0,
-  MY_LOCAL_ID = 4'h0;
-// Done
-//
-//
+  reg [255:0]         dvtFlags = 0;
+  reg [255:0]         r_data;
+  reg [31:0]          printf_adr;
+  reg [1:0]           printf_coreId;
+  reg [(128*8)-1:0]   printf_buf; // 128bytes
+  reg [(128*8)-1:0]   tmp;
+  reg                 clear=0;
+  integer             cnt;
+  string              str;
+  
+  // printf support function
+  always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
+    printf_adr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
 
-//
-//================================
-// Internals
-//================================
-//
-reg [255:0]    dvtFlags;
-reg [255:0]    r_data;
-initial begin
-   dvtFlags = 0;
-end
+    // fill the buffer
+    cep_tb.read_ddr3_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
+    cep_tb.read_ddr3_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
+ 
+    // left justify
+    clear = 0;
+    tmp = 0;
 
-   wire clk100Mhz = clk;
-
-   //
-   // to support print command
-   //
-   reg [31:0] printf_adr;
-   reg [1:0]  printf_coreId;
-   reg [(128*8)-1:0] printf_buf; // 128bytes
-   reg [(128*8)-1:0] tmp;
-   reg 		     clear=0;
-   integer 	     cnt;
-   string 	     str;
-   
-   //
-   always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
-      printf_adr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
-      //`logI("Calling PRINTF adr=0x%x",printf_adr);
-      // go fill ther buffer
-      cep_tb.read_ddr3_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
-      cep_tb.read_ddr3_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
-      // left justify
-      clear = 0;
-      tmp = 0;
-      // move trailing after newline or null
-      for (cnt=0;cnt<128;cnt=cnt+1) begin
-	 if (!clear && 
-	     (printf_buf[(128*8)-1:(127*8)] != 'h0) && 
-	     (printf_buf[(128*8)-1:(127*8)] != 'h0A) &&         // '\n'
-	     (printf_buf[(128*8)-1:(127*8)] != 'h0D)) begin	// '\r'     
-	    tmp = (tmp << 8) | printf_buf[(128*8)-1:(127*8)];
-	    printf_buf = printf_buf << 8;
-	 end
-	 else begin
-	    clear = 1;
-	    tmp = tmp << 8;
-	 end
-      end
-      //
-      $sformat(str,"C%-d: %-s",printf_adr[1:0],tmp);
-      $display("%s",str);
-      //
-      dvtFlags[`DVTF_PRINTF_CMD] = 0;
-   end
+    // move trailing after newline or null
+    for (cnt=0;cnt<128;cnt=cnt+1) begin
+      if (!clear && 
+        (printf_buf[(128*8)-1:(127*8)] != 'h0) && 
+        (printf_buf[(128*8)-1:(127*8)] != 'h0A) &&         // '\n'
+        (printf_buf[(128*8)-1:(127*8)] != 'h0D)) begin  // '\r'     
+          tmp         = (tmp << 8) | printf_buf[(128*8)-1:(127*8)];
+          printf_buf  = printf_buf << 8;
+      end else begin
+        clear         = 1;
+        tmp           = tmp << 8;
+      end // end if
+    end // end for
+    
+    $sformat(str,"C%-d: %-s",printf_adr[1:0],tmp);
+    $display("%s",str);
+    
+    dvtFlags[`DVTF_PRINTF_CMD] = 0;
+  end // end always
    
 
    //
@@ -108,7 +88,7 @@ end
 
    always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
       if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_LOCAL_ID) begin
-	 force_core_in_reset();
+   force_core_in_reset();
       end
       dvtFlags[`DVTF_PUT_CORE_IN_RESET] = 0;
       
@@ -138,7 +118,7 @@ task   READ_STATUS_TASK;
 `else     
      r_data = 0;
 `endif     
-     @(posedge clk100Mhz);
+     @(posedge clk);
   end
 endtask // READ_STATUS_TASK;
 
@@ -151,14 +131,14 @@ integer s;
    begin
 `ifdef USE_DPI
       for (s=inBox.mPar[1];s<=inBox.mPar[0];s=s+1) begin 
-	 dvtFlags[s] = inBox.mPar[2] & 1'b1; 
-	 inBox.mPar[2] = inBox.mPar[2] >> 1; 
+   dvtFlags[s] = inBox.mPar[2] & 1'b1; 
+   inBox.mPar[2] = inBox.mPar[2] >> 1; 
       end      
 `else
       for (s =lsb;s<=msb;s=s+1) begin dvtFlags[s] = value[0]; value = value >> 1; end
 `endif
       //`logI("dvtFlags=%b",dvtFlags);
-   @(posedge clk100Mhz);
+   @(posedge clk);
    
 end
 endtask // WRITE_DVT_FLAG_TASK;
@@ -169,7 +149,7 @@ task   READ_DVT_FLAG_TASK;
    input [31:0] lsb;
    output [63:0] r_data;
    integer m , l;
-   reg [63:0] 	 tmp;
+   reg [63:0]    tmp;
    
    begin
    tmp = 0;
@@ -177,8 +157,8 @@ task   READ_DVT_FLAG_TASK;
       m=inBox.mPar[0];
       l=inBox.mPar[1];
       for (int s=m;s>=l;s--) begin       
-	 tmp = {tmp[62:0],dvtFlags[s]};
-	 //$display("LOOP s=%d %x\n",s,tmp);      
+   tmp = {tmp[62:0],dvtFlags[s]};
+   //$display("LOOP s=%d %x\n",s,tmp);      
       end
       inBox.mPar[0] = tmp;
       //$display("IN %d/%d %x\n",m,l,inBox.mPar[0]);
@@ -190,7 +170,7 @@ task   READ_DVT_FLAG_TASK;
    r_data = tmp;
 `endif   
       //`logI("dvtFlags=%b r_data=%x",dvtFlags,r_data);
-   @(posedge clk100Mhz);
+   @(posedge clk);
    
 end
 endtask // READ_DVT_FLAG_TASK;
@@ -225,20 +205,20 @@ begin
 `ifdef BFM_MODE
    case (MY_LOCAL_ID)
      0: begin
-	for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
-	`CORE0_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
+  `CORE0_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      1: begin
-	for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
-	`CORE1_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
+  `CORE1_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      2: begin
-	for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
-	`CORE2_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
+  `CORE2_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      3: begin
-	for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
-	`CORE3_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
+  `CORE3_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end     
    endcase // case (MY_LOCAL_ID)
 `endif
@@ -256,18 +236,18 @@ endtask // WRITE64_BURST_TASK
    task   ATOMIC_RDW64_DPI;
       reg [3:0] bits_size;
       begin
-	 //`logI("%m a=%x d=%x",a,d);
-	 //
-	 bits_size = 3;
-	 
+   //`logI("%m a=%x d=%x",a,d);
+   //
+   bits_size = 3;
+   
  `ifdef BFM_MODE
-	 case (MY_LOCAL_ID)
-	   0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-	   1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-	   2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-	   3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-	 endcase	
-	 
+   case (MY_LOCAL_ID)
+     0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+   endcase  
+   
  `endif
       end
    endtask // ATOMIC_RDW64_TASK
@@ -289,10 +269,10 @@ begin
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-	1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-	2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-	3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
       endcase // case (MY_LOCAL_ID)
    end // else: !if(backdoor_enable)
 `else
@@ -319,20 +299,20 @@ task READ64_BURST_DPI;
 `ifdef BFM_MODE
    case (MY_LOCAL_ID)
      0: begin
-	`CORE0_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
-	for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
+  `CORE0_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
      end
      1: begin
-	`CORE1_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
-	for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];	
+  `CORE1_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];  
      end
      2: begin
-	`CORE2_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
-	for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];	
+  `CORE2_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];  
      end
      3: begin
-	`CORE3_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
-	for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];	
+  `CORE3_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];  
      end     
    endcase // case (MY_LOCAL_ID)
 `endif
@@ -355,10 +335,10 @@ task READ64_64_DPI;
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-	1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-	2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-	3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
       endcase // case (MY_LOCAL_ID)
    end
 `else
@@ -389,10 +369,10 @@ begin
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-	1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-	2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-	3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);     
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);     
       endcase // case (MY_LOCAL_ID)
    end // else: !if(backdoor_enable)
 `else
@@ -485,10 +465,10 @@ begin
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-	1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-	2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-	3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);     
       endcase // case (MY_LOCAL_ID)
    end // else: !if(backdoor_enable)
 `endif
@@ -512,10 +492,10 @@ reg [63:0] d;
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-	1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-	2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-	3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);     
       endcase // case (MY_LOCAL_ID)
    end
 `else
@@ -536,20 +516,20 @@ task READ32_8_DPI;
       mask = 1 << inBox.mAdr[2:0];
 `ifdef BFM_MODE
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-	1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-	2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-	3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);     
       endcase // case (MY_LOCAL_ID)
       case (inBox.mAdr[2:0])
-	0 : inBox.mPar[0] = d[(8*0)+7:(8*0)];
-	1 : inBox.mPar[0] = d[(8*1)+7:(8*1)];
-	2 : inBox.mPar[0] = d[(8*2)+7:(8*2)];
-	3 : inBox.mPar[0] = d[(8*3)+7:(8*3)];
-	4 : inBox.mPar[0] = d[(8*4)+7:(8*4)];
-	5 : inBox.mPar[0] = d[(8*5)+7:(8*5)];
-	6 : inBox.mPar[0] = d[(8*6)+7:(8*6)];
-	7 : inBox.mPar[0] = d[(8*7)+7:(8*7)];
+  0 : inBox.mPar[0] = d[(8*0)+7:(8*0)];
+  1 : inBox.mPar[0] = d[(8*1)+7:(8*1)];
+  2 : inBox.mPar[0] = d[(8*2)+7:(8*2)];
+  3 : inBox.mPar[0] = d[(8*3)+7:(8*3)];
+  4 : inBox.mPar[0] = d[(8*4)+7:(8*4)];
+  5 : inBox.mPar[0] = d[(8*5)+7:(8*5)];
+  6 : inBox.mPar[0] = d[(8*6)+7:(8*6)];
+  7 : inBox.mPar[0] = d[(8*7)+7:(8*7)];
       endcase
 `endif      
       //`logI("%m a=%x d=%x",a,d);
@@ -564,16 +544,16 @@ task READ32_16_DPI;
       mask = 3 << (inBox.mAdr[2:1]*2);      
 `ifdef BFM_MODE
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-	1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-	2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-	3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);     
       endcase // case (MY_LOCAL_ID)
       case (inBox.mAdr[2:1])
-	0 : inBox.mPar[0] = d[(16*0)+15:(16*0)];
-	1 : inBox.mPar[0] = d[(16*1)+15:(16*1)];
-	2 : inBox.mPar[0] = d[(16*2)+15:(16*2)];
-	3 : inBox.mPar[0] = d[(16*3)+15:(16*3)];
+  0 : inBox.mPar[0] = d[(16*0)+15:(16*0)];
+  1 : inBox.mPar[0] = d[(16*1)+15:(16*1)];
+  2 : inBox.mPar[0] = d[(16*2)+15:(16*2)];
+  3 : inBox.mPar[0] = d[(16*3)+15:(16*3)];
       endcase
 `endif      
       //`logI("%m a=%x d=%x",a,d);
@@ -589,10 +569,10 @@ task READ32_32_DPI;
       else mask = 'h0F;      
 `ifdef BFM_MODE
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-	1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-	2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-	3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);     
       endcase // case (MY_LOCAL_ID)
       inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
 `endif      
@@ -613,10 +593,10 @@ output [63:0] d;
    end
    else begin
       case (MY_LOCAL_ID)
-	0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-	1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-	2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-	3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);     
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);     
       endcase // case (MY_LOCAL_ID)
    end
 `else
@@ -638,8 +618,6 @@ endtask // READ32_64_TASK
   // SHIPC Support Common Codes
   // =============================================
   //
-`include "v2c_cmds.incl"
-`include "v2c_top.incl"
 `define SHIPC_XACTOR_ID  MY_LOCAL_ID
 `define SHIPC_CLK   clk
 `include "driver_common.incl"
@@ -657,7 +635,7 @@ endtask // READ32_64_TASK
    initial begin
       repeat(10) @(posedge clk);
       if (!myIsActive) begin
-	 force_core_in_reset();	 
+   force_core_in_reset();  
       end // if (!myIsActive)
    end // initial begin
    `endif //  `ifdef FORCE_RESET_IF_NOT_USED
@@ -665,44 +643,44 @@ endtask // READ32_64_TASK
    //
    task force_core_in_reset;
       begin
-	 case (MY_LOCAL_ID)
-	   0: begin
-	      `logI("Forcing CORE#0 in reset...");
+   case (MY_LOCAL_ID)
+     0: begin
+        `logI("Forcing CORE#0 in reset...");
     `ifdef BARE_MODE
-	      force `CORE0_PATH.core.reset =1;
+        force `CORE0_PATH.core.reset =1;
     `endif
     `ifdef BFM_MODE
-	      force `CORE0_PATH.reset =1;
+        force `CORE0_PATH.reset =1;
     `endif
-	   end
-	   1: begin
-	      `logI("Forcing CORE#1 in reset...");
+     end
+     1: begin
+        `logI("Forcing CORE#1 in reset...");
     `ifdef BARE_MODE
-	      force `CORE1_PATH.core.reset =1;
+        force `CORE1_PATH.core.reset =1;
     `endif
     `ifdef BFM_MODE
-	      force `CORE1_PATH.reset =1;
-    `endif	      
-	   end
-	   2: begin
-	      `logI("Forcing CORE#2 in reset...");
+        force `CORE1_PATH.reset =1;
+    `endif        
+     end
+     2: begin
+        `logI("Forcing CORE#2 in reset...");
     `ifdef BARE_MODE
-	      force `CORE2_PATH.core.reset =1;
+        force `CORE2_PATH.core.reset =1;
     `endif
     `ifdef BFM_MODE
-	      force `CORE2_PATH.reset =1;
-    `endif	      
-	   end
-	   3: begin
-	      `logI("Forcing CORE#3 in reset...");
+        force `CORE2_PATH.reset =1;
+    `endif        
+     end
+     3: begin
+        `logI("Forcing CORE#3 in reset...");
     `ifdef BARE_MODE
-	      force `CORE3_PATH.core.reset =1;
+        force `CORE3_PATH.core.reset =1;
     `endif
     `ifdef BFM_MODE
-	      force `CORE3_PATH.reset =1;
-    `endif	      
-	   end		 
-	 endcase // case (MY_LOCAL_ID)
+        force `CORE3_PATH.reset =1;
+    `endif        
+     end     
+   endcase // case (MY_LOCAL_ID)
       end
    endtask
 
@@ -755,12 +733,12 @@ endtask // READ32_64_TASK
    //
    // For RISC-TESTS
    //
-   reg 	PassStatus=0;
-   reg 	FailStatus=0;   
+   reg  PassStatus=0;
+   reg  FailStatus=0;   
 
 `ifdef RISCV_TESTS
    wire pcPass, pcFail;
-   reg 	checkToHost=0;
+   reg  checkToHost=0;
 
    //
    //reg [63:0] passFail [4:0] = '{default:0};
@@ -777,10 +755,10 @@ endtask // READ32_64_TASK
    //
    always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
       case (MY_LOCAL_ID)      
-	0: dvtFlags[`DVTF_PAT_LO] = `CORE0_PATH.core.reset;
-	1: dvtFlags[`DVTF_PAT_LO] = `CORE1_PATH.core.reset;
-	2: dvtFlags[`DVTF_PAT_LO] = `CORE2_PATH.core.reset;
-	3: dvtFlags[`DVTF_PAT_LO] = `CORE3_PATH.core.reset;
+  0: dvtFlags[`DVTF_PAT_LO] = `CORE0_PATH.core.reset;
+  1: dvtFlags[`DVTF_PAT_LO] = `CORE1_PATH.core.reset;
+  2: dvtFlags[`DVTF_PAT_LO] = `CORE2_PATH.core.reset;
+  3: dvtFlags[`DVTF_PAT_LO] = `CORE3_PATH.core.reset;
       endcase
       dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
    end
@@ -814,13 +792,13 @@ endtask // READ32_64_TASK
    wire        pcStuck = !DisableStuckChecker && (stuckCnt >= 500);
    //
    assign pcPass = curValid &&
-		   ((curPc[29:0] === passFail[0][29:0]) ||
-		    ((curPc[29:0] == passFail[2][29:0]) && (passFail[2][29:0] != 0)) ||		 
-		    ((curPc[29:0] == passFail[3][29:0]) && (passFail[3][29:0] != 0) && checkToHost));
+       ((curPc[29:0] === passFail[0][29:0]) ||
+        ((curPc[29:0] == passFail[2][29:0]) && (passFail[2][29:0] != 0)) ||    
+        ((curPc[29:0] == passFail[3][29:0]) && (passFail[3][29:0] != 0) && checkToHost));
    assign pcFail = (pcStuck ||
-		   (curValid &&
-		    (((curPc[29:0] == passFail[4][29:0]) && (passFail[4][29:0] != 0)) ||
-		     (curPc[29:0] === passFail[1][29:0]))));
+       (curValid &&
+        (((curPc[29:0] == passFail[4][29:0]) && (passFail[4][29:0] != 0)) ||
+         (curPc[29:0] === passFail[1][29:0]))));
    
    always @(posedge pcStuck) begin
       `logE("PC seems to be stuck!!!! Terminating...");
@@ -828,82 +806,82 @@ endtask // READ32_64_TASK
    
    always @(posedge clk) begin
       if (pcValid) begin
-	 lastPc <= curPc;
-	 if (curPc == lastPc) stuckCnt <= stuckCnt + 1;
-	 else stuckCnt <= 0;
+   lastPc <= curPc;
+   if (curPc == lastPc) stuckCnt <= stuckCnt + 1;
+   else stuckCnt <= 0;
       end
    end
    
    //
    generate
       if (MY_LOCAL_ID == 0) begin
-	 always @(posedge pcPass or posedge  pcFail) begin
-	    if (`CORE0_PATH.core.reset == 0) begin
-	       `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
-	       PassStatus = pcPass;
-	       FailStatus = pcFail;
-	       if (!DisableStuckChecker) begin
-		  repeat (20) @(posedge clk);
-		  //
-		  force `CORE0_PATH.core.reset =1;
-	       end
-	    end
-	 end
-	 assign curPc       = `CORE0_PC;
-	 assign curValid    = `CORE0_VALID;
-	 assign coreInReset = `CORE0_PATH.core.reset;
-	 assign pcValid     = `CORE0_PATH.core.csr_io_trace_0_valid && `CORE0_PATH.core._T_1481;	 
+   always @(posedge pcPass or posedge  pcFail) begin
+      if (`CORE0_PATH.core.reset == 0) begin
+         `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
+         PassStatus = pcPass;
+         FailStatus = pcFail;
+         if (!DisableStuckChecker) begin
+      repeat (20) @(posedge clk);
+      //
+      force `CORE0_PATH.core.reset =1;
+         end
+      end
+   end
+   assign curPc       = `CORE0_PC;
+   assign curValid    = `CORE0_VALID;
+   assign coreInReset = `CORE0_PATH.core.reset;
+   assign pcValid     = `CORE0_PATH.core.csr_io_trace_0_valid && `CORE0_PATH.core._T_1481;   
       end
       else if (MY_LOCAL_ID == 1) begin
-	 always @(posedge pcPass or posedge  pcFail) begin
-	    if (`CORE1_PATH.core.reset == 0) begin	    
-	       `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
-	       PassStatus = pcPass;
-	       FailStatus = pcFail;
-	       if (!DisableStuckChecker) begin	       
-		  repeat (20) @(posedge clk);	       
-		  force `CORE1_PATH.core.reset =1;
-	       end
-	    end
-	 end
-	 assign curPc       = `CORE1_PC;
-	 assign curValid    = `CORE1_VALID;
-	 assign coreInReset = `CORE1_PATH.core.reset;
-	 assign pcValid     = `CORE1_PATH.core.csr_io_trace_0_valid && `CORE1_PATH.core._T_1481;	 	 
+   always @(posedge pcPass or posedge  pcFail) begin
+      if (`CORE1_PATH.core.reset == 0) begin      
+         `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
+         PassStatus = pcPass;
+         FailStatus = pcFail;
+         if (!DisableStuckChecker) begin         
+      repeat (20) @(posedge clk);        
+      force `CORE1_PATH.core.reset =1;
+         end
+      end
+   end
+   assign curPc       = `CORE1_PC;
+   assign curValid    = `CORE1_VALID;
+   assign coreInReset = `CORE1_PATH.core.reset;
+   assign pcValid     = `CORE1_PATH.core.csr_io_trace_0_valid && `CORE1_PATH.core._T_1481;     
       end
       else if (MY_LOCAL_ID == 2) begin
-	 always @(posedge pcPass or posedge  pcFail) begin
-	    if (`CORE2_PATH.core.reset == 0) begin	    
-	       `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
-	       PassStatus = pcPass;
-	       FailStatus = pcFail;
-	       if (!DisableStuckChecker) begin	       
-		  repeat (20) @(posedge clk);
-		  force `CORE2_PATH.core.reset =1;
-	       end
-	    end
-	 end
-	 assign curPc       = `CORE2_PC;
-	 assign curValid    = `CORE2_VALID;
-	 assign coreInReset = `CORE2_PATH.core.reset;
-	 assign pcValid     = `CORE2_PATH.core.csr_io_trace_0_valid && `CORE2_PATH.core._T_1481;	 	 
+   always @(posedge pcPass or posedge  pcFail) begin
+      if (`CORE2_PATH.core.reset == 0) begin      
+         `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
+         PassStatus = pcPass;
+         FailStatus = pcFail;
+         if (!DisableStuckChecker) begin         
+      repeat (20) @(posedge clk);
+      force `CORE2_PATH.core.reset =1;
+         end
+      end
+   end
+   assign curPc       = `CORE2_PC;
+   assign curValid    = `CORE2_VALID;
+   assign coreInReset = `CORE2_PATH.core.reset;
+   assign pcValid     = `CORE2_PATH.core.csr_io_trace_0_valid && `CORE2_PATH.core._T_1481;     
       end
       else if (MY_LOCAL_ID == 3) begin
-	 always @(posedge pcPass or posedge  pcFail) begin
-	    if (`CORE3_PATH.core.reset == 0) begin	    
-	       `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
-	       PassStatus = pcPass;
-	       FailStatus = pcFail;
-	       if (!DisableStuckChecker) begin	       
-		  repeat (20) @(posedge clk);     
-		  force `CORE3_PATH.core.reset =1;
-	       end
-	    end
-	 end
-	 assign curPc       = `CORE3_PC;
-	 assign curValid    = `CORE3_VALID;
-	 assign coreInReset = `CORE3_PATH.core.reset;
-	 assign pcValid     = `CORE3_PATH.core.csr_io_trace_0_valid && `CORE3_PATH.core._T_1481;	 	 
+   always @(posedge pcPass or posedge  pcFail) begin
+      if (`CORE3_PATH.core.reset == 0) begin      
+         `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
+         PassStatus = pcPass;
+         FailStatus = pcFail;
+         if (!DisableStuckChecker) begin         
+      repeat (20) @(posedge clk);     
+      force `CORE3_PATH.core.reset =1;
+         end
+      end
+   end
+   assign curPc       = `CORE3_PC;
+   assign curValid    = `CORE3_VALID;
+   assign coreInReset = `CORE3_PATH.core.reset;
+   assign pcValid     = `CORE3_PATH.core.csr_io_trace_0_valid && `CORE3_PATH.core._T_1481;     
       end
    endgenerate
 `endif //  `ifdef RISCV_TESTS

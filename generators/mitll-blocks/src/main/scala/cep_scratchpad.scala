@@ -41,7 +41,7 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
     )
 
     // Define the SRoT Tilelink module
-    val scratchpadModule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
+    val scratchpadmodule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
 
     // Perform the slave "attachments" to the specified bus... fragment as required
     scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {

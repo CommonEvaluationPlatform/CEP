@@ -61,8 +61,7 @@ COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
-								${CHIPYARD_BLD_DIR} \
-								${BHV_DIR}
+								${CHIPYARD_BLD_DIR}
 
 CHIPYARD_TOP_FILE_bfm		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bfm.v
 CHIPYARD_TOP_FILE_bare		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bare.v
@@ -81,16 +80,15 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_FILE_bare}
 	@touch $@
 
-# Create an ordered file list from the Chipyard outputs
-# Given the use of "addResource" for many of the CEP Chisel source,
-# SystemVerilog/Verilog files are automatically copied to CHIPYARD_BLD_DIR 
-
-# Those files added using "cat" are a file list, while those added with echo is a single file name
+# Create an ordered list of SystemVerilog/Verilog files to compile
 
 # BFM Mode
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
+	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
+	done
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
@@ -104,6 +102,9 @@ else
 # Bare Metal Mode
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
+	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
+	done
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
@@ -128,7 +129,7 @@ ${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare
 
 # Perform Questasim's optimization
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
-	${VOPT_CMD} -work ${WORK_DIR} ${DUT_VOPT_ARGS} ${WORK_DIR}.${COSIM_DUT_MODULE} -o ${CHIPYARD_TOP_MODULE_OPT}
+	${VOPT_CMD} -work ${WORK_DIR} ${DUT_VOPT_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE} -o ${CHIPYARD_TOP_MODULE_OPT}
 	touch $@
 else
 
@@ -139,6 +140,3 @@ COSIM_VLOG_ARGS += +define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 endif
-
-.PHONY: mytest
-mytest: .force ${TEST_SUITE_DIR}/_info 

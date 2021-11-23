@@ -1,5 +1,17 @@
+//--------------------------------------------------------------------------------------
+// Copyright 2021 Massachusetts Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      ptw_monitor.v
+// Program:        Common Evaluation Platform (CEP)
+// Description:    
+// Notes:          
+//
+//--------------------------------------------------------------------------------------
+
+`timescale 1ns/10ps
 `include "v2c_top.incl"
-`timescale 1ns/1ns
+
 module ptw_monitor
   (
    input 	clk,

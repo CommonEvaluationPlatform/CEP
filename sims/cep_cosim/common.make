@@ -86,8 +86,7 @@ TL_CAPTURE      			= 0
 C2C_CAPTURE     			= 0
 
 # stupid VHDL package uses work.* inside so have no choice but to use work!!
-WORK_NAME       			= ${TEST_SUITE}_work
-WORK_DIR        			= ${TEST_SUITE_DIR}/${WORK_NAME}
+WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work
 
 # more paths for C build
 SHARE_DIR					= ${COSIM_TOP_DIR}/share
@@ -138,8 +137,6 @@ RANLIB  					= /usr/bin/ranlib
 LD 							= ${GCC}
 VPP_CMD						= ${BIN_DIR}/vpp.pl
 
-# Some variables 
-SIM_DEPEND_TARGET			= .${WORK_NAME}_dependList
 
 # Some derived switches
 DUT_VSIM_DO_FILE			= ${TEST_DIR}/vsim.do

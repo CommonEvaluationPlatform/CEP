@@ -9,58 +9,30 @@
 //
 //************************************************************************
 
-//
-// Top DVT level testbench
-//
 `timescale 1ns/10ps
-`include "v2c_cmds.incl"
-`include "cep_adrMap.incl"
+`include "suite_config.v"
 `include "cep_hierMap.incl"
-`include "config.v"
+`include "cep_adrMap.incl"
+`include "v2c_cmds.incl"
+`include "v2c_top.incl"
+`include "sys_common.incl"
+`include "dump_control.incl"      
+
 module v2c_top (
-   input      clk,
-   output reg [31:0] __simTime=0
+   input        clk
 );
 
-   `include "v2c_top.incl"
-   
-   integer vpp_cmd;
-   
-   // register myself
-   reg 	   done__;
-   //
-   // Open input/output pipes with the outside world
-   //
-   always @(posedge clk) __simTime = __simTime + 1;
-   //
-   //
-   // Debug stuff
-   //
-   reg 	      debug;
-   reg 	      ipc_start;
-   //
-   // Save/Restart Support
-   //
-   reg 	      waitForRestartFlag;
-   initial begin
-      waitForRestartFlag = 0;
-   end
+  // WRITE64_64
+  `ifdef USE_DPI
+    `define SHIPC_WRITE64_64_TASK WRITE64_64_DPI()
+      task   WRITE64_64_DPI;
+      begin
+        cep_tb.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
+      end
+    endtask // WRITE64_64_TASK
+  `endif   
 
-   //
-   // ---------------------------   
-   // WRITE64_64
-   // ---------------------------
-   //
-`ifdef USE_DPI
-`define SHIPC_WRITE64_64_TASK WRITE64_64_DPI()
-task   WRITE64_64_DPI;
-begin
-   //`logI("%m a=%x d=%x",a,d);
-   //
-   cep_tb.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
-end
-endtask // WRITE64_64_TASK
-`endif   
+
    //
    // ---------------------------   
    // READ64_64
@@ -153,8 +125,6 @@ endtask // READ32_64_TASK
      MY_SLOT_ID = `SYSTEM_SLOT_ID,
      MY_LOCAL_ID = `SYSTEM_CPU_ID;
 `define SHIPC_CLK clk
-`include "sys_common.incl"
-`include "dump_control.incl"      
    //
    initial begin
       __shIpc_EnableMode = 0;
@@ -203,15 +173,15 @@ endtask // READ32_64_TASK
    
    task ResetAllCores;
       begin
-	 force `CORE0_PATH.reset = 1;
-	 force `CORE1_PATH.reset = 1;
-	 force `CORE2_PATH.reset = 1;
-	 force `CORE3_PATH.reset = 1;
-	 repeat (2) @(posedge clk);
-	 release `CORE0_PATH.reset;	 
-	 release `CORE1_PATH.reset;	 
-	 release `CORE2_PATH.reset;	 
-	 release `CORE3_PATH.reset;	 
+   force `CORE0_PATH.reset = 1;
+   force `CORE1_PATH.reset = 1;
+   force `CORE2_PATH.reset = 1;
+   force `CORE3_PATH.reset = 1;
+   repeat (2) @(posedge clk);
+   release `CORE0_PATH.reset;  
+   release `CORE1_PATH.reset;  
+   release `CORE2_PATH.reset;  
+   release `CORE3_PATH.reset;  
       end
    endtask // for
    
@@ -235,46 +205,46 @@ endtask // READ32_64_TASK
       force `CORE3_PATH.core.reset =1;      
       //
       for (int c=0;c<4;c=c+1) begin
-	 if (coreActiveMask[c]) begin
-	    case (c)
-	      0: begin
-		 `logI("Releasing CORE0 Reset....");
-		 //cep_tb.putback_memory_used();
-		 if (virtualMode) begin
-		    ResetAllCores();
-		 end
-		 release `CORE0_PATH.core.reset; 
-		 @(posedge (`CORE0_DRIVER.PassStatus || `CORE0_DRIVER.FailStatus));
-	      end
-	      1: begin
-		 `logI("Releasing CORE1 Reset....");	
-		 //cep_tb.putback_memory_used();
-		 if (virtualMode) begin
-		    ResetAllCores();
-		 end		 
-		 release `CORE1_PATH.core.reset;
-		 @(posedge (`CORE1_DRIVER.PassStatus || `CORE1_DRIVER.FailStatus));
-	      end 
-	      2: begin
-		 `logI("Releasing CORE2 Reset....");	
-		 //cep_tb.putback_memory_used();
-		 if (virtualMode) begin
-		    ResetAllCores();
-		 end		 
-		 release `CORE2_PATH.core.reset;
-		 @(posedge (`CORE2_DRIVER.PassStatus || `CORE2_DRIVER.FailStatus));
-	      end
-	      3: begin
-		 `logI("Releasing CORE3 Reset....");	
-		 //cep_tb.putback_memory_used();
-		 if (virtualMode) begin
-		    ResetAllCores();
-		 end		 
-		 release `CORE3_PATH.core.reset;
-		 @(posedge (`CORE3_DRIVER.PassStatus || `CORE3_DRIVER.FailStatus));
-	      end		   
-	    endcase
-	 end
+   if (coreActiveMask[c]) begin
+      case (c)
+        0: begin
+     `logI("Releasing CORE0 Reset....");
+     //cep_tb.putback_memory_used();
+     if (virtualMode) begin
+        ResetAllCores();
+     end
+     release `CORE0_PATH.core.reset; 
+     @(posedge (`CORE0_DRIVER.PassStatus || `CORE0_DRIVER.FailStatus));
+        end
+        1: begin
+     `logI("Releasing CORE1 Reset....");  
+     //cep_tb.putback_memory_used();
+     if (virtualMode) begin
+        ResetAllCores();
+     end     
+     release `CORE1_PATH.core.reset;
+     @(posedge (`CORE1_DRIVER.PassStatus || `CORE1_DRIVER.FailStatus));
+        end 
+        2: begin
+     `logI("Releasing CORE2 Reset....");  
+     //cep_tb.putback_memory_used();
+     if (virtualMode) begin
+        ResetAllCores();
+     end     
+     release `CORE2_PATH.core.reset;
+     @(posedge (`CORE2_DRIVER.PassStatus || `CORE2_DRIVER.FailStatus));
+        end
+        3: begin
+     `logI("Releasing CORE3 Reset....");  
+     //cep_tb.putback_memory_used();
+     if (virtualMode) begin
+        ResetAllCores();
+     end     
+     release `CORE3_PATH.core.reset;
+     @(posedge (`CORE3_DRIVER.PassStatus || `CORE3_DRIVER.FailStatus));
+        end      
+      endcase
+   end
       end // for (int c=0;c<4;c=c+1)
    end // always @ (posedge singelThread)
 `endif
