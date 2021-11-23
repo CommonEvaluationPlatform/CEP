@@ -4,15 +4,36 @@
 #//
 #// File Name:      cep_buildSW.make
 #// Program:        Common Evaluation Platform (CEP)
-#// Description:    Part of Makefile structure
+#// Description:    CEP CoSimulation - Called by common.make
 #// Notes:          
 #//
 #//************************************************************************
+
+
+# BFM Mode
+ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
+COMMON_CFLAGS	        += -DBFM_MODE
 #
-# ---------------------------------
-# Flags
-# ---------------------------------
-#
+else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
+COMMON_CFLAGS	        += -DBARE_MODE
+RISCV_WRAPPER           = ./riscv_wrapper.elf
+endif
+
+# Variables related to the RISCV Toolset (RISCV must already be defined)
+RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
+RISCV_OBJDUMP     		:= ${RISCV}/bin/riscv64-unknown-elf-objdump
+RISCV_HEXDUMP     		= /usr/bin/hexdump
+RISCV_AR          		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ar
+RISCV_RANLIB      		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ranlib
+
+# Flags related to RISCV Virtual Tests
+RISCV_VIRT_CFLAGS  		+= -march=rv64g -mabi=lp64 -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DENTROPY=0xdb1550c -static 
+RISCV_VIRT_LFLAGS  		+= -T${XX_SIM_DIR}/drivers/virtual/link.ld
+RISCV_VIRT_CFILES  		+= ${XX_SIM_DIR}/drivers/virtual/*.c ${XX_SIM_DIR}/drivers/virtual/multi_entry.S 
+RISCV_VIRT_INC     		+= -I${XX_SIM_DIR}/drivers/virtual -I${RISCV_TEST_DIR}/isa/macros/scalar 
+
+BARE_SRC_DIR    		= ${SIM_DIR}/drivers/bare
+
 ifeq (${NOWAVE},1)
 COMMON_CFLAGS	        += -DNOWAVE
 RISCV_BARE_CFLAG        += -DNOWAVE
@@ -25,16 +46,6 @@ endif
 
 COMMON_CFLAGS	        += -DCAPTURE_CMD_SEQUENCE=${TL_CAPTURE}
 COMMON_CFLAGS	        += -DC2C_CAPTURE=${C2C_CAPTURE}
-
-# make
-ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
-COMMON_CFLAGS	        += -DBFM_MODE
-#
-else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
-#COMMON_CFLAGS	        += -DBARE_MODE
-else
-ERROR_MESSAGE   = "DUT_SIM_MODE=${DUT_SIM_MODE} is either not supported or please check spelling"
-endif
 
 DRIVER_DIR_LIST := ${SIM_DIR}/drivers/diag	\
 		${SIM_DIR}/drivers/cep_tests    \
@@ -66,6 +77,10 @@ RISCV_BARE_LDFILE  = ${BARE_SRC_DIR}/link.ld
 
 THREAD_SWITCH  = -lpthread -lcryptopp
 LDFLAGS        =
+
+
+%.hex: ${INC_DIR}/cep_adrMap.h %.c
+	(cd ${RISCV_BARE_BOOT_DIR}; make clean; make;)
 
 
 #
@@ -361,23 +376,6 @@ c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${VERILOG_DEFINE_LIST}
 
 %.o: %.cc ${LOCAL_H_FILES} ${LIB_DIR}/v2c_lib.a  ${VERILOG_DEFINE_LIST} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
-
-
-#
-# -------------------------------------------
-# Just to make sure all things are OK to go ahead and "make"
-# -------------------------------------------
-#
-ifeq "$(findstring OK,${ERROR_MESSAGE})" "OK"
-${BLD_DIR}/.is_checked: 
-	@echo "Checking for proper enviroment settings = ${ERROR_MESSAGE}"
-	touch $@
-else
-${BLD_DIR}/.is_checked: .force
-	@echo "ERROR: **** ${ERROR_MESSAGE} ****"
-	@rm -rf ${BLD_DIR}/.is_checked
-	@exit 1
-endif
 
 #
 # -------------------------------------------

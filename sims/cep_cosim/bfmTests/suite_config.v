@@ -1,11 +1,9 @@
 //************************************************************************
 // Copyright 2021 Massachusetts Institute of Technology
 //
-// File Name:      config.v
+// File Name:      suite_config.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    Testbench Defines for bareMetaTests category
+// Description:    Testbench Defines for the BFM Test Suite
 // Notes:          
 //
 //************************************************************************
-`timescale 1ns/100ps
-`define TB_NAME cep_tb

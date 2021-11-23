@@ -13,16 +13,37 @@
 ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED	= 1
 
+# Set default tool locations
+QUESTASIM_PATH				?= /opt/questa-2019.1/questasim/bin
+
+$(info )
+$(info CEP_COSIM: ----------------------------------------------------------------------)
+$(info CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           )
+$(info CEP_COSIM: ----------------------------------------------------------------------)
+
 # RISCV *must* be defined
 ifndef RISCV
-$(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 else
-$(info Running with RISCV=$(RISCV))
+$(info CEP_COSIM: Running with RISCV = $(RISCV))
 endif
 
-# Set default tool locations
-VIVADO_PATH					?= /opt/Xilinx/Vivado/2018.3
-QUESTASIM_PATH				?= /opt/questa-2019.1/questasim/bin
+# Perform DUT_SIM_MODE Check
+ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
+$(info CEP_COSIM: Running in BFM Mode)
+DUT_SIM_MODE = BFM_MODE
+else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
+$(info CEP_COSIM: Running in Bare Metal Mode)
+DUT_SIM_MODE = BARE_MODE
+else
+$(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
+endif
+
+# Validate the Chipyard verilog has been build by looking for the generated makefile
+ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
+$(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(COSIM_TOP_DIR)")
+endif
+$(info )
 
 # Include the file that contains info about the chipyard build
 include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
@@ -48,9 +69,6 @@ endif
 # The following DEFINES control how the software is
 # compiled and if will be overriden by lower level
 # Makefiles as needed.
-
-# DUT_SIM_MODE must either be BFM or BARE
-DUT_SIM_MODE				= BFM
 
 # Enables virtual memory support when operating in BARE mode
 DUT_IN_VIRTUAL  			= 0
@@ -84,8 +102,8 @@ LIB_DIR						= ${COSIM_TOP_DIR}/lib
 # can be override by other Makefile
 XX_LIB_DIR					?= ${LIB_DIR}
 V2C_TAB_FILE				?= ${PLI_DIR}/v2c.tab
-BUILD_HW_MAKE_FILE			?= ${COSIM_TOP_DIR}/cep_buildHW.make
-BUILD_SW_MAKE_FILE			?= ${COSIM_TOP_DIR}/cep_buildSW.make
+BUILD_HW_MAKEFILE			?= ${COSIM_TOP_DIR}/cep_buildHW.make
+BUILD_SW_MAKEFILE			?= ${COSIM_TOP_DIR}/cep_buildSW.make
 CADENCE_MAKE_FILE 			?= ${COSIM_TOP_DIR}/cadence.make
 VPP_LIB 					?= ${XX_LIB_DIR}/libvpp.so
 RISCV_LIB 					?= ${XX_LIB_DIR}/riscv_lib.a
@@ -105,46 +123,45 @@ VLIB_CMD					= ${QUESTASIM_PATH}/vlib
 VMAP_CMD					= ${QUESTASIM_PATH}/vmap
 VMAKE_CMD					= ${QUESTASIM_PATH}/vmake
 VCOVER_CMD					= ${QUESTASIM_PATH}/vcover
+
+# Quick sanity check if vsim exists
+ifeq (,$(shell which ${VSIM_CMD}))
+$(error CEP_COSIM: vsim not found.  Check QUESTASIM_PATH)
+endif
+
 endif
 
 # C/C+ tools
 GCC     					= /usr/bin/g++
 AR 							= /usr/bin/ar
 RANLIB  					= /usr/bin/ranlib
-RM    						= rm -f
 LD 							= ${GCC}
 VPP_CMD						= ${BIN_DIR}/vpp.pl
 
 # Some variables 
-ERROR_MESSAGE				= "OK"
 SIM_DEPEND_TARGET			= .${WORK_NAME}_dependList
 
 # Some derived switches
 DUT_VSIM_DO_FILE			= ${TEST_DIR}/vsim.do
 
-# Add switches based on environmental arguments
-ifeq (${PROFILE},1)
-COSIM_DUT_VSIM_ARGS			+= -autoprofile=${TEST_NAME}_profile
-endif
 
-COSIM_DUT_COVERAGE_PATH		= ${TEST_SUITE_DIR}/coverage
-ifeq (${COVERAGE},1)
-COSIM_DUT_VSIM_ARGS			+= -coverage 
-COSIM_DUT_VLOG_ARGS			+= +cover=sbceft +define+COVERAGE 
-COSIM_DUT_VOPT_ARGS			+= +cover=sbceft
-endif
-
-# Disable wave capturing
-ifeq (${NOWAVE},1)
-DUT_VLOG_ARGS				+= +define+NOWAVE
-endif
-
-# Use our gcc instead of builtin form questa
-DUT_VSIM_ARGS	  			+= -cpppath ${GCC}
+COSIM_COVERAGE_PATH			= ${TEST_SUITE_DIR}/coverage
 
 # Include both the Hardware and Software makefiles
-include ${BUILD_HW_MAKE_FILE}
+include ${BUILD_HW_MAKEFILE}
 #include ${BUILD_SW_MAKE_FILE}
+
+# Error Checking - If error message is not OK, exit
+ifeq "$(findstring OK,${ERROR_MESSAGE})" "OK"
+${BLD_DIR}/.is_checked: 
+	@echo "Checking for proper enviroment settings = ${ERROR_MESSAGE}"
+	touch $@
+else
+${BLD_DIR}/.is_checked: .force
+	@echo "ERROR: **** ${ERROR_MESSAGE} ****"
+	@rm -rf ${BLD_DIR}/.is_checked
+	@exit 1
+endif
 
 # Include the Cadence toolset specific file, if enabled
 ifeq (${CADENCE},1)
@@ -215,11 +232,7 @@ ${TEST_DIR}/vsim.do:
 	echo "$$VSIM_DO_BODY" > $@; \
 	fi
 
-#
-# -------------------------------------------
 # To detect if any important flag has changed since last run
-# -------------------------------------------
-#
 PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${COVERAGE}_${PROFILE}
 
 #
@@ -309,7 +322,8 @@ endif
 
 clean: cleanAll
 
-cleanAll:: cleanLibs
+#cleanAll: cleanLibs
+cleanAll:
 	-rm -rf ${COSIM_TOP_DIR}/*/*_work ${COSIM_TOP_DIR}/*/.*work_dependList.make
 	-rm -rf ${COSIM_TOP_DIR}/*/*.o* ${COSIM_TOP_DIR}/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*.o*
 	-rm -rf ${COSIM_TOP_DIR}/*/*/status
@@ -363,7 +377,7 @@ endef
 export MAKE_USAGE_HELP_BODY
 
 usage:
-	-echo "$$MAKE_USAGE_HELP_BODY"
+	@echo "$$MAKE_USAGE_HELP_BODY"
 
 # ifdef $(COMMON_MAKE_CALLED)
 endif

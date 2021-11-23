@@ -10,7 +10,6 @@
 
 # override anything here before calling the top 
 override DUT_SIM_MODE			= BFM
-override DUT_TOP_MODULE 		= cep_tb
 
 # Call root cosimulation common.make
 include ${COSIM_TOP_DIR}/common.make

@@ -24,10 +24,10 @@ int RSA_fd;
 always @(posedge srot_start_capture) begin
    $display("Enable cycle-by-cycle capturing of RSA stimulus");	    
    // wait until it gets out of reset
-   if (cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.rst)
-     @(negedge cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.rst);
+   if (`RSA_PATH.modexp_core_mock_tss_inst.rst)
+     @(negedge `RSA_PATH.modexp_core_mock_tss_inst.rst);
    // next clock
-   @(posedge cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.clk);
+   @(posedge `RSA_PATH.modexp_core_mock_tss_inst.clk);
    RSA_fd=$fopen("../../drivers/vectors/rsa_stimulus.txt","w");
    captureRSA_Stimulus();   
 end	
@@ -39,7 +39,7 @@ end
 always @(negedge c2c_capture_enable[`DVTF_RSA_CAPTURE_EN_BIT]) begin
    if (CaptureRSA_vector) begin
       CaptureRSA_vector=0;
-      repeat (2) @(posedge cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.clk);
+      repeat (2) @(posedge `RSA_PATH.modexp_core_mock_tss_inst.clk);
       $display("Stop Capturing RSA stimulus");
       $fwrite(RSA_fd,"};\n");
       $fwrite(RSA_fd,"`define RSA_SAMPLE_COUNT %d\n",RSA_sampleNum);      
@@ -100,7 +100,7 @@ end
 	 //
 	 // wait until valid in to interleaver
 	 while (srot_start_capture) begin
-	    @(negedge cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk);
+	    @(negedge `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.clk);
 	    if (CaptureRSA_vector || !srot_stop_capture) begin
 	    // MUST align to HEX number if _ is used!!!
 	    if (RSA_sampleNum>0) begin
@@ -109,37 +109,37 @@ end
 	       $fwrite(RSA_fd,"    ");		 
             end
 	    $fwrite(RSA_fd,"'h%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x\n",
-	    	    {1'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_key_ready,
-		     cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_key_complete,
-		     cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_clear_key_ack},
-		    {2'b0, cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_key_valid,
-		     cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_clear_key},
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.llkid_key_data[63:0],
+	    	    {1'b0,`RSA_PATH.modexp_core_mock_tss_inst.llkid_key_ready,
+		     `RSA_PATH.modexp_core_mock_tss_inst.llkid_key_complete,
+		     `RSA_PATH.modexp_core_mock_tss_inst.llkid_clear_key_ack},
+		    {2'b0, `RSA_PATH.modexp_core_mock_tss_inst.llkid_key_valid,
+		     `RSA_PATH.modexp_core_mock_tss_inst.llkid_clear_key},
+		    `RSA_PATH.modexp_core_mock_tss_inst.llkid_key_data[63:0],
 		    //
 
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_cs},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_rst},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_wr},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_cs},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_rst},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_wr},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_cs},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_rst},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_wr},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_cs},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_rst},
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.start},
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_length[7:0],	 
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_length[12:0]},
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_write_data[31:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_write_data[31:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_write_data[31:0],
-		    {3'b0,cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.ready},	 	 
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.cycles[63:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_read_data[31:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_read_data[31:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_read_data[31:0],
-		    cep_tb.fpga.topDesign.topMod.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_read_data[31:0]
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_cs},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_rst},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_wr},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_cs},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_rst},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_wr},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_cs},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_rst},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_wr},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_cs},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_rst},
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.start},
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_length[7:0],	 
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_length[12:0]},
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_write_data[31:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_write_data[31:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_write_data[31:0],
+		    {3'b0,`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.ready},	 	 
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.cycles[63:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponent_mem_api_read_data[31:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.message_mem_api_read_data[31:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.modulus_mem_api_read_data[31:0],
+		    `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.result_mem_api_read_data[31:0]
 		    );
 
 	    RSA_sampleNum++;

@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      idft_capture.incl
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -25,10 +25,10 @@ int IDFT_fd;
 always @(posedge srot_start_capture) begin
    $display("Enable cycle-by-cycle capturing of IDFT stimulus");	    
    // wait until it gets out of reset
-   if (cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.reset)
-     @(negedge cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.reset);
+   if (`IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.reset)
+     @(negedge `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.reset);
    // next clock
-   @(posedge cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.clk);
+   @(posedge `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.clk);
    IDFT_fd=$fopen("../../drivers/vectors/idft_stimulus.txt","w");
    captureIDFT_Stimulus();   
 end	
@@ -40,7 +40,7 @@ end
 always @(negedge c2c_capture_enable[`DVTF_IDFT_CAPTURE_EN_BIT]) begin
    if (CaptureIDFT_vector) begin
       CaptureIDFT_vector=0;
-      repeat (2) @(posedge cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.clk);
+      repeat (2) @(posedge `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.clk);
       $display("Stop Capturing IDFT stimulus");
       $fwrite(IDFT_fd,"};\n");
       $fwrite(IDFT_fd,"`define IDFT_SAMPLE_COUNT %d\n",IDFT_sampleNum);      
@@ -87,7 +87,7 @@ end
 	 //
 	 // wait until valid in to interleaver
 	 while (srot_start_capture) begin
-	    @(negedge cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.clk);
+	    @(negedge `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.clk);
 	    if (CaptureIDFT_vector || !srot_stop_capture) begin
 	    // MUST align to HEX number if _ is used!!!
 	    if (IDFT_sampleNum>0) begin
@@ -97,24 +97,24 @@ end
             end
 	    // MUST align to HEX number if _ is used!!!
 	    $fwrite(IDFT_fd,"'h%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x_%x\n",
-	    	    {1'b0,cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_key_ready,
-		     cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_key_complete,
-		     cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_clear_key_ack},
-		    {2'b0, cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_key_valid,
-		     cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_clear_key},
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.llkid_key_data[63:0],
+	    	    {1'b0,`IDFT_PATH.idft_top_mock_tss_inst.llkid_key_ready,
+		     `IDFT_PATH.idft_top_mock_tss_inst.llkid_key_complete,
+		     `IDFT_PATH.idft_top_mock_tss_inst.llkid_clear_key_ack},
+		    {2'b0, `IDFT_PATH.idft_top_mock_tss_inst.llkid_key_valid,
+		     `IDFT_PATH.idft_top_mock_tss_inst.llkid_clear_key},
+		    `IDFT_PATH.idft_top_mock_tss_inst.llkid_key_data[63:0],
 		    //
 
-		    {3'b0,cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.next},
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.X0[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.X1[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.X2[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.X3[15:0],
-		    {3'b0,cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.next_out},
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.Y0[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.Y1[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.Y2[15:0],
-		    cep_tb.fpga.topDesign.topMod.idftmodule.idft_top_mock_tss_inst.idft_top_inst.Y3[15:0]);
+		    {3'b0,`IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.next},
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.X0[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.X1[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.X2[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.X3[15:0],
+		    {3'b0,`IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.next_out},
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.Y0[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.Y1[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.Y2[15:0],
+		    `IDFT_PATH.idft_top_mock_tss_inst.idft_top_inst.Y3[15:0]);
 	    IDFT_sampleNum++;
 	    end
 	 end // while (1)

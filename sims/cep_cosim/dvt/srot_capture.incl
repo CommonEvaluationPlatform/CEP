@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      srot_capture.incl
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -11,7 +11,6 @@
 //
 // Capture SRoT to slave's TL transaction
 //
-`define SROT_PATH cep_tb.fpga.topDesign.topMod.srotModule
 reg CaptureSROT_vector=0;
 int SROT_sampleNum = 0;
 int SROT_fd;

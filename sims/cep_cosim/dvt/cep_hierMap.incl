@@ -10,15 +10,11 @@
 //
 //--------------------------------------------------------------------------------------
 
-`define DVT_PATH            `TB_NAME.v2c_inst
-`define WAIT4RESTART_FLAG   `TB_NAME.waitForRestartFlag
-`define DVT_FLAG            `TB_NAME.v2cd.dvtFlags
-`define DUT_TOP_LEVEL       `TB_NAME.ChipTop_inst
+`ifndef CEP_HIERMAP_INCL
+`define CEP_HIERMAP_INCL
 
-`define FIR_PATH            `DUT_TOP_LEVEL.system.firmodule
-`define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
-`define MODEXP_CLK          `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk
-`define MODEXP_EXP_MODE_REG `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
+`define DVT_FLAG            `COSIM_TB_TOP_MODULE.v2cd.dvtFlags
+`define DUT_TOP_LEVEL       `COSIM_TB_TOP_MODULE.`CHIPYARD_TOP_MODULE_inst
 
 // Path to the four RocketTile Cores within the Chisel-generate verilog hiearchy
 `define CORE0_PATH          `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
@@ -42,10 +38,10 @@
 `define CORE2_TL_PATH       `CORE2_PATH.tl_master
 `define CORE3_TL_PATH       `CORE3_PATH.tl_master
 
-`define CORE0_DRIVER        `TB_NAME.driverX[0].driver
-`define CORE1_DRIVER        `TB_NAME.driverX[1].driver
-`define CORE2_DRIVER        `TB_NAME.driverX[2].driver
-`define CORE3_DRIVER        `TB_NAME.driverX[3].driver
+`define CORE0_DRIVER        `COSIM_TB_TOP_MODULE.driverX[0].driver
+`define CORE1_DRIVER        `COSIM_TB_TOP_MODULE.driverX[1].driver
+`define CORE2_DRIVER        `COSIM_TB_TOP_MODULE.driverX[2].driver
+`define CORE3_DRIVER        `COSIM_TB_TOP_MODULE.driverX[3].driver
 
 `define PBUS_RESET          `DUT_TOP_LEVEL.system.pbus_reset
 `define PBUS_CLOCK          `DUT_TOP_LEVEL.system.pbus_clock
@@ -54,6 +50,23 @@
 // in bare metal
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
+// Paths to the CEP modules for capturing of testvectors for the unit-simulations
+`define SROT_PATH 			`DUT_TOP_LEVEL.system.srotModule
+`define SHA256_PATH 		`DUT_TOP_LEVEL.system.sha256module
+`define RSA_PATH            `DUT_TOP_LEVEL.system.rsamodule
+`define MD5_PATH 			`DUT_TOP_LEVEL.system.md5module
+`define IIR_PATH			`DUT_TOP_LEVEL.system.iirmodule
+`define IDFT_PATH 			`DUT_TOP_LEVEL.system.idftmodule
+`define GPS_PATH 			`DUT_TOP_LEVEL.system.gpsmodule
+`define FIR_PATH 			`DUT_TOP_LEVEL.system.firmodule
+`define DFT_PATH 			`DUT_TOP_LEVEL.system.dftmodule
+`define DES3_PATH 			`DUT_TOP_LEVEL.system.des3module
+`define AES_PATH 			`DUT_TOP_LEVEL.system.aesmodule
+
+`define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
+`define MODEXP_CLK          `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk
+`define MODEXP_EXP_MODE_REG `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
 
 
 
+`endif // CEP_HIERMAP_INCL
