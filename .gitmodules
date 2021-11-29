@@ -143,3 +143,6 @@
 [submodule "opentitan"]
 	path = opentitan
 	url = https://github.com/lowRISC/opentitan
+[submodule "CEP_Chipyard_ASIC"]
+	path = CEP_Chipyard_ASIC
+	url = https://llcad-github.llan.ll.mit.edu/HSS/CEP_Chipyard_ASIC.git
