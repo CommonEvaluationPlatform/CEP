@@ -27,7 +27,7 @@ module cep_driver #(
 
   // Overriden at instantiation
   parameter MY_SLOT_ID  = 4'h0;
-  parameter MY_LOCAL_ID = 4'h0;
+  parameter MY_CPU_ID = 4'h0;
 
   reg [255:0]         dvtFlags = 0;
   reg [255:0]         r_data;
@@ -39,13 +39,16 @@ module cep_driver #(
   integer             cnt;
   string              str;
   
+  // As external memory has been removed the calibration is ALWAYS complete  
+  always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b1;
+
   // printf support function
   always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
     printf_adr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
 
     // fill the buffer
-    cep_tb.read_ddr3_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
-    cep_tb.read_ddr3_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
+    `COSIM_TB_TOP_MODULE.read_ddr3_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
+    `COSIM_TB_TOP_MODULE.read_ddr3_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
  
     // left justify
     clear = 0;
@@ -72,7 +75,7 @@ module cep_driver #(
   end // end always
    
 
-   always @(*) dvtFlags[`DVTF_PROGRAM_LOADED]        = cep_tb.program_loaded;
+   always @(*) dvtFlags[`DVTF_PROGRAM_LOADED]        = `COSIM_TB_TOP_MODULE.program_loaded;
 
    reg backdoor_enable = 0;
    always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
@@ -82,7 +85,7 @@ module cep_driver #(
    end
 
    always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
-      if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_LOCAL_ID) begin
+      if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
    force_core_in_reset();
       end
       dvtFlags[`DVTF_PUT_CORE_IN_RESET] = 0;
@@ -195,24 +198,24 @@ begin
    bits_size = $clog2(inBox.mAdrHi << 3); // unit of 8 bytes
    
 `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
      0: begin
   for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
-  `CORE0_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  `CORE0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      1: begin
   for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
-  `CORE1_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  `CORE1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      2: begin
   for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
-  `CORE2_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  `CORE2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end
      3: begin
   for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
-  `CORE3_TL_PATH.tl_a_ul_write_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+  `CORE3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
      end     
-   endcase // case (MY_LOCAL_ID)
+   endcase // case (MY_CPU_ID)
 `endif
 end
 endtask // WRITE64_BURST_TASK
@@ -233,11 +236,11 @@ endtask // WRITE64_BURST_TASK
    bits_size = 3;
    
  `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
-     0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-     1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-     2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-     3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+   case (MY_CPU_ID)
+     0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+     3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
    endcase  
    
  `endif
@@ -257,18 +260,18 @@ begin
    //
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
+      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
+      endcase // case (MY_CPU_ID)
    end // else: !if(backdoor_enable)
 `else
-   cep_tb.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);               
+   `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);               
 `endif
 end
 endtask // WRITE64_64_TASK
@@ -289,24 +292,24 @@ task READ64_BURST_DPI;
    bits_size = $clog2(inBox.mAdrHi << 3); // unit of 8 bytes
    
 `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
      0: begin
-  `CORE0_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  `CORE0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
   for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
      end
      1: begin
-  `CORE1_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  `CORE1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
   for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];  
      end
      2: begin
-  `CORE2_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  `CORE2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
   for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];  
      end
      3: begin
-  `CORE3_TL_PATH.tl_a_ul_read_burst(MY_LOCAL_ID & 'h1, inBox.mAdr,bits_size);
+  `CORE3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
   for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];  
      end     
-   endcase // case (MY_LOCAL_ID)
+   endcase // case (MY_CPU_ID)
 `endif
 end
 endtask // WRITE64_BURST_TASK
@@ -323,18 +326,18 @@ task READ64_64_DPI;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.read_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);      
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);      
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
+      endcase // case (MY_CPU_ID)
    end
 `else
-      cep_tb.read_ddr3_backdoor(inBox.mAdr, inBox.mPar[0]);
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr, inBox.mPar[0]);
 `endif // !`ifdef BFM_MODE
       //`logI("%m a=%x d=%x",a,d);
    end
@@ -357,18 +360,18 @@ begin
    `logI("%m a=%x d=%x",inBox.mAdr,d);   
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.write_ddr3_backdoor(inBox.mAdr,d);
+      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,d);
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);
-  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, inBox.mAdr,d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
+      endcase // case (MY_CPU_ID)
    end // else: !if(backdoor_enable)
 `else
-   cep_tb.write_ddr3_backdoor(inBox.mAdr,d);               
+   `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,d);               
 `endif
 end
 endtask // WRITE32_64_TASK
@@ -385,12 +388,12 @@ begin
    byte8 = inBox.mPar[0] & 'hff;
    d = {8{byte8}};
 `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
-     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,0);
-     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,0);
-     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,0);
-     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,0);     
-   endcase // case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
+     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
+   endcase // case (MY_CPU_ID)
 `endif
 end
 endtask // WRITE32_8_TASK
@@ -408,12 +411,12 @@ begin
    word = inBox.mPar[0] & 'hffff;
    d = {4{word}};
 `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
-     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,1);
-     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,1);
-     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,1);
-     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,1);     
-   endcase // case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
+     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
+   endcase // case (MY_CPU_ID)
 `endif
 end
 endtask // WRITE32_16_TASK
@@ -431,12 +434,12 @@ begin
    d[63:32] = inBox.mPar[0];
    d[31:0] = inBox.mPar[0];   
 `ifdef BFM_MODE
-   case (MY_LOCAL_ID)
-     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,2);
-     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,2);
-     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,2);
-     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_LOCAL_ID & 'h1, inBox.mAdr,d,mask,2);     
-   endcase // case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
+     0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+     1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+     2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+     3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
+   endcase // case (MY_CPU_ID)
 `endif
 end
 endtask // WRITE32_32_TASK
@@ -453,15 +456,15 @@ begin
    //
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.write_ddr3_backdoor(a,d);      
+      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(a,d);      
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-  1: `CORE1_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-  2: `CORE2_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);
-  3: `CORE3_TL_PATH.tl_x_ul_write(MY_LOCAL_ID & 'h1, a, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
+  1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
+  2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
+  3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);     
+      endcase // case (MY_CPU_ID)
    end // else: !if(backdoor_enable)
 `endif
 end
@@ -480,18 +483,18 @@ reg [63:0] d;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.read_ddr3_backdoor(inBox.mAdr,d);      
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,d);      
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);
-  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, inBox.mAdr, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
+      endcase // case (MY_CPU_ID)
    end
 `else
-      cep_tb.read_ddr3_backdoor(inBox.mAdr,d);            
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,d);            
 `endif // !`ifdef BFM_MODE
       
       inBox.mPar[0] = d[63:32];
@@ -507,12 +510,12 @@ task READ32_8_DPI;
    begin
       mask = 1 << inBox.mAdr[2:0];
 `ifdef BFM_MODE
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);
-  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 0, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
+      endcase // case (MY_CPU_ID)
       case (inBox.mAdr[2:0])
   0 : inBox.mPar[0] = d[(8*0)+7:(8*0)];
   1 : inBox.mPar[0] = d[(8*1)+7:(8*1)];
@@ -535,12 +538,12 @@ task READ32_16_DPI;
    begin
       mask = 3 << (inBox.mAdr[2:1]*2);      
 `ifdef BFM_MODE
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);
-  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 1, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
+      endcase // case (MY_CPU_ID)
       case (inBox.mAdr[2:1])
   0 : inBox.mPar[0] = d[(16*0)+15:(16*0)];
   1 : inBox.mPar[0] = d[(16*1)+15:(16*1)];
@@ -560,12 +563,12 @@ task READ32_32_DPI;
       if (inBox.mAdr[2]) mask = 'hF0;
       else mask = 'h0F;      
 `ifdef BFM_MODE
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);
-  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_LOCAL_ID & 'h1, inBox.mAdr, mask, 2, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
+      endcase // case (MY_CPU_ID)
       inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
 `endif      
       //`logI("%m a=%x d=%x",a,d);
@@ -581,18 +584,18 @@ output [63:0] d;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      cep_tb.read_ddr3_backdoor(a,d);      
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(a,d);      
    end
    else begin
-      case (MY_LOCAL_ID)
-  0: `CORE0_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-  1: `CORE1_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-  2: `CORE2_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);
-  3: `CORE3_TL_PATH.tl_x_ul_read(MY_LOCAL_ID & 'h1, a, d);     
-      endcase // case (MY_LOCAL_ID)
+      case (MY_CPU_ID)
+  0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
+  1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
+  2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
+  3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);     
+      endcase // case (MY_CPU_ID)
    end
 `else
-      cep_tb.read_ddr3_backdoor(a,d);            
+      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(a,d);            
 `endif
       //`logI("%m a=%x d=%x",a,d);
    end
@@ -610,7 +613,7 @@ endtask // READ32_64_TASK
   // SHIPC Support Common Codes
   // =============================================
   //
-`define SHIPC_XACTOR_ID  MY_LOCAL_ID
+`define SHIPC_XACTOR_ID  MY_CPU_ID
 `define SHIPC_CLK   clk
 `include "driver_common.incl"
 `undef   SHIPC_CLK
@@ -635,7 +638,7 @@ endtask // READ32_64_TASK
    //
    task force_core_in_reset;
       begin
-   case (MY_LOCAL_ID)
+   case (MY_CPU_ID)
      0: begin
         `logI("Forcing CORE#0 in reset...");
     `ifdef BARE_MODE
@@ -672,52 +675,16 @@ endtask // READ32_64_TASK
         force `CORE3_PATH.reset =1;
     `endif        
      end     
-   endcase // case (MY_LOCAL_ID)
+   endcase // case (MY_CPU_ID)
       end
    endtask
-
-   //
-   // Cycle-by-cycle capturing
-   //
-   // AES
-   always @(posedge dvtFlags[`DVTF_AES_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_AES_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_AES_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_AES_CAPTURE_EN_BIT] = 0;   
-   // SHA256
-   always @(posedge dvtFlags[`DVTF_SHA256_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_SHA256_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_SHA256_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_SHA256_CAPTURE_EN_BIT] = 0;   
-   // MD5
-   always @(posedge dvtFlags[`DVTF_MD5_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_MD5_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_MD5_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_MD5_CAPTURE_EN_BIT] = 0;   
-   // RSA
-   always @(posedge dvtFlags[`DVTF_RSA_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_RSA_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_RSA_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_RSA_CAPTURE_EN_BIT] = 0;   
-   // DES3
-   always @(posedge dvtFlags[`DVTF_DES3_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_DES3_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_DES3_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_DES3_CAPTURE_EN_BIT] = 0;   
-   // GPS
-   always @(posedge dvtFlags[`DVTF_GPS_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_GPS_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_GPS_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_GPS_CAPTURE_EN_BIT] = 0;   
-   // DFT
-   always @(posedge dvtFlags[`DVTF_DFT_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_DFT_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_DFT_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_DFT_CAPTURE_EN_BIT] = 0;   
-   // IDFT
-   always @(posedge dvtFlags[`DVTF_IDFT_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_IDFT_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_IDFT_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_IDFT_CAPTURE_EN_BIT] = 0;   
-   // IIR
-   always @(posedge dvtFlags[`DVTF_IIR_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_IIR_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_IIR_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_IIR_CAPTURE_EN_BIT] = 0;   
-   // FIR
-   always @(posedge dvtFlags[`DVTF_FIR_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_FIR_CAPTURE_EN_BIT] = 1;
-   always @(negedge dvtFlags[`DVTF_FIR_CAPTURE_EN_BIT]) cep_tb.c2c_capture_enable[`DVTF_FIR_CAPTURE_EN_BIT] = 0;
-   // SROT
-   always @(posedge dvtFlags[`DVTF_SROT_START_CAPTURE_BIT]) cep_tb.srot_start_capture = 1;
-   always @(posedge dvtFlags[`DVTF_SROT_STOP_CAPTURE_BIT])  cep_tb.srot_stop_capture  = 1;
+   
    //
    always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
-      if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = cep_tb.fpga.topDesign.topMod.cepregsmodule.core0_status;
-      else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = cep_tb.fpga.topDesign.topMod.cepregsmodule.core1_status;
-      else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = cep_tb.fpga.topDesign.topMod.cepregsmodule.core2_status;
-      else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = cep_tb.fpga.topDesign.topMod.cepregsmodule.core3_status;
+      if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core0_status;
+      else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core1_status;
+      else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core2_status;
+      else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core3_status;
       //`logI("Core status=%x",dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]);
       dvtFlags[`DVTF_GET_CORE_STATUS]=0;
    end
@@ -746,7 +713,7 @@ endtask // READ32_64_TASK
    end
    //
    always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
-      case (MY_LOCAL_ID)      
+      case (MY_CPU_ID)      
   0: dvtFlags[`DVTF_PAT_LO] = `CORE0_PATH.core.reset;
   1: dvtFlags[`DVTF_PAT_LO] = `CORE1_PATH.core.reset;
   2: dvtFlags[`DVTF_PAT_LO] = `CORE2_PATH.core.reset;
@@ -806,7 +773,7 @@ endtask // READ32_64_TASK
    
    //
    generate
-      if (MY_LOCAL_ID == 0) begin
+      if (MY_CPU_ID == 0) begin
    always @(posedge pcPass or posedge  pcFail) begin
       if (`CORE0_PATH.core.reset == 0) begin
          `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
@@ -824,7 +791,7 @@ endtask // READ32_64_TASK
    assign coreInReset = `CORE0_PATH.core.reset;
    assign pcValid     = `CORE0_PATH.core.csr_io_trace_0_valid && `CORE0_PATH.core._T_1481;   
       end
-      else if (MY_LOCAL_ID == 1) begin
+      else if (MY_CPU_ID == 1) begin
    always @(posedge pcPass or posedge  pcFail) begin
       if (`CORE1_PATH.core.reset == 0) begin      
          `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
@@ -841,7 +808,7 @@ endtask // READ32_64_TASK
    assign coreInReset = `CORE1_PATH.core.reset;
    assign pcValid     = `CORE1_PATH.core.csr_io_trace_0_valid && `CORE1_PATH.core._T_1481;     
       end
-      else if (MY_LOCAL_ID == 2) begin
+      else if (MY_CPU_ID == 2) begin
    always @(posedge pcPass or posedge  pcFail) begin
       if (`CORE2_PATH.core.reset == 0) begin      
          `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
@@ -858,7 +825,7 @@ endtask // READ32_64_TASK
    assign coreInReset = `CORE2_PATH.core.reset;
    assign pcValid     = `CORE2_PATH.core.csr_io_trace_0_valid && `CORE2_PATH.core._T_1481;     
       end
-      else if (MY_LOCAL_ID == 3) begin
+      else if (MY_CPU_ID == 3) begin
    always @(posedge pcPass or posedge  pcFail) begin
       if (`CORE3_PATH.core.reset == 0) begin      
          `logI("C3 Pass/fail Detected!!!.. Put it to sleep");

@@ -268,7 +268,7 @@ module `COSIM_TB_TOP_MODULE;
     for (c = 0; c < 4; c = c + 1) begin : driverX  
       cep_driver #(
         .MY_SLOT_ID   (0),
-        .MY_LOCAL_ID  (c)
+        .MY_CPU_ID    (c)
       ) driver (
         .clk          (sys_clk_i      ),  
         .reset        (~sys_rst_n     ),

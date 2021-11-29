@@ -48,7 +48,7 @@ initial begin
   __shIpc_cmdValid = 0;
   __shIpc_remoteReq = 0;
   #1 __mSlotId = MY_SLOT_ID ;
-  __mCpuId = MY_LOCAL_ID;
+  __mCpuId = MY_CPU_ID;
 end
 always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 
@@ -419,8 +419,8 @@ always @(posedge enableMe) begin
   $vpp_isCActive(`SHIPC_XACTOR_ID, myIsActive);
   if (myIsActive) begin
      // wait until C-side is alive
-     $display("%m: calling $vpp_WaitTilStart slot=%d cpu=%d",MY_SLOT_ID,MY_LOCAL_ID);
-     $vpp_WaitTilStart(MY_SLOT_ID,MY_LOCAL_ID);
+     $display("%m: calling $vpp_WaitTilStart slot=%d cpu=%d",MY_SLOT_ID,MY_CPU_ID);
+     $vpp_WaitTilStart(MY_SLOT_ID,MY_CPU_ID);
      $display("%m: Turning ON __shIpc_EnableMode %t",$time);
     __shIpc_EnableMode = 1;
    end

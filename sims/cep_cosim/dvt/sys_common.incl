@@ -9,14 +9,9 @@
 //
 //************************************************************************
 
-//
-//
-//
 `include "dpi_common.incl"
 
-//
 // DVT
-// 
 reg [255:0]    dvtFlags;
 reg ipcDelay = 1;
 initial begin
