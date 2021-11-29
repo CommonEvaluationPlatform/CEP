@@ -21,7 +21,6 @@
   `define CHIPYARD_TOP_MODULE_inst  `CHIPYARD_TOP_MODULE\_inst
 `endif 
 
-`timescale 1ns/10ps
 `include "suite_config.v"
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"

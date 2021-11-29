@@ -1,3 +1,14 @@
+//************************************************************************
+// Copyright 2021 Massachusetts Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      sahandler.c
+// Program:        Common Evaluation Platform (CEP)
+// Description:    
+// Notes:          
+//
+//************************************************************************
+
 #include <signal.h> 
 #include <stdio.h> 
 #include "vpi_user.h" 

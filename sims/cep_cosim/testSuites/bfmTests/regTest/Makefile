@@ -9,7 +9,7 @@
 #//
 #//************************************************************************
 
-COSIM_TOP_DIR   	= $(strip $(shell cd ../..; pwd))
+COSIM_TOP_DIR   	= $(strip $(shell cd ../../..; pwd))
 COSIM_BIN_DIR       = $(COSIM_TOP_DIR)/bin
 REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))

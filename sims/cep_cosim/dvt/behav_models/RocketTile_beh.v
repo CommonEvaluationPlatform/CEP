@@ -109,7 +109,7 @@ module RocketTile_beh(
     .tl_master_d_bits_corrupt     (auto_tl_other_masters_out_d_bits_corrupt),
     .tl_master_e_ready            (auto_tl_other_masters_out_e_ready),
     .tl_master_e_valid            (auto_tl_other_masters_out_e_valid),
-    .tl_master_e_bits_sink        (auto_tl_other_masters_out_e_bits_sink),
+    .tl_master_e_bits_sink        (auto_tl_other_masters_out_e_bits_sink)
    );
 
 endmodule // RocketTile_beh

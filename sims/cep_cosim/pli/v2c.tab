@@ -2,9 +2,10 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      v2c.tab
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    Synopsys VCS "tab" file to support automated
+//                 registration of PLI functions
 // Notes:          
 //
 //************************************************************************

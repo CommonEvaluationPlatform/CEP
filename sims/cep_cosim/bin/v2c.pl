@@ -5,7 +5,8 @@
 #//
 #// File Name:      v2c.pl
 #// Program:        Common Evaluation Platform (CEP)
-#// Description:    
+#// Description:    Perl script for converting Verilog Syntax to
+#//                 C Syntax
 #// Notes:          
 #//
 #//************************************************************************

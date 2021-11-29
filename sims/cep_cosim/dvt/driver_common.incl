@@ -34,7 +34,7 @@ reg [31:0] __shIpc_p4;
 reg [31:0] __shIpc_p5;
 reg [31:0] __shIpc_p6;
 reg [31:0] __shIpc_p7;
-//reg [31:0] __simTime;
+reg [31:0] __simTime;
 reg __shIpc_C_not_active=1;
 
 initial begin

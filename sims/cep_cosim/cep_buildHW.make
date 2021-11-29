@@ -61,6 +61,7 @@ COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
+								${BHV_DIR} \
 								${CHIPYARD_BLD_DIR}
 
 CHIPYARD_TOP_FILE_bfm		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bfm.v
@@ -86,11 +87,11 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
-	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
-		echo $${i} >> ${COSIM_BUILD_LIST}; \
-	done
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
+	done
+	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}
@@ -102,11 +103,11 @@ else
 # Bare Metal Mode
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
-	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
-		echo $${i} >> ${COSIM_BUILD_LIST}; \
-	done
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
+	done
+	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}

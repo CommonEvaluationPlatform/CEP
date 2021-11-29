@@ -41,7 +41,7 @@ endif
 XRUN_CMD = ${XCELIUM_INSTALL}/tools/bin/xrun
 IMC_CMD  = ${IMC_INSTALL}/tools/bin/imc
 #
-SAHANLDER_FILE 		= ${REPO_TOP_DIR}/cosim/sahandler.c
+SAHANLDER_FILE 		= ${SHR_DIR}/sahandler.c
 #
 # If coverage is on
 #

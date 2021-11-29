@@ -9,7 +9,7 @@
 //
 //--------------------------------------------------------------------------------------
 
-`timescale 1ns/10ps
+`include "suite_config.v"
 `include "v2c_top.incl"
 
 module ptw_monitor

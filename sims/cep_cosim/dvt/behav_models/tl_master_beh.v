@@ -10,176 +10,78 @@
 //
 //--------------------------------------------------------------------------------------
 
-
-//
-// TileLink Defines
-//
-/*
-  Channel Opcode Message Operation Response
-A 0 PutFullData Put AccessAck
-A 1 PutPartialData Put AccessAck
-A 2 ArithmeticData Atomic AccessAckData
-A 3 LogicalData Atomic AccessAckData
-A 4 Get Get AccessAckData
-A 5 Intent Intent HintAck
-A 6 Acquire Acquire Grant or GrantData
-B 0 PutFullData Put AccessAck
-B 1 PutPartialData Put AccessAck
-B 2 ArithmeticData Atomic AccessAckData
-B 3 LogicalData Atomic AccessAckData
-B 4 Get Get AccessAckData
-B 5 Intent Intent HintAck
-B 6 Probe Acquire ProbeAck or ProbeAckData
-C 0 AccessAck Put
-C 1 AccessAckData Get or Atomic
-C 2 HintAck Intent
-C 4 ProbeAck Acquire
-C 5 ProbeAckData Acquire
-C 6 Release Release ReleaseAck
-C 7 ReleaseData Release ReleaseAck
-D 0 AccessAck Put
-D 1 AccessAckData Get or Atomic
-D 2 HintAck Intent
-D 4 Grant Acquire GrantAck
-D 5 GrantData Acquire GrantAck
-D 6 ReleaseAck Release
-E - GrantAck Acquire
-Table 5.3: Summary of TileLink messages, ordered by channel and opcode.
-  */
-//
-// TileLink Opcodes
-//
-`define TL_A_PUTFULLDATA    0   
-`define TL_A_PUTPARTIALDATA     1 
-`define TL_A_ARITHMETICDATA     2 
-`define TL_A_LOGICALDATA    3 
-`define TL_A_GET        4 
-`define TL_A_INTENT         5 
-`define TL_A_ACQUIRE        6   
-
-`define TL_B_PUTFULLDATA    0 
-`define TL_B_PUTPARTIALDATA     1 
-`define TL_B_ARITHMETICDATA     2 
-`define TL_B_LOGICALDATA    3 
-`define TL_B_GET        4 
-`define TL_B_INTENT         5 
-`define TL_B_PROBE      6 
-
-`define TL_C_ACCESSACK      0   
-`define TL_C_ACCESSACKDATA  1 
-`define TL_C_HINTACK        2   
-`define TL_C_PROBEACK       4   
-`define TL_C_PROBEACKDATA   5 
-`define TL_C_RELEASE RELEASE    6   
-`define TL_C_RELEASEDATA    7 
-
-`define TL_D_ACCESSACK      0   
-`define TL_D_ACCESSACKDATA  1 
-`define TL_D_HINTACK        2   
-`define TL_D_GRANT      4 
-`define TL_D_GRANTDATA      5   
-`define TL_D_RELEASEACK     6   
-//
-// Parameters
-// 
-// Cap types (Grant = new permissions, Probe = permisions <= target)
-`define CAP_toT    0
-`define CAP_toB    1
-`define CAP_toN    2
-
-// Grow types (Acquire = permissions >= target)
-`define GROW_NtoB  0
-`define GROW_NtoT  1
-`define GROW_BtoT  2
- 
-// Shrink types (ProbeAck, Release)
-`define SHRINK_TtoB 0
-`define SHRINK_TtoN 1
-`define SHRINK_BtoN 2
-
-// Report types (ProbeAck, Release)
-`define REPORT_TtoT 3
-`define REPORT_BtoB 4
-`define REPORT_NtoN 5
-
-// logicalData param
-`define LOGIC_XOR   0
-`define LOGIC_OR    1
-`define LOGIC_AND   2
-`define LOGIC_SWAP  3
-
-//
-// 08/26/19: aduong : Channel A/D only (UL)
-//
+`include "suite_config.v"
+`include "tl_defines.incl"
 `include "v2c_top.incl"
-`timescale 1ns/100ps
-module tl_master_beh 
-  #(parameter
-    CHIP_ID=0, // for sim ONLY
-    SRC_SIZE=2,
-    SINK_SIZE=2,
-    BUS_SIZE=8, 
-    ADR_WIDTH=32,
-    //
-    localparam TL_SIZE=4, // $clog2(BUS_SIZE),
-    localparam DATA_WIDTH=(BUS_SIZE*8)
-    )
-   ( // Master mode
-     input           clock, 
-     input           reset, 
-     // Channel A
-     input           tl_master_a_ready, 
-     output reg          tl_master_a_valid=0, 
-     output reg [2:0]        tl_master_a_bits_opcode=0, 
-     output reg [2:0]        tl_master_a_bits_param=0, 
-     output reg [TL_SIZE-1:0]    tl_master_a_bits_size=0, 
-     output reg [SRC_SIZE-1:0]   tl_master_a_bits_source=0, 
-     output reg [ADR_WIDTH-1:0]  tl_master_a_bits_address=0, 
-     output reg [BUS_SIZE-1:0]   tl_master_a_bits_mask=0, 
-     output reg [DATA_WIDTH-1:0] tl_master_a_bits_data=0, 
-     output reg          tl_master_a_bits_corrupt=0, 
-     // Channel B
-     output reg          tl_master_b_ready=1, 
-     input           tl_master_b_valid, 
-     input [2:0]         tl_master_b_bits_opcode, 
-     input [1:0]         tl_master_b_bits_param, 
-     input [TL_SIZE-1:0]     tl_master_b_bits_size, 
-     input [SRC_SIZE-1:0]    tl_master_b_bits_source, 
-     input [ADR_WIDTH-1:0]   tl_master_b_bits_address, 
-     input [BUS_SIZE-1:0]    tl_master_b_bits_mask, 
-     input           tl_master_b_bits_corrupt,
-    // Channel C    
-     input           tl_master_c_ready, 
-     output reg          tl_master_c_valid=0, 
-     output reg [2:0]        tl_master_c_bits_opcode=0, 
-     output reg [2:0]        tl_master_c_bits_param=0, 
-     output reg [3:0]        tl_master_c_bits_size=0, //
-     output reg [SRC_SIZE-1:0]   tl_master_c_bits_source=0, 
-     output reg [ADR_WIDTH-1:0]  tl_master_c_bits_address=0, 
-     output reg [DATA_WIDTH-1:0] tl_master_c_bits_data=0, 
-     output reg          tl_master_c_bits_corrupt=0, 
-    // Channel D
-     output reg          tl_master_d_ready=1, // default 
-     input           tl_master_d_valid, 
-     input [2:0]         tl_master_d_bits_opcode, 
-     input [1:0]         tl_master_d_bits_param, 
-     input [3:0]         tl_master_d_bits_size,  //
-     input [SRC_SIZE-1:0]    tl_master_d_bits_source, 
-     input [SINK_SIZE-1:0]   tl_master_d_bits_sink, 
-     input           tl_master_d_bits_denied, 
-     input [DATA_WIDTH-1:0]      tl_master_d_bits_data, 
-     input           tl_master_d_bits_corrupt, 
-     // Channel E          
-     input           tl_master_e_ready, 
-     output reg          tl_master_e_valid=0, 
-     output reg [SINK_SIZE-1:0]  tl_master_e_bits_sink=0,
-     // Misc.
+
+module tl_master_beh #(
+  parameter CHIP_ID       = 0,
+  parameter SRC_SIZE      = 2,
+  parameter SINK_SIZE     = 2,
+  parameter BUS_SIZE      = 8, 
+  parameter ADR_WIDTH     = 32,
+
+  localparam TL_SIZE      = 4, // $clog2(BUS_SIZE),
+  localparam DATA_WIDTH   = (BUS_SIZE*8),
+  localparam MAX_TIMEOUT  = 1000
+) (
+  input                       clock, 
+  input                       reset, 
+  
+  // Channel A
+  input                       tl_master_a_ready, 
+  output reg                  tl_master_a_valid = 0, 
+  output reg [2:0]            tl_master_a_bits_opcode = 0, 
+  output reg [2:0]            tl_master_a_bits_param = 0, 
+  output reg [TL_SIZE-1:0]    tl_master_a_bits_size = 0, 
+  output reg [SRC_SIZE-1:0]   tl_master_a_bits_source = 0, 
+  output reg [ADR_WIDTH-1:0]  tl_master_a_bits_address = 0, 
+  output reg [BUS_SIZE-1:0]   tl_master_a_bits_mask = 0, 
+  output reg [DATA_WIDTH-1:0] tl_master_a_bits_data = 0, 
+  output reg                  tl_master_a_bits_corrupt = 0, 
+  
+  // Channel B
+  output reg                  tl_master_b_ready = 1, 
+  input                       tl_master_b_valid, 
+  input [2:0]                 tl_master_b_bits_opcode, 
+  input [1:0]                 tl_master_b_bits_param, 
+  input [TL_SIZE-1:0]         tl_master_b_bits_size, 
+  input [SRC_SIZE-1:0]        tl_master_b_bits_source, 
+  input [ADR_WIDTH-1:0]       tl_master_b_bits_address, 
+  input [BUS_SIZE-1:0]        tl_master_b_bits_mask, 
+  input                       tl_master_b_bits_corrupt,
+ 
+  // Channel C    
+  input                       tl_master_c_ready, 
+  output reg                  tl_master_c_valid = 0, 
+  output reg [2:0]            tl_master_c_bits_opcode = 0, 
+  output reg [2:0]            tl_master_c_bits_param = 0, 
+  output reg [3:0]            tl_master_c_bits_size = 0,
+  output reg [SRC_SIZE-1:0]   tl_master_c_bits_source = 0, 
+  output reg [ADR_WIDTH-1:0]  tl_master_c_bits_address = 0, 
+  output reg [DATA_WIDTH-1:0] tl_master_c_bits_data = 0, 
+  output reg                  tl_master_c_bits_corrupt = 0, 
+  
+  // Channel D
+  output reg                  tl_master_d_ready = 1,
+  input                       tl_master_d_valid, 
+  input [2:0]                 tl_master_d_bits_opcode, 
+  input [1:0]                 tl_master_d_bits_param, 
+  input [3:0]                 tl_master_d_bits_size,
+  input [SRC_SIZE-1:0]        tl_master_d_bits_source, 
+  input [SINK_SIZE-1:0]       tl_master_d_bits_sink, 
+  input                       tl_master_d_bits_denied, 
+  input [DATA_WIDTH-1:0]      tl_master_d_bits_data, 
+  input                       tl_master_d_bits_corrupt, 
+  
+  // Channel E          
+  input                       tl_master_e_ready, 
+  output reg                  tl_master_e_valid = 0, 
+  output reg [SINK_SIZE-1:0]  tl_master_e_bits_sink = 0
 );
 
-   localparam MAX_TIMEOUT = 1000;
    
- // 2560;
-   //
+
    integer              i;
    reg                  tl_err = 0;
 //`define TICK_DELAY #1

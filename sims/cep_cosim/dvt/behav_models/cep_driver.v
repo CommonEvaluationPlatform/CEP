@@ -12,7 +12,6 @@
 // Notes:          
 //
 //--------------------------------------------------------------------------------------
-`timescale 1ns/10ps
 `include "suite_config.v"
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"
@@ -73,10 +72,6 @@ module cep_driver #(
   end // end always
    
 
-   //
-   //
-   //
-   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = `MIG_PATH.init_calib_complete;
    always @(*) dvtFlags[`DVTF_PROGRAM_LOADED]        = cep_tb.program_loaded;
 
    reg backdoor_enable = 0;
@@ -94,9 +89,6 @@ module cep_driver #(
       
    end
    
-   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = `MIG_PATH.init_calib_complete;   
-
- 
 //
 // ================================================
 // Task Lists

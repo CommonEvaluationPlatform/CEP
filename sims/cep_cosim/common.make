@@ -13,7 +13,7 @@
 ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED	= 1
 
-# Set default tool locations
+# Set default tool locations (can be overridden from the command line)
 QUESTASIM_PATH				?= /opt/questa-2019.1/questasim/bin
 
 $(info )
@@ -92,9 +92,7 @@ WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work
 SHARE_DIR					= ${COSIM_TOP_DIR}/share
 PLI_DIR						= ${COSIM_TOP_DIR}/pli
 SIMDIAG_DIR					= ${COSIM_TOP_DIR}/simDiag
-SRC_DIR						= ${COSIM_TOP_DIR}/src
 DVT_DIR         			= ${COSIM_TOP_DIR}/dvt
-INC_DIR         			= ${COSIM_TOP_DIR}/include
 BHV_DIR         			= ${DVT_DIR}/behav_models
 LIB_DIR						= ${COSIM_TOP_DIR}/lib
 
@@ -136,7 +134,7 @@ AR 							= /usr/bin/ar
 RANLIB  					= /usr/bin/ranlib
 LD 							= ${GCC}
 VPP_CMD						= ${BIN_DIR}/vpp.pl
-
+V2C_CMD						= ${BIN_DIR}/v2c.pl
 
 # Some derived switches
 DUT_VSIM_DO_FILE			= ${TEST_DIR}/vsim.do
@@ -147,18 +145,6 @@ COSIM_COVERAGE_PATH			= ${TEST_SUITE_DIR}/coverage
 # Include both the Hardware and Software makefiles
 include ${BUILD_HW_MAKEFILE}
 #include ${BUILD_SW_MAKE_FILE}
-
-# Error Checking - If error message is not OK, exit
-ifeq "$(findstring OK,${ERROR_MESSAGE})" "OK"
-${BLD_DIR}/.is_checked: 
-	@echo "Checking for proper enviroment settings = ${ERROR_MESSAGE}"
-	touch $@
-else
-${BLD_DIR}/.is_checked: .force
-	@echo "ERROR: **** ${ERROR_MESSAGE} ****"
-	@rm -rf ${BLD_DIR}/.is_checked
-	@exit 1
-endif
 
 # Include the Cadence toolset specific file, if enabled
 ifeq (${CADENCE},1)

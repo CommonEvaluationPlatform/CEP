@@ -55,7 +55,7 @@ DRIVER_INC_LIST             += -I ${SIM_DIR}/include
 
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
 
-COMMON_CFLAGS	+= -I ${PLI_DIR} -I ${INC_DIR} -I ${SHARE_DIR}  \
+COMMON_CFLAGS	+= -I ${PLI_DIR} -I ${SHARE_DIR} -I ${SHARE_DIR}  \
 		-I ${SIMDIAG_DIR} $(DRIVER_INC_LIST)		\
 		${EXTRA_COMMON_CFLAGS} \
 		-g  -std=gnu++11 \
@@ -79,7 +79,7 @@ THREAD_SWITCH  = -lpthread -lcryptopp
 LDFLAGS        =
 
 
-%.hex: ${INC_DIR}/cep_adrMap.h %.c
+%.hex: ${SHARE_DIR}/cep_adrMap.h %.c
 	(cd ${RISCV_BARE_BOOT_DIR}; make clean; make;)
 
 
@@ -199,6 +199,7 @@ V2C_FILE_LIST       := 	v2c_cmds.h 	\
 CEP_ADR_SCALA_FILE = ${XX_SIM_DIR}/../hdl_cores/freedom/mitll-blocks/src/main/scala/cep_addresses.scala
 CEP_VER_H_FILE     = ${SIM_DIR}/drivers/cep_tests/cep_version.h
 
+# Build the cep_adrMap.h from cep_addMap.incl
 ${CEP_VER_H_FILE} : ${CEP_ADR_SCALA_FILE}
 	@echo "// auto-extracted from ${CEP_ADR_SCALA_FILE}" > ${CEP_VER_H_FILE}
 	@echo "// Do not modify" >> ${CEP_VER_H_FILE}
@@ -209,16 +210,16 @@ ${CEP_VER_H_FILE} : ${CEP_ADR_SCALA_FILE}
 	@echo "#endif" >> ${CEP_VER_H_FILE}
 	touch $@
 
-VERILOG_DEFINE_LIST := $(foreach t,${V2C_FILE_LIST}, ${INC_DIR}/${t})
+VERILOG_DEFINE_LIST := $(foreach t,${V2C_FILE_LIST}, ${SHARE_DIR}/${t})
 VERILOG_DEFINE_LIST += ${PERSUITE_CHECK}
 VERILOG_DEFINE_LIST += ${CEP_VER_H_FILE}
 build_v2c: ${VERILOG_DEFINE_LIST}
 
-${INC_DIR}/v2c_cmds.h : ${DVT_DIR}/v2c_cmds.incl ${BIN_DIR}/v2c.pl 
-	${BIN_DIR}/v2c.pl $< $@
+${SHARE_DIR}/v2c_cmds.h : ${DVT_DIR}/v2c_cmds.incl ${V2C_CMD}
+	${V2C_CMD} $< $@
 
-${INC_DIR}/cep_adrMap.h : ${DVT_DIR}/cep_adrMap.incl ${BIN_DIR}/v2c.pl 
-	${BIN_DIR}/v2c.pl $< $@
+${SHARE_DIR}/cep_adrMap.h : ${DVT_DIR}/cep_adrMap.incl ${V2C_CMD}
+	${V2C_CMD} $< $@
 
 
 #

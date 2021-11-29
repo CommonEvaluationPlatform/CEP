@@ -9,7 +9,6 @@
 //
 //************************************************************************
 
-`timescale 1ns/10ps
 `include "suite_config.v"
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"
@@ -19,36 +18,30 @@
 `include "dump_control.incl"      
 
 module v2c_top (
-   input        clk
+  input        clk
 );
 
   // WRITE64_64
   `ifdef USE_DPI
     `define SHIPC_WRITE64_64_TASK WRITE64_64_DPI()
-      task   WRITE64_64_DPI;
+    task   WRITE64_64_DPI;
       begin
         cep_tb.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
       end
     endtask // WRITE64_64_TASK
   `endif   
 
-
-   //
-   // ---------------------------   
    // READ64_64
-   // ---------------------------
-   //
-`ifdef USE_DPI   
-`define SHIPC_READ64_64_TASK READ64_64_DPI()
-task READ64_64_DPI;
-   begin
-`ifdef BFM_MODE
-    `CORE0_TL_PATH.tl_x_ul_read(0, inBox.mAdr, inBox.mPar[0]);
-`endif // !`ifdef BFM_MODE
-      //`logI("%m a=%x d=%x",a,d);
-   end
-endtask // READ64_64_TASK
-`endif
+  `ifdef USE_DPI   
+    `define SHIPC_READ64_64_TASK READ64_64_DPI()
+    task READ64_64_DPI;
+      begin
+        `ifdef BFM_MODE
+          `CORE0_TL_PATH.tl_x_ul_read(0, inBox.mAdr, inBox.mPar[0]);
+        `endif // !`ifdef BFM_MODE
+      end
+    endtask // READ64_64_TASK
+  `endif
    
    //
    // ---------------------------   
@@ -133,7 +126,8 @@ endtask // READ32_64_TASK
    end
 `undef   SHIPC_CLK
 
-   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = `MIG_PATH.init_calib_complete;
+  
+   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b0;
 
    always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
       ipcDelay = dvtFlags[`DVTF_PAT_LO];
