@@ -15,6 +15,6 @@
 override DUT_SIM_MODE	 		= BARE
 override DUT_ELF_MODE    		= LOCAL
 override DUT_XILINX_TOP_MODULE 	= cep_tb
-override ENABLE_VIRTUAL  		= 1
+override VIRTUAL_MODE	  		= 1
 #
 include ${REPO_TOP_DIR}/${COSIM_DIR_NAME}/common.make

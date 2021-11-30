@@ -265,7 +265,6 @@ summary:
 		cat ${BLD_DIR}/$${i}/status | tee -a regressionSummary;	\
 	done
 
-
 #
 # ----------------------------
 #

@@ -18,6 +18,11 @@ else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 COSIM_VLOG_ARGS         	+= +define+BARE_MODE
 endif
 
+# Virtual Mode
+ifeq (${VIRTUAL_MODE},1)
+COSIM_VLOG_ARGS 			+= +define+VIRTUAL_MODE
+endif
+
 # Default arguments
 COSIM_VLOG_ARGS 			+= -incr +define+MODELSIM +libext+.v +libext+.sv
 

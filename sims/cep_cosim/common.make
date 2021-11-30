@@ -64,15 +64,18 @@ include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 # compiled and if will be overriden by lower level
 # Makefiles as needed.
 
-# Enables virtual memory support when operating in BARE mode
-ENABLE_VIRTUAL  			= 0
-
 # Set some default flag values
-ENABLE_VIRTUAL				= 0
+SINGLE_THREAD 				= 0
+VIRTUAL_MODE				= 0
 USE_DPI         			= 1
 RANDOMIZE     				= 1
 UPDATE_INFO   				= 1
 TEST_INFO     				= testHistory.txt
+
+# override at command line ONLY!!!
+PASS_IS_TO_HOST=0;
+
+
 
 # Misc. variable definitions
 WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work
@@ -138,7 +141,8 @@ $(info CEP_COSIM:   PROFILE        = ${PROFILE})
 $(info CEP_COSIM:   COVERAGE       = ${COVERAGE})
 $(info CEP_COSIM:   USE_GDB        = ${USE_GDB})
 $(info CEP_COSIM:   TL_CAPTURE     = ${TL_CAPTURE})
-$(info CEP_COSIM:   ENABLE_VIRTUAL = ${ENABLE_VIRTUAL})
+$(info CEP_COSIM:   VIRTUAL_MODE   = ${VIRTUAL_MODE})
+$(info CEP_COSIM:   SINGLE_THREAD  = ${SINGLE_THREAD})
 $(info )
 
 # Create default local vsim do file if not there: one with sim for interactive and one for regression
@@ -209,10 +213,10 @@ endif
 #--------------------------------------------------------------------------------------
 
 
+
 #--------------------------------------------------------------------------------------
 # Variable and Build target tasked with running the simulation
 #--------------------------------------------------------------------------------------
-
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)
 VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_DIR_NAME}.log +myplus=0"
 
@@ -226,14 +230,13 @@ endif
 #--------------------------------------------------------------------------------------
 
 
-# ISA Auto test generation
+
+#--------------------------------------------------------------------------------------
+# Targets to support automatic generate of the ISA Tests
+#--------------------------------------------------------------------------------------
 makeTest: ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@echo "Done"
 
-# override at command line ONLY!!!
-SINGLE_THREAD=0
-VIRTUAL_MODE=0
-PASS_IS_TO_HOST=0;
 
 ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 	@if test ! -d ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
@@ -262,6 +265,7 @@ endif
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
+#--------------------------------------------------------------------------------------
 
 
 
