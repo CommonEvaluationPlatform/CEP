@@ -177,16 +177,16 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 
   always @*
   begin
-    master_a_size                           <= master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
-    master_a_source                         <= master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
-    master_a_address                        <= master_tl_h2d.a_address[MASTER_TL_AW-1:0];
+    master_a_size                             <= master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
+    master_a_source                           <= master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
+    master_a_address                          <= master_tl_h2d.a_address[MASTER_TL_AW-1:0];
 
-    master_tl_d2h.d_size                    <= '0;
-    master_tl_d2h.d_size[MASTER_TL_SZW]     <= master_d_size;
-    master_tl_d2h.d_source                  <= '0;
-    master_tl_d2h.d_source[MASTER_TL_AIW]   <= master_d_source;
-    master_tl_d2h.d_sink                    <= '0;
-    master_tl_d2h.d_sink[MASTER_TL_DIW]     <= master_d_sink;
+    master_tl_d2h.d_size                      <= '0;
+    master_tl_d2h.d_size[MASTER_TL_SZW-1:0]   <= master_d_size;
+    master_tl_d2h.d_source                    <= '0;
+    master_tl_d2h.d_source[MASTER_TL_AIW-1:0] <= master_d_source;
+    master_tl_d2h.d_sink                      <= '0;
+    master_tl_d2h.d_sink[MASTER_TL_DIW-1:0]   <= master_d_sink;
   end
 
   // Make Master A channel connections

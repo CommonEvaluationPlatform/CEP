@@ -4,8 +4,8 @@
 //
 // File Name:      driver_common.incl
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
-// Notes:          
+// Description:    Defines items associated with the Core Driver Mailboxes
+// Notes:          Each core instance has it's own mailbox
 //
 //************************************************************************
 

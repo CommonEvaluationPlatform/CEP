@@ -15,11 +15,10 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))
 TEST_SUITE_NAME		= $(shell cd ..; basename `pwd`)
 TEST_DIR			= $(strip $(shell cd .; pwd))
+TEST_DIR_NAME		= $(shell cd .; basename `pwd`)
 
 # default target
-#all: .vrun_flag
 all: .force ${TEST_SUITE_DIR}/_info 
-
 
 # override anything here before calling the common file
 include ${TEST_SUITE_DIR}/common.make

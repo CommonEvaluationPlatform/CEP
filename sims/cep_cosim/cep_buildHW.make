@@ -45,6 +45,7 @@ ifeq (${USE_DPI},1)
 COSIM_VLOG_ARGS 			+= +define+USE_DPI
 endif
 
+
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_FILE			:= ${DVT_DIR}/${COSIM_TB_TOP_MODULE}.v
@@ -124,13 +125,13 @@ ifeq (${MODELSIM}, 1)
 COSIM_VLOG_ARGS += +define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE_OPT} +define+CHIPYARD_TOP_MODULE_inst=${CHIPYARD_TOP_MODULE}_inst
 
 # Compile all the Verilog and SystemVerilog for the CEP
-${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make
+${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
 	${VLOG_CMD} -work ${WORK_DIR} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 
 # Perform Questasim's optimization
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
-	${VOPT_CMD} -work ${WORK_DIR} ${DUT_VOPT_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE} -o ${CHIPYARD_TOP_MODULE_OPT}
+	${VOPT_CMD} -work ${WORK_DIR} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE} -o ${CHIPYARD_TOP_MODULE_OPT}
 	touch $@
 else
 
@@ -141,3 +142,4 @@ COSIM_VLOG_ARGS += +define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 endif
+

@@ -300,7 +300,7 @@ RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
 # so build with -g for dump file only
 #
 #
-ifeq (${DUT_IN_VIRTUAL},1)
+ifeq (${ENABLE_VIRTUAL},1)
 riscv_wrapper.elf: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;

@@ -47,7 +47,7 @@ SAHANLDER_FILE 		= ${SHR_DIR}/sahandler.c
 #
 ifeq (${COVERAGE},1)
 CADENCE_COV_COM_ARGS += -covfile ${REPO_TOP_DIR}/cosim/cadence_cov.ccf
-CADENCE_COV_RUN_ARGS += -write_metrics -covoverwrite -covworkdir ${DUT_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
+CADENCE_COV_RUN_ARGS += -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
 endif
 
 # build the library for Cadence via this command under vivado
@@ -89,19 +89,19 @@ ifeq (${CADENCE},1)
 	fi
 	rm -rf ${CAD_TOP_COVERAGE}/${TEST_SUITE}/*
 	mkdir  ${CAD_TOP_COVERAGE}/${TEST_SUITE}/merge
-	@if test -d ${DUT_COVERAGE_PATH}/${TEST_SUITE}; then	\
-		echo "Merging Cadene coverage files under ${DUT_COVERAGE_PATH} ..."; \
-		${IMC_CMD}  -execcmd "config analysis.enable_partial_toggle -set true; merge ${DUT_COVERAGE_PATH}/${TEST_SUITE}/* -overwrite -message 1 -out ${DUT_COVERAGE_PATH} "; \
+	@if test -d ${COSIM_COVERAGE_PATH}/${TEST_SUITE}; then	\
+		echo "Merging Cadene coverage files under ${COSIM_COVERAGE_PATH} ..."; \
+		${IMC_CMD}  -execcmd "config analysis.enable_partial_toggle -set true; merge ${COSIM_COVERAGE_PATH}/${TEST_SUITE}/* -overwrite -message 1 -out ${COSIM_COVERAGE_PATH} "; \
 	fi 
-	cp ${DUT_COVERAGE_PATH}/*.ucm ${CAD_TOP_COVERAGE}/${TEST_SUITE}/.
-	cp ${DUT_COVERAGE_PATH}/*.ucd ${CAD_TOP_COVERAGE}/${TEST_SUITE}/merge/.
+	cp ${COSIM_COVERAGE_PATH}/*.ucm ${CAD_TOP_COVERAGE}/${TEST_SUITE}/.
+	cp ${COSIM_COVERAGE_PATH}/*.ucd ${CAD_TOP_COVERAGE}/${TEST_SUITE}/merge/.
 endif
 
 #
 # Cadence Stuffs
 #
 CAD_TOP_COVERAGE           ?= ${SIM_DIR}/cad_coverage
-override DUT_COVERAGE_PATH  = ${BLD_DIR}/cad_coverage
+override COSIM_COVERAGE_PATH  = ${BLD_DIR}/cad_coverage
 
 mergeAll:: .force
 ifeq (${CADENCE},1)

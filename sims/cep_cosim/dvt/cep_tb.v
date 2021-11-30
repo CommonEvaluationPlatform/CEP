@@ -5,7 +5,7 @@
 // File Name:      cep_tb.v
 // Program:        Common Evaluation Platform (CEP)
 // Description:    CEP Co-Simulation Top Level Testbench 
-// Notes:          
+// Notes:          When operating in BFM_MODE
 //
 //--------------------------------------------------------------------------------------
 
