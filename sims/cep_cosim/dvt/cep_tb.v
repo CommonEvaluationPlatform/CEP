@@ -7,7 +7,7 @@
 // Description:    CEP Co-Simulation Top Level Testbench 
 // Notes:          When operating in BFM_MODE
 //
-//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------VI
 
 `ifndef COSIM_TB_TOP_MODULE
   `define COSIM_TB_TOP_MODULE       cep_tb

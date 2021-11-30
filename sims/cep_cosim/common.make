@@ -1,4 +1,4 @@
-#//************************************************************************
+#//--------------------------------------------------------------------------------------
 #// Copyright 2021 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
 #//
@@ -7,7 +7,7 @@
 #// Description:    Top level common.make for CEP Cosimulation
 #// Notes:          
 #//
-#//************************************************************************
+#//--------------------------------------------------------------------------------------
 
 # Avoid redundant inclusions of common.make
 ifndef $(COMMON_MAKE_CALLED)
@@ -70,12 +70,8 @@ VIRTUAL_MODE				= 0
 USE_DPI         			= 1
 RANDOMIZE     				= 1
 UPDATE_INFO   				= 1
+PASS_IS_TO_HOST				= 0;
 TEST_INFO     				= testHistory.txt
-
-# override at command line ONLY!!!
-PASS_IS_TO_HOST=0;
-
-
 
 # Misc. variable definitions
 WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work
@@ -86,21 +82,25 @@ SHARE_DIR					:= ${COSIM_TOP_DIR}/share
 PLI_DIR						:= ${COSIM_TOP_DIR}/pli
 SIMDIAG_DIR					:= ${COSIM_TOP_DIR}/simDiag
 DVT_DIR         			:= ${COSIM_TOP_DIR}/dvt
+DRIVER_DIR					:= ${COSIM_TOP_DIR}/drivers
 BHV_DIR         			:= ${DVT_DIR}/behav_models
 LIB_DIR						:= ${COSIM_TOP_DIR}/lib
 
-# can be override by other Makefile
-XX_LIB_DIR					:= ${LIB_DIR}
+# More variables and paths
+LIB_DIR						:= ${LIB_DIR}
 V2C_TAB_FILE				:= ${PLI_DIR}/v2c.tab
 BUILD_HW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildHW.make
 BUILD_SW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildSW.make
 CADENCE_MAKE_FILE 			:= ${COSIM_TOP_DIR}/cadence.make
-VPP_LIB 					:= ${XX_LIB_DIR}/libvpp.so
-VPP_SV_LIB 					:= ${XX_LIB_DIR}/libvpp
-RISCV_LIB 					:= ${XX_LIB_DIR}/riscv_lib.a
+VPP_LIB 					:= ${LIB_DIR}/libvpp.so
+VPP_SV_LIB 					:= ${LIB_DIR}/libvpp
+RISCV_LIB 					:= ${LIB_DIR}/riscv_lib.a
 BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
-RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/software/riscv-tests
 ISA_TEST_TEMPLATE 			:= ${TEST_SUITE_DIR}/testTemplate
+
+# Points to the root directory of the riscv-test repo
+RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/software/riscv-tests
+
 
 # Pointers to various binaries
 GCC     					= /usr/bin/g++
@@ -204,7 +204,7 @@ ${PERSUITE_CHECK}: .force
 #--------------------------------------------------------------------------------------
 # Include both the Hardware and Software makefiles
 include ${BUILD_HW_MAKEFILE}
-#include ${BUILD_SW_MAKE_FILE}
+include ${BUILD_SW_MAKEFILE}
 
 # Include the Cadence toolset specific file, if enabled
 ifeq (${CADENCE},1)
@@ -220,7 +220,7 @@ endif
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)
 VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_DIR_NAME}.log +myplus=0"
 
-.vrun_flag: ${TEST_SUITE_DIR}/_info ${XX_LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
+.vrun_flag: ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
 ifeq (${COVERAGE},1)
 	@if test ! -d ${COSIM_COVERAGE_PATH}; then	\
 		mkdir  ${COSIM_COVERAGE_PATH};		\
@@ -234,7 +234,7 @@ endif
 #--------------------------------------------------------------------------------------
 # Targets to support automatic generate of the ISA Tests
 #--------------------------------------------------------------------------------------
-makeTest: ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+makeIsaTest: ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@echo "Done"
 
 
@@ -310,6 +310,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}testSuites/.PERSUITE*
+	-rm -f ${V2C_H_FILE_LIST}
 
 	-rm -rf ${COSIM_TOP_DIR}/*/*.o* ${COSIM_TOP_DIR}/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*.o*
 	-rm -rf ${COSIM_TOP_DIR}/*/*/status

@@ -273,30 +273,30 @@ summary:
 createISATests: .force
 	@for i in ${ISA_VM_1CORE_ONLY_LIST}; do				\
 		echo "== Generating VM 1CORE test directory for $${i}";		\
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=1 SFX=0 makeTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=2 SFX=1 makeTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=4 SFX=2 makeTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=8 SFX=3 makeTest; \
+		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=1 SFX=0 makeIsaTest; \
+		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=2 SFX=1 makeIsaTest; \
+		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=4 SFX=2 makeIsaTest; \
+		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=8 SFX=3 makeIsaTest; \
 	done
 	@for i in ${ISA_VM_SINGETHR_LIST}; do				\
 		echo "== Generating VM SINGETHR test directory for $${i}";		\
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_THREAD=1 makeTest; \
+		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_THREAD=1 makeIsaTest; \
 	done
 	@for i in ${ISA_1CORE_ONLY_LIST}; do				\
 		echo "== Generating 1CORE_ONLY test directory for $${i}";		\
-		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeTest; \
+		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; \
 	done
 	@for i in ${ISA_SINGETHR_LIST}; do				\
 		echo "== Generating SINGETHR test directory for $${i}";		\
-		make TEST_NAME=$${i} SINGLE_THREAD=1 makeTest; \
+		make TEST_NAME=$${i} SINGLE_THREAD=1 makeIsaTest; \
 	done
 	@for i in ${ISA_PARALLEL_TEST_LIST}; do				\
 		echo "== Generating PARALLEL test directory for $${i}";		\
-		make TEST_NAME=$${i} makeTest; \
+		make TEST_NAME=$${i} makeIsaTest; \
 	done
 	@for i in ${ISA_SPECIAL_TESTS}; do				\
 		echo "== Generating SPECIAL TESTs directory for $${i}";		\
-		make TEST_NAME=$${i} PASS_IS_TO_HOST=1 makeTest; \
+		make TEST_NAME=$${i} PASS_IS_TO_HOST=1 makeIsaTest; \
 	done
 	touch ${BLD_DIR}/.ISACreated
 

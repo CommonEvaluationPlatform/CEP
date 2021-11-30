@@ -1,13 +1,13 @@
-#//************************************************************************
+#//--------------------------------------------------------------------------------------
 #// Copyright 2021 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
 #//
 #// File Name:      cep_buildHW.make
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    Co-Simulation makefile for CEP Hardware
-#// Notes:          
+#// Notes:          This file cannot be invoked by itself
 #//
-#//************************************************************************
+#//--------------------------------------------------------------------------------------
 
 # BFM Mode
 ifeq "${DUT_SIM_MODE}" "BFM_MODE"
