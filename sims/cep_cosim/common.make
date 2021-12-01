@@ -309,12 +309,16 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
-	-rm -f ${COSIM_TOP_DIR}testSuites/.PERSUITE*
+	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
+	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog
 	-rm -f ${V2C_H_FILE_LIST}
 	-rm -rf ${LIB_DIR}/*
 	-rm -rf ${LIB_DIR}/.buildLibs
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*/*.o*
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/c_dispatch
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/c_dispatch ${COSIM_TOP_DIR}/*/*/*/*.log
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.KEY ${COSIM_TOP_DIR}/*/*/*/testHistory.txt
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/status
+	-rm -f ${COSIM_TOP_DIR}/*/*/_info
 # Use to force rebuilds for rules that include this dependency
 .force:
 #--------------------------------------------------------------------------------------

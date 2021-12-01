@@ -47,8 +47,8 @@ module cep_driver
     printf_adr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
 
     // fill the buffer
-    `COSIM_TB_TOP_MODULE.read_ddr3_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
-    `COSIM_TB_TOP_MODULE.read_ddr3_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
+    `COSIM_TB_TOP_MODULE.read_main_mem_cache_n_clear(printf_adr,printf_buf[(128*8)-1:64*8]);
+    `COSIM_TB_TOP_MODULE.read_main_mem_cache_n_clear(printf_adr | 'h40,printf_buf[(64*8)-1:0]);
  
     // left justify
     clear = 0;
@@ -260,7 +260,7 @@ begin
    //
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);
+      `COSIM_TB_TOP_MODULE.write_main_mem_backdoor(inBox.mAdr,inBox.mPar[0]);
    end
    else begin
       case (MY_CPU_ID)
@@ -271,7 +271,7 @@ begin
       endcase // case (MY_CPU_ID)
    end // else: !if(backdoor_enable)
 `else
-   `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);               
+   `COSIM_TB_TOP_MODULE.write_main_mem_backdoor(inBox.mAdr,inBox.mPar[0]);               
 `endif
 end
 endtask // WRITE64_64_TASK
@@ -326,7 +326,7 @@ task READ64_64_DPI;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,inBox.mPar[0]);      
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(inBox.mAdr,inBox.mPar[0]);      
    end
    else begin
       case (MY_CPU_ID)
@@ -337,7 +337,7 @@ task READ64_64_DPI;
       endcase // case (MY_CPU_ID)
    end
 `else
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr, inBox.mPar[0]);
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(inBox.mAdr, inBox.mPar[0]);
 `endif // !`ifdef BFM_MODE
       //`logI("%m a=%x d=%x",a,d);
    end
@@ -360,7 +360,7 @@ begin
    `logI("%m a=%x d=%x",inBox.mAdr,d);   
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,d);
+      `COSIM_TB_TOP_MODULE.write_main_mem_backdoor(inBox.mAdr,d);
    end
    else begin
       case (MY_CPU_ID)
@@ -371,7 +371,7 @@ begin
       endcase // case (MY_CPU_ID)
    end // else: !if(backdoor_enable)
 `else
-   `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(inBox.mAdr,d);               
+   `COSIM_TB_TOP_MODULE.write_main_mem_backdoor(inBox.mAdr,d);               
 `endif
 end
 endtask // WRITE32_64_TASK
@@ -456,7 +456,7 @@ begin
    //
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.write_ddr3_backdoor(a,d);      
+      `COSIM_TB_TOP_MODULE.write_main_mem_backdoor(a,d);      
    end
    else begin
       case (MY_CPU_ID)
@@ -483,7 +483,7 @@ reg [63:0] d;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,d);      
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(inBox.mAdr,d);      
    end
    else begin
       case (MY_CPU_ID)
@@ -494,7 +494,7 @@ reg [63:0] d;
       endcase // case (MY_CPU_ID)
    end
 `else
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(inBox.mAdr,d);            
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(inBox.mAdr,d);            
 `endif // !`ifdef BFM_MODE
       
       inBox.mPar[0] = d[63:32];
@@ -584,7 +584,7 @@ output [63:0] d;
    begin
 `ifdef BFM_MODE
    if (backdoor_enable) begin
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(a,d);      
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(a,d);      
    end
    else begin
       case (MY_CPU_ID)
@@ -595,7 +595,7 @@ output [63:0] d;
       endcase // case (MY_CPU_ID)
    end
 `else
-      `COSIM_TB_TOP_MODULE.read_ddr3_backdoor(a,d);            
+      `COSIM_TB_TOP_MODULE.read_main_mem_backdoor(a,d);            
 `endif
       //`logI("%m a=%x d=%x",a,d);
    end
@@ -681,10 +681,10 @@ endtask // READ32_64_TASK
    
    //
    always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
-      if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core0_status;
-      else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core1_status;
-      else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core2_status;
-      else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `COSIM_TB_TOP_MODULE.fpga.topDesign.topMod.cepregsmodule.core3_status;
+      if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core0_status;
+      else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core1_status;
+      else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core2_status;
+      else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core3_status;
       //`logI("Core status=%x",dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]);
       dvtFlags[`DVTF_GET_CORE_STATUS]=0;
    end

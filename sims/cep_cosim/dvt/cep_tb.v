@@ -70,6 +70,7 @@ module `COSIM_TB_TOP_MODULE;
   wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
 
   wire [31:0]         __simTime;
+  reg                 program_loaded = 0;
   //--------------------------------------------------------------------------------------
 
 
@@ -134,6 +135,10 @@ module `COSIM_TB_TOP_MODULE;
   //--------------------------------------------------------------------------------------
   // C <--> Verilog Deamon and backdoor support are here
   //--------------------------------------------------------------------------------------
+  always @(posedge `DVT_FLAG[`DVTF_PROGRAM_LOADED]) begin
+    program_loaded = 1;
+  end // always @(posedge `DVT_FLAG[`DVTF_PROGRAM_LOADED])
+
   always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
   begin
     wait (`PBUS_RESET==0);
@@ -166,6 +171,7 @@ module `COSIM_TB_TOP_MODULE;
     `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
   end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
 
+  // Instantiate the "System" driver
   v2c_top v2c_inst(
     .clk        (sys_clk_i),
     .__simTime  (__simTime)
@@ -211,11 +217,10 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
+  // Tasks and statements supporting monitoring and access to Main Nemory
   //--------------------------------------------------------------------------------------
   reg enableWrTrace   = 0;
   reg enableRdTrace   = 0;   
-  reg migRdTrace      = 0;
-  reg migWrTrace      = 0;
   
   always @(posedge `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING]) begin
     enableWrTrace = 0;
@@ -236,14 +241,34 @@ module `COSIM_TB_TOP_MODULE;
     `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
   end
   
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MIG_MEMRD_LOGGING]) begin
-    migRdTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MIG_MEMRD_LOGGING] = 0;
-  end
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MIG_MEMWR_LOGGING]) begin
-    migWrTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MIG_MEMWR_LOGGING] = 0;
-  end         
+  task   write_main_mem_backdoor;
+    input [31:0] addr;
+    input [63:0] data;
+
+    begin
+    
+      // If the memory is in reset, wait for it to be released
+      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
+
+      // All backdoor memory access is 64-bit
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i    = '1;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i   = 1;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i   = data;
+
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
+
+      `logI("== Main Mem Backdoor Write addr=0x%x data=0x%x",addr,data);
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+    end
+  endtask // write_main_mem_backdoor
+  //--------------------------------------------------------------------------------------
 
 
 

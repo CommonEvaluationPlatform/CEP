@@ -52,23 +52,23 @@
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
 // Paths to the CEP modules for capturing of testvectors for the unit-simulations
-`define SROT_PATH           `DUT_TOP_LEVEL.system.srotModule
-`define SHA256_PATH         `DUT_TOP_LEVEL.system.sha256module
-`define RSA_PATH            `DUT_TOP_LEVEL.system.rsamodule
-`define MD5_PATH            `DUT_TOP_LEVEL.system.md5module
-`define IIR_PATH            `DUT_TOP_LEVEL.system.iirmodule
-`define IDFT_PATH           `DUT_TOP_LEVEL.system.idftmodule
-`define GPS_PATH            `DUT_TOP_LEVEL.system.gpsmodule
-`define FIR_PATH            `DUT_TOP_LEVEL.system.firmodule
-`define DFT_PATH            `DUT_TOP_LEVEL.system.dftmodule
-`define DES3_PATH           `DUT_TOP_LEVEL.system.des3module
-`define AES_PATH            `DUT_TOP_LEVEL.system.aesmodule
-`define SCRATCHPAD_PATH     `DUT_TOP_LEVEL.system.scratchpadmodule
+`define SROT_PATH           	`DUT_TOP_LEVEL.system.srotModule
+`define SHA256_PATH         	`DUT_TOP_LEVEL.system.sha256module
+`define RSA_PATH            	`DUT_TOP_LEVEL.system.rsamodule
+`define MD5_PATH            	`DUT_TOP_LEVEL.system.md5module
+`define IIR_PATH            	`DUT_TOP_LEVEL.system.iirmodule
+`define IDFT_PATH           	`DUT_TOP_LEVEL.system.idftmodule
+`define GPS_PATH            	`DUT_TOP_LEVEL.system.gpsmodule
+`define FIR_PATH            	`DUT_TOP_LEVEL.system.firmodule
+`define DFT_PATH            	`DUT_TOP_LEVEL.system.dftmodule
+`define DES3_PATH           	`DUT_TOP_LEVEL.system.des3module
+`define AES_PATH            	`DUT_TOP_LEVEL.system.aesmodule
+`define SCRATCHPAD_PATH     	`DUT_TOP_LEVEL.system.scratchpadmodule
+`define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_wrapper_inst
+`define CEPREGS_PATH        	`DUT_TOP_LEVEL.system.cepregsmodule
 
-`define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
-`define MODEXP_CLK          `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.clk
-`define MODEXP_EXP_MODE_REG `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
-
-
+`define MODEXP_RESET_N      	`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
+`define MODEXP_CLK          	`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.clk
+`define MODEXP_EXP_MODE_REG 	`RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
 
 `endif // CEP_HIERMAP_INCL
