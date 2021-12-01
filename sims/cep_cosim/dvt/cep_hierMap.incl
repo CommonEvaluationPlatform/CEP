@@ -44,9 +44,9 @@
 `define CORE2_DRIVER        `COSIM_TB_TOP_MODULE.driverX[2].driver
 `define CORE3_DRIVER        `COSIM_TB_TOP_MODULE.driverX[3].driver
 
-`define PBUS_RESET          `DUT_TOP_LEVEL.system.pbus_reset
-`define PBUS_CLOCK          `DUT_TOP_LEVEL.system.pbus_clock
-`define DEBUG_NDRESET       `DUT_TOP_LEVEL.system_debug_ndreset
+`define PBUS_RESET          `DUT_TOP_LEVEL.system.subsystem_pbus_clock
+`define PBUS_CLOCK          `DUT_TOP_LEVEL.system.subsystem_pbus_reset
+`define DEBUG_NDRESET       `DUT_TOP_LEVEL.system.debug_systemjtag_reset
 
 // in bare metal
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
