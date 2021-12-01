@@ -15,7 +15,7 @@
 override  DUT_SIM_MODE	= BARE
 ifeq (${NO_BUILDIN_ELF_MODE},1)
 else
-override  DUT_ELF_MODE  = BUILTIN
+override  ELF_MODE  = BUILTIN
 endif
 override  DUT_XILINX_TOP_MODULE = cep_tb
 #

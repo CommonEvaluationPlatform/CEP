@@ -29,52 +29,6 @@ COMMON_CFLAGS	        += -DUSE_DPI
 RISCV_BARE_CFLAG        += -DUSE_DPI
 endif
 
-# Misc. variables
-BARE_SRC_DIR    		= ${DIRVER_DIR}/bare
-
-# Create a common list of include directories.
-COMMON_INCLUDE_DIR_LIST	:= 	${DIRVER_DIR}/drivers/diag	\
-							${DIRVER_DIR}/drivers/cep_tests \
-							${DIRVER_DIR}/drivers/vectors \
-							${SHARE_DIR} \
-							${SIMDIAG_DIR} \
-							${PLI_DIR}
-COMMON_INCLUDE_LIST			:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
-
-# Variables related to the RISCV Toolset (RISCV must already be defined)
-RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
-RISCV_OBJDUMP     		:= ${RISCV}/bin/riscv64-unknown-elf-objdump
-RISCV_HEXDUMP     		= /usr/bin/hexdump
-RISCV_AR          		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ar
-RISCV_RANLIB      		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ranlib
-
-# Flags related to RISCV Virtual tests
-RISCV_VIRT_CFLAGS  		+= -march=rv64g -mabi=lp64 -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DENTROPY=0xdb1550c -static 
-RISCV_VIRT_LFLAGS  		+= -T${XX_COSIM_TOP_DIR}/drivers/virtual/link.ld
-RISCV_VIRT_CFILES  		+= ${XX_COSIM_TOP_DIR}/drivers/virtual/*.c ${XX_COSIM_TOP_DIR}/drivers/virtual/multi_entry.S 
-RISCV_VIRT_INC     		+= -I${XX_COSIM_TOP_DIR}/drivers/virtual -I${RISCV_TEST_DIR}/isa/macros/scalar 
-
-# Flags related to RISCV Baremetal tests
-RISCV_BARE_CFLAG  		+= -DBARE_MODE -static -DRISCV_CPU -mcmodel=medany -Wall -O2 -g -fno-common -nostdlib -fno-builtin-printf -I${BARE_SRC_DIR} $(COMMON_INCLUDE_LIST)
-RISCV_BARE_LDFLAGS 		+= -static -nostdlib -nostartfiles -lgcc -DBARE_MODE 
-RISCV_BARE_LDFILE  		= ${BARE_SRC_DIR}/link.ld
-
-# Additional common flags
-COMMON_CFLAGS			+= 	${DRIVER_INC_LIST} \
-							${EXTRA_COMMON_CFLAGS} \
-							-DCAPTURE_CMD_SEQUENCE=${TL_CAPTURE} \
-							-g -std=gnu++11 \
-							-Wno-format -Wno-narrowing \
-							-DBIG_ENDIAN
-COMMON_LDFLAGS        	=
-
-# Flags for Hardware and Software simulation compilations
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -D_SIM_HW_ENV -DSIM_ENV_ONLY
-SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -D_SIM_SW_ENV -DSIM_ENV_ONLY
-
-
-LIBRARY_SWITCHES  		= -lpthread -lcryptopp
-
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #
@@ -84,17 +38,14 @@ LIBRARY_SWITCHES  		= -lpthread -lcryptopp
 #   *.bobj = object file for RISCV's bare metal
 #
 #--------------------------------------------------------------------------------------
-
-# Source directories
 SRC_D           = ${COSIM_TOP_DIR}/src
-APIS_D          = ${DIRVER_DIR}/cep_tests
-BARE_D          = ${DIRVER_DIR}/bare
-DIAG_D          = ${DIRVER_DIR}/diag
+APIS_D          = ${DRIVERS_DIR}/cep_tests
+BARE_D          = ${DRIVERS_DIR}/bare
+DIAG_D          = ${DRIVERS_DIR}/diag
 SHARE_D         = ${COSIM_TOP_DIR}/share
 SIMDIAG_D       = ${COSIM_TOP_DIR}/simDiag
 PLI_D           = ${COSIM_TOP_DIR}/pli
 
-# Library Directories
 SRC_LIB_DIR     = ${LIB_DIR}/src
 APIS_LIB_DIR    = ${LIB_DIR}/cep_tests
 BARE_LIB_DIR    = ${LIB_DIR}/bare
@@ -103,7 +54,6 @@ SHARE_LIB_DIR   = ${LIB_DIR}/share
 SIMDIAG_LIB_DIR = ${LIB_DIR}/simDiag
 PLI_LIB_DIR     = ${LIB_DIR}/pli
 
-# Lists of C sources for each source directory
 SRC_SRC         = $(wildcard ${SRC_D}/*.cc)
 APIS_SRC        = $(wildcard ${APIS_D}/*.cc)
 BARE_SRC        = $(wildcard ${BARE_D}/*.c)
@@ -112,7 +62,6 @@ SHARE_SRC       = $(wildcard ${SHARE_D}/*.cc)
 SIMDIAG_SRC     = $(wildcard ${SIMDIAG_D}/*.cc)
 PLI_SRC         = $(wildcard ${PLI_D}/*.cc)
 
-# Lists of header file for each source directory
 SRC_H           = $(wildcard ${SRC_D}/*.h)
 APIS_H          = $(wildcard ${APIS_D}/*.h)
 BARE_H          = $(wildcard ${BARE_D}/*.h)
@@ -121,7 +70,7 @@ SHARE_H         = $(wildcard ${SHARE_D}/*.h)
 SIMDIAG_H       = $(wildcard ${SIMDIAG_D}/*.h)
 PLI_H           = $(wildcard ${PLI_D}/*.h)
 
-# Combined list of sources and header files
+# Create list of C/H files
 ALL_C_FILES      = \
 	${SRC_H}         ${SRC_SRC}         \
 	${APIS_H}        ${APIS_SRC}        \
@@ -131,7 +80,7 @@ ALL_C_FILES      = \
 	${SIMDIAG_H}     ${SIMDIAG_SRC}     \
 	${PLI_H}         ${PLI_SRC}         
 
-# Create lists, lists, and more lists of objects
+# list of objects: 
 SRC_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${SRC_SRC})},     ${SRC_LIB_DIR}/${t})
 APIS_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,${APIS_SRC})},    ${APIS_LIB_DIR}/${t})
 BARE_O_LIST       = $(foreach t,${notdir $(subst .c,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
@@ -140,7 +89,6 @@ SHARE_O_LIST      = $(foreach t,${notdir $(subst .cc,.o,${SHARE_SRC})},   ${SHAR
 SIMDIAG_O_LIST    = $(foreach t,${notdir $(subst .cc,.o,${SIMDIAG_SRC})}, ${SIMDIAG_LIB_DIR}/${t})
 PLI_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${PLI_SRC})},     ${PLI_LIB_DIR}/${t})
 
-# Create lists, lists, and more lists of objects
 SRC_OBJ_LIST      = $(subst .o,.obj,${SRC_O_LIST})
 APIS_OBJ_LIST     = $(subst .o,.obj,${APIS_O_LIST})
 BARE_OBJ_LIST     = $(subst .o,.obj,${BARE_O_LIST})
@@ -149,7 +97,6 @@ SHARE_OBJ_LIST    = $(subst .o,.obj,${SHARE_O_LIST})
 SIMDIAG_OBJ_LIST  = $(subst .o,.obj,${SIMDIAG_O_LIST})
 PLI_OBJ_LIST      = $(subst .o,.obj,${PLI_O_LIST})
 
-# Create lists, lists, and more lists of objects
 SRC_BOBJ_LIST     = $(subst .o,.bobj,${SRC_O_LIST})
 APIS_BOBJ_LIST    = $(subst .o,.bobj,${APIS_O_LIST})
 BARE_BOBJ_LIST    = $(subst .o,.bobj,${BARE_O_LIST})
@@ -158,7 +105,7 @@ SHARE_BOBJ_LIST   = $(subst .o,.bobj,${SHARE_O_LIST})
 SIMDIAG_BOBJ_LIST = $(subst .o,.bobj,${SIMDIAG_O_LIST})
 PLI_BOBJ_LIST     = $(subst .o,.bobj,${PLI_O_LIST})
 
-# Create library directories directories if not there (check first via order-only-prerequisites)
+# Create directories if not there (check first via order-only-prerequisites)
 $(SRC_O_LIST)     : | ${SRC_LIB_DIR}
 $(APIS_O_LIST)    : | ${APIS_LIB_DIR}
 $(DIAG_O_LIST)    : | ${DIAG_LIB_DIR}
@@ -167,9 +114,9 @@ $(SIMDIAG_O_LIST) : | ${SIMDIAG_LIB_DIR}
 $(BARE_BOBJ_LIST) : | ${BARE_LIB_DIR}
 $(PLI_OBJ_LIST)   : | ${PLI_LIB_DIR}
 
-OBJECT_DIR_LIST  	+= ${SRC_LIB_DIR} ${APIS_LIB_DIR} ${BARE_LIB_DIR} ${DIAG_LIB_DIR} ${SHARE_LIB_DIR} ${SIMDIAG_LIB_DIR} ${PLI_LIB_DIR}
+OBJECT_DIR_LIST  += ${SRC_LIB_DIR} ${APIS_LIB_DIR} ${DIAG_LIB_DIR} ${SHARE_LIB_DIR} ${SIMDIAG_LIB_DIR} ${BARE_LIB_DIR} ${PLI_LIB_DIR}
 ${OBJECT_DIR_LIST}:
-	mkdir $@
+	mkdir -p $@
 #--------------------------------------------------------------------------------------
 
 
@@ -178,7 +125,7 @@ ${OBJECT_DIR_LIST}:
 # Auto-extract the MAJOR/MINOR version from scala
 #--------------------------------------------------------------------------------------
 CEP_ADR_SCALA_FILE = ${REPO_TOP_DIR}/generators/mitll-blocks/src/main/scala/cep_addresses.scala
-CEP_VER_H_FILE     = ${DRIVER_DIR}/cep_tests/cep_version.h
+CEP_VER_H_FILE     = ${DRIVERS_DIR}/cep_tests/cep_version.h
 
 ${CEP_VER_H_FILE} : ${CEP_ADR_SCALA_FILE}
 	@echo "// auto-extracted from ${CEP_ADR_SCALA_FILE}" > ${CEP_VER_H_FILE}
@@ -194,191 +141,230 @@ ${CEP_VER_H_FILE} : ${CEP_ADR_SCALA_FILE}
 
 
 #--------------------------------------------------------------------------------------
-# Convert specified .incl (Verilog) files to .h which will be placed
-# in the $SHARE_DIR
+# Convert specified .incl (Verilog) files to .h which will be placed in the $SHARE_D
 #--------------------------------------------------------------------------------------
 V2C_INCL_FILE_LIST	:= 	${DVT_DIR}/v2c_cmds.incl \
 						${DVT_DIR}/cep_adrMap.incl
+V2C_H_FILE_LIST     :=  $(foreach t,${notdir $(subst .incl,.h,${V2C_INCL_FILE_LIST})}, ${SHARE_D}/${t})
 
-V2C_H_FILE_LIST		:= 	$(foreach t,${notdir $(subst .incl,.h,${V2C_INCL_FILE_LIST})}, ${SHARE_DIR}/${t})
+# This rule will apply to any .h we try to build in the ${SHARE_D}.  Fortunately, the only .h
+# that are build are those being converted from .incl
+${SHARE_D}/%.h: ${DVT_DIR}/%.incl ${V2C_CMD}
+	@${V2C_CMD} $< $@
 
-${SHARE_DIR}/%.h : ${DVT_DIR}/*.incl V2C_INCL_FILE_LIST
-	${V2C_CMD} $< $@
-
-build_v2c: ${SHARE_DIR}/%.h ${V2C_INC_FILE_LIST}
+build_v2c: ${V2C_H_FILE_LIST}
 #-------------------------------------------------------------------------------------
 
 
 
-# #--------------------------------------------------------------------------------------
-# # Rules to build object files
-# #--------------------------------------------------------------------------------------
-# # .o & .obj: same rule
-# ${SRC_LIB_DIR}/%.o ${SRC_LIB_DIR}/%.obj: ${SRC_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# Misc. variables
+BARE_SRC_DIR    		:= ${DRIVERS_DIR}/bare
 
-# ${APIS_LIB_DIR}/%.o ${APIS_LIB_DIR}/%.obj: ${APIS_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# Create a common list of include directories.
+COMMON_INCLUDE_DIR_LIST	:= 	${SRC_D} \
+							${APIS_D} \
+							${DIAG_D} \
+							${SHARE_D} \
+							${SIMDIAG_D} \
+							${PLI_D}
+COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
-# ${BARE_LIB_DIR}/%.o ${BARE_LIB_DIR}/%.obj: ${BARE_D}/%.c ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# A common set of dependencies
+COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK}
 
-# ${DIAG_LIB_DIR}/%.o ${DIAG_LIB_DIR}/%.obj: ${DIAG_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# Variables related to the RISCV Toolset (RISCV must already be defined)
+RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
+RISCV_OBJDUMP     		:= ${RISCV}/bin/riscv64-unknown-elf-objdump
+RISCV_HEXDUMP     		= /usr/bin/hexdump
+RISCV_AR          		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ar
+RISCV_RANLIB      		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ranlib
 
-# ${SIMDIAG_LIB_DIR}/%.o ${SIMDIAG_LIB_DIR}/%.obj: ${SIMDIAG_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# Flags related to RISCV Virtual tests
+RISCV_VIRT_CFLAGS  		+= -march=rv64g -mabi=lp64 -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DENTROPY=0xdb1550c -static 
+RISCV_VIRT_LFLAGS  		+= -T${DRIVERS_DIR}/virtual/link.ld
+RISCV_VIRT_CFILES  		+= ${DRIVERS_DIR}/virtual/*.c ${DRIVERS_DIR}/virtual/multi_entry.S 
+RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/scalar 
 
-# ${PLI_LIB_DIR}/%.o ${PLI_LIB_DIR}/%.obj: ${PLI_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
+# Flags related to RISCV Baremetal tests
+RISCV_BARE_CFLAG  		+= -DBARE_MODE -static -DRISCV_CPU -mcmodel=medany -Wall -O2 -g -fno-common -nostdlib -fno-builtin-printf -I${BARE_SRC_DIR} $(COMMON_INCLUDE_LIST)
+RISCV_BARE_LDFLAGS 		+= -static -nostdlib -nostartfiles -lgcc -DBARE_MODE 
+RISCV_BARE_LDFILE  		= ${BARE_SRC_DIR}/link.ld
+RISCV_BARE_CRTFILE 		:= ${BARE_SRC_DIR}/crt.S
 
-# # .o & .obj  not same rule
-# ${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# Additional common flags
+COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
+							-DCAPTURE_CMD_SEQUENCE=${TL_CAPTURE} \
+							-g -std=gnu++11 \
+							-Wno-format -Wno-narrowing \
+							-DBIG_ENDIAN
+COMMON_LDFLAGS        	=
 
-# ${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
+# Flags for Hardware and Software simulation compilations
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -I ${SIMULATOR_PATH}/../include -D_SIM_HW_ENV -DSIM_ENV_ONLY
+SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -D_SIM_SW_ENV -DSIM_ENV_ONLY
 
-# # .bobj for bare-metal
-# ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+# Switches to indicate what libraries are being used
+LIBRARY_SWITCHES  		= -lpthread -lcryptopp
 
-# ${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# ${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# ${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+#--------------------------------------------------------------------------------------
+# Rules to build object files.. based on the type and where they are going
+#--------------------------------------------------------------------------------------
+${SRC_LIB_DIR}/%.o ${SRC_LIB_DIR}/%.obj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# ${SIMDIAG_LIB_DIR}/%.bobj: ${SIMDIAG_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+${APIS_LIB_DIR}/%.o ${APIS_LIB_DIR}/%.obj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# ${SHARE_LIB_DIR}/%.bobj: ${SHARE_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+${BARE_LIB_DIR}/%.o ${BARE_LIB_DIR}/%.obj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# ${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${VERILOG_DEFINE_LIST} 
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+${DIAG_LIB_DIR}/%.o ${DIAG_LIB_DIR}/%.obj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# # special S files
-# RISCV_BARE_CRTFILE = ${BARE_SRC_DIR}/crt.S
+${SIMDIAG_LIB_DIR}/%.o ${SIMDIAG_LIB_DIR}/%.obj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# ${BARE_LIB_DIR}/crt.bobj: ${RISCV_BARE_CRTFILE}
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+${PLI_LIB_DIR}/%.o ${PLI_LIB_DIR}/%.obj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
 
-# #
-# # -----------------------------------------------------------------------
-# # rules to build object file for bare metal under sim (bobj)
-# # -----------------------------------------------------------------------
-# #
+# .o & .obj  not same rule
+${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-# riscv_wrapper.bobj: riscv_wrapper.cc
-# 	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
 
-# ifeq "$(findstring BUILTIN,${DUT_ELF_MODE})" "BUILTIN"
-# # blank it
-# undefine RISCV_WRAPPER_ELF
-# else
+# .bobj for bare-metal
+${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
+${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# #
-# # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
-# # so build with -g for dump file only
-# #
-# #
-# ifeq (${VIRTUAL_MODE},1)
-# riscv_wrapper.elf: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
-# 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
-# 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
-# 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
-# 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
-# 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
-# else
-# riscv_wrapper.elf: riscv_wrapper.bobj ${RISCV_LIB}
-# 	$(RISCV_GCC) -T ${RISCV_BARE_LDFILE} ${RISCV_BARE_LDFLAGS} $^ -o $@
-# 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
-# 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
+${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# endif
+${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# endif
+${SIMDIAG_LIB_DIR}/%.bobj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# #
-# # v2c_lib.a : src/cep_tests/diag/share/simDiag
-# #
-# ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
-# $(AR) crv $@ 					\
-# 	$(shell ls ${SRC_LIB_DIR}/*.o) 		\
-# 	$(shell ls ${APIS_LIB_DIR}/*.o) 	\
-# 	$(shell ls ${DIAG_LIB_DIR}/*.o)		\
-# 	$(shell ls ${SHARE_LIB_DIR}/*.o)	\
-# 	$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
-# $(RANLIB) $@
+${SHARE_LIB_DIR}/%.bobj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# #
-# # libvpp.so : pli/share
-# #
-# ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
-# $(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT  -fPIC -shared  -g  \
-# 	-o ${VPP_LIB}	\
-# 	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
-# 	$(shell ls ${PLI_LIB_DIR}/*.obj) 
+${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+#--------------------------------------------------------------------------------------
 
-# #
-# # riscv_lib.a: bare/apis/diag
-# #
-# ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST} ${BARE_LIB_DIR}/crt.bobj
-# $(RISCV_AR) crv $@ \
-# 	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
-# 	$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
-# 	$(shell ls ${BARE_LIB_DIR}/*.bobj) 
-# $(RISCV_RANLIB) $@
 
-# #
-# # target
-# #
-# AUTO_C_DEPEND_FILE ?= ${COSIM_TOP_DIR}/.c_children.mk
 
-# buildLibs : ${LIB_DIR}/.buildLibs
+# -----------------------------------------------------------------------
+# Unique rules for baremetal object files
+# -----------------------------------------------------------------------
+${BARE_LIB_DIR}/crt.bobj: ${RISCV_BARE_CRTFILE}
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
 
-# # create list of files
-# ${LIB_DIR}/.buildLibs: ${RE_USE_TARGET} ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB}
-# 	-rm -f ${AUTO_C_DEPEND_FILE}
-# 	@echo "ALL_C_FILES = \\" > ${COSIM_TOP_DIR}/.c_children.mk
-# 	@for i in ${ALL_C_FILES}; do				\
-# 		echo "	$${i} \\" >> ${AUTO_C_DEPEND_FILE}; 	\
-# 	done
-# 	@echo "" >> ${AUTO_C_DEPEND_FILE}
-# 	touch $@
+riscv_wrapper.bobj: riscv_wrapper.cc
+	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+# -----------------------------------------------------------------------
 
-# #
-# # to build local test
-# #
-# LOCAL_CC_FILES  := $(wildcard ./*.cc)
-# LOCAL_H_FILES   += $(wildcard ./*.h)
-# LOCAL_OBJ_FILES += $(LOCAL_CC_FILES:%.cc=%.o)
 
-# c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${VERILOG_DEFINE_LIST}
-# 	$(GCC) $(SIM_SW_CFLAGS) $(COMMON_LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${EXTRA_V2C_LIB} ${LIBRARY_SWITCHES} 
 
-# %.o: %.cc ${LOCAL_H_FILES} ${LIB_DIR}/v2c_lib.a  ${VERILOG_DEFINE_LIST} 
-# 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# -----------------------------------------------------------------------
+# If set, do not create a seperate ELF wrapper for bare metal mode
+# (applicable for the ISA Tests)
+# -----------------------------------------------------------------------
+ifeq "$(findstring BUILTIN,${ELF_MODE})" "BUILTIN"
+RISCV_WRAPPER_ELF = 
+else
+RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
 
-# #
-# # -------------------------------------------
-# # Config change detect.. If so, force a rebuild
-# # -------------------------------------------
-# #
-# ${BLD_DIR}/${CUR_CONFIG}:
-# 	-rm -f  ${BLD_DIR}/.CONFIG_*
-# 	touch $@
+# with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
+# so build with -g for dump file only
+ifeq (${VIRTUAL_MODE},1)
+riscv_wrapper.elf: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
+	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
+	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
+	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
+	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
+	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
+else
+riscv_wrapper.elf: riscv_wrapper.bobj ${RISCV_LIB}
+	$(RISCV_GCC) -T ${RISCV_BARE_LDFILE} ${RISCV_BARE_LDFLAGS} $^ -o $@
+	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
+	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
-# #
-# # Clean up
-# #
-# cleanLibs::
-# 	-rm -rf ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB} ${AUTO_C_DEPEND_FILE}
-# 	-rm -rf ${LIB_DIR}/*/*.o ${LIB_DIR}/*/*.obj ${LIB_DIR}/*/*.bobj
+endif
 
+endif
+# -----------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------
+# Libray build targets
+# -----------------------------------------------------------------------
+V2C_LIB            		:= ${LIB_DIR}/v2c_lib.a
+VPP_LIB            		:= ${LIB_DIR}/libvpp.so
+RISCV_LIB          		:= ${LIB_DIR}/riscv_lib.a
+
+# v2c_lib.a : src/cep_tests/diag/share
+${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
+	$(AR) crv $@ \
+		$(shell ls ${SRC_LIB_DIR}/*.o) \
+		$(shell ls ${APIS_LIB_DIR}/*.o) \
+		$(shell ls ${DIAG_LIB_DIR}/*.o) \
+		$(shell ls ${SHARE_LIB_DIR}/*.o) \
+		$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
+	$(RANLIB) $@
+
+# libvpp.so : pli/share
+${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT  -fPIC -shared  -g  \
+	-o ${VPP_LIB}	\
+	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
+	$(shell ls ${PLI_LIB_DIR}/*.obj) 
+
+# riscv_lib.a: bare/apis/diag
+${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST} ${BARE_LIB_DIR}/crt.bobj
+	$(RISCV_AR) crv $@ \
+	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
+	$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
+	$(shell ls ${BARE_LIB_DIR}/*.bobj) 
+	$(RISCV_RANLIB) $@
+
+# Library build target
+${LIB_DIR}/.buildLibs: ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB}
+	touch $@
+
+buildLibs: ${LIB_DIR}/.buildLibs
+# -----------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------
+# Build Local Test
+# -----------------------------------------------------------------------
+LOCAL_CC_FILES  		:= $(wildcard ./*.cc)
+LOCAL_H_FILES   		+= $(wildcard ./*.h)
+LOCAL_OBJ_FILES 		+= $(LOCAL_CC_FILES:%.cc=%.o)
+
+c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${COMMON_DEPENDENCIES}
+	$(GCC) $(SIM_SW_CFLAGS) $(COMMON_LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${LIBRARY_SWITCHES} 
+
+%.o: %.cc ${LOCAL_H_FILES} ${LIB_DIR}/v2c_lib.a  ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+# -----------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------
+# Clean Targets
+# -----------------------------------------------------------------------
+cleanLibs::
+	-rm -rf ${LIB_DIR}/*
+	-rm -rf ${LIB_DIR}/.buildLibs
+# -----------------------------------------------------------------------

@@ -13,7 +13,7 @@
 # must have this one for auto-dependentcy detection
 
 override DUT_SIM_MODE	 		= BARE
-override DUT_ELF_MODE   		= LOCAL
+override ELF_MODE   		= LOCAL
 override DUT_XILINX_TOP_MODULE 	= cep_tb
 #
 include ${REPO_TOP_DIR}/${COSIM_DIR_NAME}/common.make

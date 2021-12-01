@@ -14,7 +14,7 @@ ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1
 
 # The following flags / variables can be overridden by lower level makefiles or the command line
-QUESTASIM_PATH				?= /opt/questa-2019.1/questasim/bin
+SIMULATOR_PATH				?= /opt/questa-2019.1/questasim/bin
 MODELSIM        			?= 1
 CADENCE 					?= 0
 NOWAVE          			?= 0
@@ -78,16 +78,13 @@ WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work
 COSIM_COVERAGE_PATH			:= ${TEST_SUITE_DIR}/coverage
 
 # Additional Co-Simulation Paths
-SHARE_DIR					:= ${COSIM_TOP_DIR}/share
 PLI_DIR						:= ${COSIM_TOP_DIR}/pli
-SIMDIAG_DIR					:= ${COSIM_TOP_DIR}/simDiag
 DVT_DIR         			:= ${COSIM_TOP_DIR}/dvt
-DRIVER_DIR					:= ${COSIM_TOP_DIR}/drivers
+DRIVERS_DIR					:= ${COSIM_TOP_DIR}/drivers
 BHV_DIR         			:= ${DVT_DIR}/behav_models
 LIB_DIR						:= ${COSIM_TOP_DIR}/lib
 
 # More variables and paths
-LIB_DIR						:= ${LIB_DIR}
 V2C_TAB_FILE				:= ${PLI_DIR}/v2c.tab
 BUILD_HW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildHW.make
 BUILD_SW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildSW.make
@@ -101,7 +98,6 @@ ISA_TEST_TEMPLATE 			:= ${TEST_SUITE_DIR}/testTemplate
 # Points to the root directory of the riscv-test repo
 RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/software/riscv-tests
 
-
 # Pointers to various binaries
 GCC     					= /usr/bin/g++
 AR 							= /usr/bin/ar
@@ -114,25 +110,26 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 # Questasim only related items
 #--------------------------------------------------------------------------------------
 ifeq (${MODELSIM},1)
-VLOG_CMD					= ${QUESTASIM_PATH}/vlog
-VCOM_CMD					= ${QUESTASIM_PATH}/vcom
-VOPT_CMD					= ${QUESTASIM_PATH}/vopt
-VSIM_CMD 					= ${QUESTASIM_PATH}/vsim
-VLIB_CMD					= ${QUESTASIM_PATH}/vlib
-VMAP_CMD					= ${QUESTASIM_PATH}/vmap
-VMAKE_CMD					= ${QUESTASIM_PATH}/vmake
-VCOVER_CMD					= ${QUESTASIM_PATH}/vcover
+VLOG_CMD					= ${SIMULATOR_PATH}/vlog
+VCOM_CMD					= ${SIMULATOR_PATH}/vcom
+VOPT_CMD					= ${SIMULATOR_PATH}/vopt
+VSIM_CMD 					= ${SIMULATOR_PATH}/vsim
+VLIB_CMD					= ${SIMULATOR_PATH}/vlib
+VMAP_CMD					= ${SIMULATOR_PATH}/vmap
+VMAKE_CMD					= ${SIMULATOR_PATH}/vmake
+VCOVER_CMD					= ${SIMULATOR_PATH}/vcover
 VSIM_DO_FILE				= ${TEST_DIR}/vsim.do
 
 # Quick sanity check if vsim exists
 ifeq (,$(shell which ${VSIM_CMD}))
-$(error CEP_COSIM: vsim not found.  Check QUESTASIM_PATH)
+$(error CEP_COSIM: vsim not found.  Check SIMULATOR_PATH)
 endif
 
 # Provide some status of the user contronable parameters
 $(info )
 $(info CEP_COSIM: Running with the following variables:)
 $(info CEP_COSIM:   RISCV          = $(RISCV))
+$(info CEP_COSIM:   SIMULATOR_PATH = ${SIMULATOR_PATH})
 $(info CEP_COSIM:   MODELSIM       = $(MODELSIM))
 $(info CEP_COSIM:   CADENCE        = $(CADENCE))
 $(info CEP_COSIM:   DUT_SIM_MODE   = ${DUT_SIM_MODE})
@@ -194,7 +191,7 @@ endif
 PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${USE_DPI}
 
 ${PERSUITE_CHECK}: .force
-	if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
+	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
 #--------------------------------------------------------------------------------------
 
 
@@ -311,17 +308,10 @@ cleanAll:
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}testSuites/.PERSUITE*
 	-rm -f ${V2C_H_FILE_LIST}
-
-	-rm -rf ${COSIM_TOP_DIR}/*/*.o* ${COSIM_TOP_DIR}/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*.o*
-	-rm -rf ${COSIM_TOP_DIR}/*/*/status
-	-rm -rf ${COSIM_TOP_DIR}/bareMetalTests/*/*.elf ${COSIM_TOP_DIR}/bareMetalTests/*/*.dump
-	-rm -rf ${COSIM_TOP_DIR}/*/.build*
-	-rm -rf ${LIB_DIR}/*/*.o* ${LIB_DIR}/*.a ${LIB_DIR}/*.so
-	-rm -rf ${COSIM_TOP_DIR}/*/*/C2V*
-	-rm -rf ${COSIM_TOP_DIR}/*/xcelium.d ${COSIM_TOP_DIR}/*/.cadenceBuild ${COSIM_TOP_DIR}/*/*/cov_work ${COSIM_TOP_DIR}/*/*/xrun.log
-	-rm -rf ${COSIM_TOP_DIR}/*/cad_coverage
-	-rm -rf ${COSIM_TOP_DIR}/*/coverage
-
+	-rm -rf ${LIB_DIR}/*
+	-rm -rf ${LIB_DIR}/.buildLibs
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*/*.o*
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/c_dispatch
 # Use to force rebuilds for rules that include this dependency
 .force:
 #--------------------------------------------------------------------------------------
