@@ -17,10 +17,6 @@
   `define CHIPYARD_TOP_MODULE       ChipTop
 `endif 
 
-`ifndef CHIPYARD_TOP_MODULE_inst
-  `define CHIPYARD_TOP_MODULE_inst  `CHIPYARD_TOP_MODULE\_inst
-`endif 
-
 `include "suite_config.v"
 `include "cep_hierMap.incl"
 `include "cep_adrMap.incl"
@@ -72,6 +68,8 @@ module `COSIM_TB_TOP_MODULE;
   wire                sdio_sdio_dat_1; pullup (weak1) (sdio_sdio_dat_1);
   wire                sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
   wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
+
+  wire [31:0]         __simTime;
   //--------------------------------------------------------------------------------------
 
 
@@ -169,7 +167,8 @@ module `COSIM_TB_TOP_MODULE;
   end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
 
   v2c_top v2c_inst(
-    .clk        (sys_clk_i)
+    .clk        (sys_clk_i),
+    .__simTime  (__simTime)
   );
 
   // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
@@ -188,7 +187,7 @@ module `COSIM_TB_TOP_MODULE;
   //
   // I/O manually copied from Chisel generated verilog
   //--------------------------------------------------------------------------------------
-  `CHIPYARD_TOP_MODULE `CHIPYARD_TOP_MODULE_inst ( 
+  `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
     .jtag_TMS           (jtag_TMS),
     .jtag_TDI           (jtag_TDI),

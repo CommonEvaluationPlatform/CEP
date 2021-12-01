@@ -53,13 +53,17 @@ endif
 
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
+COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
 COSIM_TB_TOP_FILE			:= ${DVT_DIR}/${COSIM_TB_TOP_MODULE}.v
 COSIM_TB_CLOCK_PERIOD       := 5000
 COSIM_TB_RESET_DELAY		:= 777.7
-CHIPYARD_TOP_MODULE_OPT		:= ${CHIPYARD_TOP_MODULE}_opt
 
 COSIM_VOPT_ARGS	  			+= +acc -64 +nolibcell +nospecify +notimingchecks
-COSIM_VLOG_ARGS				+= +acc -64 -sv +define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} +define+RESET_DELAY=${COSIM_TB_RESET_DELAY} +define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE}
+COSIM_VLOG_ARGS				+= 	+acc -64 -sv \
+								+define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} \
+								+define+RESET_DELAY=${COSIM_TB_RESET_DELAY} \
+								+define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE} \
+								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
 COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630
 
 # Defines inherited from Chipyard
@@ -126,23 +130,18 @@ endif
 # Modelsim only related steps
 ifeq (${MODELSIM}, 1)
  
-# When using Questasim, use the optimized module
-COSIM_VLOG_ARGS += +define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE_OPT} +define+CHIPYARD_TOP_MODULE_inst=${CHIPYARD_TOP_MODULE}_inst
-
 # Compile all the Verilog and SystemVerilog for the CEP
 ${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
 	${VLOG_CMD} -work ${WORK_DIR} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 
+buildVlog: ${TEST_SUITE_DIR}/.buildVlog
+
 # Perform Questasim's optimization
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
-	${VOPT_CMD} -work ${WORK_DIR} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${CHIPYARD_TOP_MODULE} -o ${CHIPYARD_TOP_MODULE_OPT}
+	${VOPT_CMD} -work ${WORK_DIR} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE} -o ${COSIM_TB_TOP_MODULE_OPT}
 	touch $@
 else
-
-# When using Cadence's XCellium, use the original module name
-COSIM_VLOG_ARGS += +define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
-
 # Cadence XCellium Steps
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@

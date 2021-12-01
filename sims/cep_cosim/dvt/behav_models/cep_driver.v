@@ -18,8 +18,8 @@
 `include "v2c_cmds.incl"
 `include "v2c_top.incl"
 
-module cep_driver #(
-) (
+module cep_driver
+(
   input               clk,
   input               reset,
   input               enableMe

@@ -5,7 +5,7 @@
 // File Name:      sys_common.incl
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Defines items associated with the System Mailbox
-// Notes:          
+// Notes:          This must be included within a verilog module
 //
 //************************************************************************
 

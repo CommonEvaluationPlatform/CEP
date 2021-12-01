@@ -14,20 +14,26 @@
 `include "cep_adrMap.incl"
 `include "v2c_cmds.incl"
 `include "v2c_top.incl"
-`include "sys_common.incl"
-`include "dump_control.incl"      
 
 module v2c_top (
-  input        clk
+  input               clk,
+  output reg [31:0]   __simTime = 0
+
 );
 
+  // Advance the __simtime
+  always @(posedge clk) __simTime = __simTime + 1;
+  
   // shIpc stuffs
   //
   parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
   parameter MY_CPU_ID   = `SYSTEM_CPU_ID;
 
-
+  // These includes must remain within the verilog module and
+  // is dependent on the SHIPC_CLK macro
   `define SHIPC_CLK clk
+  `include "sys_common.incl"
+  `include "dump_control.incl"      
   initial begin
     __shIpc_EnableMode = 0;
     #1;

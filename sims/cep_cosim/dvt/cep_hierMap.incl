@@ -14,7 +14,8 @@
 `define CEP_HIERMAP_INCL
 
 `define DVT_FLAG            `COSIM_TB_TOP_MODULE.v2c_inst.dvtFlags
-`define DUT_TOP_LEVEL       `COSIM_TB_TOP_MODULE.`CHIPYARD_TOP_MODULE_inst
+`define DUT_INST            dut
+`define DUT_TOP_LEVEL       `COSIM_TB_TOP_MODULE.`DUT_INST
 
 // Path to the four RocketTile Cores within the Chisel-generate verilog hiearchy
 `define CORE0_PATH          `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
@@ -51,17 +52,17 @@
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
 // Paths to the CEP modules for capturing of testvectors for the unit-simulations
-`define SROT_PATH 			`DUT_TOP_LEVEL.system.srotModule
-`define SHA256_PATH 		`DUT_TOP_LEVEL.system.sha256module
+`define SROT_PATH           `DUT_TOP_LEVEL.system.srotModule
+`define SHA256_PATH         `DUT_TOP_LEVEL.system.sha256module
 `define RSA_PATH            `DUT_TOP_LEVEL.system.rsamodule
-`define MD5_PATH 			`DUT_TOP_LEVEL.system.md5module
-`define IIR_PATH			`DUT_TOP_LEVEL.system.iirmodule
-`define IDFT_PATH 			`DUT_TOP_LEVEL.system.idftmodule
-`define GPS_PATH 			`DUT_TOP_LEVEL.system.gpsmodule
-`define FIR_PATH 			`DUT_TOP_LEVEL.system.firmodule
-`define DFT_PATH 			`DUT_TOP_LEVEL.system.dftmodule
-`define DES3_PATH 			`DUT_TOP_LEVEL.system.des3module
-`define AES_PATH 			`DUT_TOP_LEVEL.system.aesmodule
+`define MD5_PATH            `DUT_TOP_LEVEL.system.md5module
+`define IIR_PATH            `DUT_TOP_LEVEL.system.iirmodule
+`define IDFT_PATH           `DUT_TOP_LEVEL.system.idftmodule
+`define GPS_PATH            `DUT_TOP_LEVEL.system.gpsmodule
+`define FIR_PATH            `DUT_TOP_LEVEL.system.firmodule
+`define DFT_PATH            `DUT_TOP_LEVEL.system.dftmodule
+`define DES3_PATH           `DUT_TOP_LEVEL.system.des3module
+`define AES_PATH            `DUT_TOP_LEVEL.system.aesmodule
 `define SCRATCHPAD_PATH     `DUT_TOP_LEVEL.system.scratchpadmodule
 
 `define MODEXP_RESET_N      `DUT_TOP_LEVEL.system.rsamodule.modexp_core_mock_tss_inst.modexp_core_inst.reset_n

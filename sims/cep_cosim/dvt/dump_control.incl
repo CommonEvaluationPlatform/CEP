@@ -4,33 +4,30 @@
 //
 // File Name:      dump_control.incl
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
-// Notes:          
+// Description:    Provides wave dump functionality
+// Notes:          This must be included within a verilog module
 //
 //************************************************************************
-//
+
 // Cadence
-//
 `ifdef CADENCE
-`define DVAR_FILE $recordfile("cep_wave")
-`define DVARON    $recordon
-`define DVAROFF   $recordoff
-`define DVAR      $recordvars
-`define DVAR_CLOSE #0
-`define LEVEL0    "depth=0"
-`define LEVEL1    "depth=1"
-`define SEL_LEVEL (dLevel)?`LEVEL1:`LEVEL0
+  `define DVAR_FILE     $recordfile("cep_wave")
+  `define DVARON        $recordon
+  `define DVAROFF       $recordoff
+  `define DVAR          $recordvars
+  `define DVAR_CLOSE    #0
+  `define LEVEL0        "depth=0"
+  `define LEVEL1        "depth=1"
+  `define SEL_LEVEL     (dLevel)?`LEVEL1:`LEVEL0
 
-initial begin
-  //
-`ifdef NOWAVE
-`else  
-  `DVAR_FILE;
-  `DVAR(`LEVEL0,cep_tb);
-  `DVARON;	
-`endif
-end
-
+  initial begin
+    `ifdef NOWAVE
+    `else  
+      `DVAR_FILE;
+      `DVAR(`LEVEL0,cep_tb);
+      `DVARON;	
+    `endif
+  end
 `endif
 
 
