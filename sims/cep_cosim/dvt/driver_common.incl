@@ -2,11 +2,11 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      driver_common.incl
-// Program:        Common Evaluation Platform (CEP)
-// Description:    Defines items associated with the Core Driver Mailboxes
-// Notes:          Each core instance has it's own mailbox
-//
+// File Name:      	driver_common.incl
+// Program:        	Common Evaluation Platform (CEP)
+// Description:		Defines items associated with the Core Driver Mailboxes
+//                 	Each core instance has it's own mailbox
+// Notes:			Must be included within a verilog module
 //************************************************************************
 
 `include "dpi_common.incl"

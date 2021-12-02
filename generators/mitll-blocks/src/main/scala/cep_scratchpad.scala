@@ -45,14 +45,14 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
 
     // Perform the slave "attachments" to the specified bus... fragment as required
     scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {
-      scratchpadModule.slave_node :*=
+      scratchpadmodule.slave_node :*=
       TLSourceShrinker(16) :*=
       TLFragmenter(scratchpadattachparams.slave_bus) :*=_
     }
 
     // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { scratchpadModule.module.clock := scratchpadattachparams.slave_bus.module.clock }
-    InModuleBody { scratchpadModule.module.reset := scratchpadattachparams.slave_bus.module.reset }
+    InModuleBody { scratchpadmodule.module.clock := scratchpadattachparams.slave_bus.module.clock }
+    InModuleBody { scratchpadmodule.module.reset := scratchpadattachparams.slave_bus.module.reset }
 
 }}
 

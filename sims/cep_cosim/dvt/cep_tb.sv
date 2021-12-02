@@ -241,7 +241,8 @@ module `COSIM_TB_TOP_MODULE;
     `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
   end
   
-  task   write_main_mem_backdoor;
+  // Writes data directly to the Scratcpad (Main) Memory
+  task write_mainmem_backdoor;
     input [31:0] addr;
     input [63:0] data;
 
@@ -267,7 +268,30 @@ module `COSIM_TB_TOP_MODULE;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
     end
-  endtask // write_main_mem_backdoor
+  endtask // write_mainmem_backdoor
+
+  // Reads data directly from the Scratcpad (Main) Memory
+  task read_mainmem_backdoor;
+    input   [31:0] addr;
+    output  [63:0] data;
+
+    begin
+    
+      // If the memory is in reset, wait for it to be released
+      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
+
+      // Reads are registered
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
+
+      `logI("== Main Mem Backdoor Read addr=0x%x data=0x%x",addr,data);
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+    end
+  endtask // read_mainmem_backdoor
   //--------------------------------------------------------------------------------------
 
 
