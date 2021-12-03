@@ -45,7 +45,6 @@ BFM_TEST_LIST = \
 	regTest		\
 	macroMix	\
 	playback	\
-	lockTest	\
 	multiLock	\
 	ddr3Test	\
 	memPreload	\

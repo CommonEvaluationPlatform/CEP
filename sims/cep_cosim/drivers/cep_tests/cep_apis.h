@@ -35,7 +35,6 @@ extern "C" {
    * Function Prototypes
    */
   void dump_wave(int cycle2start, int cycle2capture, int enable);
-  int calibrate_ddr3(int maxTimeOut);
   int is_program_loaded(int maxTimeOut);  
   int check_bare_status(int coreId,int maxTimeOut);  
   int load_mainMemory(char *imageF, uint32_t ddr3_base, int srcOffset, int destOffset, int backdoor_on, int verify);

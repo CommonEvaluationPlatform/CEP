@@ -138,7 +138,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
     slave_tl_h2d.a_source                       <= '0;
     slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     <= slave_a_source;
     slave_tl_h2d.a_address                      <= '0;
-    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_source;
+    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_address;
     
     slave_d_size                                <= slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
     slave_d_source                              <= slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];

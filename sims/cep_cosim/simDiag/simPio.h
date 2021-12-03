@@ -13,7 +13,6 @@
 #define simPio_H
 
 #include "access.h"
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <sys/types.h>

@@ -56,7 +56,7 @@ uint64_t  cepRegTest_ReadEntry(regBaseTest_t *me, uint32_t adr) {
 // The test itself
 // =============================
 //
-int cepRegTest_runTest(int cpuId, int accessSize,int revCheck,int seed, int verbose) {
+int cepRegTest_runTest(int cpuId, int accessSize, int revCheck, int seed, int verbose) {
 
   int errCnt = 0;
   //

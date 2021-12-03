@@ -51,8 +51,7 @@
 // in bare metal
 `define BOOTROM_PATH        `DUT_TOP_LEVEL.system.maskROM.rom
   
-// Paths to the CEP modules for capturing of testvectors for the unit-simulations
-`define SROT_PATH           	`DUT_TOP_LEVEL.system.srotModule
+`define SROT_PATH           	`DUT_TOP_LEVEL.system.srotmodule
 `define SHA256_PATH         	`DUT_TOP_LEVEL.system.sha256module
 `define RSA_PATH            	`DUT_TOP_LEVEL.system.rsamodule
 `define MD5_PATH            	`DUT_TOP_LEVEL.system.md5module

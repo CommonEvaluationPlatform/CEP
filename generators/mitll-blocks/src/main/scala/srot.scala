@@ -42,11 +42,11 @@ trait CanHaveSROT { this: BaseSubsystem =>
     )
 
     // Define the SRoT Tilelink module
-    val srotModule = LazyModule(new srotTLModule(srotattachparams)(p))
+    val srotmodule = LazyModule(new srotTLModule(srotattachparams)(p))
 
     // Perform the slave "attachments" to the periphery bus
     srotattachparams.slave_bus.coupleTo("srot_slave") {
-      srotModule.slave_node :*= 
+      srotmodule.slave_node :*= 
       TLSourceShrinker(16) :*=
       TLFragmenter(srotattachparams.slave_bus) :*=_
    }
@@ -54,12 +54,12 @@ trait CanHaveSROT { this: BaseSubsystem =>
     // Perform the master "attachments" to the front bus
     srotattachparams.master_bus.coupleFrom("srot_master") {
       _ := 
-      srotModule.master_node  
+      srotmodule.master_node  
     }
 
     // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { srotModule.module.clock := srotattachparams.slave_bus.module.clock }
-    InModuleBody { srotModule.module.reset := srotattachparams.slave_bus.module.reset }
+    InModuleBody { srotmodule.module.clock := srotattachparams.slave_bus.module.clock }
+    InModuleBody { srotmodule.module.reset := srotattachparams.slave_bus.module.reset }
 
 }}
 

@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_io.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -18,7 +18,6 @@
 
 #include "portable_io.h"
 #include "cep_run.h"
-//#include <sys/types.h>
 
 extern std::mutex iomutex;
 #define THR_LOGI(format, ...) {                 \
@@ -50,6 +49,8 @@ extern std::mutex iomutex;
 #define UDELAY(a)       _udelay(a)
 #define LOGI            THR_LOGI
 #define LOGE            THR_LOGE
+#define LOGW 			THR_LOGW
+#define LOGF 			THR_LOGF
 
 #define MIN(a,b)        ((a<b)?a:b)
 

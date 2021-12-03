@@ -11,8 +11,6 @@
 
 #include "v2c_cmds.h"
 #include "simPio.h"
-//#include "sim_adr.h"
-
 #include "simdiag_global.h"
 
 simPio::simPio() : access() {
