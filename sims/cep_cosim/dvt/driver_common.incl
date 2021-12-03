@@ -2,11 +2,11 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      	driver_common.incl
-// Program:        	Common Evaluation Platform (CEP)
-// Description:		Defines items associated with the Core Driver Mailboxes
-//                 	Each core instance has it's own mailbox
-// Notes:			Must be included within a verilog module
+// File Name:       driver_common.incl
+// Program:         Common Evaluation Platform (CEP)
+// Description:   Defines items associated with the Core Driver Mailboxes
+//                  Each core instance has it's own mailbox
+// Notes:     Must be included within a verilog module
 //************************************************************************
 
 `include "dpi_common.incl"
@@ -14,7 +14,7 @@
 //
 // Loop to turn on the shIPC thread
 //
-//reg [63:0] r_data	;
+//reg [63:0] r_data ;
 reg __playBackEnable;
 reg __shIpc_CheckpointEnable;
 reg __shIpc_EnableMode;
@@ -43,7 +43,7 @@ initial begin
   __playBackEnable = 0;
   __shIpc_Active = 1;
   __shIpc_InProgress = 0; 
-  __shIpc_Time2Shutdown = 0;		
+  __shIpc_Time2Shutdown = 0;    
   __shIpc_EnableMode = 0;
   __shIpc_cmdValid = 0;
   __shIpc_remoteReq = 0;
@@ -60,263 +60,263 @@ task processCmd;
 //
 // ATOMIC_RDW64
 //
-	`SHIPC_ATOMIC_RDW64 : begin 
+  `SHIPC_ATOMIC_RDW64 : begin 
 `ifdef SHIPC_ATOMIC_RDW64_TASK
-	`SHIPC_ATOMIC_RDW64_TASK;
+  `SHIPC_ATOMIC_RDW64_TASK;
 `undef SHIPC_ATOMIC_RDW64_TASK
 `else
-	unsupportTask("SHIPC_ATOMIC_RDW64");
+  unsupportTask("SHIPC_ATOMIC_RDW64");
 `endif
-	end
+  end
 
 //
 // WRITE64_BURST
 //
-	`SHIPC_WRITE64_BURST : begin 
+  `SHIPC_WRITE64_BURST : begin 
 `ifdef SHIPC_WRITE64_BURST_TASK
-	`SHIPC_WRITE64_BURST_TASK;
+  `SHIPC_WRITE64_BURST_TASK;
 `undef SHIPC_WRITE64_BURST_TASK
 `else
-	unsupportTask("SHIPC_WRITE64_BURST");
+  unsupportTask("SHIPC_WRITE64_BURST");
 `endif
-	end
+  end
 
 
 //
 // WRITE32_64
 //
-	`SHIPC_WRITE32_64 : begin 
+  `SHIPC_WRITE32_64 : begin 
 `ifdef SHIPC_WRITE32_64_TASK
-	`SHIPC_WRITE32_64_TASK;
+  `SHIPC_WRITE32_64_TASK;
 `undef SHIPC_WRITE32_64_TASK
 `else
-	unsupportTask("SHIPC_WRITE32_64");
+  unsupportTask("SHIPC_WRITE32_64");
 `endif
-	end
+  end
 
 //
 // WRITE32_32
 //
-	`SHIPC_WRITE32_32 : begin 
+  `SHIPC_WRITE32_32 : begin 
 `ifdef SHIPC_WRITE32_32_TASK
-	`SHIPC_WRITE32_32_TASK;
+  `SHIPC_WRITE32_32_TASK;
 `undef SHIPC_WRITE32_32_TASK
 `else
-	unsupportTask("SHIPC_WRITE32_32");
+  unsupportTask("SHIPC_WRITE32_32");
 `endif
-	end
+  end
 
 //
 // WRITE32_16
 //
-	`SHIPC_WRITE32_16 : begin 
+  `SHIPC_WRITE32_16 : begin 
 `ifdef SHIPC_WRITE32_16_TASK
-	`SHIPC_WRITE32_16_TASK;
+  `SHIPC_WRITE32_16_TASK;
 `undef SHIPC_WRITE32_16_TASK
 `else
-	unsupportTask("SHIPC_WRITE32_16");
+  unsupportTask("SHIPC_WRITE32_16");
 `endif
-	end
+  end
 
 //
 // WRITE32_8
 //
-	`SHIPC_WRITE32_8 : begin 
+  `SHIPC_WRITE32_8 : begin 
 `ifdef SHIPC_WRITE32_8_TASK
-	`SHIPC_WRITE32_8_TASK;
+  `SHIPC_WRITE32_8_TASK;
 `undef SHIPC_WRITE32_8_TASK
 `else
-	unsupportTask("SHIPC_WRITE32_8");
+  unsupportTask("SHIPC_WRITE32_8");
 `endif
-	end
+  end
 
 //
 // WRITE64_64
 //
-	`SHIPC_WRITE64_64 : begin 
+  `SHIPC_WRITE64_64 : begin 
 `ifdef SHIPC_WRITE64_64_TASK
-	`SHIPC_WRITE64_64_TASK;
+  `SHIPC_WRITE64_64_TASK;
 `undef SHIPC_WRITE64_64_TASK
 `else
-	unsupportTask("SHIPC_WRITE64_64");
+  unsupportTask("SHIPC_WRITE64_64");
 `endif
-	end
+  end
 
 //
 // READ32_8
 //
-	`SHIPC_READ32_8 : begin 
+  `SHIPC_READ32_8 : begin 
 `ifdef SHIPC_READ32_8_TASK
-	`SHIPC_READ32_8_TASK;
+  `SHIPC_READ32_8_TASK;
 `undef SHIPC_READ32_8_TASK
 `else
-	unsupportTask("SHIPC_READ32_8");
+  unsupportTask("SHIPC_READ32_8");
 `endif
-	end
+  end
 
 //
 // READ32_16
 //
-	`SHIPC_READ32_16 : begin 
+  `SHIPC_READ32_16 : begin 
 `ifdef SHIPC_READ32_16_TASK
-	`SHIPC_READ32_16_TASK;
+  `SHIPC_READ32_16_TASK;
 `undef SHIPC_READ32_16_TASK
 `else
-	unsupportTask("SHIPC_READ32_16");
+  unsupportTask("SHIPC_READ32_16");
 `endif
-	end
+  end
 
 //
 // READ32_32
 //
-	`SHIPC_READ32_32 : begin 
+  `SHIPC_READ32_32 : begin 
 `ifdef SHIPC_READ32_32_TASK
-	`SHIPC_READ32_32_TASK;
+  `SHIPC_READ32_32_TASK;
 `undef SHIPC_READ32_32_TASK
 `else
-	unsupportTask("SHIPC_READ32_32");
+  unsupportTask("SHIPC_READ32_32");
 `endif
-	end
+  end
 
 //
 // READ32_64
 //
-	`SHIPC_READ32_64 : begin 
+  `SHIPC_READ32_64 : begin 
 `ifdef SHIPC_READ32_64_TASK
-	`SHIPC_READ32_64_TASK;
+  `SHIPC_READ32_64_TASK;
 `undef SHIPC_READ32_64_TASK
 `else
-	unsupportTask("SHIPC_READ32_64");
+  unsupportTask("SHIPC_READ32_64");
 `endif
-	end
+  end
 
 //
 // READ64_64
 //
-	`SHIPC_READ64_64 : begin 
+  `SHIPC_READ64_64 : begin 
 `ifdef SHIPC_READ64_64_TASK
-	`SHIPC_READ64_64_TASK;
+  `SHIPC_READ64_64_TASK;
 `undef SHIPC_READ64_64_TASK
 `else
-	unsupportTask("SHIPC_READ64_64");
+  unsupportTask("SHIPC_READ64_64");
 `endif
-	end
+  end
 //
 // READ64_BURST
 //
-	`SHIPC_READ64_BURST : begin 
+  `SHIPC_READ64_BURST : begin 
 `ifdef SHIPC_READ64_BURST_TASK
-	`SHIPC_READ64_BURST_TASK;
+  `SHIPC_READ64_BURST_TASK;
 `undef SHIPC_READ64_BURST_TASK
 `else
-	unsupportTask("SHIPC_READ64_BURST");
+  unsupportTask("SHIPC_READ64_BURST");
 `endif
-	end
+  end
 
 //
 // PRINTF
 //
-	`SHIPC_PRINTF : begin 
+  `SHIPC_PRINTF : begin 
 `ifdef SHIPC_PRINTF_TASK
-	`SHIPC_PRINTF_TASK;
+  `SHIPC_PRINTF_TASK;
 `undef SHIPC_PRINTF_TASK
 `else
-	unsupportTask("SHIPC_PRINTF");
+  unsupportTask("SHIPC_PRINTF");
 `endif
-	end
+  end
 //
 // WRITE_STATUS
 //
-	`SHIPC_WRITE_STATUS : begin 
+  `SHIPC_WRITE_STATUS : begin 
 `ifdef SHIPC_WRITE_STATUS_TASK
-	`SHIPC_WRITE_STATUS_TASK;
+  `SHIPC_WRITE_STATUS_TASK;
 `undef SHIPC_WRITE_STATUS_TASK
 `else
-	unsupportTask("SHIPC_WRITE_STATUS");
+  unsupportTask("SHIPC_WRITE_STATUS");
 `endif
-	end
+  end
 //
 // READ_STATUS
 //
-	`SHIPC_READ_STATUS : begin 
+  `SHIPC_READ_STATUS : begin 
 `ifdef SHIPC_READ_STATUS_TASK
-	`SHIPC_READ_STATUS_TASK;
+  `SHIPC_READ_STATUS_TASK;
 `undef SHIPC_READ_STATUS_TASK
 `else
-	unsupportTask("SHIPC_READ_STATUS");
+  unsupportTask("SHIPC_READ_STATUS");
 `endif
-	end
+  end
 
 //
 // WRITE_DVT_FLAG
 //
-	`SHIPC_WRITE_DVT_FLAG : begin 
+  `SHIPC_WRITE_DVT_FLAG : begin 
 `ifdef SHIPC_WRITE_DVT_FLAG_TASK
-	`SHIPC_WRITE_DVT_FLAG_TASK;
+  `SHIPC_WRITE_DVT_FLAG_TASK;
 `undef SHIPC_WRITE_DVT_FLAG_TASK
 `else
-	unsupportTask("SHIPC_WRITE_DVT_FLAG");
+  unsupportTask("SHIPC_WRITE_DVT_FLAG");
 `endif
-	end
+  end
 //
 // READ_DVT_FLAG
 //
-	`SHIPC_READ_DVT_FLAG : begin 
+  `SHIPC_READ_DVT_FLAG : begin 
 `ifdef SHIPC_READ_DVT_FLAG_TASK
-	`SHIPC_READ_DVT_FLAG_TASK;
+  `SHIPC_READ_DVT_FLAG_TASK;
 `undef SHIPC_READ_DVT_FLAG_TASK
 `else
-	unsupportTask("SHIPC_READ_DVT_FLAG");
+  unsupportTask("SHIPC_READ_DVT_FLAG");
 `endif
-	end
+  end
 
 //
 // SHIPC_READ_ERROR_CNT
 //
-	`SHIPC_READ_ERROR_CNT : begin 
+  `SHIPC_READ_ERROR_CNT : begin 
 `ifdef SHIPC_READ_ERROR_CNT_TASK
-	`SHIPC_READ_ERROR_CNT_TASK;
+  `SHIPC_READ_ERROR_CNT_TASK;
 `undef SHIPC_READ_ERROR_CNT_TASK
 `else
-	unsupportTask("SHIPC_READ_ERROR_CNT");
+  unsupportTask("SHIPC_READ_ERROR_CNT");
 `endif
-	end
+  end
 
 //
 // FRAMER_RDWR
 //
     `SHIPC_FRAMER_RDWR : begin 
 `ifdef SHIPC_FRAMER_RDWR_TASK
-	`SHIPC_FRAMER_RDWR_TASK;
+  `SHIPC_FRAMER_RDWR_TASK;
 `undef SHIPC_FRAMER_RDWR_TASK
 `else
-	unsupportTask("SHIPC_FRAMER_RDWR");
+  unsupportTask("SHIPC_FRAMER_RDWR");
 `endif
-	end
+  end
 
     `SHIPC_SAMPLE_RDWR : begin 
 `ifdef SHIPC_SAMPLE_RDWR_TASK
-	`SHIPC_SAMPLE_RDWR_TASK;
+  `SHIPC_SAMPLE_RDWR_TASK;
 `undef SHIPC_SAMPLE_RDWR_TASK
 `else
-	unsupportTask("SHIPC_SAMPLE_RDWR");
+  unsupportTask("SHIPC_SAMPLE_RDWR");
 `endif
-	end
+  end
 
 //
 // Common Task
 //
-      	`SHIPC_GET_SIM_TIME: r_data = {2{__simTime}};
-      	`SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);
-	`SHIPC_SHUTDOWN: __shIpc_Time2Shutdown = 1;
-	`SHIPC_SIMV_SAVE: begin
-	    // set the flag!!
-	    //`WAIT4RESTART_FLAG = 1;
-	    __shIpc_CheckpointEnable = 1;
-	end
-      	default        : $display("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+        `SHIPC_GET_SIM_TIME: r_data = {2{__simTime}};
+        `SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);
+  `SHIPC_SHUTDOWN: __shIpc_Time2Shutdown = 1;
+  `SHIPC_SIMV_SAVE: begin
+      // set the flag!!
+      //`WAIT4RESTART_FLAG = 1;
+      __shIpc_CheckpointEnable = 1;
+  end
+        default        : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
       endcase
-	//`logI("processCmd __shIpc_p0=%x r_data=%x",__shIpc_p0 , r_data);
+  //`logI("processCmd __shIpc_p0=%x r_data=%x",__shIpc_p0 , r_data);
   end
 endtask // processCmd
 
@@ -326,20 +326,20 @@ endtask // processCmd
 `ifdef USE_DPI
 always @(posedge (__shIpc_EnableMode && !__playBackEnable)) begin
   @(posedge `SHIPC_CLK ); // wait 1 clock
-  `logI("=========== Entering shIpc_EnableMode Loop simeTime=%d =================", __simTime);  
+  `logI("=========== Entering shIpc_EnableMode Loop simeTime = %d =================", __simTime);  
   while (__shIpc_EnableMode) begin
     // get the command
     get_v2c_mail(__mSlotId, __mCpuId,inBox);
     __shIpc_cmdValid       = inBox.mCmdValid;
      if (inBox.mActive == 0) 
        __shIpc_Active         = 0; // inBox.mActive;       
-    // 		     
+    //         
     // process the command
     if (__shIpc_InProgress && !__shIpc_Active) begin
-	__shIpc_EnableMode = 0; 
-	__shIpc_InProgress = 0;
-	__shIpc_Active     = 1;
-    end	
+  __shIpc_EnableMode = 0; 
+  __shIpc_InProgress = 0;
+  __shIpc_Active     = 1;
+    end 
     if (inBox.mCmdValid) begin
        __shIpc_remoteReq      = inBox.mRemoteReq;
        __shIpc_cmd            = inBox.mCmd;
@@ -357,7 +357,7 @@ always @(posedge (__shIpc_EnableMode && !__playBackEnable)) begin
 //          @(posedge `SHIPC_CLK); // wait 1 clock
     end
     if (__shIpc_Time2Shutdown) begin
-	
+  
     end
     if (__shIpc_Active) begin
       //`logI("__shIpc_Active=0 is detected.. Stop checking for command");
@@ -388,8 +388,8 @@ end
 // =================================================================
 //
 task unsupportTask;
-  input [1024:0] str;	
-begin $display("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n",str); end
+  input [1024:0] str; 
+begin `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n",str); end
 endtask
 
 task RUNCLK;
@@ -419,14 +419,14 @@ always @(posedge enableMe) begin
   $vpp_isCActive(`SHIPC_XACTOR_ID, myIsActive);
   if (myIsActive) begin
      // wait until C-side is alive
-     $display("%m: calling $vpp_WaitTilStart slot=%d cpu=%d",MY_SLOT_ID,MY_CPU_ID);
+     `logI("%m: calling $vpp_WaitTilStart slot=%d cpu=%d",MY_SLOT_ID,MY_CPU_ID);
      $vpp_WaitTilStart(MY_SLOT_ID,MY_CPU_ID);
-     $display("%m: Turning ON __shIpc_EnableMode %t",$time);
+     `logI("%m: Turning ON __shIpc_EnableMode %t", $time);
     __shIpc_EnableMode = 1;
    end
    else begin
-    $display("%m: Turning OFF __shIpc_EnableMode %t",$time);
+    `logI("%m: Turning OFF __shIpc_EnableMode %t", $time);
     __shIpc_EnableMode = 0;
-   end	
-end	
+   end  
+end 
 

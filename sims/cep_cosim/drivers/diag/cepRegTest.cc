@@ -137,7 +137,7 @@ int cepRegTest_runTest(int cpuId, int accessSize,int revCheck,int seed, int verb
     DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, i);
     DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
     uint64_t d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
-    LOGI("CoreId=%d = 0x%016lx\n",i,d64);
+    LOGI("CoreId = %d = 0x%016lx\n",i,d64);
   }
 #endif
   return errCnt;

@@ -45,9 +45,9 @@ endif
 
 # Perform DUT_SIM_MODE Check
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
-DUT_SIM_MODE = BFM_MODE
+override DUT_SIM_MODE = BFM_MODE
 else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
-DUT_SIM_MODE = BARE_MODE
+override DUT_SIM_MODE = BARE_MODE
 else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif

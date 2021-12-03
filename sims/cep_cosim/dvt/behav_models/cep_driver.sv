@@ -38,6 +38,7 @@ module cep_driver
   reg                 clear = 0;
   integer             cnt;
   string              str;
+  reg                 backdoor_enable = 0;
   
   //--------------------------------------------------------------------------------------
   // Printf support function
@@ -74,7 +75,7 @@ module cep_driver
     end // end for
     
     $sformat(str,"C%-d: %-s", printf_addr[1:0], tmp);
-    $display("%s",str);
+    `logI("%s",str);
     
     dvtFlags[`DVTF_PRINTF_CMD] = 0;
   end // end always
@@ -89,9 +90,7 @@ module cep_driver
 
   always @(*) dvtFlags[`DVTF_PROGRAM_LOADED]        = `COSIM_TB_TOP_MODULE.program_loaded;
 
-
-  // Enable backdoor loading of main memory
-  reg backdoor_enable = 0;
+  // Enable backdoor loading of main memory (this will affect all WRITE64_64_DPI and READ64_64_DPI calls)
   always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
     backdoor_enable = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR] = 0;
@@ -346,7 +345,6 @@ module cep_driver
       begin
         d[63:32] = inBox.mPar[0];
         d[31:0]  = inBox.mPar[1];
-        `logI("%m a=%x d=%x",inBox.mAdr,d);   
         `ifdef BFM_MODE
           if (backdoor_enable) begin
             `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,d);
@@ -739,7 +737,7 @@ module cep_driver
 
     // Disable Stuck Checker
     always @(posedge dvtFlags[`DVTF_DISABLE_STUCKCHECKER]) begin
-      `logI("DisableStuckChecker=1");
+      `logI("DisableStuckChecker = 1");
       DisableStuckChecker = 1;
       dvtFlags[`DVTF_DISABLE_STUCKCHECKER] = 0; // self-clear
     end   

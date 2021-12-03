@@ -52,10 +52,8 @@ begin
       l=inBox.mPar[1];
       for (int s=m;s>=l;s--) begin       
 	 tmp = {tmp[62:0],dvtFlags[s]};
-	 //$display("LOOP s=%d %x\n",s,tmp);      
       end
       inBox.mPar[0] = tmp;
-      //$display("IN %d/%d %x\n",m,l,inBox.mPar[0]);
 
 `else   
    for (s =msb;s>=lsb;s=s-1) begin
@@ -179,7 +177,7 @@ always @(posedge __shIpc_EnableMode) begin
       	  `SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);	
 	  //
 	  `SHIPC_READ_STATUS : __shIpc_p0 = __shIpcStatus;
-      	  default        : $display("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+      	  default        : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
 	endcase
 	// return data
 	// complete the command
@@ -204,7 +202,7 @@ end // end posedge
 
 task unsupportTask;
   input [1024:0] str;	
-begin $display("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n",str); end
+begin `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n",str); end
 endtask
 
 task RUNCLK;

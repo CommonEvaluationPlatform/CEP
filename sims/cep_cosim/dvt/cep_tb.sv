@@ -313,7 +313,7 @@ module `COSIM_TB_TOP_MODULE;
   
   genvar c;
   generate
-    for (c = 0; c < 4; c = c + 1) begin : driverX  
+    for (c = 0; c < 4; c++) begin : driverX  
       cep_driver #(
         .MY_SLOT_ID   (0),
         .MY_CPU_ID    (c)
