@@ -15,7 +15,7 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))
 TEST_SUITE_NAME		= $(shell cd ..; basename `pwd`)
 TEST_DIR			= $(strip $(shell cd .; pwd))
-TEST_DIR_NAME		= $(shell cd .; basename `pwd`)
+TEST_NAME			= $(shell cd .; basename `pwd`)
 
 # default target
 all: .vrun_flag

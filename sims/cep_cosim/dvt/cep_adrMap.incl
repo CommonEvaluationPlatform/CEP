@@ -76,8 +76,8 @@ Generated Address Map
 `define ddr3_base_adr           'h8000_0000
 `define ddr3_base_size          'h4000_0000
 
-`define scratchpad_base_addr    'h6480_0000
-`define scratchpad_base_size    'h0001_0000
+`define scratchpad_base_addr    'h8000_0000
+`define scratchpad_base_size    'h0002_0000
 `define scratchpad_know_pattern 'h600dbabe_12345678
 
 

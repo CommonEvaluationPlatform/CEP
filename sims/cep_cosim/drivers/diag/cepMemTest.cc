@@ -103,16 +103,11 @@ cepMemTest_ReadEntry(memBaseTest_t *me, uint64_t adr)
 int cepMemTest_runTest(int cpuId,uint64_t mem_base, int adrWidth, int dataWidth, int seed, int verbose, int full) {
 
   int errCnt = 0;
-  //
-  memBaseTest_t *memp; //
-  //
-  //
-  // constructors
-  // 1Gbytes??
-  //
+
+  memBaseTest_t *memp; 
+
   int step = (full) ? 1 : 0x10000;
-  //int adrWidth = 30-2; // 1 Gbytes (30bits) for all 4 cores => each one will test 1/4 of that
-  //uint64_t mem_base = ddr3_base_adr + ((cpuId&0x3) << adrWidth);  
+
   cepMemTest_CREATE(memp,cpuId,mem_base, adrWidth-3, dataWidth, step, seed + (cpuId*100));
   //
   // uniquify

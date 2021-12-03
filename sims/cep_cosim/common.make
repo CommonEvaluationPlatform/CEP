@@ -215,7 +215,7 @@ endif
 # Variable and Build target tasked with running the simulation
 #--------------------------------------------------------------------------------------
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)
-VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_DIR_NAME}.log +myplus=0"
+VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_NAME}.log +myplus=0"
 
 .vrun_flag: ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
 ifeq (${COVERAGE},1)
@@ -319,6 +319,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.KEY ${COSIM_TOP_DIR}/*/*/*/testHistory.txt
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/status
 	-rm -f ${COSIM_TOP_DIR}/*/*/_info
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.wlf
 # Use to force rebuilds for rules that include this dependency
 .force:
 #--------------------------------------------------------------------------------------

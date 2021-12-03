@@ -1,30 +1,30 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      c_module.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 #include "v2c_cmds.h"
 #include "simPio.h"
-//
 #include "shMem.h"
 #include "c_module.h"
 #include <unistd.h>
 #include "random48.h"
-
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "simdiag_global.h"
+
 #include "cepMemTest.h"
 
-//
 void *c_module(void *arg) {
 
-// Set up
+  //--------------------------------------------------------------------------------------
+  // Test Set up
+  //--------------------------------------------------------------------------------------
   pthread_parm_t *tParm = (pthread_parm_t *)arg;
   int errCnt = 0;
   int slotId = tParm->slotId;
@@ -39,42 +39,44 @@ void *c_module(void *arg) {
   ptr->SetAliveStatus();
   sleep(1);
 
-  // Test is Here
   simPio pio;
-  pio.MaybeAThread(); // chec
+  pio.MaybeAThread();
   pio.EnableShIpc(1);
   pio.SetVerbose(verbose);
+  //--------------------------------------------------------------------------------------
 
+
+
+  //--------------------------------------------------------------------------------------
   // Test starts here
+  //--------------------------------------------------------------------------------------
   pio.RunClk(500);
 
-
-
-
-  int full = 0;
-  int adrWidth = 16 - 2; // 65k (16 bits) for all 4 cores => each one will test 1/4 of that
-  u_int32_t mem_base = scratchpad_base_addr + ((cpuId&0x3) << adrWidth);  
+  int full            = 0;
+  int addrWidth       = 17 - 2; // 128k (17 bits) for all 4 cores => each one will test 1/4 of that
+  u_int32_t mem_base  = scratchpad_base_addr + ((cpuId&0x3) << addrWidth);  
 
   int dataWidth = 0;
 
-  for (int i=0;i<4;i++) {
+  // Cycle through all cores 
+  for (int i = 0; i < 4; i++) {
     switch ((i + cpuId) & 0x3) {
     case 0 : dataWidth = 8; break;
     case 1 : dataWidth = 16; break;
     case 2 : dataWidth = 32; break;
     case 3 : dataWidth = 64; break;
    }
-    if (!errCnt) { errCnt = cepMemTest_runTest(cpuId, mem_base, adrWidth, dataWidth ,seed + ((cpuId+i)*0x10), verbose, full); }
+    if (!errCnt) { errCnt = cepMemTest_runTest(cpuId, mem_base, addrWidth, dataWidth ,seed + ((cpuId+i)*0x10), verbose, full); }
   }
 
-  //
-  //
-  //
   pio.RunClk(100);  
-  //
-  // ======================================
+  //--------------------------------------------------------------------------------------
+
+
+
+  //--------------------------------------------------------------------------------------
   // Exit
-  // ======================================
+  //--------------------------------------------------------------------------------------
 cleanup:
   if (errCnt != 0) {
     LOGI("======== TEST FAIL ========== %x\n",errCnt);
@@ -87,4 +89,4 @@ cleanup:
   pthread_exit(NULL);
   return ((void *)NULL);
 }
-
+  //--------------------------------------------------------------------------------------
