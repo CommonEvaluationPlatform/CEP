@@ -37,17 +37,17 @@ int cepSrotMemTest_runTest(int cpuId, int seed, int verbose) {
   int dataWidth = 64;
   //
   // disable operational bits
-  DUT_WRITE32_64(srot_base_addr + SROT_CTRLSTS_ADDR , 0);
+  DUT_WRITE32_64(SROT_CTRLSTS_ADDR , 0);
   //
   //
   //
   for (int i=0;i<2;i++) {
     if (i == 0) {
       adrWidth = 11; // 2048 locations
-      mem_base = srot_base_addr + SROT_KEYRAM_ADDR;
+      mem_base = SROT_KEYRAM_ADDR;
     } else {
       adrWidth = 6; // 32 locations
-      mem_base = srot_base_addr + SROT_KEYINDEXRAM_ADDR;
+      mem_base = SROT_KEYINDEXRAM_ADDR;
     }
     if (!errCnt) { errCnt = cepMemTest_runTest(cpuId,mem_base,adrWidth,dataWidth ,seed, verbose, full); }
   }

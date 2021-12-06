@@ -332,6 +332,7 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
     USEC_SLEEP(100);
     timeOut--;
   };
+  if (timeOut <= 0) { LOGE("%s: timeout reading from address = 0x%08x\n", __FUNCTION__, (uint32_t)get_physical_adr(coreIndex, pAddress)); }
   if (GetVerbose(2)) {  LOGI("%s: expData=0x%016lx rdDat=0x%016lx\n",__FUNCTION__,pData,rdDat); }
   return (timeOut <= 0) ? 1 : 0;
 }

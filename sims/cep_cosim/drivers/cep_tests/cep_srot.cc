@@ -70,6 +70,8 @@ int cep_srot::InitKeyIndexRAM (void)
     LOGI("----------------------------------------------------------------------------\n");
     LOGI("\n");
   }
+
+  // The cep_writeNcapture function uses an offset from the current "core's" base address
   for (int i = 0; i < (int)SROT_KEYINDEXRAM_SIZE; i++) {
     cep_writeNcapture(SROT_KEYINDEXRAM_ADDR + (i*8), 0);
   }
@@ -281,15 +283,17 @@ int cep_srot::LLKI_Setup(int cpuId) {
 #endif
         
     if (GetVerbose()) {
-      LOGI("%s: cpu#%d is the master. mask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
+      LOGI("%s: cpu#%d is the master. cpuActiveMask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
     }
   
 
     //
     // Initialize the LLKI Key Index RAM to all zeroes (thus effectively deleting any existing keys)
     //
-    InitKeyIndexRAM();
-        
+    errCnt += InitKeyIndexRAM();
+
+    if (errCnt) return errCnt;
+
     //
     // Loop through all the LLKI cores and load keys if the following conditions are met:
     //  1) The core is enabled as define in cep_core_info (CEP.h)
@@ -306,16 +310,19 @@ int cep_srot::LLKI_Setup(int cpuId) {
       if (IS_ON(coreIndex) && core.enabled) {
 
         // Load the appropriate key
-        LoadLLKIKey(coreIndex,        // KeyIndex (address in the KeyIndexRAM)
+        errCnt += LoadLLKIKey(
+                    coreIndex,        // KeyIndex (address in the KeyIndexRAM)
                     coreIndex,        // CoreIndex (defines the core for which this key is destined for.  Corresponds
-                                      // to the core indecies defined in DevKitConfigs.scala)
+                                      // to the core indicies defined in DevKitConfigs.scala)
                     key.lowPointer,
                     key.highPointer,
                     key.keyData,
                     key.invertType);
-
-        DisableLLKI(coreIndex);
-        EnableLLKI(coreIndex);
+        if (errCnt) return errCnt;
+        errCnt += DisableLLKI(coreIndex);
+        if (errCnt) return errCnt;
+        errCnt += EnableLLKI(coreIndex);
+        if (errCnt) return errCnt;
 
       } // if (IS_ON(keyIndex) && core.enabled)
 
@@ -334,6 +341,7 @@ int cep_srot::LLKI_Setup(int cpuId) {
 #endif
       
   } else {  // else if (iAMMaster)
+
     if (GetVerbose()) {
       LOGI("%s: cpu#%d will be the slave. mask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
     }

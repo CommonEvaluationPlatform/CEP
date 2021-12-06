@@ -32,8 +32,8 @@ void *c_module(void *arg) {
   int verbose = tParm->verbose;
   Int32U seed = tParm->seed;
   int restart = tParm->restart;
-  int offset = GET_OFFSET(slotId,cpuId);
-  GlobalShMemory.getSlotCpuId(offset,&slotId,&cpuId);
+  int offset = GET_OFFSET(slotId, cpuId);
+  GlobalShMemory.getSlotCpuId(offset, &slotId, &cpuId);
 
   shIpc *ptr = GlobalShMemory.getIpcPtr(offset);
   ptr->SetAliveStatus();
@@ -52,10 +52,8 @@ void *c_module(void *arg) {
   //--------------------------------------------------------------------------------------
   pio.RunClk(500);
   
-  int mask = seed; // seed is used as cpuActiveMask from c_dispatch
-
-//  int coreMask = 0xFFFFFFFF; // all cores
-  int coreMask = 0x00000001;  // AES
+  int coreMask = 0xFFFFFFFF; // all cores
+//  int coreMask = 0x00000001;  // AES
 //  int coreMask = 0x00000002;  // MD5
 //  int coreMask = 0x00000004;  // SHA256.0
 //  int coreMask = 0x00000008;  // SHA256.1
@@ -71,7 +69,8 @@ void *c_module(void *arg) {
 //  int coreMask = 0x00002000;  // GPS.1
 //  int coreMask = 0x00004000;  // GPS.2
 //  int coreMask = 0x00008000;  // GPS.3
-  errCnt += cepMacroMix_runTest(cpuId, mask, coreMask, seed, verbose);
+
+  errCnt += cepMacroMix_runTest(cpuId, GlobalShMemory.getActiveMask(), coreMask, seed, verbose);
 
   pio.RunClk(100);  
   //--------------------------------------------------------------------------------------

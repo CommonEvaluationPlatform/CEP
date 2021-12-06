@@ -33,8 +33,7 @@ extern void memBaseTest_Construct         (memBaseTest_t *me,
 //
 // Overload functions
 //
-int 
-cepMemTest_WriteEntry(memBaseTest_t *me, uint64_t adr)
+int cepMemTest_WriteEntry(memBaseTest_t *me, uint64_t adr)
 {
   uint64_t dat64 = (uint64_t)me->wrPat[0];
   uint32_t dat32 = (uint32_t)dat64;
@@ -62,8 +61,7 @@ cepMemTest_WriteEntry(memBaseTest_t *me, uint64_t adr)
   return 0;
 }
 
-int
-cepMemTest_ReadEntry(memBaseTest_t *me, uint64_t adr)
+int cepMemTest_ReadEntry(memBaseTest_t *me, uint64_t adr)
 {
   uint64_t dat64;
   uint32_t dat32;
@@ -106,12 +104,9 @@ int cepMemTest_runTest(int cpuId,uint64_t mem_base, int adrWidth, int dataWidth,
 
   int step = (full) ? 1 : 0x10000;
 
-  cepMemTest_CREATE(memp,cpuId,mem_base, adrWidth-3, dataWidth, step, seed + (cpuId*100));
-  //
-  // uniquify
-  //
+  cepMemTest_CREATE(memp, cpuId, mem_base, adrWidth - 3, dataWidth, step, seed + (cpuId*100));
+
   // write
-  // flip the order just for fun :-))  
   if (memp->mTarget & 0x1) {
     if (!errCnt) { errCnt += (*memp->walk_1_thruAdrTest_p)(memp,1,0); }
     if (!errCnt) { errCnt += (*memp->walk_1_thruDatTest_p)(memp,1,0); }
@@ -119,9 +114,7 @@ int cepMemTest_runTest(int cpuId,uint64_t mem_base, int adrWidth, int dataWidth,
     if (!errCnt) { errCnt += (*memp->walk_0_thruDatTest_p)(memp,1,0); }        
     if (!errCnt) { errCnt += (*memp->walk_1_thruAdrTest_p)(memp,1,0); }
   }
-  //
   // readNcompare
-  //
   if (memp->mTarget & 0x1) {
     if (!errCnt) { errCnt += (*memp->walk_1_thruAdrTest_p)(memp,0,1); }
     if (!errCnt) { errCnt += (*memp->walk_1_thruDatTest_p)(memp,0,1); }
@@ -134,9 +127,7 @@ int cepMemTest_runTest(int cpuId,uint64_t mem_base, int adrWidth, int dataWidth,
     if (!errCnt) { errCnt += (*memp->doMemTest_p)(memp); }        
   }
 
-  //
   // Destructors
-  //
   cepMemTest_DELETE(memp);
   return errCnt;
 }

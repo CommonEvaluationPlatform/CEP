@@ -58,6 +58,9 @@ module RocketTile_beh(
   output [1:0]  auto_tl_other_masters_out_e_bits_sink
 );
  
+  // Tie-off unused outputs
+  assign auto_wfi_out_0 = 0;
+
   // Instantiate the Tilelink Master Behavioral Model
   tl_master_beh #(
     .CHIP_ID    (0),  // Will be overwritten by the testbench for each core and thus

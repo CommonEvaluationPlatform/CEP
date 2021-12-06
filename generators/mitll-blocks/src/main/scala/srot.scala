@@ -255,20 +255,20 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
 
   // Instantiate the srot_wrapper
   val srot_wrapper_inst = Module(new srot_wrapper(
-    slaveEdge.bundle.sizeBits,
-    slaveEdge.bundle.sourceBits,
-    slaveEdge.bundle.addressBits,
-    slaveEdge.bundle.dataBits / 8,
-    slaveEdge.bundle.dataBits,
-    slaveEdge.bundle.sinkBits,
-    masterEdge.bundle.sizeBits,
-    masterEdge.bundle.sourceBits,
-    masterEdge.bundle.addressBits,
-    masterEdge.bundle.dataBits / 8,
-    masterEdge.bundle.dataBits,
-    masterEdge.bundle.sinkBits,
-    core_index_array_packed,
-    num_cores
+    slave_tl_szw                    = slaveEdge.bundle.sizeBits,
+    slave_tl_aiw                    = slaveEdge.bundle.sourceBits,
+    slave_tl_aw                     = slaveEdge.bundle.addressBits,
+    slave_tl_dbw                    = slaveEdge.bundle.dataBits / 8,
+    slave_tl_dw                     = slaveEdge.bundle.dataBits,
+    slave_tl_diw                    = slaveEdge.bundle.sinkBits,
+    master_tl_szw                   = masterEdge.bundle.sizeBits,
+    master_tl_aiw                   = masterEdge.bundle.sourceBits,
+    master_tl_aw                    = masterEdge.bundle.addressBits,
+    master_tl_dbw                   = masterEdge.bundle.dataBits / 8,
+    master_tl_dw                    = masterEdge.bundle.dataBits,
+    master_tl_diw                   = masterEdge.bundle.sinkBits,
+    num_cores                       = num_cores,
+    core_index_array_packed         = core_index_array_packed
   ))
 
   // Connect the Clock and Reset

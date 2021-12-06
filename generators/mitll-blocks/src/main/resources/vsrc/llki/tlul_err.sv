@@ -120,6 +120,7 @@ module tlul_err import tlul_pkg::*; (
             addr_sz_chk  = ~|tl_i.a_address[2:0]; // Per TL spec, address must be aligned to size
             mask_chk     = 1'b1;
             fulldata_chk = &tl_i.a_mask[7:0];     // Given 8-byte transfer, all mask bits should be set
+          // Unsupported sizes for DW != 64
           end else begin
             addr_sz_chk  = 1'b0;
             mask_chk     = 1'b0;

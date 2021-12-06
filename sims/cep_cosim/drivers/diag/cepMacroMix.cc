@@ -77,7 +77,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
 #endif
   int maxLoop;
   if (VERBOSE1()) {
-    LOGI("%s: cpuActiveMask=0x%x coreMask=0x%08x\n",__FUNCTION__, cpuActiveMask, coreMask);
+    LOGI("%s: cpuId=%d, cpuActiveMask=0x%08x coreMask=0x%08x, seed=0x%08x\n",__FUNCTION__, cpuId, cpuActiveMask, coreMask, seed);
   }
 
   // Instantiate and initialize an SRoT object

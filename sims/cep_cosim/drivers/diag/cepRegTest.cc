@@ -94,8 +94,8 @@ int cepRegTest_runTest(int cpuId, int accessSize, int revCheck, int seed, int ve
     (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch1_reg,(uint64_t)(-1));                
     (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch5_reg,(uint64_t)(-1));            
 
-    (*regp->AddAReg_p)(regp, srot_base_addr  + SROT_LLKIC2_SCRATCHPAD0_ADDR, (uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, srot_base_addr  + SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, SROT_LLKIC2_SCRATCHPAD0_ADDR, (uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
     break;
   }    
   case 2: {
