@@ -5,7 +5,7 @@
 // File Name:      cep_tb.v
 // Program:        Common Evaluation Platform (CEP)
 // Description:    CEP Co-Simulation Top Level Testbench 
-// Notes:          When operating in BFM_MODE
+// Notes:          
 //
 //--------------------------------------------------------------------------------------VI
 
@@ -45,9 +45,9 @@ module `COSIM_TB_TOP_MODULE;
   reg                 sys_rst_n;
   reg                 sys_clk_i;  
     
-  wire                jtag_TCK;
-  wire                jtag_TMS;
-  wire                jtag_TDI;
+  wire                jtag_TCK; pullup (weak1) (jtag_TCK);
+  wire                jtag_TMS; pullup (weak1) (jtag_TMS);
+  wire                jtag_TDI; pullup (weak1) (jtag_TDI);
   wire                jtag_TDO;   
 
   wire                uart_rxd; pullup (weak1) (uart_rxd);

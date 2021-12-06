@@ -61,7 +61,7 @@ begin
    end
    r_data = tmp;
 `endif   
-   //`logI("dvtFlags=%b r_data=%x",dvtFlags,r_data);
+   `logI("dvtFlags=%b r_data=%x",dvtFlags,r_data);
    @(posedge `SHIPC_CLK);   
 end
 endtask // READ_DVT_FLAG_TASK;

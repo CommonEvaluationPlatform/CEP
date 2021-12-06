@@ -200,8 +200,8 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 COMMON_LDFLAGS        	=
 
 # Flags for Hardware and Software simulation compilations
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -I ${SIMULATOR_PATH}/../include -D_SIM_HW_ENV -DSIM_ENV_ONLY
-SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -D_SIM_SW_ENV -DSIM_ENV_ONLY
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${SIMULATOR_PATH}/../include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
+SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV 
 
 # Switches to indicate what libraries are being used
 LIBRARY_SWITCHES  		= -lpthread -lcryptopp
@@ -227,14 +227,14 @@ ${SIMDIAG_LIB_DIR}/%.o ${SIMDIAG_LIB_DIR}/%.obj: ${SIMDIAG_D}/%.cc ${COMMON_DEPE
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 ${PLI_LIB_DIR}/%.o ${PLI_LIB_DIR}/%.obj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
+	$(GCC) $(SIM_HW_CFLAGS) -fPIC -c -o $@ $< 
 
 # .o & .obj  not same rule
 ${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 ${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT -fPIC -c -o $@ $< 
+	$(GCC) $(SIM_HW_CFLAGS) -fPIC -c -o $@ $< 
 
 # .bobj for bare-metal
 ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
@@ -323,7 +323,7 @@ ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIA
 
 # libvpp.so : pli/share
 ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
-	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -D_REENTRANT  -fPIC -shared  -g  \
+	$(GCC) $(SIM_HW_CFLAGS) -fPIC -shared  -g  \
 	-o ${VPP_LIB}	\
 	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
 	$(shell ls ${PLI_LIB_DIR}/*.obj) 

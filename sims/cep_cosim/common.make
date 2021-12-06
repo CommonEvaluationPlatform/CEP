@@ -140,6 +140,7 @@ $(info CEP_COSIM:   USE_GDB        = ${USE_GDB})
 $(info CEP_COSIM:   TL_CAPTURE     = ${TL_CAPTURE})
 $(info CEP_COSIM:   VIRTUAL_MODE   = ${VIRTUAL_MODE})
 $(info CEP_COSIM:   SINGLE_THREAD  = ${SINGLE_THREAD})
+$(info CEP_COSIM:   USE_DPI        = ${USE_DPI})
 $(info )
 
 # Create default local vsim do file if not there: one with sim for interactive and one for regression
@@ -307,7 +308,7 @@ cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
+#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog

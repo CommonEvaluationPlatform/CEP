@@ -29,20 +29,16 @@
 #include "simdiag_global.h"
 
 
-#if defined(_SIM_HW_ENV) || defined(_SIM_SW_ENV)
-#include "v2c_cmds.h"
-#include "v2c_sys.h"
-#endif
-
 #ifdef SIM_ENV_ONLY
+  #include "v2c_cmds.h"
+  #include "v2c_sys.h"
 
-#ifdef DLL_SIM
-#include "log.h"
-//#include "vpp_dll.h"
-#else
-#include "shMem.h"
-#include "shLog.h"
-#endif
+  #ifdef DLL_SIM
+    #include "log.h"
+  #else
+    #include "shMem.h"
+    #include "shLog.h"
+  #endif
 #endif
 
 //
@@ -126,6 +122,7 @@ public:
   u_int64_t  ReadDvtFlag(int msb, int lsb) ;
   int  ReadStatus(); // Flow control
   int  ReadErrorCount(); // Flow control
+
 #ifdef SIM_ENV_ONLY
   shIpc *ptr;
 #endif

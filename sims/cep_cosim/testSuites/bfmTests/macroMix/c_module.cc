@@ -50,7 +50,7 @@ void *c_module(void *arg) {
   //--------------------------------------------------------------------------------------
   // Test starts here
   //--------------------------------------------------------------------------------------
-  pio.RunClk(1000);
+  pio.RunClk(500);
   
   int mask = seed; // seed is used as cpuActiveMask from c_dispatch
 
@@ -71,7 +71,7 @@ void *c_module(void *arg) {
 //  int coreMask = 0x00002000;  // GPS.1
 //  int coreMask = 0x00004000;  // GPS.2
 //  int coreMask = 0x00008000;  // GPS.3
-  if (!errCnt) { errCnt = cepMacroMix_runTest(cpuId, mask, coreMask, seed, verbose); }
+  errCnt += cepMacroMix_runTest(cpuId, mask, coreMask, seed, verbose);
 
   pio.RunClk(100);  
   //--------------------------------------------------------------------------------------
