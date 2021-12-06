@@ -55,6 +55,7 @@ void *c_module(void *arg) {
   int coreMask = 0xFFFFFFFF; // all cores
 //  int coreMask = 0x00000001;  // AES
 //  int coreMask = 0x00000002;  // MD5
+//  int coreMask = 0x0000003C;  // SHA256.0
 //  int coreMask = 0x00000004;  // SHA256.0
 //  int coreMask = 0x00000008;  // SHA256.1
 //  int coreMask = 0x00000010;  // SHA256.2

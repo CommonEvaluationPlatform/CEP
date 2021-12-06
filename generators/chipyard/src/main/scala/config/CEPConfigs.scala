@@ -17,6 +17,7 @@ class CEPRocketConfig extends Config(
   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithIIR ++
+  new chipyard.config.WithDFT ++
   new chipyard.config.WithIDFT ++
   new chipyard.config.WithGPS ++
   new chipyard.config.WithMD5 ++
@@ -51,6 +52,7 @@ class CEPASICRocketConfig extends Config(
   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithIIR ++
+  new chipyard.config.WithDFT ++
   new chipyard.config.WithIDFT ++
   new chipyard.config.WithGPS ++
   new chipyard.config.WithMD5 ++
