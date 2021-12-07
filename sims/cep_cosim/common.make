@@ -27,11 +27,6 @@ $(info CEP_COSIM: --------------------------------------------------------------
 $(info CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           )
 $(info CEP_COSIM: ----------------------------------------------------------------------)
 
-# RISCV *must* be defined
-ifndef RISCV
-$(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
-endif
-
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
 # The following check ensures one and only one is set
 ifeq (${CADENCE},1)
@@ -47,9 +42,14 @@ ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 override DUT_SIM_MODE = BFM_MODE
 else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
 override DUT_SIM_MODE = BARE_MODE
+# RISCV *must* be defined when running in Bare Metal mode
+ifndef RISCV
+$(error CEP_COSIM: RISCV is unset and BARE sim mode is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+endif
 else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
+
 
 # Validate the Chipyard verilog has been build by looking for the generated makefile
 ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
