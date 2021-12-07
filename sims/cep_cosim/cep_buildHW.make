@@ -57,12 +57,11 @@ COSIM_TB_TOP_FILE			:= ${DVT_DIR}/${COSIM_TB_TOP_MODULE}.sv
 COSIM_TB_CLOCK_PERIOD       := 5000
 COSIM_TB_RESET_DELAY		:= 777.7
 
-COSIM_VLOG_ARGS				+= 	+acc -64 -sv \
+COSIM_VLOG_ARGS				+= 	-sv \
 								+define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} \
 								+define+RESET_DELAY=${COSIM_TB_RESET_DELAY} \
 								+define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE} \
 								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
-
 
 # Defines inherited from Chipyard
 COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0"
@@ -91,7 +90,7 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
 
-# BFM Mode
+# BFM Mode (Chipyard generated TestDriver.v is explicitly exluded)
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
@@ -107,8 +106,9 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
+	@sed -i '/TestDriver.v/d' ${COSIM_BUILD_LIST}
 else
-# Bare Metal Mode
+# Bare Metal Mode (Chipyard generated TestDriver.v is explicitly exluded)
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
 	@for i in ${COSIM_INCDIR_LIST}; do \
@@ -123,6 +123,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
+	@sed -i '/TestDriver.v/d' ${COSIM_BUILD_LIST}
 endif
 #--------------------------------------------------------------------------------------
 
@@ -186,7 +187,7 @@ ${VSIM_DO_FILE}:
 	echo "$$VSIM_DO_BODY" > $@; \
 	fi
 
-COSIM_VLOG_ARGS 			+= -incr +define+MODELSIM
+COSIM_VLOG_ARGS 			+= +acc -64 -incr +define+MODELSIM
 COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630
 COSIM_VOPT_ARGS	  			+= +acc -64 +nolibcell +nospecify +notimingchecks
 
@@ -207,19 +208,16 @@ ${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare
 	${VLOG_CMD} -work ${WORK_DIR} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 
+# Test build target
 buildVlog: ${TEST_SUITE_DIR}/.buildVlog
 
 # Perform Questasim's optimization
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
 	${VOPT_CMD} -work ${WORK_DIR} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE} -o ${COSIM_TB_TOP_MODULE_OPT}
 	touch $@
-else
-# Cadence XCellium Steps
-${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
-	touch $@
 
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)
-VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_NAME}.log +myplus=0"
+VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_NAME}_modelsim.log +myplus=0"
 
 endif
 #--------------------------------------------------------------------------------------
@@ -239,6 +237,9 @@ MDV_XLM_HOME 					:= ${XCELIUM_INSTALL}
 XRUN_CMD 						:= ${XCELIUM_INSTALL}/tools/bin/xrun
 IMC_CMD  						:= ${IMC_INSTALL}/tools/bin/imc
 SAHANLDER_FILE    				:= ${SHR_DIR}/sahandler.c
+
+# Allow Value Parameters without default values
+export CADENCE_ENABLE_AVSREQ_44905_PHASE_1 = 1
 
 # Quick sanity check if xrun exists
 ifeq (,$(shell which ${XRUN_CMD}))
@@ -268,10 +269,11 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
-	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${TEST_SUITE_DIR}/presession.log  ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
+	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${TEST_DIR}/${TEST_NAME}_xrun.log ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
 	touch $@
 
-myBuild: ${TEST_SUITE_DIR}/.cadenceBuild
+# Test build target
+cadenceBuild: ${TEST_SUITE_DIR}/.cadenceBuild
 
 # NOTE: double :: rule!!
 merge::
@@ -308,6 +310,10 @@ endif
 
 remerge:
 	(cd ${CAD_TOP_COVERAGE}; rm -rf merge; ${IMC_CMD}  -execcmd "config analysis.enable_partial_toggle -set true;  merge -runfile ${CAD_TOP_COVERAGE}/runFile.txt -initial_model union_all -message 1 -out ${CAD_TOP_COVERAGE}/merge;")
+
+# Dummy build target to ensure complete dependencies when simulating
+${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
+	touch $@
 
 # override the VPP command for Cadence tool
 override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d  -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot ${CADENCE_COV_RUN_ARGS} "

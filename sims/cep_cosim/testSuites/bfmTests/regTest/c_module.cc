@@ -18,7 +18,7 @@
 #include "cep_apis.h"
 #include "simdiag_global.h"
 
-#include "cepLockTest.h"
+#include "cepRegTest.h"
 
 void *c_module(void *arg) {
 

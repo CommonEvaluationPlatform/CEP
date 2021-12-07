@@ -261,6 +261,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/status
 	-rm -f ${COSIM_TOP_DIR}/*/*/_info
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.wlf
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/*history
 # Use to force rebuilds for rules that include this dependency
 .force:
 #--------------------------------------------------------------------------------------
