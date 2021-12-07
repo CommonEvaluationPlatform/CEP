@@ -1,33 +1,30 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      c_module.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 #include "v2c_cmds.h"
 #include "simPio.h"
-//
 #include "shMem.h"
 #include "c_module.h"
 #include <unistd.h>
 #include "random48.h"
-
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "simdiag_global.h"
-#include "cepFragmentorTest.h"
 
-//
+#include "cepFragmenterTest.h"
+
 void *c_module(void *arg) {
 
-
-  // ======================================
-  // Set up
-  // ======================================
+  //--------------------------------------------------------------------------------------
+  // Test Set up
+  //--------------------------------------------------------------------------------------
   pthread_parm_t *tParm = (pthread_parm_t *)arg;
   int errCnt = 0;
   int slotId = tParm->slotId;
@@ -37,31 +34,26 @@ void *c_module(void *arg) {
   int restart = tParm->restart;
   int offset = GET_OFFSET(slotId,cpuId);
   GlobalShMemory.getSlotCpuId(offset,&slotId,&cpuId);
-  //printf("offset=%x seed=%x verbose=%x GlobalShMemory=%x\n",offset,seed, verbose,(unsigned long) &GlobalShMemory);
-  // notify I am Alive!!!
+
   shIpc *ptr = GlobalShMemory.getIpcPtr(offset);
   ptr->SetAliveStatus();
   sleep(1);
 
-  // ======================================
-  // Test is Here
-  // ======================================
   simPio pio;
-  pio.MaybeAThread(); // chec
+  pio.MaybeAThread();
   pio.EnableShIpc(1);
   pio.SetVerbose(verbose);
+  //--------------------------------------------------------------------------------------
 
-  //
-  // ======================================
+
+
+  //--------------------------------------------------------------------------------------
   // Test starts here
-  // ======================================
-  // MUST
-  // wait until Calibration is done..
-  //int calibDone = calibrate_ddr3(50);
+  //--------------------------------------------------------------------------------------
   pio.RunClk(500);
+
   uint64_t rdBuf[32];
-  //
-#if 1
+
   switch (cpuId) {
   case 0 : 
     // HOLES
@@ -77,7 +69,6 @@ void *c_module(void *arg) {
     errCnt += cepFragmentorTest_baseTest(cpuId, fir_base_addr  + 0x0100,        16, 8, (uint64_t) 0, seed, verbose); // HOLE!!
     errCnt += cepFragmentorTest_baseTest(cpuId, iir_base_addr  + 0x0100,        16, 8, (uint64_t) 0, seed, verbose); // HOLE!!
     errCnt += cepFragmentorTest_baseTest(cpuId, gps_base_addr  + 0x0100,        16, 8, (uint64_t) 0, seed, verbose); // HOLE!!
-    //   errCnt += cepFragmentorTest_baseTest(cpuId, srot_base_addr + 0x0100,        16, 8, (uint64_t) 0, seed, verbose); // HOLE!!
     break;
 
   case 1 : 
@@ -92,7 +83,6 @@ void *c_module(void *arg) {
 
   case 2 : 
     // MaskRom
-    //    errCnt += cepFragmentorTest_verifyMaskRom(cpuId, bootrom_base_addr, "../../drivers/bootbare/bootbare.bin", 8, seed,verbose);
     errCnt += cepFragmentorTest_verifyMaskRom(cpuId, bootrom_base_addr, "../../../hdl_cores/freedom/builds/vc707-u500devkit/sdboot_fpga_sim.bin", 8, seed,verbose);
 
     // MD5
@@ -119,14 +109,15 @@ void *c_module(void *arg) {
     break;
 
   }
-#endif
-  //
-  //
-  pio.RunClk(100);  
-  //
-  // ======================================
+
+  pio.RunClk(100);
+  //--------------------------------------------------------------------------------------
+  
+
+
+  //--------------------------------------------------------------------------------------
   // Exit
-  // ======================================
+  //--------------------------------------------------------------------------------------
 cleanup:
   if (errCnt != 0) {
     LOGI("======== TEST FAIL ========== %x\n",errCnt);
@@ -139,4 +130,4 @@ cleanup:
   pthread_exit(NULL);
   return ((void *)NULL);
 }
-
+  //--------------------------------------------------------------------------------------

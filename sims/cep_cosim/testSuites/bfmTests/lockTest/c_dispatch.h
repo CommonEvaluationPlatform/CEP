@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      c_dispatch.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -10,7 +10,6 @@
 //************************************************************************
 #ifndef __C_DISPATCH_H
 #define __C_DISPATCH_H
-
 
 // Dispatch setup
 #ifdef LONGTEST
