@@ -269,7 +269,7 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
-	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${TEST_DIR}/${TEST_NAME}_xrun.log ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
+	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${TEST_DIR}/${TEST_NAME}_compile_xrun.log ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
 	touch $@
 
 # Test build target
@@ -316,7 +316,7 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 
 # override the VPP command for Cadence tool
-override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d  -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot ${CADENCE_COV_RUN_ARGS} "
+override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d  -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${TEST_DIR}/${TEST_NAME}_sim_xrun.log ${CADENCE_COV_RUN_ARGS} "
 
 endif	
 #--------------------------------------------------------------------------------------
