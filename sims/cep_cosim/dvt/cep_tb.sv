@@ -251,17 +251,19 @@ module `COSIM_TB_TOP_MODULE;
       // If the memory is in reset, wait for it to be released
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
       // All backdoor memory access is 64-bit
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i    = '1;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i   = 1;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i   = data;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
+      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i       = data;
 
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
-      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
+      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
 
       `logI("== Main Mem Backdoor Write addr=0x%x data=0x%x",addr,data);
@@ -281,11 +283,11 @@ module `COSIM_TB_TOP_MODULE;
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
       // Reads are registered
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
       data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
-      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
+      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
 
       `logI("== Main Mem Backdoor Read addr=0x%x data=0x%x",addr,data);
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);

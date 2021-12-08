@@ -168,7 +168,7 @@ endif
 
 # It is important to note that the arguments here are being passed to the ${VPP_CMD} external script and thus ALL of these arguments are required
 # This line is subordinate to the .vrun_flag build target
-	${VPP_CMD} ${TEST_DIR}/c_dispatch ${RANDOMIZE} ${UPDATE_INFO} ${TEST_INFO} ${USE_GDB} ${TEST_DIR}/${TEST_NAME}.log ${COVERAGE} \"${VSIM_CMD_LINE}\"
+	${VPP_CMD} ${TEST_DIR}/c_dispatch ${RANDOMIZE} ${UPDATE_INFO} ${TEST_INFO} ${USE_GDB} ${SIMULATION_LOGFILE} ${COVERAGE} \"${VSIM_CMD_LINE}\"
 #--------------------------------------------------------------------------------------
 
 

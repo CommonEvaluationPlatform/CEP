@@ -46,13 +46,11 @@ BFM_TEST_LIST = \
 	macroMix	\
 	playback	\
 	multiLock	\
-	ddr3Test	\
 	memPreload	\
 	miscTests	\
 	accessTest	\
 	clintTest	\
 	plicTest	\
-	fragmentors	\
 	srotBadKeys	\
 	srotMemTest	\
 	srotKeyTest	\

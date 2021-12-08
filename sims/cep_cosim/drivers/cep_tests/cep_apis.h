@@ -1,13 +1,13 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_apis.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 
 #ifndef CEP_APIS_H
 #define CEP_APIS_H

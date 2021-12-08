@@ -16,7 +16,6 @@
 // global
 int gActiveSlotId=0;
 int gActiveLocalId=0;
-//int access::mUseShIpc = 0;
 int access::mVerbose = 0;
 
 //
@@ -25,7 +24,6 @@ int access::mVerbose = 0;
 access::access() {
   mSlotId = gActiveSlotId;
   mLocalId = gActiveLocalId;
-//  mVerbose = 1;
   mLogLevelMask = INIT_LOG_LEVEL;
   mUseShIpc = 0;
   MaybeAThread();
@@ -33,7 +31,6 @@ access::access() {
 access::access(int slotId, int localId, int verbose) {
   mSlotId  = slotId;
   mLocalId = localId;
-//  mVerbose = verbose;
   mLogLevelMask = ACCESS_LOG_LEVEL;
   mUseShIpc = 0;
   MaybeAThread();

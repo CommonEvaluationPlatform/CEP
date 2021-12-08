@@ -72,10 +72,6 @@ Generated Address Map
 `define other_base_addr         'h6400_0000
 `define other_base_size         'h0100_0000
 
-`define ddr3_adr_mask           'h8000_0000
-`define ddr3_base_adr           'h8000_0000
-`define ddr3_base_size          'h4000_0000
-
 `define scratchpad_base_addr    'h8000_0000
 `define scratchpad_base_size    'h0002_0000
 `define scratchpad_know_pattern 'h600dbabe_12345678
@@ -275,15 +271,15 @@ Generated Address Map
 `endif
 
 
+// CEP printf memory is used to overload printfs when operating in bare metal mode during simulation.
 //
-// Printf mail box per core
-// each printf len is 128 bytes max and upto 32 per string
-//  tha WILL GIVE 32 PRINTF per core
+// As external memory has been removed, it must be remapped to the upper end of scratchpad memory
 //
-`define cep_printf_mem              'hB000_0000
+// Each printf len is a maxmimum of 128 bytes with up 32 lines per core
 `define cep_printf_str_max     128
 `define cep_printf_max_lines   32
-`define cep_printf_core_size   (cep_printf_str_max*cep_printf_max_lines)
+`define cep_printf_core_size   (cep_printf_str_max * cep_printf_max_lines) // in bytes
+`define cep_printf_mem         (scratchpad_base_addr + scratchpad_base_size) - (cep_printf_core_size * 4)
 
 //
 // Place for malloc in bare metal

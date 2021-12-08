@@ -94,7 +94,7 @@ module cep_driver
   always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
     backdoor_enable = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR] = 0;
-    `logI("Setting backdoor_enable=%d",backdoor_enable);
+    `logI("Setting backdoor_enable = %d",backdoor_enable);
   end
 
   always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin

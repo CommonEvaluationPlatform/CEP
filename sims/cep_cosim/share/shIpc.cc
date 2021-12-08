@@ -261,7 +261,7 @@ void shIpc::WriteDvtFlag(int msb, int lsb, int value) {
   mPar[1] = lsb;
   mPar[2] = value;
 
-  printf("%s: mPar[0]=0x%016lx, mPar[1]=0x%016lx, mPar[2]=0x%016lx\n",__FUNCTION__,mPar[0], mPar[1], mPar[2]);
+  // printf("%s: mPar[0]=0x%016lx, mPar[1]=0x%016lx, mPar[2]=0x%016lx\n",__FUNCTION__,mPar[0], mPar[1], mPar[2]);
 
   // set cmd
   SendCmdNwait(SHIPC_WRITE_DVT_FLAG);

@@ -65,6 +65,7 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   tl_d2h_t                      slave_tl_d2h_i;
   tl_h2d_t                      slave_tl_h2d_o;
   logic                         tl_err;
+  logic                         addr_err;
 
   // In the OpenTitan world, TL buses are encapsulated with the structures instantitated above
   // and as defined in top_pkg.sv.  This includes field widths.
@@ -209,6 +210,14 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // there could be a reequest in-flight when d_channel becomes NOT ready, thus the need for using almost full.
   assign slave_tl_d2h_i.a_ready   = !rsp_almost_full;
 
+  // See if an out of bound address was provided 
+  always @(scratchpad_addr_i or slave_tl_h2d_o.a_valid) begin
+    addr_err                    <= 1'b0;
+    
+    if (slave_tl_h2d_o.a_valid == 1 && scratchpad_addr_i >= (DEPTH /8))
+      addr_err                  <= 1'b1;
+  end
+
   // Perform the remaining tilelink connections
   always_ff @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -232,7 +241,7 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
       slave_tl_d2h_i.d_source   <= slave_tl_h2d_o.a_source;
       slave_tl_d2h_i.d_sink     <= '0;
       slave_tl_d2h_i.d_user     <= '0;
-      slave_tl_d2h_i.d_error    <= tl_err;
+      slave_tl_d2h_i.d_error    <= tl_err || addr_err;
       // We cannot process the response if not ready
       slave_tl_d2h_i.d_valid    <= slave_tl_h2d_o.a_valid & slave_tl_d2h_i.a_ready;
     end // end if (!rst_ni)

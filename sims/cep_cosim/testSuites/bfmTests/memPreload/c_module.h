@@ -1,8 +1,8 @@
 //************************************************************************
 // Copyright 2021 Massachusetts Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      c_module.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          

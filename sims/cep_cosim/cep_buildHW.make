@@ -143,6 +143,8 @@ VMAP_CMD					= ${QUESTASIM_PATH}/vmap
 VMAKE_CMD					= ${QUESTASIM_PATH}/vmake
 VCOVER_CMD					= ${QUESTASIM_PATH}/vcover
 VSIM_DO_FILE				= ${TEST_DIR}/vsim.do
+COMPILE_LOGFILE				:= ${TEST_DIR}/${TEST_NAME}_questa_compile.log
+SIMULATION_LOGFILE			:= ${TEST_DIR}/${TEST_NAME}_questa_sim.log
 
 # Quick sanity check if vsim exists
 ifeq (,$(shell which ${VSIM_CMD}))
@@ -205,7 +207,7 @@ endif
 
 # Compile all the Verilog and SystemVerilog for the CEP
 ${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
-	${VLOG_CMD} -work ${WORK_DIR} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
+	${VLOG_CMD} -work ${WORK_DIR} -l ${COMPILE_LOGFILE} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 
 # Test build target
@@ -217,7 +219,7 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
 	touch $@
 
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)
-VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${TEST_DIR}/${TEST_NAME}_modelsim.log +myplus=0"
+VSIM_CMD_LINE = "${VSIM_CMD} -work ${WORK_DIR} -t 100ps -tab ${V2C_TAB_FILE} -pli ${VPP_LIB} -sv_lib ${VPP_SV_LIB} -do ${VSIM_DO_FILE} ${COSIM_VSIM_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE_OPT} -batch -logfile ${SIMULATION_LOGFILE} +myplus=0"
 
 endif
 #--------------------------------------------------------------------------------------
@@ -237,7 +239,8 @@ MDV_XLM_HOME 					:= ${XCELIUM_INSTALL}
 XRUN_CMD 						:= ${XCELIUM_INSTALL}/tools/bin/xrun
 IMC_CMD  						:= ${IMC_INSTALL}/tools/bin/imc
 SAHANLDER_FILE    				:= ${SHR_DIR}/sahandler.c
-
+COMPILE_LOGFILE					:= ${TEST_DIR}/${TEST_NAME}_compile_xrun.log
+SIMULATION_LOGFILE				:= ${TEST_DIR}/${TEST_NAME}_sim_xrun.log
 # Allow Value Parameters without default values
 export CADENCE_ENABLE_AVSREQ_44905_PHASE_1 = 1
 
@@ -269,7 +272,7 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
-	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${TEST_DIR}/${TEST_NAME}_compile_xrun.log ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
+	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
 	touch $@
 
 # Test build target
@@ -316,7 +319,7 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 
 # override the VPP command for Cadence tool
-override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d  -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${TEST_DIR}/${TEST_NAME}_sim_xrun.log ${CADENCE_COV_RUN_ARGS} "
+override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE} ${CADENCE_COV_RUN_ARGS} "
 
 endif	
 #--------------------------------------------------------------------------------------

@@ -1,13 +1,13 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_apis.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 
 #include "v2c_cmds.h"
 #include "portable_io.h"
@@ -25,6 +25,8 @@
 #ifdef BARE_MODE
 #include "encoding.h"
 #endif
+
+int __prIdx[MAX_CORES] = {0,0,0,0};
 
 int is_program_loaded(int maxTimeOut) {
   //
@@ -67,16 +69,21 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 #endif
 }
 
+// Clear the memory being used for printf "overloading"
 int clear_printf_mem(int coreId) {
   int errCnt = 0;
-#ifdef SIM_ENV_ONLY
-  LOGI("%s: coreid=%d\n",__FUNCTION__,coreId);
-  for (int i=0;i<cep_printf_max_lines;i++) {
-    for (int j=0;j<16;j++) {
-      DUT_WRITE32_64(cep_printf_mem + (coreId*cep_printf_core_size) + (i*cep_printf_str_max) + (j*8), 0);
+
+  #ifdef SIM_ENV_ONLY
+    LOGI("%s: coreid = %d\n",__FUNCTION__,coreId);
+
+    for (int i = 0; i < cep_printf_max_lines; i++) {
+      for (int j=0; j < 16; j++) {
+        
+        DUT_WRITE32_64(cep_printf_mem + (coreId * cep_printf_core_size) + (i * cep_printf_str_max) + (j*8), 0);
+      }
     }
-  }
-#endif
+  #endif // #ifdef SIM_ENV_ONLY
+  
   return errCnt;
 }
 
@@ -100,108 +107,118 @@ int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
   return 0;
 }
 
-int load_mainMemory(char *imageF, uint32_t ddr3_base, int srcOffset, int destOffset, int backdoor_on, int verify) {
+int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int backdoor_on, int verify) {
   int errCnt = 0;
-#ifdef SIM_ENV_ONLY  
-  FILE *fd=NULL;
-  uint64_t d64,rd64;
-  int s,d,i=0, bCnt=0;  
-  fd=fopen(imageF,"rb");
-  //
-  LOGI("==== %s: Loading file %s to main memory base=0x%08x ====\n",__FUNCTION__,imageF,ddr3_base);
-  //
-  if (fd == NULL) {
-    printf("Can't open file %s\n",imageF);
-    return 1;
-  }
-  else {
-    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
-    DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
-      
-    //
-    // fist 16bit = upstream, second 16 bits = downstream, etc..
-    // And this test is for downstream so use only every second 16bits
-    //
-    // Enable
+
+  #ifdef SIM_ENV_ONLY  
+    FILE      *fd   = NULL;
+    uint64_t  d64;
+    uint64_t  rd64;
+    int       s     = 0;
+    int       d     = 0;
+    int       bCnt  = 0;  
+    
+    // Open binary file
+    fd = fopen(imageF, "rb");
+  
+    LOGI("==== %s: Loading file %s to memory base = 0x%08x ====\n",__FUNCTION__, imageF, mem_base);
+
+    if (fd == NULL) {
+      printf("Can't open file %s\n",imageF);
+      return 1;
+    } else {
+      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
+      DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
+    }
+
+    // Enable backdoor memory loading
     if (backdoor_on) {
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
       DUT_WRITE_DVT(DVTF_ENABLE_MEM_BACKDOOR, DVTF_ENABLE_MEM_BACKDOOR, 1);
     }
-    s=0;
-    d=0;
+
+    // Read from the file and load into the memory (via backdoor if enabled)
     while (!feof(fd)) {
-      fread(&d64,sizeof(uint64_t),1,fd);
-      if ((s*8) >= srcOffset) {
-	DUT_WRITE32_64(ddr3_base + destOffset + d*8,d64);
-	d++;
+      fread(&d64, sizeof(uint64_t), 1, fd);
+      if ((s * 8) >= srcOffset) {
+        DUT_WRITE32_64(mem_base + destOffset + d * 8, d64);
+        d++;
       }
       s++;
-    }
-    bCnt=(i+1)*8;
-    //
-    // if not end at the cache line (64bytes), continue end so if in backdoor mode
-    //
+    } // end while
+    
+    // Calculate the number of bytes loaded
+    bCnt=(s + 1) * 8;
+    
+    // If we are loading memory using the backdoor, ensure we fill out the cache line
     if (backdoor_on && ((s & 0x7) != 0)) {
       d64 = 0xDEADDEADDEADDEADLL;      
-      LOGI("==== %s: flusing to cache line s=%d ====\n",__FUNCTION__,s);
+      LOGI("%s: flushing to cache line s = %d ====\n",__FUNCTION__, s);
       while ((s & 0x7) != 0) {
-	DUT_WRITE32_64(ddr3_base + d*8,d64);
-	d++;
-	s++;
+        DUT_WRITE32_64(mem_base + d*8,d64);
+        d++;
+        s++;
       }
-    }
-    LOGI("==== %s: DONE backdoor loading file %s to main memory size=%d bytes ====\n",__FUNCTION__,imageF,bCnt);
-    // Disable
+    } // end if backdoor_on
+
+    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %d bytes ====\n",__FUNCTION__, imageF, bCnt);
+    
+    // Disable backdoor access, if enabled
     if (backdoor_on) {    
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
       DUT_WRITE_DVT(DVTF_ENABLE_MEM_BACKDOOR, DVTF_ENABLE_MEM_BACKDOOR, 1);
     }
-    //
+    
+    // Verify if enabled
     if (verify) {
       rewind(fd);
       s = 0;
       d = 0;
+
       while (!feof(fd)) {
-	fread(&d64,sizeof(uint64_t),1,fd);
-	//
-	// use front door to verify??
-	//
-	if ((s*8) >= srcOffset) {
-	  DUT_READ32_64(ddr3_base + d*8,rd64);
-	  d++;
-	  if (d64 != rd64) {
-	    LOGE("%s: Miscomapre @0x%08x act=0x%016llx exp=0x%016llx\n",__FUNCTION__,ddr3_base + i*8,rd64,d64);
-	    errCnt++;
-	    break;
-	  }
-	}
-	s++;
-      }
+        fread(&d64, sizeof(uint64_t), 1 ,fd);
+        if ((s * 8) >= srcOffset) {
+          DUT_READ32_64(mem_base + destOffset + d*8, rd64);
+          if (d64 != rd64) {
+            LOGE("%s: Miscompare addr=0x%08x act=0x%016llx exp=0x%016llx\n",__FUNCTION__,mem_base + d*8, rd64, d64);
+            errCnt++;
+            break;
+          } // end if (d64 != rd64)
+          d++;
+        } // end if ((s*8) >= srcOffset)
+        s++;
+      } // end while (!feof(fd))
+
+      // Report compaison status
       if (!errCnt) {
-	LOGI("%s: File %s preload and read-back OK size=%d bytes\n",__FUNCTION__,imageF,bCnt);
+        LOGI("%s: File %s preload and read-back OK\n",__FUNCTION__,imageF);
       } else {
-	LOGE("%s: File %s has error size=%d bytes\n",__FUNCTION__,imageF,bCnt);	
-      }
-    }    
+        LOGE("%s: File %s preload and read-back ERROR\n",__FUNCTION__,imageF); 
+      } // end if (!errCnt)
+
+    } // if (verify)
+
+    // Close the file descriptor
     fclose(fd);
-  }
-  //
-  for (i=0;i<4;i++) {
-    errCnt += clear_printf_mem(i);
-  }
-
-  // turn back on
-  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
-  DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
   
-  //
-  DUT_WRITE_DVT(DVTF_PROGRAM_LOADED,DVTF_PROGRAM_LOADED, 1);
+    // Clear the printf memory (since we just loaded it with a file)
+    for (int i=0; i < 4; i++) {
+      errCnt += clear_printf_mem(i);
+    }
 
-#endif
+    // Restore clocking of IPC
+    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
+    DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
+
+    // Indicate that a program has been loaded  
+    DUT_WRITE_DVT(DVTF_PROGRAM_LOADED, DVTF_PROGRAM_LOADED, 1);
+
+  #endif // #ifdef SIM_ENV_ONLY
+
   return errCnt;
-}
+} // load_mainMemory
 
-int __prIdx[MAX_CORES] = {0,0,0,0};
+
 
 // Check PassFail
 int check_PassFail_status(int coreId,int maxTimeOut) {
@@ -276,13 +293,13 @@ int check_bare_status(int coreId,int maxTimeOut) {
       DUT_READ32_64(p_adr,d64);
       //LOGI("%s: PRINTF**** p_adr=0x%x d=0x%016llx i=%d\n",__FUNCTION__,p_adr,d64,__prIdx[coreId]);
       if (d64 != 0) {
-	// get the string!!!
-	DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (coreId & 0x3));
-	DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1);
-	//
-	__prIdx[coreId] = (__prIdx[coreId] + 1) % cep_printf_max_lines;
+  // get the string!!!
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (coreId & 0x3));
+  DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1);
+  //
+  __prIdx[coreId] = (__prIdx[coreId] + 1) % cep_printf_max_lines;
       } else {
-	break;
+  break;
       }
     }
     //
@@ -405,7 +422,7 @@ int set_status(int errCnt, int testId) {
   }
   #endif
 
-	    
+      
   return errCnt;
 }
 
@@ -442,7 +459,7 @@ uint64_t cep_raw_read(uint64_t pAddress) {
 static int inRange(uint64_t adr, uint64_t upperAdr,uint64_t lowerAdr) {
   return ((adr >= lowerAdr) && (adr < upperAdr)) ? 1 : 0;
 }
-		   
+       
 int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int totalCmds, int totalSize, int verbose) {
   if (verbose) {
     LOGI("%s: playback command sequence totalCmds=%d totalSize=%d\n",__FUNCTION__,totalCmds,totalSize);
@@ -454,41 +471,41 @@ int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int tot
     // read the first item
     if (cmdSeq[i] == WRITE__CMD) {
       if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {    
-	cep_raw_write(cmdSeq[i+1],cmdSeq[i+2]);
+  cep_raw_write(cmdSeq[i+1],cmdSeq[i+2]);
       }
       i += WRITE__CMD_SIZE;
     }
     else if (cmdSeq[i] == RDnCMP_CMD) {
-      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {    	
-	rdDat = cep_raw_read(cmdSeq[i+1]);
-	if (rdDat != cmdSeq[i+2]) {
-	  LOGE("%s: ERROR Mismatch at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-	       c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
-	  errCnt = c;
-	  break;
-	} else if (verbose) {
-	  LOGI("%s: OK at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-	       c, cmdSeq[i+1],cmdSeq[i+2],rdDat);	
-	}
+      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {     
+  rdDat = cep_raw_read(cmdSeq[i+1]);
+  if (rdDat != cmdSeq[i+2]) {
+    LOGE("%s: ERROR Mismatch at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
+         c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
+    errCnt = c;
+    break;
+  } else if (verbose) {
+    LOGI("%s: OK at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
+         c, cmdSeq[i+1],cmdSeq[i+2],rdDat); 
+  }
       }
       i += RDnCMP_CMD_SIZE;
     }
     else if (cmdSeq[i] == RDSPIN_CMD) {
-      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {    	
-	TO = cmdSeq[i+4];
-	while (TO > 0) {
-	  rdDat = cep_raw_read(cmdSeq[i+1]);
-	  if (((rdDat ^ cmdSeq[i+2]) & cmdSeq[i+3]) == 0) {
-	    break;
-	  }
-	  TO--;
-	  if (TO <= 0) {
-	    LOGE("%s: timeout at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-		 c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
-	    errCnt = c;
-	    break;
-	  }
-	}
+      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {     
+  TO = cmdSeq[i+4];
+  while (TO > 0) {
+    rdDat = cep_raw_read(cmdSeq[i+1]);
+    if (((rdDat ^ cmdSeq[i+2]) & cmdSeq[i+3]) == 0) {
+      break;
+    }
+    TO--;
+    if (TO <= 0) {
+      LOGE("%s: timeout at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
+     c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
+      errCnt = c;
+      break;
+    }
+  }
       }
       i += RDSPIN_CMD_SIZE;
     }
@@ -503,8 +520,8 @@ int cep_get_lock(int myId, int lockNum, int timeOut) {
   int gotIt = 0;
   uint64_t dat64, rdDat, exp;
   dat64 = (((uint64_t)1 << reqLock_bit ) |
-	   ((uint64_t)(lockNum & reqLockNum_mask) << reqLockNum_bit) |
-	   ((uint64_t)(myId & reqId_mask) << reqId_bit_lo));
+     ((uint64_t)(lockNum & reqLockNum_mask) << reqLockNum_bit) |
+     ((uint64_t)(myId & reqId_mask) << reqId_bit_lo));
   exp = 1 | (myId << 1); // expected
   do {
     // request the lock
@@ -528,8 +545,8 @@ void cep_release_lock(int myId, int lockNum) {
   uint64_t dat64;
   // just release
   dat64 = (((uint64_t)1 << releaseLock_bit ) |
-	   ((uint64_t)(lockNum & reqLockNum_mask) << reqLockNum_bit) |
-	   ((uint64_t)(myId & reqId_mask) << reqId_bit_lo));  
+     ((uint64_t)(lockNum & reqLockNum_mask) << reqLockNum_bit) |
+     ((uint64_t)(myId & reqId_mask) << reqId_bit_lo));  
   cep_raw_write(reg_base_addr + testNset_reg, dat64);
 }
 

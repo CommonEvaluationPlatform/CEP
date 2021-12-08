@@ -186,7 +186,7 @@ always @(posedge __shIpc_EnableMode) begin
 	inBox.mRemoteReq         = 0;
 	send_v2c_mail(__mSlotId, __mCpuId,inBox);
      end // if valid
-     else if (ipcDelay) begin // to help spee dup backdoor loading
+     else if (ipcDelay) begin // to help speedup backdoor loading
         @(posedge `SHIPC_CLK); // wait 1 clock
      end
   end // while
