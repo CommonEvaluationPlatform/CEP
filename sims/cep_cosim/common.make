@@ -1,13 +1,13 @@
-#//--------------------------------------------------------------------------------------
-#// Copyright 2021 Massachusetts Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
-#//
-#// File Name:      common.make
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    Top level common.make for CEP Cosimulation
-#// Notes:          
-#//
-#//--------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------
+# Copyright 2021 Massachusetts Institute of Technology
+# SPDX short identifier: BSD-2-Clause
+#
+# File Name:      common.make
+# Program:        Common Evaluation Platform (CEP)
+# Description:    Top level common.make for CEP Cosimulation
+# Notes:          
+#
+#--------------------------------------------------------------------------------------
 
 # Avoid redundant inclusions of common.make
 ifndef $(COMMON_MAKE_CALLED)

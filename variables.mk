@@ -66,6 +66,7 @@ ifeq ($(SUB_PROJECT),cep)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
+	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
 endif
 
 # Common Evaluation Platform Default Build
@@ -79,6 +80,7 @@ ifeq ($(SUB_PROJECT),cep_asic)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
+	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
 endif
 
 # default chipyard build
@@ -165,6 +167,7 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+BOOTROM_SRC_DIR ?= $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 

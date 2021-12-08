@@ -90,7 +90,7 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
 
-# BFM Mode (Chipyard generated TestDriver.v is explicitly exluded)
+# BFM Mode
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
@@ -106,7 +106,6 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
-	@sed -i '/TestDriver.v/d' ${COSIM_BUILD_LIST}
 else
 # Bare Metal Mode (Chipyard generated TestDriver.v is explicitly exluded)
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
@@ -123,7 +122,6 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
-	@sed -i '/TestDriver.v/d' ${COSIM_BUILD_LIST}
 endif
 #--------------------------------------------------------------------------------------
 

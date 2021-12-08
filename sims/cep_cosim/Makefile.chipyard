@@ -33,8 +33,6 @@ default: verilog
 #########################################################################################
 # simulaton requirements
 #########################################################################################
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
 
 # Include common simulation flags
 include $(base_dir)/sims/common-sim-flags.mk
