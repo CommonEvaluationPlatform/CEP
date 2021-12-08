@@ -161,12 +161,24 @@ build_v2c: ${V2C_H_FILE_LIST}
 BARE_SRC_DIR    		:= ${DRIVERS_DIR}/bare
 
 # Create a common list of include directories.
+ifeq (${MODELSIM}, 1)
 COMMON_INCLUDE_DIR_LIST	:= 	${SRC_D} \
 							${APIS_D} \
 							${DIAG_D} \
 							${SHARE_D} \
 							${SIMDIAG_D} \
-							${PLI_D}
+							${PLI_D} \
+							${QUESTASIM_PATH}/../include 
+else ifeq (${CADENCE}, 1)
+COMMON_INCLUDE_DIR_LIST	:= 	${SRC_D} \
+							${APIS_D} \
+							${DIAG_D} \
+							${SHARE_D} \
+							${SIMDIAG_D} \
+							${PLI_D} \
+							${XCELIUM_INSTALL}/tools/include 
+endif
+
 COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
 # A common set of dependencies
@@ -200,11 +212,7 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 COMMON_LDFLAGS        	=
 
 # Flags for Hardware and Software simulation compilations
-ifeq (${MODELSIM}, 1)
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${QUESTASIM_PATH}/../include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
-else ifeq (${CADENCE}, 1)
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${XCELIUM_INSTALL}/tools/include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
-endif
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_HW_ENV -D_REENTRANT
 SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV 
 
 # Switches to indicate what libraries are being used
@@ -231,14 +239,14 @@ ${SIMDIAG_LIB_DIR}/%.o ${SIMDIAG_LIB_DIR}/%.obj: ${SIMDIAG_D}/%.cc ${COMMON_DEPE
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 ${PLI_LIB_DIR}/%.o ${PLI_LIB_DIR}/%.obj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_HW_CFLAGS) -fPIC -c -o $@ $< 
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -c -o $@ $< 
 
 # .o & .obj  not same rule
 ${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 ${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_HW_CFLAGS) -fPIC -c -o $@ $< 
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -c -o $@ $< 
 
 # .bobj for bare-metal
 ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
@@ -327,7 +335,7 @@ ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIA
 
 # libvpp.so : pli/share
 ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
-	$(GCC) $(SIM_HW_CFLAGS) -fPIC -shared  -g  \
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -shared  -g  \
 	-o ${VPP_LIB}	\
 	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
 	$(shell ls ${PLI_LIB_DIR}/*.obj) 

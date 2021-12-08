@@ -13,6 +13,11 @@
 ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1
 
+# RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
+ifndef RISCV
+$(error CEP_COSIM: RISCV is unset and BARE DUT_SIM_MODE is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+endif
+
 # The following flags / variables can be overridden by lower level makefiles or the command line
 MODELSIM        			?= 1
 CADENCE 					?= 0
@@ -42,10 +47,6 @@ ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 override DUT_SIM_MODE = BFM_MODE
 else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
 override DUT_SIM_MODE = BARE_MODE
-# RISCV *must* be defined when running in Bare Metal mode
-ifndef RISCV
-$(error CEP_COSIM: RISCV is unset and BARE DUT_SIM_MODE is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
-endif
 else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
