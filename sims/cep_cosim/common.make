@@ -14,7 +14,7 @@ ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1
 
 # The following flags / variables can be overridden by lower level makefiles or the command line
-MODELSIM        			?= 0
+MODELSIM        			?= 1
 CADENCE 					?= 0
 NOWAVE          			?= 0
 PROFILE         			?= 0
@@ -44,7 +44,7 @@ else ifeq "$(findstring BARE,${DUT_SIM_MODE})" "BARE"
 override DUT_SIM_MODE = BARE_MODE
 # RISCV *must* be defined when running in Bare Metal mode
 ifndef RISCV
-$(error CEP_COSIM: RISCV is unset and BARE sim mode is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error CEP_COSIM: RISCV is unset and BARE DUT_SIM_MODE is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)

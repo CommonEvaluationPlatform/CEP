@@ -200,7 +200,11 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 COMMON_LDFLAGS        	=
 
 # Flags for Hardware and Software simulation compilations
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${SIMULATOR_PATH}/../include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
+ifeq (${MODELSIM}, 1)
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${QUESTASIM_PATH}/../include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
+else ifeq (${CADENCE}, 1)
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -I ${XCELIUM_INSTALL}/tools/include -D_SIM_HW_ENV -DDLL_SIM -D_REENTRANT
+endif
 SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV 
 
 # Switches to indicate what libraries are being used
