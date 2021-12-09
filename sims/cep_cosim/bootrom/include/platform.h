@@ -1,4 +1,13 @@
-// See LICENSE for license details.
+//-------------------------------------------------------------------------------------
+// Copyright 2021 Massachusetts Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      platform.h
+// Program:        Common Evaluation Platform (CEP)
+// Description:    
+// Notes:          
+//
+//--------------------------------------------------------------------------------------
 
 #ifndef _CHIPYARD_PLATFORM_H
 #define _CHIPYARD_PLATFORM_H
@@ -40,7 +49,8 @@
 #define MASKROM_MEM_ADDR _AC(0x10000,UL)
 #define MASKROM_MEM_SIZE _AC(0x10000,UL)
 #define MEMORY_MEM_ADDR _AC(0x80000000,UL)
-#define MEMORY_MEM_SIZE _AC(0x10000000,UL)
+#define MEMORY_MEM_SIZE _AC(0x00200000,UL)
+#define MEMORY_MEM_SP_OFFSET 0x1A0000
 #define PLIC_CTRL_ADDR _AC(0xc000000,UL)
 #define PLIC_CTRL_SIZE _AC(0x4000000,UL)
 #define SPI_CTRL_ADDR _AC(0x64001000,UL)

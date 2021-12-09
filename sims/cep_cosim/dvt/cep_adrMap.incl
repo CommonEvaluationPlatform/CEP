@@ -12,44 +12,6 @@
 //
 //************************************************************************
 
-/* as reported from Chisel
- as of 05/03/21
-Generated Address Map
-	       0 -     1000 ARWX  debug-controller@0
-	    3000 -     4000 ARWX  error-device@3000
-	   10000 -   210000  R X  rom@10000
-	 2000000 -  2010000 ARW   clint@2000000
-	 c000000 - 10000000 ARW   interrupt-controller@c000000
-	64000000 - 64001000 ARW   serial@64000000
-	64001000 - 64002000 ARW   spi@64001000
-	64002000 - 64003000 ARW   gpio@64002000
-	64800000 - 64810000  RWXC scratchpad@64800000
-	70000000 - 70000100 ARW   aes-slave@70000000
-	70008000 - 70008040 ARW   aes-llki-slave@70008000
-	70010000 - 70010100 ARW   md5-slave@70010000
-	70018000 - 70018100 ARW   md5-llki-slave@70018000
-	70020000 - 70020100 ARW   sha256-slave@70020000
-	70028000 - 70028100 ARW   sha256-llki-slave@70028000
-	70030000 - 70030100 ARW   rsa-slave@70030000
-	70038000 - 70038100 ARW   rsa-llki-slave@70038000
-	70040000 - 70040100 ARW   des3-slave@70040000
-	70048000 - 70048100 ARW   des3-llki-slave@70048000
-	70050000 - 70050100 ARW   dft-slave@70050000
-	70058000 - 70058100 ARW   dft-llki-slave@70058000
-	70060000 - 70060100 ARW   idft-slave@70060000
-	70068000 - 70068100 ARW   idft-llki-slave@70068000
-	70070000 - 70070100 ARW   fir-slave@70070000
-	70078000 - 70078100 ARW   fir-llki-slave@70078000
-	70080000 - 70080100 ARW   iir-slave@70080000
-	70088000 - 70088100 ARW   iir-llki-slave@70088000
-	70090000 - 70090100 ARW   gps-slave@70090000
-	70098000 - 70098100 ARW   gps-llki-slave@70098000
-	700f0000 - 70100000 ARW   cepregs-slave@700f0000
-	70200000 - 70201000 ARW   srot-slave@70200000
-	80000000 - c0000000  RWXC memory@80000000
-
-*/
-
 `ifndef CEP_ADRMAP_INCL
 `define CEP_ADRMAP_INCL
 
@@ -274,12 +236,14 @@ Generated Address Map
 // CEP printf memory is used to overload printfs when operating in bare metal mode during simulation.
 //
 // As external memory has been removed, it must be remapped to the upper end of scratchpad memory
+// (minus the amoutn of space left for the stack pointer)
 //
 // Each printf len is a maxmimum of 128 bytes with up 32 lines per core
 `define cep_printf_str_max     128
 `define cep_printf_max_lines   32
 `define cep_printf_core_size   (cep_printf_str_max * cep_printf_max_lines) // in bytes
-`define cep_printf_mem         (scratchpad_base_addr + scratchpad_base_size) - (cep_printf_core_size * 4)
+`define cep_printf_mem_offset  'h1000
+`define cep_printf_mem         (scratchpad_base_addr + scratchpad_base_size) - (cep_printf_core_size * 4) - cep_printf_mem_offset
 
 //
 // Place for malloc in bare metal

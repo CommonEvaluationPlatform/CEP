@@ -1,4 +1,4 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
@@ -7,7 +7,7 @@
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 
 //
 // =============================
@@ -20,45 +20,49 @@
 #include <stdio.h>
 
 // See from simulation/verilog/HW side
-#if defined(_SIM_HW_ENV)
-  #define LOGD   my_io_logD
-  #define LOGW   my_io_logW
-  #define LOGI   my_io_logI
-  #define LOGE   my_io_logE
-  #define LOGF   my_io_logF
+#ifdef SIM_ENV_ONLY
 
-// See from simulation/C side
-#elif defined(_SIM_SW_ENV)
+  #if defined(_SIM_HW_ENV)
+    #define LOGD   my_io_logD
+    #define LOGW   my_io_logW
+    #define LOGI   my_io_logI
+    #define LOGE   my_io_logE
+    #define LOGF   my_io_logF
 
-  #include "v2c_sys.h"
-  #define LOGI   v2cLogI
-  #define LOGW   v2cLogI
-  #define LOGE   v2cLogE
-  #define LOGF   v2cLogF
+  // See from simulation/C side
+  #elif defined(_SIM_SW_ENV)
 
-  #ifdef USE_DPI
-    #define DUT_ATOMIC_RMW64(a,p,m,d) sim_Atomic_Rdw64(a,p,m,d)
-    #define DUT_WRITE32_BURST(a,s,d) sim_Write64_BURST(a,s,d)
-    #define DUT_READ32_BURST(a,s,d)  sim_Read64_BURST(a,s,d)
-    #define DUT_WRITE32_64(a,d) sim_Write64_64(a,d)
-    #define DUT_READ32_64(a,d)  d=sim_Read64_64(a)
-    #define DUT_WRITE32_32(a,d) sim_Write32_32(a,d)
-    #define DUT_READ32_32(a,d)  d=sim_Read32_32(a)
-    #define DUT_WRITE32_16(a,d) sim_Write32_16(a,d)
-    #define DUT_READ32_16(a,d)  d=sim_Read32_16(a)
-    #define DUT_WRITE32_8(a,d) sim_Write32_8(a,d)
-    #define DUT_READ32_8(a,d)  d=sim_Read32_8(a)
-  #endif
+    #include "v2c_sys.h"
+    #define LOGI   v2cLogI
+    #define LOGW   v2cLogI
+    #define LOGE   v2cLogE
+    #define LOGF   v2cLogF
 
-  #define DUT_WRITE_DVT(msb,lsb,val) sim_WriteDvtFlag(msb,lsb,val)
-  #define DUT_READ_DVT(msb,lsb)      sim_ReadDvtFlag(msb,lsb)
-  #define DUT_SetInActiveStatus      sim_SetInActiveStatus
-  #define DUT_RUNCLK(x)              sim_RunClk(x)
-  #define USEC_SLEEP(x)              
+    #ifdef USE_DPI
+      #define DUT_ATOMIC_RMW64(a,p,m,d) sim_Atomic_Rdw64(a,p,m,d)
+      #define DUT_WRITE32_BURST(a,s,d) sim_Write64_BURST(a,s,d)
+      #define DUT_READ32_BURST(a,s,d)  sim_Read64_BURST(a,s,d)
+      #define DUT_WRITE32_64(a,d) sim_Write64_64(a,d)
+      #define DUT_READ32_64(a,d)  d=sim_Read64_64(a)
+      #define DUT_WRITE32_32(a,d) sim_Write32_32(a,d)
+      #define DUT_READ32_32(a,d)  d=sim_Read32_32(a)
+      #define DUT_WRITE32_16(a,d) sim_Write32_16(a,d)
+      #define DUT_READ32_16(a,d)  d=sim_Read32_16(a)
+      #define DUT_WRITE32_8(a,d) sim_Write32_8(a,d)
+      #define DUT_READ32_8(a,d)  d=sim_Read32_8(a)
+    #endif
 
-  // framer
-  #define DUT_FRAMER_RDWR(a,wd,rd) sim_Framer_RdWr(a,wd,rd)
-  #define DUT_SAMPLE_RDWR(a,wd,rd) sim_Sample_RdWr(a,wd,rd)
+    #define DUT_WRITE_DVT(msb,lsb,val) sim_WriteDvtFlag(msb,lsb,val)
+    #define DUT_READ_DVT(msb,lsb)      sim_ReadDvtFlag(msb,lsb)
+    #define DUT_SetInActiveStatus      sim_SetInActiveStatus
+    #define DUT_RUNCLK(x)              sim_RunClk(x)
+    #define USEC_SLEEP(x)              
+
+    // framer
+    #define DUT_FRAMER_RDWR(a,wd,rd) sim_Framer_RdWr(a,wd,rd)
+    #define DUT_SAMPLE_RDWR(a,wd,rd) sim_Sample_RdWr(a,wd,rd)
+
+  #endif // if defined(_SIM_HW_ENV)
 
 // Linux Mode
 #elif defined(LINUX_MODE)

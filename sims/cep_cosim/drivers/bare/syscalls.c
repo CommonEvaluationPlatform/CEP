@@ -1,13 +1,13 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      syscalls.c
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // See LICENSE for license details.
 
 #include <stdint.h>

@@ -1,12 +1,13 @@
-#//************************************************************************
-#// Copyright 2021 Massachusetts Institute of Technology
-#//
-#// File Name:      
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    
-#// Notes:          
-#//
-#//************************************************************************
+#--------------------------------------------------------------------------------------
+# Copyright 2021 Massachusetts Institute of Technology
+# SPDX short identifier: BSD-2-Clause
+#
+# File Name:      crt.S
+# Program:        Common Evaluation Platform (CEP)
+# Description:    
+# Notes:          
+#
+#--------------------------------------------------------------------------------------
 
 # See LICENSE for license details.
 

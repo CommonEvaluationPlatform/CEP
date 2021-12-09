@@ -73,7 +73,15 @@ COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 
 CHIPYARD_TOP_FILE_bfm		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bfm.v
 CHIPYARD_TOP_FILE_bare		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bare.v
+CHIPYARD_TOP_SMEMS_FILE_sim	:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}.mems_sim.v
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
+
+
+${CHIPYARD_TOP_SMEMS_FILE_sim}: .force ${CHIPYARD_TOP_SMEMS_FILE}
+	@rm -f $@
+	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_SMEMS_FILE_sim}
+	@cat ${CHIPYARD_TOP_SMEMS_FILE} >> ${CHIPYARD_TOP_SMEMS_FILE_sim}
+	@touch $@
 
 # Create a BFM compatible verion of the CHIPYARD_TOP_FILE
 ${CHIPYARD_TOP_FILE_bfm}: .force ${CHIPYARD_TOP_FILE} 
@@ -86,6 +94,7 @@ ${CHIPYARD_TOP_FILE_bfm}: .force ${CHIPYARD_TOP_FILE}
 ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@rm -f $@
 	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_FILE_bare}
+	@cat ${CHIPYARD_TOP_FILE} >> ${CHIPYARD_TOP_FILE_bare}
 	@touch $@
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
@@ -103,7 +112,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
+	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
 else
@@ -119,7 +128,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_SMEMS_FILE} >> ${COSIM_BUILD_LIST}
+	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
 endif
@@ -204,7 +213,7 @@ COSIM_VSIM_ARGS				+= -autoprofile=${TEST_NAME}_profile
 endif
 
 # Compile all the Verilog and SystemVerilog for the CEP
-${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
+${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
 	${VLOG_CMD} -work ${WORK_DIR} -l ${COMPILE_LOGFILE} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 
@@ -269,7 +278,7 @@ CAD_TOP_COVERAGE				?= ${COSIM_TOP_DIR}/cad_coverage
 override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
-${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
+${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
 	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
 	touch $@
 

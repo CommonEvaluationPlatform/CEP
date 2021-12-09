@@ -1,19 +1,16 @@
-#//************************************************************************
-#// Copyright 2021 Massachusetts Institute of Technology
-#//
-#// File Name:      
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    
-#// Notes:          
-#//
-#//************************************************************************
+#--------------------------------------------------------------------------------------
+# Copyright 2021 Massachusetts Institute of Technology
 #
-# override anything here before calling the top 
+# File Name:      common.make
+# Program:        Common Evaluation Platform (CEP)
+# Description:    common.make for bareMetalTests test suite
+# Notes:          
 #
-# must have this one for auto-dependentcy detection
+#--------------------------------------------------------------------------------------
 
-override DUT_SIM_MODE	 		= BARE
-override ELF_MODE   		= LOCAL
-override DUT_XILINX_TOP_MODULE 	= cep_tb
-#
-include ${REPO_TOP_DIR}/${COSIM_DIR_NAME}/common.make
+# override anything here before calling the top 
+override DUT_SIM_MODE			= BARE
+override ELF_MODE   			= LOCAL
+
+# Call root cosimulation common.make
+include ${COSIM_TOP_DIR}/common.make

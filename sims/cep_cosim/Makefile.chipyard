@@ -56,5 +56,6 @@ include $(base_dir)/common.mk
 #########################################################################################
 .PHONY: clean
 clean:
+	(cd ${BOOTROM_SRC_DIR}; make clean)
 	rm -rf $(build_dir)
 

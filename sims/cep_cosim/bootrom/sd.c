@@ -1,9 +1,18 @@
+//-------------------------------------------------------------------------------------
+// Copyright 2021 Massachusetts Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      sd.c
+// Program:        Common Evaluation Platform (CEP)
+// Description:    
+// Notes:          
+//
+//--------------------------------------------------------------------------------------
+
 // See LICENSE.Sifive for license details.
 #include <stdint.h>
 
 #include <platform.h>
-
-#include "common.h"
 
 #define DEBUG
 #include "kprintf.h"
@@ -165,7 +174,7 @@ static const char spinner[] = { '-', '/', '|', '\\' };
 
 static int copy(void)
 {
-  volatile uint8_t *p = (void *)(PAYLOAD_DEST);
+  volatile uint8_t *p = (void *)(MEMORY_MEM_ADDR);
   long i = PAYLOAD_SIZE;
   int rc = 0;
 

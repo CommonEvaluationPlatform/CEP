@@ -214,7 +214,7 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   always @(scratchpad_addr_i or slave_tl_h2d_o.a_valid) begin
     addr_err                    <= 1'b0;
     
-    if (slave_tl_h2d_o.a_valid == 1 && scratchpad_addr_i >= (DEPTH /8))
+    if (slave_tl_h2d_o.a_valid == 1 && scratchpad_addr_i >= (DEPTH / 8))
       addr_err                  <= 1'b1;
   end
 

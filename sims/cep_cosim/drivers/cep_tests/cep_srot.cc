@@ -275,12 +275,12 @@ int cep_srot::LLKI_Setup(int cpuId) {
   //
   if (iAMmaster) {
         
-#ifdef SIM_ENV_ONLY
-    if (mSrotFlag) {
-      LOGI("%s: cpu#%d: enable SROT vector capture\n",__FUNCTION__,cpuId);
-      DUT_WRITE_DVT(DVTF_SROT_START_CAPTURE_BIT, DVTF_SROT_START_CAPTURE_BIT , 1);
-    }
-#endif
+    #ifdef SIM_ENV_ONLY
+      if (mSrotFlag) {
+        LOGI("%s: cpu#%d: enable SROT vector capture\n",__FUNCTION__,cpuId);
+        DUT_WRITE_DVT(DVTF_SROT_START_CAPTURE_BIT, DVTF_SROT_START_CAPTURE_BIT , 1);
+      }
+    #endif
         
     if (GetVerbose()) {
       LOGI("%s: cpu#%d is the master. cpuActiveMask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());

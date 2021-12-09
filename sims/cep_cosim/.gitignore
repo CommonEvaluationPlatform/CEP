@@ -1,8 +1,6 @@
-.Xil/
-xil_lib/
-.xil_lib/
-.cxl.ip/
-.cxl*
+**/*.elf
+**/*.img
+lib/*
 *.log*
 *.jou
 *.elf
@@ -24,8 +22,5 @@ vsim.do
 **/*.dump
 include/cep_adrMap.h
 include/v2c_cmds.h
-lib/dll/libvpp.so
-lib/libvpp.so
-lib/.buildLibs
-generate_src/
+generated-src/
 CHIPYARD_BUILD_INFO.make

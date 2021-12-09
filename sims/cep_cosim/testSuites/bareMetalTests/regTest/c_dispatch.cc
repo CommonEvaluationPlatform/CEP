@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   int verify        = 0;
   int srcOffset     = 0x1000;
   int destOffset    = 0;
-  errCnt += load_mainMemory((char *)"./riscv_wrapper.elf", scratchpad_base_addr ,srcOffset, destOffset, backdoor_on, verify);
+  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr ,srcOffset, destOffset, backdoor_on, verify);
 
   // Wait until all threads are complete
   int Done = 0;

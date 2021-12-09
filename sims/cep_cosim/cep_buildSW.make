@@ -1,32 +1,31 @@
-#//--------------------------------------------------------------------------------------
-#// Copyright 2021 Massachusetts Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
-#//
-#// File Name:      cep_buildSW.make
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    Co-Simulation makefile for CEP Software
-#// Notes:          This file cannot be invoked by itself
-#//
-#//--------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------
+# Copyright 2021 Massachusetts Institute of Technology
+# SPDX short identifier: BSD-2-Clause
+#
+# File Name:      cep_buildSW.make
+# Program:        Common Evaluation Platform (CEP)
+# Description:    Co-Simulation makefile for CEP Software
+# Notes:          This file cannot be invoked by itself
+#
+#--------------------------------------------------------------------------------------
 
 # BFM Mode
 ifeq "${DUT_SIM_MODE}" "BFM_MODE"
 COMMON_CFLAGS	        += -DBFM_MODE
-#
+# BARE Metal Mode (RISCV_BARE_CFLAGS passes the BARE_MODE define to the appropriate compilations)
 else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
-COMMON_CFLAGS	        += -DBARE_MODE
 RISCV_WRAPPER           = ./riscv_wrapper.elf
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
 endif
 
 ifeq (${NOWAVE},1)
 COMMON_CFLAGS	        += -DNOWAVE
-RISCV_BARE_CFLAG        += -DNOWAVE
+RISCV_BARE_CFLAGS       += -DNOWAVE
 endif
 
 ifeq (${USE_DPI},1)
 COMMON_CFLAGS	        += -DUSE_DPI
-RISCV_BARE_CFLAG        += -DUSE_DPI
+RISCV_BARE_CFLAGS       += -DUSE_DPI
 endif
 
 #--------------------------------------------------------------------------------------
@@ -157,6 +156,9 @@ build_v2c: ${V2C_H_FILE_LIST}
 
 
 
+#-------------------------------------------------------------------------------------
+# Common variables
+#-------------------------------------------------------------------------------------
 # Misc. variables
 BARE_SRC_DIR    		:= ${DRIVERS_DIR}/bare
 
@@ -198,7 +200,7 @@ RISCV_VIRT_CFILES  		+= ${DRIVERS_DIR}/virtual/*.c ${DRIVERS_DIR}/virtual/multi_
 RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/scalar 
 
 # Flags related to RISCV Baremetal tests
-RISCV_BARE_CFLAG  		+= -DBARE_MODE -static -DRISCV_CPU -mcmodel=medany -Wall -O2 -g -fno-common -nostdlib -fno-builtin-printf -I${BARE_SRC_DIR} $(COMMON_INCLUDE_LIST)
+RISCV_BARE_CFLAGS  		+= -DBARE_MODE -static -DRISCV_CPU -mcmodel=medany -Wall -O2 -g -fno-common -nostdlib -fno-builtin-printf -I${BARE_SRC_DIR} $(COMMON_INCLUDE_LIST)
 RISCV_BARE_LDFLAGS 		+= -static -nostdlib -nostartfiles -lgcc -DBARE_MODE 
 RISCV_BARE_LDFILE  		= ${BARE_SRC_DIR}/link.ld
 RISCV_BARE_CRTFILE 		:= ${BARE_SRC_DIR}/crt.S
@@ -217,6 +219,7 @@ SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV
 
 # Switches to indicate what libraries are being used
 LIBRARY_SWITCHES  		= -lpthread -lcryptopp
+#-------------------------------------------------------------------------------------
 
 
 
@@ -250,37 +253,37 @@ ${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES}
 
 # .bobj for bare-metal
 ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${SIMDIAG_LIB_DIR}/%.bobj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${SHARE_LIB_DIR}/%.bobj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 #--------------------------------------------------------------------------------------
 
 
 
 # -----------------------------------------------------------------------
-# Unique rules for baremetal object files
+# Unique rules for specific baremetal object files
 # -----------------------------------------------------------------------
 ${BARE_LIB_DIR}/crt.bobj: ${RISCV_BARE_CRTFILE}
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 riscv_wrapper.bobj: riscv_wrapper.cc
-	$(RISCV_GCC) $(RISCV_BARE_CFLAG) -c $< -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 # -----------------------------------------------------------------------
 
 
@@ -297,14 +300,14 @@ RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
 # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
 # so build with -g for dump file only
 ifeq (${VIRTUAL_MODE},1)
-riscv_wrapper.elf: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
+${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-riscv_wrapper.elf: riscv_wrapper.bobj ${RISCV_LIB}
+${RISCV_WRAPPER_ELF}: riscv_wrapper.bobj ${RISCV_LIB}
 	$(RISCV_GCC) -T ${RISCV_BARE_LDFILE} ${RISCV_BARE_LDFLAGS} $^ -o $@
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex

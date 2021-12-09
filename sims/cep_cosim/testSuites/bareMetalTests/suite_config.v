@@ -1,13 +1,13 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 //
-// File Name:      config.v
+// File Name:      suite_config.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    Testbench Defines for bareMetaTests category
+// Description:    Testbench Defines for the Bare Metal Test Suite
 // Notes:          
 //
-//************************************************************************
-`define TB_NAME cep_tb
+//--------------------------------------------------------------------------------------
+`timescale 1ns/100ps
 
 //`define RANDOMIZE_REG_INIT
 //`define RANDOMIZE_MEM_INIT
@@ -15,4 +15,3 @@
 //`define RANDOMIZE_INVALID_ASSIGN
 //`define RANDOMIZE
 
-`timescale 1ns/100ps

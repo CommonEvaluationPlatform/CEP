@@ -1,13 +1,13 @@
-#//************************************************************************
-#// Copyright 2021 Massachusetts Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
-#//
-#// File Name:      Makefile
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    
-#// Notes:          
-#//
-#//************************************************************************
+#--------------------------------------------------------------------------------------
+# Copyright 2021 Massachusetts Institute of Technology
+# SPDX short identifier: BSD-2-Clause
+#
+# File Name:      Makefile
+# Program:        Common Evaluation Platform (CEP)
+# Description:    
+# Notes:          
+#
+#--------------------------------------------------------------------------------------
 
 COSIM_TOP_DIR   	= $(strip $(shell cd ../../..; pwd))
 COSIM_BIN_DIR       = $(COSIM_TOP_DIR)/bin
