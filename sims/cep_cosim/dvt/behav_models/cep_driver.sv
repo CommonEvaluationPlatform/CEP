@@ -90,7 +90,7 @@ module cep_driver
 
   always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `COSIM_TB_TOP_MODULE.program_loaded;
 
-  // Enable backdoor loading of main memory (this will affect all WRITE64_64_DPI and READ64_64_DPI calls)
+  // Enable backdoor loading of main memory (this will affect all WRITE32/64_64_DPI and READ32/64_64_DPI calls)
   always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
     backdoor_enable = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR] = 0;

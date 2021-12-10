@@ -326,7 +326,7 @@ endtask // processCmd
 `ifdef USE_DPI
 always @(posedge (__shIpc_EnableMode && !__playBackEnable)) begin
   @(posedge `SHIPC_CLK ); // wait 1 clock
-  `logI("=========== Entering shIpc_EnableMode Loop sim Time = %0d =================", __simTime);  
+  `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
   while (__shIpc_EnableMode) begin
     // get the command
     get_v2c_mail(__mSlotId, __mCpuId,inBox);
@@ -417,13 +417,13 @@ always @(posedge enableMe) begin
   $vpp_isCActive(`SHIPC_XACTOR_ID, myIsActive);
   if (myIsActive) begin
      // wait until C-side is alive
-     `logI("%m: calling $vpp_WaitTilStart slot= %0d cpu= %d", MY_SLOT_ID, MY_CPU_ID);
-     $vpp_WaitTilStart(MY_SLOT_ID,MY_CPU_ID);
-     `logI("%m: Turning ON __shIpc_EnableMode %t", $time);
+     `logI("Calling $vpp_WaitTilStart slot = %0d cpu = %0d", MY_SLOT_ID, MY_CPU_ID);
+     $vpp_WaitTilStart(MY_SLOT_ID, MY_CPU_ID);
+     `logI("Turning ON __shIpc_EnableMode simTime = %0d", __simTime);
     __shIpc_EnableMode = 1;
    end
    else begin
-    `logI("%m: Turning OFF __shIpc_EnableMode %t", $time);
+    `logI("Turning OFF __shIpc_EnableMode simTime = %0d", __simTime);
     __shIpc_EnableMode = 0;
    end  
 end 

@@ -250,7 +250,7 @@ cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
+#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog

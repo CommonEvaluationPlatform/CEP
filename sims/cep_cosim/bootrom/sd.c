@@ -254,7 +254,7 @@ int main(void)
 {
 
   // Disable UART and SD initialization when in simulation mode
-  #ifdef _SIM_ONLY
+  #ifndef _SIM_ONLY
 
     REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
 

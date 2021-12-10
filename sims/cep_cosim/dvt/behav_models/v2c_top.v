@@ -90,7 +90,7 @@ module v2c_top (
     reg         singleThread    = 0;
     reg [3:0]   coreActiveMask  = 0;
 
-    // Utility to force a single threaded ( on core) operation
+    // Utility to force a single threaded (one core) operation
     always @(posedge dvtFlags[`DVTF_FORCE_SINGLE_THREAD]) begin
       coreActiveMask = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] ;
       singleThread = 1;

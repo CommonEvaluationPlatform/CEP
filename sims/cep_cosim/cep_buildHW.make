@@ -7,6 +7,28 @@
 # Description:    Co-Simulation makefile for CEP Hardware
 # Notes:          This file cannot be invoked by itself
 #
+#                 The following are a list of defines contained
+#                 within the Chisel-generated verilog:
+#
+# PRINTF_COND
+#   Defines under what condition a printf occurs (Verilator uses PLI-like calls, such as $c("verbose", "&&", "done_reset")
+# STOP_COND
+#   Defines under what condition to allow stopping of simulation. For verilator, it uses $c("done_reset")
+#
+# FIRRTL_BEFORE_INITIAL
+# FIRRTL_AFTER_INITIAL
+#   Allows for defining print "hooks" to occurr both before and after initial statements
+#
+# RANDOMIZE
+# INIT_RANDOM
+# RANDOM_DELAY
+# RANDOMIZE_GARBAGE_ASSIGN
+# RANDOMIZE_INVALID_ASSIGN
+# RANDOMIZE_REG_INIT
+#  Randomization related defines
+#
+# SYNTHESIS
+#   Removes all simulation only constructs
 #--------------------------------------------------------------------------------------
 
 
@@ -38,6 +60,10 @@ endif
 ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
+
+# Defines for used within the Chisel Generated Verilog
+#COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
+#COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
 #--------------------------------------------------------------------------------------
 
 
@@ -79,26 +105,44 @@ COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
 
 ${CHIPYARD_TOP_SMEMS_FILE_sim}: .force ${CHIPYARD_TOP_SMEMS_FILE}
 	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_SMEMS_FILE_sim}
-	@cat ${CHIPYARD_TOP_SMEMS_FILE} >> ${CHIPYARD_TOP_SMEMS_FILE_sim}
+	@echo "\`include \"suite_config.v\"" > $@
+	@echo "\`include \"cep_hierMap.incl\"" >> $@
+#	@echo "\`include \"v2c_top.incl\"" >> $@
+	@echo "" >> $@
+	@cat ${CHIPYARD_TOP_SMEMS_FILE} >> $@
+#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@rm -f $@.bak
 	@touch $@
 
 # Create a BFM compatible verion of the CHIPYARD_TOP_FILE
 ${CHIPYARD_TOP_FILE_bfm}: .force ${CHIPYARD_TOP_FILE} 
 	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_FILE_bfm}
-	@sed -e 's/RocketTile tile/RocketTile_beh tile/g' ${CHIPYARD_TOP_FILE} >> ${CHIPYARD_TOP_FILE_bfm}
+	@echo "\`include \"suite_config.v\"" > $@
+	@echo "\`include \"cep_hierMap.incl\"" >> $@
+#	@echo "\`include \"v2c_top.incl\"" >>$@
+	@echo "" >> $@
+	@cat ${CHIPYARD_TOP_FILE} >> $@
+	@sed -i.bak -e 's/RocketTile tile/RocketTile_beh tile/g' $@
+#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@rm -f $@.bak
 	@touch $@
 
 # Create a BARE compatible version of the CHIPYARD_TOP_FILE
 ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > ${CHIPYARD_TOP_FILE_bare}
-	@cat ${CHIPYARD_TOP_FILE} >> ${CHIPYARD_TOP_FILE_bare}
+	@echo "\`include \"suite_config.v\"" > $@
+	@echo "\`include \"cep_hierMap.incl\"" >> $@
+#	@echo "\`include \"v2c_top.incl\"" >> $@
+	@echo "" >> $@
+	@cat ${CHIPYARD_TOP_FILE} >> $@
+#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@rm -f $@.bak
 	@touch $@
 
-# Create an ordered list of SystemVerilog/Verilog files to compile
+tweaked: ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare}
 
+
+# Create an ordered list of SystemVerilog/Verilog files to compile
 # BFM Mode
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
@@ -116,7 +160,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
 	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
 else
-# Bare Metal Mode (Chipyard generated TestDriver.v is explicitly exluded)
+# Bare Metal Mode
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@rm -f ${COSIM_BUILD_LIST}
 	@for i in ${COSIM_INCDIR_LIST}; do \

@@ -11,7 +11,7 @@
 
 # RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
 ifndef RISCV
-$(error CEP_COSIM: RISCV is unset and BARE DUT_SIM_MODE is specified. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
 # RISCV environment variable must be set

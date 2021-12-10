@@ -106,7 +106,7 @@ always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 `ifdef USE_DPI
   always @(posedge __shIpc_EnableMode) begin
     @(posedge `SHIPC_CLK); // wait 1 clock
-    `logI("=========== Entering shIpc_EnableMode Loop sim Time = %0d =================", __simTime);  
+    `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
     while (__shIpc_EnableMode) begin
        // get the command
       get_v2c_mail(__mSlotId, __mCpuId, inBox);
