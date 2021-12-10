@@ -50,6 +50,13 @@ void *c_module(void *arg) {
   //--------------------------------------------------------------------------------------
   // Test starts here
   //--------------------------------------------------------------------------------------
+  // Wait until the program is loaded
+  errCnt += is_program_loaded(50);
+
+  // A timeout has occured, terminate the thread
+  if (errCnt) goto cleanup;
+
+  // Check the status of the bare metal program
   errCnt += check_bare_status(cpuId, 500);
 
   pio.RunClk(100);
@@ -66,7 +73,6 @@ cleanup:
   } else {
     LOGI("======== TEST PASS ========== \n");    
   }
-  //  shIpc *ptr = GlobalShMemory.getIpcPtr(offset);
   ptr->SetError(errCnt);
   ptr->SetThreadDone();
   pthread_exit(NULL);

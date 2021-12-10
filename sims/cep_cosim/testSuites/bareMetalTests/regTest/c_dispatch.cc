@@ -56,12 +56,17 @@ int main(int argc, char *argv[])
     dump_wave(cycle2start, cycle2capture, wave_enable);
   #endif
 
-  // Load bare metal executabl into scratchpad memory
+  //--------------------------------------------------------------------------------------
+  // Load the bare executable into scratchpad memory (from the system thread)
+  // Ignoring the first 4096 bytes (stripping the ELF header?)
+  //--------------------------------------------------------------------------------------
   int backdoor_on   = 1;
   int verify        = 0;
   int srcOffset     = 0x1000;
   int destOffset    = 0;
-  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr ,srcOffset, destOffset, backdoor_on, verify);
+  int maxByteCnt    = cep_max_program_size;
+  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, srcOffset, destOffset, backdoor_on, verify, maxByteCnt);
+  //--------------------------------------------------------------------------------------
 
   // Wait until all threads are complete
   int Done = 0;

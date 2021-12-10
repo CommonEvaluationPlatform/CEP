@@ -95,9 +95,10 @@ initial begin
   __shIpc_EnableMode = 0;
   __shIpc_cmdValid = 0;
   __shIpc_remoteReq = 0;
-  #1 __mSlotId = `SYSTEM_SLOT_ID;
-  __mCpuId = `SYSTEM_CPU_ID;
+  #1 __mSlotId = MY_SLOT_ID;
+  __mCpuId = MY_CPU_ID;
 end
+always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 
 //--------------------------------------------------------------------------------------
 // New DPI
@@ -105,10 +106,10 @@ end
 `ifdef USE_DPI
   always @(posedge __shIpc_EnableMode) begin
     @(posedge `SHIPC_CLK); // wait 1 clock
-    `logI("=========== Entering shIpc_EnableMode Loop =================");    
+    `logI("=========== Entering shIpc_EnableMode Loop sim Time = %0d =================", __simTime);  
     while (__shIpc_EnableMode) begin
        // get the command
-      get_v2c_mail(__mSlotId, __mCpuId,inBox);
+      get_v2c_mail(__mSlotId, __mCpuId, inBox);
       __shIpc_cmdValid       = inBox.mCmdValid;
       if (inBox.mActive == 0) 
          __shIpc_Active         = 0; // inBox.mActive;
@@ -171,14 +172,13 @@ end
           
           `SHIPC_RUNCLK           : RUNCLK(__shIpc_p0);  
           `SHIPC_READ_STATUS      : __shIpc_p0 = __shIpcStatus;
-          default                 : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+          default                 : `logE("ERROR: %m __shIpc_cmd = %x NOT SUPPORTED!!!!\n",__shIpc_cmd);
         endcase
 
         // return data & complete the command
         inBox.mCmdValid          = 0; 
         inBox.mRemoteReq         = 0;
-        send_v2c_mail(__mSlotId, __mCpuId,inBox);
-    
+        send_v2c_mail(__mSlotId, __mCpuId, inBox);
       // end if valid
       end else if (ipcDelay) begin // to help speedup backdoor loading
         @(posedge `SHIPC_CLK); // wait 1 clock
@@ -227,3 +227,11 @@ always @(posedge __shIpc_Time2Shutdown) begin
   
   #10 $finish;
 end
+
+// The system driver is ALWAYS enabled
+initial begin
+  __shIpc_EnableMode = 0;
+  #1;
+  __shIpc_EnableMode = 1;      
+end
+

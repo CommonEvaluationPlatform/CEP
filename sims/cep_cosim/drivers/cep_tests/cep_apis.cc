@@ -13,12 +13,11 @@
 #include "portable_io.h"
 
 #ifdef SIM_ENV_ONLY
-#include "simPio.h"
+  #include "simPio.h"
 #else
-// SW or BARE in sim
-#include <stdint.h>
+  #include <stdint.h>
 #endif
-//
+
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 
@@ -29,22 +28,23 @@
 int __prIdx[MAX_CORES] = {0,0,0,0};
 
 int is_program_loaded(int maxTimeOut) {
-  //
+  int errCnt = 0;
   int loaded = 0;
 #ifdef SIM_ENV_ONLY
-  int to=0;  
+  int to = 0;  
   while (!loaded && (to < maxTimeOut)) {
-    loaded = DUT_READ_DVT(DVTF_PROGRAM_LOADED, DVTF_PROGRAM_LOADED);
+    loaded = DUT_READ_DVT(DVTF_GET_PROGRAM_LOADED, DVTF_GET_PROGRAM_LOADED);
     DUT_RUNCLK(1000);
     to++;
   }
   if (!loaded) {
-    LOGI("ERROR: Program_loading is not done\n");
+    LOGE("ERROR: Program loading timeout\n");
+    errCnt++;
   } else {
-    LOGI("OK: Program_loading is completed\n");    
+    LOGI("OK: Program loading is completed\n");    
   }
 #endif
-  return loaded;
+  return errCnt;
 }
 
 void dump_wave(int cycle2start, int cycle2capture, int enable)
@@ -107,7 +107,8 @@ int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
   return 0;
 }
 
-int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int backdoor_on, int verify) {
+// Load a file into Main Memory (must be called from the system thread)
+int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int backdoor_on, int verify, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
@@ -121,7 +122,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     // Open binary file
     fd = fopen(imageF, "rb");
   
-    LOGI("==== %s: Loading file %s to memory base = 0x%08x ====\n",__FUNCTION__, imageF, mem_base);
+    LOGI("%s: Loading file %s to memory base = 0x%08x\n",__FUNCTION__, imageF, mem_base);
 
     if (fd == NULL) {
       printf("Can't open file %s\n",imageF);
@@ -161,16 +162,19 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
       }
     } // end if backdoor_on
 
-    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %d bytes ====\n",__FUNCTION__, imageF, bCnt);
+    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %d bytes\n",__FUNCTION__, imageF, bCnt);
     
     // Disable backdoor access, if enabled
     if (backdoor_on) {    
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
       DUT_WRITE_DVT(DVTF_ENABLE_MEM_BACKDOOR, DVTF_ENABLE_MEM_BACKDOOR, 1);
     }
-    
+
+    // Did the loaded program exceed the maximum byte count?
+    if (bCnt >= maxByteCnt) {
+      errCnt++;
     // Verify if enabled
-    if (verify) {
+    } else if (verify) {
       rewind(fd);
       s = 0;
       d = 0;
@@ -201,17 +205,16 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     // Close the file descriptor
     fclose(fd);
   
-    // Clear the printf memory (since we just loaded it with a file)
-    for (int i=0; i < 4; i++) {
-      errCnt += clear_printf_mem(i);
-    }
-
     // Restore clocking of IPC
     DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
     DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
 
-    // Indicate that a program has been loaded  
-    DUT_WRITE_DVT(DVTF_PROGRAM_LOADED, DVTF_PROGRAM_LOADED, 1);
+    // Indicate that a program has been loaded (assuming there was no error)
+    if (!errCnt) {
+      LOGI("%s: Setting program loaded flag\n", __FUNCTION__);
+      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
+      DUT_WRITE_DVT(DVTF_SET_PROGRAM_LOADED, DVTF_SET_PROGRAM_LOADED, 1);
+    }
 
   #endif // #ifdef SIM_ENV_ONLY
 
@@ -274,7 +277,7 @@ int check_PassFail_status(int coreId,int maxTimeOut) {
 }
 
 // spin on the scratch mem until it is good or bad
-int check_bare_status(int coreId,int maxTimeOut) {
+int check_bare_status(int coreId, int maxTimeOut) {
   int errCnt=0;  
   //
 #ifdef SIM_ENV_ONLY

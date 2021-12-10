@@ -88,13 +88,13 @@ module cep_driver
   // As external memory has been removed the calibration is ALWAYS complete  
   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b1;
 
-  always @(*) dvtFlags[`DVTF_PROGRAM_LOADED]        = `COSIM_TB_TOP_MODULE.program_loaded;
+  always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `COSIM_TB_TOP_MODULE.program_loaded;
 
   // Enable backdoor loading of main memory (this will affect all WRITE64_64_DPI and READ64_64_DPI calls)
   always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
     backdoor_enable = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR] = 0;
-    `logI("Setting backdoor_enable = %d",backdoor_enable);
+    `logI("Setting backdoor_enable = %d", backdoor_enable);
   end
 
   always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin

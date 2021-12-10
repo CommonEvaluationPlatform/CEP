@@ -192,7 +192,7 @@ void access::RunClk(int numClk) {
 #else
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   if (GetVerbose()) {
-    ptr->PrintVerbose("access::RunClk mSlotId=%d mLocalId=%d numClk=%08x\n",mSlotId,mLocalId,numClk);
+    ptr->PrintVerbose("access::RunClk mSlotId=%d mLocalId=%d numClk=%d\n",mSlotId,mLocalId,numClk);
   }
   ptr->RunClk(numClk);
 #endif

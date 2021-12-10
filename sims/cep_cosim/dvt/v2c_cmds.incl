@@ -117,34 +117,32 @@
 `define DVTF_DISABLE_MAIN_MEM_LOGGING         84
 `define DVTF_ENABLE_MEM_BACKDOOR              85
 `define DVTF_PUT_CORE_IN_RESET                86
-`define DVTF_PROGRAM_LOADED                   87
-`define DVTF_PRINTF_CMD                       88
-`define DVTF_SET_IPC_DELAY                    89
+`define DVTF_SET_PROGRAM_LOADED               87
+`define DVTF_GET_PROGRAM_LOADED               88
+`define DVTF_PRINTF_CMD                       89
+`define DVTF_SET_IPC_DELAY                    90
 
 // Constants related to Cycle-level vector capture, which
 // is no longer supported in the CEP co-simulation environment
-`define DVTF_AES_CAPTURE_EN_BIT               90
-`define DVTF_SHA256_CAPTURE_EN_BIT            91
-`define DVTF_MD5_CAPTURE_EN_BIT               92
-`define DVTF_RSA_CAPTURE_EN_BIT               93
-`define DVTF_DES3_CAPTURE_EN_BIT              94
-`define DVTF_GPS_CAPTURE_EN_BIT               95
-`define DVTF_DFT_CAPTURE_EN_BIT               96
-`define DVTF_IDFT_CAPTURE_EN_BIT              97
-`define DVTF_IIR_CAPTURE_EN_BIT               98
-`define DVTF_FIR_CAPTURE_EN_BIT               99
+`define DVTF_AES_CAPTURE_EN_BIT               91
+`define DVTF_SHA256_CAPTURE_EN_BIT            92
+`define DVTF_MD5_CAPTURE_EN_BIT               93
+`define DVTF_RSA_CAPTURE_EN_BIT               94
+`define DVTF_DES3_CAPTURE_EN_BIT              95
+`define DVTF_GPS_CAPTURE_EN_BIT               96
+`define DVTF_DFT_CAPTURE_EN_BIT               97
+`define DVTF_IDFT_CAPTURE_EN_BIT              98
+`define DVTF_IIR_CAPTURE_EN_BIT               99
+`define DVTF_FIR_CAPTURE_EN_BIT               100
 
-`define DVTF_TOGGLE_CHIP_RESET_BIT            100
-`define DVTF_GET_CORE_RESET_STATUS            101
-`define DVTF_GET_PASS_FAIL_STATUS             102
-`define DVTF_SET_PASS_FAIL_STATUS             103
-`define DVTF_FORCE_SINGLE_THREAD              104
-`define DVTF_SET_VIRTUAL_MODE                 105
-`define DVTF_PASS_IS_TO_HOST                  106
-`define DVTF_TOGGLE_DMI_RESET_BIT             107
-//
-`define DVTF_ENABLE_MIG_MEMRD_LOGGING         108
-`define DVTF_ENABLE_MIG_MEMWR_LOGGING         109
+`define DVTF_TOGGLE_CHIP_RESET_BIT            101
+`define DVTF_GET_CORE_RESET_STATUS            102
+`define DVTF_GET_PASS_FAIL_STATUS             103
+`define DVTF_SET_PASS_FAIL_STATUS             104
+`define DVTF_FORCE_SINGLE_THREAD              105
+`define DVTF_SET_VIRTUAL_MODE                 106
+`define DVTF_PASS_IS_TO_HOST                  107
+`define DVTF_TOGGLE_DMI_RESET_BIT             108
 
 // SRoT TL capture 
 `define DVTF_SROT_START_CAPTURE_BIT           111

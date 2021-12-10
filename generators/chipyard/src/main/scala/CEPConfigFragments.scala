@@ -223,6 +223,7 @@ class WithCEPRegisters extends Config((site, here, up) => {
     ))
 })
 
+// Address and size defaults can be overriden
 class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_addr,
                          size:      BigInt = CEPBaseAddresses.scratchpad_depth) extends Config((site, here, up) => {
   case CEPScratchpadKey => List(

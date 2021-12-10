@@ -4,7 +4,7 @@
 //
 // File Name:      v2c_top.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    System Level testbench driver
 // Notes:          
 //
 //--------------------------------------------------------------------------------------
@@ -18,12 +18,8 @@
 module v2c_top (
   input               clk,
   output reg [31:0]   __simTime = 0
-
 );
 
-  // Advance the __simtime
-  always @(posedge clk) __simTime = __simTime + 1;
-  
   // shIpc stuffs
   //
   parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
@@ -31,20 +27,47 @@ module v2c_top (
 
   // These includes must remain within the verilog module and
   // is dependent on the SHIPC_CLK macro
-  `define SHIPC_CLK clk
+
+  `ifdef USE_DPI
+    // WRITE32_64
+    `define SHIPC_WRITE32_64_TASK WRITE32_64_DPI()
+    task WRITE32_64_DPI;
+      reg [63:0] d;
+      begin
+        d[63:32] = inBox.mPar[0];
+        d[31:0]  = inBox.mPar[1];
+
+        `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,d);
+      end
+    endtask // WRITE32_64_TASK
+
+    // READ32_64
+    `define SHIPC_READ32_64_TASK READ32_64_DPI()
+    task READ32_64_DPI;
+      reg [63:0] d;
+      begin
+        `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr,d);      
+      
+        inBox.mPar[0] = d[63:32];
+        inBox.mPar[1] = d[31:0];      
+      end
+    endtask // READ32_64_DPI
+  `endif
+
+  //--------------------------------------------------------------------------------------
+  // SHIPC Support Common Codes
+  //--------------------------------------------------------------------------------------
+  `define   SHIPC_CLK   clk
   `include "sys_common.incl"
   `include "dump_control.incl"      
-  initial begin
-    __shIpc_EnableMode = 0;
-    #1;
-    __shIpc_EnableMode = 1;      
-  end
-  `undef   SHIPC_CLK
+  `undef    SHIPC_CLK
+  //--------------------------------------------------------------------------------------
 
   // As external memory has been removed the calibration is ALWAYS complete  
   always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b1;
 
   always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
+    `logI("Setting ipcDelay");
     ipcDelay = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_SET_IPC_DELAY] = 0;
   end

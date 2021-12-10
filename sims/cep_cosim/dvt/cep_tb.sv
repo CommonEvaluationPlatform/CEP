@@ -7,7 +7,7 @@
 // Description:    CEP Co-Simulation Top Level Testbench 
 // Notes:          
 //
-//--------------------------------------------------------------------------------------VI
+//--------------------------------------------------------------------------------------
 
 `ifndef COSIM_TB_TOP_MODULE
   `define COSIM_TB_TOP_MODULE       cep_tb
@@ -70,7 +70,6 @@ module `COSIM_TB_TOP_MODULE;
   wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
 
   wire [31:0]         __simTime;
-  reg                 program_loaded = 0;
   //--------------------------------------------------------------------------------------
 
 
@@ -135,9 +134,13 @@ module `COSIM_TB_TOP_MODULE;
   //--------------------------------------------------------------------------------------
   // C <--> Verilog Deamon and backdoor support are here
   //--------------------------------------------------------------------------------------
-  always @(posedge `DVT_FLAG[`DVTF_PROGRAM_LOADED]) begin
-    program_loaded = 1;
-  end // always @(posedge `DVT_FLAG[`DVTF_PROGRAM_LOADED])
+  reg     program_loaded = 0;
+
+  always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
+    `logI("Program is now loaded");
+    program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
+    `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED])
 
   always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
   begin
@@ -170,12 +173,6 @@ module `COSIM_TB_TOP_MODULE;
     `logI("SocketId=0x%08x",`DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO]);
     `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
   end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
-
-  // Instantiate the "System" driver
-  v2c_top v2c_inst(
-    .clk        (sys_clk_i),
-    .__simTime  (__simTime)
-  );
 
   // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
   `ifdef BFM_MODE
@@ -227,6 +224,7 @@ module `COSIM_TB_TOP_MODULE;
     enableRdTrace = 0;      
     `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING] = 0;
   end
+  
   always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING]) begin
     enableWrTrace = 1;
     enableRdTrace = 1;            
@@ -267,7 +265,6 @@ module `COSIM_TB_TOP_MODULE;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
 
       `logI("== Main Mem Backdoor Write addr=0x%x data=0x%x",addr,data);
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
     end
   endtask // write_mainmem_backdoor
@@ -282,6 +279,8 @@ module `COSIM_TB_TOP_MODULE;
       // If the memory is in reset, wait for it to be released
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
       // Reads are registered
       force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
@@ -290,7 +289,6 @@ module `COSIM_TB_TOP_MODULE;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
 
       `logI("== Main Mem Backdoor Read addr=0x%x data=0x%x",addr,data);
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
     end
   endtask // read_mainmem_backdoor
@@ -328,6 +326,12 @@ module `COSIM_TB_TOP_MODULE;
       assign passMask[c] = driver.PassStatus;
     end // end for
   endgenerate
+
+  // Instantiate the "System" driver (which is ALWAYS enabled)
+  v2c_top v2c_inst(
+    .clk        (sys_clk_i),
+    .__simTime  (__simTime)
+  );
   //--------------------------------------------------------------------------------------
   
 

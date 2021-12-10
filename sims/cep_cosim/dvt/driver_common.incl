@@ -303,11 +303,11 @@ task processCmd;
 `endif
   end
 
-//
-// Common Task
-//
-        `SHIPC_GET_SIM_TIME: r_data = {2{__simTime}};
-        `SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);
+  //
+  // Common Task
+  //
+  `SHIPC_GET_SIM_TIME: r_data = {2{__simTime}};
+  `SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);
   `SHIPC_SHUTDOWN: __shIpc_Time2Shutdown = 1;
   `SHIPC_SIMV_SAVE: begin
       // set the flag!!
@@ -326,7 +326,7 @@ endtask // processCmd
 `ifdef USE_DPI
 always @(posedge (__shIpc_EnableMode && !__playBackEnable)) begin
   @(posedge `SHIPC_CLK ); // wait 1 clock
-  `logI("=========== Entering shIpc_EnableMode Loop simeTime = %d =================", __simTime);  
+  `logI("=========== Entering shIpc_EnableMode Loop sim Time = %0d =================", __simTime);  
   while (__shIpc_EnableMode) begin
     // get the command
     get_v2c_mail(__mSlotId, __mCpuId,inBox);
@@ -406,21 +406,18 @@ begin
 end
 endtask // RUNCLK
 
-//
-//
-//
-// start the initi
-reg myIsActive=0;
+// Intialize the share memory for this driver
+reg myIsActive  = 0;
 always @(posedge enableMe) begin
-  //  `logI("%m Calling VPP_SHMEMINIT as client ====== %t",$time);
   $vpp_shMemInit(-1); // use key in file
-  //
+
   // check if my master (C-side) is on
   #10;
+
   $vpp_isCActive(`SHIPC_XACTOR_ID, myIsActive);
   if (myIsActive) begin
      // wait until C-side is alive
-     `logI("%m: calling $vpp_WaitTilStart slot=%d cpu=%d",MY_SLOT_ID,MY_CPU_ID);
+     `logI("%m: calling $vpp_WaitTilStart slot= %0d cpu= %d", MY_SLOT_ID, MY_CPU_ID);
      $vpp_WaitTilStart(MY_SLOT_ID,MY_CPU_ID);
      `logI("%m: Turning ON __shIpc_EnableMode %t", $time);
     __shIpc_EnableMode = 1;
