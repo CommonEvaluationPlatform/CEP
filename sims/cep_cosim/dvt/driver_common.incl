@@ -369,8 +369,7 @@ end
 task unsupportedTask;
   input string str; 
   begin 
-    `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n", str); 
-    $fatal;
+    `logE("ERROR: %m Command %s NOT SUPPORTED for this module.\n", str); 
   end
 endtask
 
