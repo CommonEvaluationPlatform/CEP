@@ -46,11 +46,6 @@ else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 COSIM_VLOG_ARGS         	+= +define+BARE_MODE
 endif
 
-# Enable the DPI
-ifeq (${USE_DPI},1)
-COSIM_VLOG_ARGS 			+= +define+USE_DPI
-endif
-
 # Virtual Mode
 ifeq (${VIRTUAL_MODE},1)
 COSIM_VLOG_ARGS 			+= +define+VIRTUAL_MODE

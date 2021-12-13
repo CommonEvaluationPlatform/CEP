@@ -23,11 +23,6 @@ COMMON_CFLAGS	        += -DNOWAVE
 RISCV_BARE_CFLAGS       += -DNOWAVE
 endif
 
-ifeq (${USE_DPI},1)
-COMMON_CFLAGS	        += -DUSE_DPI
-RISCV_BARE_CFLAGS       += -DUSE_DPI
-endif
-
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #

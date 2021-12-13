@@ -20,42 +20,44 @@ module v2c_top (
   output reg [31:0]   __simTime = 0
 );
 
-  // shIpc stuffs
-  //
   parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
   parameter MY_CPU_ID   = `SYSTEM_CPU_ID;
 
-  // These includes must remain within the verilog module and
-  // is dependent on the SHIPC_CLK macro
+  //--------------------------------------------------------------------------------------
+  // Define system driver supported DPI tasks prior to the inclusion of sys_common.incl
+  //--------------------------------------------------------------------------------------    
+  // WRITE32_64
+  `define SHIPC_WRITE32_64_TASK WRITE32_64_DPI()
+  task WRITE32_64_DPI;
+    reg [63:0] d;
+    begin
+      d[63:32] = inBox.mPar[0];
+      d[31:0]  = inBox.mPar[1];
 
-  `ifdef USE_DPI
-    // WRITE32_64
-    `define SHIPC_WRITE32_64_TASK WRITE32_64_DPI()
-    task WRITE32_64_DPI;
-      reg [63:0] d;
-      begin
-        d[63:32] = inBox.mPar[0];
-        d[31:0]  = inBox.mPar[1];
+      `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr, d);
+    end
+  endtask // WRITE32_64_DPI
 
-        `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,d);
-      end
-    endtask // WRITE32_64_TASK
-
-    // READ32_64
-    `define SHIPC_READ32_64_TASK READ32_64_DPI()
-    task READ32_64_DPI;
-      reg [63:0] d;
-      begin
-        `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr,d);      
+  // READ32_64
+  `define SHIPC_READ32_64_TASK READ32_64_DPI()
+  task READ32_64_DPI;
+    reg [63:0] d;
+    begin
+      `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr, d);      
       
-        inBox.mPar[0] = d[63:32];
-        inBox.mPar[1] = d[31:0];      
-      end
-    endtask // READ32_64_DPI
-  `endif
+      inBox.mPar[0] = d[63:32];
+      inBox.mPar[1] = d[31:0];      
+    end
+  endtask // READ32_64_DPI
+  //--------------------------------------------------------------------------------------
+
+
 
   //--------------------------------------------------------------------------------------
   // SHIPC Support Common Codes
+  //
+  // These includes must remain within the verilog module and
+  // is dependent on the SHIPC_CLK macro.
   //--------------------------------------------------------------------------------------
   `define   SHIPC_CLK   clk
   `include "sys_common.incl"
@@ -63,15 +65,102 @@ module v2c_top (
   `undef    SHIPC_CLK
   //--------------------------------------------------------------------------------------
 
-  // As external memory has been removed the calibration is ALWAYS complete  
-  always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b1;
 
+
+  //--------------------------------------------------------------------------------------
+  // System Driver supported DVT tasks
+  //--------------------------------------------------------------------------------------
   always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
-    `logI("Setting ipcDelay");
+    `logI("Setting ipcDelay to %0d", ipcDelay);
     ipcDelay = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_SET_IPC_DELAY] = 0;
   end
+  
+  reg     program_loaded = 0;
 
+  always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
+    `logI("Program is now loaded");
+    program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
+    `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED])
+
+  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
+  begin
+    wait (`PBUS_RESET==0);
+    @(negedge `PBUS_CLOCK);
+    #2000;
+    `logI("Asserting pbus_Reset");
+    force `PBUS_RESET = 1;
+    repeat (10) @(negedge `PBUS_CLOCK);
+    #2000;
+    release `PBUS_RESET;      
+    `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
+
+  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
+  begin
+    `logI("Forcing topMod_debug_ndreset");
+    force `DEBUG_NDRESET = 1;
+    repeat (10) @(negedge `PBUS_CLOCK);
+    release `DEBUG_NDRESET;
+    `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
+
+  always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT]) 
+  begin
+    `logI("DVTF_GET_SOCKET_ID_BIT");
+    `ifdef OPENOCD_ENABLE
+      `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO] = jtag_getSocketPortId();
+    `endif
+    `logI("SocketId = 0x%08x",`DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO]);
+    `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
+
+  // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
+  `ifdef BFM_MODE
+    defparam `CORE0_TL_PATH.CHIP_ID = 0;
+    defparam `CORE1_TL_PATH.CHIP_ID = 1;
+    defparam `CORE2_TL_PATH.CHIP_ID = 2;
+    defparam `CORE3_TL_PATH.CHIP_ID = 3;
+  `endif
+
+  reg enableWrTrace   = 0;
+  reg enableRdTrace   = 0;   
+  
+  always @(posedge `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING]) begin
+    enableWrTrace = 0;
+    enableRdTrace = 0;      
+    `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING] = 0;
+  end
+  
+  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING]) begin
+    enableWrTrace = 1;
+    enableRdTrace = 1;            
+    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING] = 0;
+  end
+  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING]) begin
+    enableWrTrace = 1;
+    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING] = 0;
+  end
+  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING]) begin
+    enableRdTrace = 1;            
+    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
+  end
+  
+
+//--------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+  //--------------------------------------------------------------------------------------
+  // System Driver support tasks when running the RISCV_TESTS
+  //--------------------------------------------------------------------------------------
   // This is to handle single threading core: one core active at a time
   `ifdef RISCV_TESTS
     initial begin
@@ -81,8 +170,6 @@ module v2c_top (
     int virtualMode = 0;
    
     always @(posedge dvtFlags[`DVTF_SET_VIRTUAL_MODE]) begin
-//      virtualMode = 1;
-//      `logI("==== Enable Virtual Mode");
       dvtFlags[`DVTF_SET_VIRTUAL_MODE] = 0;
     end
    
@@ -197,5 +284,7 @@ module v2c_top (
       end // for (int c=0;c<4;c=c+1)
     end // always @(posedge singleThread)
   `endif // endif `ifdef RISCV_TESTS
+  //--------------------------------------------------------------------------------------
+
    
 endmodule // v2c_top

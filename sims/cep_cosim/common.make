@@ -67,7 +67,6 @@ include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 # Set some default flag values
 SINGLE_THREAD 				= 0
 VIRTUAL_MODE				= 0
-USE_DPI         			= 1
 RANDOMIZE     				= 1
 UPDATE_INFO   				= 1
 PASS_IS_TO_HOST				= 0;
@@ -110,7 +109,7 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 #--------------------------------------------------------------------------------------
 # To detect if any important flag has changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${USE_DPI}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
@@ -148,7 +147,6 @@ $(info CEP_COSIM:   USE_GDB                = ${USE_GDB})
 $(info CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE})
 $(info CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE})
 $(info CEP_COSIM:   SINGLE_THREAD          = ${SINGLE_THREAD})
-$(info CEP_COSIM:   USE_DPI                = ${USE_DPI})
 $(info )
 #--------------------------------------------------------------------------------------
 
@@ -243,14 +241,46 @@ endif
 #--------------------------------------------------------------------------------------
 # Misc build targets
 #--------------------------------------------------------------------------------------
-clean: cleanAll
+clean: cleanLocal
 
+cleanLocal:
+	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj
+	-rm -f ${TEST_DIR}/*.wlf
+	-rm -f ${TEST_DIR}/*history
+	-rm -f ${TEST_DIR}/*.dump
+	-rm -f ${TEST_DIR}/*.elf
+	-rm -f ${TEST_DIR}/*.hex
+	-rm -f ${TEST_DIR}/*.log
+	-rm -f ${TEST_DIR}/wlf*
+	-rm -f ${TEST_DIR}/c_dispatch
+	-rm -f ${TEST_DIR}/*.KEY
+	-rm -f ${TEST_DIR}/testHistory.txt
+	-rm -f ${TEST_DIR}/transcript
+	-rm -f ${TEST_DIR}/status
+	
+cleanLocalDo:
+	-rm -f ${TEST_DIR}/*.do
+
+cleanSuite:
+	-rm -f ${TEST_SUITE_DIR}/.cosim_build_list
+	-rm -rf ${TEST_SUITE_DIR}/*_work
+	-rm -f ${TEST_SUITE_DIR}/.PERSUITE*
+	-rm -f ${TEST_SUITE_DIR}/.buildVlog
+
+cleanLib:
+	-rm -f ${CHIPYARD_TOP_FILE_bfm}
+	-rm -f ${CHIPYARD_TOP_FILE_bare}
+	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
+	-rm -f ${V2C_H_FILE_LIST}
+	-rm -rf ${LIB_DIR}/*
+	-rm -rf ${LIB_DIR}/.buildLibs
+	
 cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/vsim.do
+	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog
@@ -267,6 +297,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*dump
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*elf
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/wlf*
 
 # Use to force rebuilds for rules that include this dependency
 .force:

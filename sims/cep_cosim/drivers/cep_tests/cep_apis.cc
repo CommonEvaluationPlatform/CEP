@@ -25,7 +25,8 @@
 #include "encoding.h"
 #endif
 
-int __prIdx[MAX_CORES] = {0,0,0,0};
+// Private bare-metal printf pointer
+int __prIdx[MAX_CORES] = {0, 0, 0, 0};
 
 int is_program_loaded(int maxTimeOut) {
   int errCnt = 0;
@@ -104,7 +105,7 @@ int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
 }
 
 // Load a file into Main Memory (must be called from the system thread)
-int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int backdoor_on, int verify, int maxByteCnt) {
+int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int verify, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
@@ -128,12 +129,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
       DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
     }
 
-    // Enable backdoor memory loading
-    if (backdoor_on) {
-      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
-      DUT_WRITE_DVT(DVTF_ENABLE_MEM_BACKDOOR, DVTF_ENABLE_MEM_BACKDOOR, 1);
-    }
-
     // Read from the file and load into the memory (via backdoor if enabled)
     while (!feof(fd)) {
       fread(&d64, sizeof(uint64_t), 1, fd);
@@ -148,7 +143,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     bCnt=(s + 1) * 8;
     
     // If we are loading memory using the backdoor, ensure we fill out the cache line
-    if (backdoor_on && ((s & 0x7) != 0)) {
+    if ((s & 0x7) != 0) {
       d64 = 0xDEADDEADDEADDEADLL;      
       LOGI("%s: flushing to cache line s = %d ====\n",__FUNCTION__, s);
       while ((s & 0x7) != 0) {
@@ -160,12 +155,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
 
     LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %d bytes\n",__FUNCTION__, imageF, bCnt);
     
-    // Disable backdoor access, if enabled
-    if (backdoor_on) {    
-      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
-      DUT_WRITE_DVT(DVTF_ENABLE_MEM_BACKDOOR, DVTF_ENABLE_MEM_BACKDOOR, 1);
-    }
-
     // Did the loaded program exceed the maximum byte count?
     if (bCnt >= maxByteCnt) {
       errCnt++;
@@ -189,7 +178,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
         s++;
       } // end while (!feof(fd))
 
-      // Report compaison status
+      // Report comparison status
       if (!errCnt) {
         LOGI("%s: File %s preload and read-back OK\n",__FUNCTION__,imageF);
       } else {
@@ -200,6 +189,10 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
 
     // Close the file descriptor
     fclose(fd);
+
+    // Initialize printf memory
+    for (int i = 0; i < MAX_CORES; i++)
+      clear_printf_mem(i);
   
     // Restore clocking of IPC
     DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
@@ -272,10 +265,14 @@ int check_PassFail_status(int coreId,int maxTimeOut) {
   return errCnt;
 }
 
-// spin on the scratch mem until it is good or bad
-int check_bare_status(int coreId, int maxTimeOut) {
-  int errCnt=0;  
+// Monitor the "bare" status of the specified core
 
+// spin on the scratch mem until it is good or bad
+int check_bare_status(int cpuId, int maxTimeOut) {
+
+  int errCnt = 0;
+
+  // This function is only relevant in simulation mode
   #ifdef SIM_ENV_ONLY
     uint64_t  d64;
     uint64_t  offS;
@@ -284,49 +281,60 @@ int check_bare_status(int coreId, int maxTimeOut) {
     int       i       = 0;
     int       done    = 0;
   
-    LOGI("%s: maxTimeOut=%d\n",__FUNCTION__,maxTimeOut);  
+    LOGI("%s: cpuId = %0d, maxTimeOut = %0d\n", __FUNCTION__, cpuId, maxTimeOut);  
   
-    offS = cep_scratch_mem + (coreId*cep_cache_size);
+    offS = cep_scratch_mem + (cpuId * cep_cache_size);
     
+    // Loop until a done or timeout is detected
     while (!done && (i < maxTimeOut)) {
     
+      // Check to see if a printf has occurred from the core... capture all of the non-zero buffer
       while (1) {
-        uint32_t p_adr = cep_printf_mem + (coreId*cep_printf_core_size) + (cep_printf_str_max*__prIdx[coreId]);
-        DUT_READ32_64(p_adr,d64);
 
+        // Read from printf memory
+        uint32_t p_adr = cep_printf_mem + (cpuId * cep_printf_core_size) + (cep_printf_str_max*__prIdx[cpuId]);
+        DUT_READ32_64(p_adr, d64);
+        LOGI("%s: cpuId = %0d, p_adr = 0x%08x, d64 = 0x%016llx\n", __FUNCTION__, cpuId, p_adr, d64);
+
+        // If a non-zero value is detected, convey that a printf has occured to the testbench
+        // and increment the pointer
         if (d64 != 0) {
-          DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (coreId & 0x3));
+          DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (cpuId & 0x3));
           DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1);
-          __prIdx[coreId] = (__prIdx[coreId] + 1) % cep_printf_max_lines;
+          __prIdx[cpuId] = (__prIdx[cpuId] + 1) % cep_printf_max_lines;
         } else {
           break;
         }
       } // while (1)
 
-    // Read the core status
-    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, coreId);
-    DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
-    d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
-    testId = d64 >> 32;
-    d32 = d64 & 0xFFFFFFFF;
+      // Read the core status
+      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
+      DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
+      d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
+      testId = d64 >> 32;
+      d32 = d64 & 0xFFFFFFFF;
 
-    if (d32 == CEP_GOOD_STATUS) {
-      LOGI("%s: GOOD offS = 0x%016llx Status = 0x%016llx detected..i = %0d\n",__FUNCTION__,offS, d64, i);
-      done = 1;
-    }
-    else if (d32 == CEP_BAD_STATUS) {
-      LOGI("%s: BAD offS = 0x%016llx Status = 0x%016llx detected..i= %0d\n",__FUNCTION__,offS, d64, i);
-      done = 1;
-      errCnt++;
-    }
+      // Check status
+      if (d32 == CEP_GOOD_STATUS) {
+        LOGI("%s: GOOD offS = 0x%016llx Status = 0x%016llx detected..i = %0d\n",__FUNCTION__,offS, d64, i);
+        done = 1;
+      } else if (d32 == CEP_BAD_STATUS) {
+        LOGI("%s: BAD offS = 0x%016llx Status = 0x%016llx detected..i= %0d\n",__FUNCTION__,offS, d64, i);
+        done = 1;
+        errCnt++;
+      } // end if (d32 == CEP_GOOD_STATUS)
     
-    i++;
-    if (!done) {
-      LOGI("%s: offS = 0x%016llx d64 = 0x%016llx..i = %0d pIdx = %0d\n",__FUNCTION__,offS, d64, i, __prIdx[coreId]);
-      DUT_RUNCLK(1000);
-    }
+      // Increment the timeout counter
+      i++;
+
+      if (!done) {
+        LOGI("%s: NOT DONE offS = 0x%016llx d64 = 0x%016llx..i = %0d pIdx = %0d\n",__FUNCTION__,offS, d64, i, __prIdx[cpuId]);
+        DUT_RUNCLK(1000);
+      } // end if (!done)
+
   } // while (!done && (i < maxTimeOut))
   
+  // Has a timeout occurred?
   if (i >= maxTimeOut) {
       LOGI("%s: max Timeout offS = 0x%016llx Status = 0x%016llx..\n",__FUNCTION__, offS, d64);
       errCnt++;    
@@ -335,7 +343,7 @@ int check_bare_status(int coreId, int maxTimeOut) {
   // put core in reset
   DUT_RUNCLK(100);
   LOGI("%s: Putting core in reset to stop the PC...\n",__FUNCTION__);
-  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, coreId); // at cycle 10
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId); // at cycle 10
   DUT_WRITE_DVT(DVTF_PUT_CORE_IN_RESET, DVTF_PUT_CORE_IN_RESET, 1);
 
 #endif
@@ -353,7 +361,6 @@ void set_cur_status(int status) {
   // which core???
   coreId = read_csr(mhartid);
   d64 = ((u_int64_t)coreId << 32) | (u_int64_t)status;
-  // Use core status 05/18/20
   offS = reg_base_addr + cep_core0_status + (coreId * 8);
   *(volatile uint64_t *)(offS) = d64;
 #endif

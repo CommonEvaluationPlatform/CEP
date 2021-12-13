@@ -13,8 +13,17 @@
 `ifndef CEP_HIERMAP_INCL
 `define CEP_HIERMAP_INCL
 
+
+`define SYSTEM_DRIVER             `COSIM_TB_TOP_MODULE.v2c_inst
+`define CORE0_DRIVER              `COSIM_TB_TOP_MODULE.driverX[0].driver
+`define CORE1_DRIVER              `COSIM_TB_TOP_MODULE.driverX[1].driver
+`define CORE2_DRIVER              `COSIM_TB_TOP_MODULE.driverX[2].driver
+`define CORE3_DRIVER              `COSIM_TB_TOP_MODULE.driverX[3].driver
+
 `define SYSTEM_RESET              `COSIM_TB_TOP_MODULE.sys_rst_n
-`define DVT_FLAG                  `COSIM_TB_TOP_MODULE.v2c_inst.dvtFlags
+`define PROGRAM_LOADED            `SYSTEM_DRIVER.program_loaded
+
+`define DVT_FLAG                  `SYSTEM_DRIVER.dvtFlags
 `define DUT_INST                  dut
 `define DUT_TOP_LEVEL             `COSIM_TB_TOP_MODULE.`DUT_INST
 
@@ -39,11 +48,6 @@
 `define CORE1_TL_PATH             `CORE1_PATH.tl_master
 `define CORE2_TL_PATH             `CORE2_PATH.tl_master
 `define CORE3_TL_PATH             `CORE3_PATH.tl_master
-
-`define CORE0_DRIVER              `COSIM_TB_TOP_MODULE.driverX[0].driver
-`define CORE1_DRIVER              `COSIM_TB_TOP_MODULE.driverX[1].driver
-`define CORE2_DRIVER              `COSIM_TB_TOP_MODULE.driverX[2].driver
-`define CORE3_DRIVER              `COSIM_TB_TOP_MODULE.driverX[3].driver
 
 `define PBUS_RESET                `DUT_TOP_LEVEL.system.subsystem_pbus_clock
 `define PBUS_CLOCK                `DUT_TOP_LEVEL.system.subsystem_pbus_reset

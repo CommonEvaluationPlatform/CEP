@@ -110,12 +110,10 @@
 `define DVTF_GET_CORE_STATUS                  73
 
 // Main memory related items
-`define DVTF_READ_CALIBRATION_DONE            80
 `define DVTF_ENABLE_MAIN_MEM_LOGGING          81
 `define DVTF_ENABLE_MAIN_MEMWR_LOGGING        82
 `define DVTF_ENABLE_MAIN_MEMRD_LOGGING        83
 `define DVTF_DISABLE_MAIN_MEM_LOGGING         84
-`define DVTF_ENABLE_MEM_BACKDOOR              85
 `define DVTF_PUT_CORE_IN_RESET                86
 `define DVTF_SET_PROGRAM_LOADED               87
 `define DVTF_GET_PROGRAM_LOADED               88

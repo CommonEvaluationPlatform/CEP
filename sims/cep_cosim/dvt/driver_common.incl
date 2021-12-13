@@ -11,10 +11,6 @@
 //--------------------------------------------------------------------------------------
 `include "dpi_common.incl"
 
-//
-// Loop to turn on the shIPC thread
-//
-//reg [63:0] r_data ;
 reg __playBackEnable;
 reg __shIpc_CheckpointEnable;
 reg __shIpc_EnableMode;
@@ -65,7 +61,7 @@ task processCmd;
   `SHIPC_ATOMIC_RDW64_TASK;
 `undef SHIPC_ATOMIC_RDW64_TASK
 `else
-  unsupportTask("SHIPC_ATOMIC_RDW64");
+  unsupportedTask("SHIPC_ATOMIC_RDW64");
 `endif
   end
 
@@ -77,7 +73,7 @@ task processCmd;
   `SHIPC_WRITE64_BURST_TASK;
 `undef SHIPC_WRITE64_BURST_TASK
 `else
-  unsupportTask("SHIPC_WRITE64_BURST");
+  unsupportedTask("SHIPC_WRITE64_BURST");
 `endif
   end
 
@@ -90,7 +86,7 @@ task processCmd;
   `SHIPC_WRITE32_64_TASK;
 `undef SHIPC_WRITE32_64_TASK
 `else
-  unsupportTask("SHIPC_WRITE32_64");
+  unsupportedTask("SHIPC_WRITE32_64");
 `endif
   end
 
@@ -102,7 +98,7 @@ task processCmd;
   `SHIPC_WRITE32_32_TASK;
 `undef SHIPC_WRITE32_32_TASK
 `else
-  unsupportTask("SHIPC_WRITE32_32");
+  unsupportedTask("SHIPC_WRITE32_32");
 `endif
   end
 
@@ -114,7 +110,7 @@ task processCmd;
   `SHIPC_WRITE32_16_TASK;
 `undef SHIPC_WRITE32_16_TASK
 `else
-  unsupportTask("SHIPC_WRITE32_16");
+  unsupportedTask("SHIPC_WRITE32_16");
 `endif
   end
 
@@ -126,7 +122,7 @@ task processCmd;
   `SHIPC_WRITE32_8_TASK;
 `undef SHIPC_WRITE32_8_TASK
 `else
-  unsupportTask("SHIPC_WRITE32_8");
+  unsupportedTask("SHIPC_WRITE32_8");
 `endif
   end
 
@@ -138,7 +134,7 @@ task processCmd;
   `SHIPC_WRITE64_64_TASK;
 `undef SHIPC_WRITE64_64_TASK
 `else
-  unsupportTask("SHIPC_WRITE64_64");
+  unsupportedTask("SHIPC_WRITE64_64");
 `endif
   end
 
@@ -150,7 +146,7 @@ task processCmd;
   `SHIPC_READ32_8_TASK;
 `undef SHIPC_READ32_8_TASK
 `else
-  unsupportTask("SHIPC_READ32_8");
+  unsupportedTask("SHIPC_READ32_8");
 `endif
   end
 
@@ -162,7 +158,7 @@ task processCmd;
   `SHIPC_READ32_16_TASK;
 `undef SHIPC_READ32_16_TASK
 `else
-  unsupportTask("SHIPC_READ32_16");
+  unsupportedTask("SHIPC_READ32_16");
 `endif
   end
 
@@ -174,7 +170,7 @@ task processCmd;
   `SHIPC_READ32_32_TASK;
 `undef SHIPC_READ32_32_TASK
 `else
-  unsupportTask("SHIPC_READ32_32");
+  unsupportedTask("SHIPC_READ32_32");
 `endif
   end
 
@@ -186,7 +182,7 @@ task processCmd;
   `SHIPC_READ32_64_TASK;
 `undef SHIPC_READ32_64_TASK
 `else
-  unsupportTask("SHIPC_READ32_64");
+  unsupportedTask("SHIPC_READ32_64");
 `endif
   end
 
@@ -198,7 +194,7 @@ task processCmd;
   `SHIPC_READ64_64_TASK;
 `undef SHIPC_READ64_64_TASK
 `else
-  unsupportTask("SHIPC_READ64_64");
+  unsupportedTask("SHIPC_READ64_64");
 `endif
   end
 //
@@ -209,7 +205,7 @@ task processCmd;
   `SHIPC_READ64_BURST_TASK;
 `undef SHIPC_READ64_BURST_TASK
 `else
-  unsupportTask("SHIPC_READ64_BURST");
+  unsupportedTask("SHIPC_READ64_BURST");
 `endif
   end
 
@@ -221,7 +217,7 @@ task processCmd;
   `SHIPC_PRINTF_TASK;
 `undef SHIPC_PRINTF_TASK
 `else
-  unsupportTask("SHIPC_PRINTF");
+  unsupportedTask("SHIPC_PRINTF");
 `endif
   end
 //
@@ -232,7 +228,7 @@ task processCmd;
   `SHIPC_WRITE_STATUS_TASK;
 `undef SHIPC_WRITE_STATUS_TASK
 `else
-  unsupportTask("SHIPC_WRITE_STATUS");
+  unsupportedTask("SHIPC_WRITE_STATUS");
 `endif
   end
 //
@@ -243,7 +239,7 @@ task processCmd;
   `SHIPC_READ_STATUS_TASK;
 `undef SHIPC_READ_STATUS_TASK
 `else
-  unsupportTask("SHIPC_READ_STATUS");
+  unsupportedTask("SHIPC_READ_STATUS");
 `endif
   end
 
@@ -255,7 +251,7 @@ task processCmd;
   `SHIPC_WRITE_DVT_FLAG_TASK;
 `undef SHIPC_WRITE_DVT_FLAG_TASK
 `else
-  unsupportTask("SHIPC_WRITE_DVT_FLAG");
+  unsupportedTask("SHIPC_WRITE_DVT_FLAG");
 `endif
   end
 //
@@ -266,7 +262,7 @@ task processCmd;
   `SHIPC_READ_DVT_FLAG_TASK;
 `undef SHIPC_READ_DVT_FLAG_TASK
 `else
-  unsupportTask("SHIPC_READ_DVT_FLAG");
+  unsupportedTask("SHIPC_READ_DVT_FLAG");
 `endif
   end
 
@@ -278,7 +274,7 @@ task processCmd;
   `SHIPC_READ_ERROR_CNT_TASK;
 `undef SHIPC_READ_ERROR_CNT_TASK
 `else
-  unsupportTask("SHIPC_READ_ERROR_CNT");
+  unsupportedTask("SHIPC_READ_ERROR_CNT");
 `endif
   end
 
@@ -290,7 +286,7 @@ task processCmd;
   `SHIPC_FRAMER_RDWR_TASK;
 `undef SHIPC_FRAMER_RDWR_TASK
 `else
-  unsupportTask("SHIPC_FRAMER_RDWR");
+  unsupportedTask("SHIPC_FRAMER_RDWR");
 `endif
   end
 
@@ -299,7 +295,7 @@ task processCmd;
   `SHIPC_SAMPLE_RDWR_TASK;
 `undef SHIPC_SAMPLE_RDWR_TASK
 `else
-  unsupportTask("SHIPC_SAMPLE_RDWR");
+  unsupportedTask("SHIPC_SAMPLE_RDWR");
 `endif
   end
 
@@ -323,87 +319,67 @@ endtask // processCmd
 // ===================================
 // New DPI
 // ===================================
-`ifdef USE_DPI
-always @(posedge (__shIpc_EnableMode && !__playBackEnable)) begin
+always @(posedge (__shIpc_EnableMode && !__playBackEnable)) 
+begin
+
   @(posedge `SHIPC_CLK ); // wait 1 clock
   `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
   while (__shIpc_EnableMode) begin
     // get the command
     get_v2c_mail(__mSlotId, __mCpuId,inBox);
     __shIpc_cmdValid       = inBox.mCmdValid;
-     if (inBox.mActive == 0) 
-       __shIpc_Active         = 0; // inBox.mActive;       
-    //         
+
+    if (inBox.mActive == 0) 
+      __shIpc_Active         = 0; // inBox.mActive;       
+
     // process the command
     if (__shIpc_InProgress && !__shIpc_Active) begin
-  __shIpc_EnableMode = 0; 
-  __shIpc_InProgress = 0;
-  __shIpc_Active     = 1;
+      __shIpc_EnableMode      = 0; 
+      __shIpc_InProgress      = 0;
+      __shIpc_Active          = 1;
     end 
+    
     if (inBox.mCmdValid) begin
-       __shIpc_remoteReq      = inBox.mRemoteReq;
-       __shIpc_cmd            = inBox.mCmd;
-      __shIpc_InProgress = 1;
+      __shIpc_remoteReq       = inBox.mRemoteReq;
+      __shIpc_cmd             = inBox.mCmd;
+      __shIpc_InProgress      = 1;
+      
       processCmd;
-       // print
-       //`logI("MAILBOX: mCmdValid=%d mCmd=0x%08x mAdr=0x%08x\n",inBox.mCmdValid,inBox.mCmd,inBox.mAdr);
-       inBox.mCmdValid = 0;
-       inBox.mRemoteReq = 0;
-       send_v2c_mail(__mSlotId, __mCpuId,inBox);
-      // complete the command
-    end // if valid
-    // need to wait for 1 clock so other can advance if the C side is not yet up
-    else if (!__shIpc_InProgress) begin // at beginning
-//          @(posedge `SHIPC_CLK); // wait 1 clock
-    end
-    if (__shIpc_Time2Shutdown) begin
-  
-    end
-    if (__shIpc_Active) begin
-      //`logI("__shIpc_Active=0 is detected.. Stop checking for command");
-      //__shIpc_EnableMode = 0;
-    end
-  end // while
-end // end posedge
-// ===================================
-// OLD PLI STUFFS!!!
-// ===================================
-`else
-// Deprecated!!! 11/19/2019
-end
 
-`endif
+      inBox.mCmdValid         = 0;
+      inBox.mRemoteReq        = 0;
+      send_v2c_mail(__mSlotId, __mCpuId,inBox);
+    end // if (inBox.mCmdValid)
+  end // while (__shIpc_EnableMode)
+end // end posedge
 
 //
 // Task to kill the sim job
 //
 always @(posedge __shIpc_Time2Shutdown) begin
-   //`DVT_PATH.done = 1;
   `logI("Running for %d more NS before terminate the simv process");
    #10 $finish;
 end
+
 //
 // =================================================================
 // Default Task Lists 
 // =================================================================
 //
-task unsupportTask;
+task unsupportedTask;
   input string str; 
-begin 
-  `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n", str); end
+  begin 
+    `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n", str); 
+    $fatal;
+  end
 endtask
 
 task RUNCLK;
-input [31:0] clkCnt;
-begin
-`ifdef USE_DPI
-  repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
-  inBox.mPar[0] = __simTime;
-`else
-  repeat(clkCnt) @(posedge `SHIPC_CLK);
-  __shIpc_p0 = __simTime;
-`endif       
-end
+  input [31:0] clkCnt;
+  begin
+    repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
+    inBox.mPar[0] = __simTime;
+  end
 endtask // RUNCLK
 
 // Intialize the share memory for this driver

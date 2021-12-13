@@ -63,10 +63,10 @@ int shPthread::ForkAThread(pthread_parm_t *tParm, void * (*start_routine)(void *
   //
   // Initial thread map table if not yet
   printf("shPthread::ForkAThread: InitTables from : slotId=%d cpuId=%d globalThread2SlotIdMap_initDone=%d\n",
-	 tParm->slotId, tParm->cpuId,globalThread2SlotIdMap_initDone);
+   tParm->slotId, tParm->cpuId,globalThread2SlotIdMap_initDone);
   InitTables();
   printf("shPthread::ForkAThread: InitTables from : slotId=%d cpuId=%d globalThread2SlotIdMap_initDone=%d\n",
-	 tParm->slotId, tParm->cpuId,globalThread2SlotIdMap_initDone);
+   tParm->slotId, tParm->cpuId,globalThread2SlotIdMap_initDone);
   //
   // Execute the thread
   //
@@ -120,31 +120,36 @@ int shPthread::ForkAThread(int slotId, int cpuId, int verbose, Int32U seed, void
 #endif
   return errCnt;
 }
+
 //
 // return if all done 
 //
 int shPthread::AllThreadDone() {
   int allDone = 1; // assume alldone
-#ifdef SIM_ENV_ONLY
-  for (int i=0;i<MAX_SHIPC;i++) {
-    if ((globalThreadStatus[i] != SHIPC_STATUS_INACTIVE) && (i != GetSystemThreadOffset())) { // check!!
-      shIpc *ptr = GlobalShMemory.getIpcPtr(i);
-      if (ptr->GetThreadDone()) {
-	int slotId, cpuId;
-	GlobalShMemory.getSlotCpuId(i,&slotId,&cpuId);
-	printf("SLOTID=%d CPUID=%d (Thread %x) is done with errorCount=%d\n",slotId,cpuId, (Int32U)globalThread2SlotIdMap[i],ptr->GetError());
-	// update stat
-	globalThreadStatus[i] = SHIPC_STATUS_INACTIVE;
-	mErrCnt += ptr->GetError();
-      } else {
-	allDone = 0;
-      }
-    }
-  }
-//
-#endif
-  return allDone;
-}
+
+  #ifdef SIM_ENV_ONLY
+    for (int i = 0; i < MAX_SHIPC; i++) {
+      if ((globalThreadStatus[i] != SHIPC_STATUS_INACTIVE) && (i != GetSystemThreadOffset())) { // check!!
+        shIpc *ptr = GlobalShMemory.getIpcPtr(i);
+        if (ptr->GetThreadDone()) {
+          int slotId, cpuId;
+          GlobalShMemory.getSlotCpuId(i,&slotId,&cpuId);
+          printf("SLOTID=%d CPUID=%d (Thread %x) is done with errorCount=%d\n",slotId,cpuId, (Int32U)globalThread2SlotIdMap[i],ptr->GetError());
+  
+          // update stat
+          globalThreadStatus[i] = SHIPC_STATUS_INACTIVE;
+          mErrCnt += ptr->GetError();
+        } else {
+          allDone = 0;
+        } // end if (ptr->GetThreadDone())
+      } // end if ((globalThreadStatus[i] != SHIPC_STATUS_INACTIVE) && (i != GetSystemThreadOffset()))
+    } // end for (int i = 0; i < MAX_SHIPC; i++)
+  #endif
+    return allDone;
+
+} // int shPthread::AllThreadDone()
+
+
 // 
 int shPthread::AddSysThread(int slotId, int cpuId) {
   int errCnt = 0;
@@ -182,17 +187,17 @@ int shPthread::ProcessRemoteReqs() {  // if any
     if (globalThreadStatus[i] != SHIPC_STATUS_INACTIVE) {
       shIpc *ptr = GlobalShMemory.getIpcPtr(i);
       if (ptr->GetRemoteFlag() && ptr->IsRemoteCmdValid()) { // there is a pending remote access request
-	int remoteOffset = ptr->GetRemoteOffset();
-	// check if the remote is available
-	shIpc *remotePtr = GlobalShMemory.getIpcPtr(remoteOffset);
-	if (!remotePtr->GetRemoteReq()) { // it is avail
-	  // notify the remote target & clear local flag
-	  remotePtr->SetRemoteOffset(i);
-	  remotePtr->SetRemoteReq();
-	  // clear local flag
-	  ptr->ClrRemoteFlag();
-	  printf("Initiating remote request from %x ->%x\n",i,remoteOffset);
-	}
+  int remoteOffset = ptr->GetRemoteOffset();
+  // check if the remote is available
+  shIpc *remotePtr = GlobalShMemory.getIpcPtr(remoteOffset);
+  if (!remotePtr->GetRemoteReq()) { // it is avail
+    // notify the remote target & clear local flag
+    remotePtr->SetRemoteOffset(i);
+    remotePtr->SetRemoteReq();
+    // clear local flag
+    ptr->ClrRemoteFlag();
+    printf("Initiating remote request from %x ->%x\n",i,remoteOffset);
+  }
       }
     }
   }

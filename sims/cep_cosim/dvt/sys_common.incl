@@ -22,20 +22,15 @@ task   WRITE_DVT_FLAG_TASK;
   input [31:0]  lsb;
   input [31:0]  value; 
   integer       s;
-
 begin
-  `ifdef USE_DPI
-    for (s = inBox.mPar[1]; s <= inBox.mPar[0];s = s + 1) begin 
-      dvtFlags[s] = inBox.mPar[2] & 1'b1; 
-      inBox.mPar[2] = inBox.mPar[2] >> 1; 
-    end      
-  `else
-    for (s = lsb;s <= msb;s = s + 1) begin 
-      dvtFlags[s] = value[0]; value = value >> 1; 
-    end
-  `endif   
+  
+  for (s = inBox.mPar[1]; s <= inBox.mPar[0];s = s + 1) begin 
+    dvtFlags[s] = inBox.mPar[2] & 1'b1; 
+    inBox.mPar[2] = inBox.mPar[2] >> 1; 
+  end      
 
    @(posedge `SHIPC_CLK);   
+
 end
 endtask // WRITE_DVT_FLAG_TASK;
 
@@ -48,22 +43,16 @@ task   READ_DVT_FLAG_TASK;
   integer       s;
   reg [63:0]  tmp;
 begin
-  tmp = 0;
-  `ifdef USE_DPI
-    m = inBox.mPar[0];
-    l = inBox.mPar[1];
-    for (int s = m; s >= l; s--) begin       
-      tmp = {tmp[62:0], dvtFlags[s]};
-    end
-    inBox.mPar[0] = tmp;
-  `else   
-    for (s = msb;s >= lsb; s= s - 1) begin
-      tmp = {tmp[30:0],dvtFlags[s]};
-    end
-    r_data = tmp;
-  `endif   
+  tmp   = 0;
+  m     = inBox.mPar[0];
+  l     = inBox.mPar[1];
+    
+  for (int s = m; s >= l; s--) begin       
+    tmp = {tmp[62:0], dvtFlags[s]};
+  end 
+  inBox.mPar[0] = tmp;
 
-   @(posedge `SHIPC_CLK);   
+  @(posedge `SHIPC_CLK);   
 end
 endtask // READ_DVT_FLAG_TASK;
    
@@ -101,112 +90,106 @@ end
 always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 
 //--------------------------------------------------------------------------------------
-// New DPI
+// System Driver DPI interface & Mailbox processing
 //--------------------------------------------------------------------------------------
-`ifdef USE_DPI
-  always @(posedge __shIpc_EnableMode) begin
-    @(posedge `SHIPC_CLK); // wait 1 clock
-    `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
-    while (__shIpc_EnableMode) begin
-       // get the command
-      get_v2c_mail(__mSlotId, __mCpuId, inBox);
-      __shIpc_cmdValid       = inBox.mCmdValid;
-      if (inBox.mActive == 0) 
-         __shIpc_Active         = 0; // inBox.mActive;
+always @(posedge __shIpc_EnableMode) begin
+  @(posedge `SHIPC_CLK); // wait 1 clock
+  `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
+  while (__shIpc_EnableMode) begin
+     // get the command
+    get_v2c_mail(__mSlotId, __mCpuId, inBox);
+    __shIpc_cmdValid       = inBox.mCmdValid;
+    if (inBox.mActive == 0) 
+       __shIpc_Active         = 0; // inBox.mActive;
      
-      // thread done?
-      if (__shIpc_InProgress && !__shIpc_Active) 
-        __shIpc_EnableMode = 0;
+    // thread done?
+    if (__shIpc_InProgress && !__shIpc_Active) 
+      __shIpc_EnableMode = 0;
       
-      if (inBox.mCmdValid) begin
-        __shIpc_InProgress = 1;
+    if (inBox.mCmdValid) begin
+      __shIpc_InProgress = 1;
         
-        case (inBox.mCmd)
-          `SHIPC_SHUTDOWN         : __shIpc_Time2Shutdown = 1;
-          `SHIPC_WRITE_DVT_FLAG   : begin
-            WRITE_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p2);
-          end
-          `SHIPC_READ_DVT_FLAG    : begin
-            READ_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p0);
-          end
+      case (inBox.mCmd)
+        `SHIPC_SHUTDOWN         : __shIpc_Time2Shutdown = 1;
+        `SHIPC_WRITE_DVT_FLAG   : begin
+          WRITE_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p2);
+        end
+        `SHIPC_READ_DVT_FLAG    : begin
+          READ_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p0);
+        end
 
-          // WRITE32_64 to support backdoor
-          `SHIPC_WRITE32_64       : begin 
-            `ifdef SHIPC_WRITE32_64_TASK
-                `SHIPC_WRITE32_64_TASK;
-                `undef SHIPC_WRITE32_64_TASK
-            `else
-                unsupportTask("SHIPC_WRITE32_64");
-            `endif
-          end
+        // WRITE32_64 to support backdoor
+        `SHIPC_WRITE32_64       : begin 
+          `ifdef SHIPC_WRITE32_64_TASK
+              `SHIPC_WRITE32_64_TASK;
+              `undef SHIPC_WRITE32_64_TASK
+          `else
+              unsupportedTask("SHIPC_WRITE32_64");
+          `endif
+        end
     
-          // WRITE64_64 to support backdoor
-          `SHIPC_WRITE64_64       : begin 
-            `ifdef SHIPC_WRITE64_64_TASK
-              `SHIPC_WRITE64_64_TASK;
-              `undef SHIPC_WRITE64_64_TASK
-            `else
-              unsupportTask("SHIPC_WRITE64_64");
-            `endif
-          end
+        // WRITE64_64 to support backdoor
+        `SHIPC_WRITE64_64       : begin 
+          `ifdef SHIPC_WRITE64_64_TASK
+            `SHIPC_WRITE64_64_TASK;
+            `undef SHIPC_WRITE64_64_TASK
+          `else
+            unsupportedTask("SHIPC_WRITE64_64");
+          `endif
+        end
     
-          // READ32_64
-          `SHIPC_READ32_64        : begin 
-            `ifdef SHIPC_READ32_64_TASK
-              `SHIPC_READ32_64_TASK;
-              `undef SHIPC_READ32_64_TASK
-            `else
-              unsupportTask("SHIPC_READ32_64");
-            `endif
-          end
+        // READ32_64
+        `SHIPC_READ32_64        : begin 
+          `ifdef SHIPC_READ32_64_TASK
+            `SHIPC_READ32_64_TASK;
+            `undef SHIPC_READ32_64_TASK
+          `else
+            unsupportedTask("SHIPC_READ32_64");
+          `endif
+        end
     
-          // READ64_64
-          `SHIPC_READ64_64        : begin 
-            `ifdef SHIPC_READ64_64_TASK
-              `SHIPC_READ64_64_TASK;
-              `undef SHIPC_READ64_64_TASK
-            `else
-              unsupportTask("SHIPC_READ64_64");
-            `endif
-          end
+        // READ64_64
+        `SHIPC_READ64_64        : begin 
+          `ifdef SHIPC_READ64_64_TASK
+            `SHIPC_READ64_64_TASK;
+            `undef SHIPC_READ64_64_TASK
+          `else
+            unsupportedTask("SHIPC_READ64_64");
+          `endif
+        end
           
-          `SHIPC_RUNCLK           : RUNCLK(__shIpc_p0);  
-          `SHIPC_READ_STATUS      : __shIpc_p0 = __shIpcStatus;
-          default                 : `logE("ERROR: %m __shIpc_cmd = %x NOT SUPPORTED!!!!\n",__shIpc_cmd);
-        endcase
+        `SHIPC_RUNCLK           : RUNCLK(__shIpc_p0);  
+        `SHIPC_READ_STATUS      : __shIpc_p0 = __shIpcStatus;
+        default                 : `logE("ERROR: %m __shIpc_cmd = %x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+      endcase
 
-        // return data & complete the command
-        inBox.mCmdValid          = 0; 
-        inBox.mRemoteReq         = 0;
-        send_v2c_mail(__mSlotId, __mCpuId, inBox);
-      // end if valid
-      end else if (ipcDelay) begin // to help speedup backdoor loading
-        @(posedge `SHIPC_CLK); // wait 1 clock
-      end // else if (ipcDelay)
-    end // while
-  end // end posedge
-`else
-// OLD PLI was deprecated 11/19/19
-`endif
+      // return data & complete the command
+      inBox.mCmdValid          = 0; 
+      inBox.mRemoteReq         = 0;
+      send_v2c_mail(__mSlotId, __mCpuId, inBox);
+      
+    // end if valid
+    end else if (ipcDelay) begin // to help speedup backdoor loading
+      @(posedge `SHIPC_CLK); // wait 1 clock 
+    end // else if (ipcDelay)
+
+  end // while
+end // end posedge
 
 
-task unsupportTask;
+task unsupportedTask;
   input string str; 
 begin 
-  `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n", str); 
+  `logE("ERROR: %m Command %s NOT SUPPORTED for this module!!!!\n", str);
+  $fatal;
 end
 endtask
 
 task RUNCLK;
   input [31:0] clkCnt;
 begin
-  `ifdef USE_DPI
-    repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
-    inBox.mPar[0] = __simTime;
-  `else
-    repeat(clkCnt) @(posedge `SHIPC_CLK);
-    __shIpc_p0 = __simTime;
-  `endif  
+  repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
+  inBox.mPar[0] = __simTime;
 end
 endtask // RUNCLK
  

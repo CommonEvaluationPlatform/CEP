@@ -38,19 +38,17 @@
     #define LOGE   v2cLogE
     #define LOGF   v2cLogF
 
-    #ifdef USE_DPI
-      #define DUT_ATOMIC_RMW64(a,p,m,d) sim_Atomic_Rdw64(a,p,m,d)
-      #define DUT_WRITE32_BURST(a,s,d) sim_Write64_BURST(a,s,d)
-      #define DUT_READ32_BURST(a,s,d)  sim_Read64_BURST(a,s,d)
-      #define DUT_WRITE32_64(a,d) sim_Write32_64(a,d)
-      #define DUT_READ32_64(a,d)  d=sim_Read32_64(a)
-      #define DUT_WRITE32_32(a,d) sim_Write32_32(a,d)
-      #define DUT_READ32_32(a,d)  d=sim_Read32_32(a)
-      #define DUT_WRITE32_16(a,d) sim_Write32_16(a,d)
-      #define DUT_READ32_16(a,d)  d=sim_Read32_16(a)
-      #define DUT_WRITE32_8(a,d) sim_Write32_8(a,d)
-      #define DUT_READ32_8(a,d)  d=sim_Read32_8(a)
-    #endif
+    #define DUT_ATOMIC_RMW64(a,p,m,d) sim_Atomic_Rdw64(a,p,m,d)
+    #define DUT_WRITE32_BURST(a,s,d) sim_Write64_BURST(a,s,d)
+    #define DUT_READ32_BURST(a,s,d)  sim_Read64_BURST(a,s,d)
+    #define DUT_WRITE32_64(a,d) sim_Write32_64(a,d)
+    #define DUT_READ32_64(a,d)  d=sim_Read32_64(a)
+    #define DUT_WRITE32_32(a,d) sim_Write32_32(a,d)
+    #define DUT_READ32_32(a,d)  d=sim_Read32_32(a)
+    #define DUT_WRITE32_16(a,d) sim_Write32_16(a,d)
+    #define DUT_READ32_16(a,d)  d=sim_Read32_16(a)
+    #define DUT_WRITE32_8(a,d) sim_Write32_8(a,d)
+    #define DUT_READ32_8(a,d)  d=sim_Read32_8(a)
 
     #define DUT_WRITE_DVT(msb,lsb,val) sim_WriteDvtFlag(msb,lsb,val)
     #define DUT_READ_DVT(msb,lsb)      sim_ReadDvtFlag(msb,lsb)

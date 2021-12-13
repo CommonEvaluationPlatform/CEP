@@ -60,32 +60,39 @@ int main(int argc, char *argv[])
   // Load the bare executable into scratchpad memory (from the system thread)
   // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
-  int backdoor_on   = 1;
   int verify        = 0;
   int srcOffset     = 0x1000;
   int destOffset    = 0;
   int maxByteCnt    = cep_max_program_size;
-  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, srcOffset, destOffset, backdoor_on, verify, maxByteCnt);
+  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, srcOffset, destOffset, verify, maxByteCnt);
   //--------------------------------------------------------------------------------------
 
-  // Wait until all threads are complete
+
+
+  //--------------------------------------------------------------------------------------
+  // Have the system thea wait until all threads are complete
+  //--------------------------------------------------------------------------------------
   int Done = 0;
   while (!Done) {
     Done = thr.AllThreadDone();
     sleep(2);
   }
-  /* ===================================== */
-  /*   END-OF-TEST CHECKING                */
-  /* ===================================== */
+  //--------------------------------------------------------------------------------------
+
+
+
+  //--------------------------------------------------------------------------------------
+  // End of test checking and thread termination
+  //--------------------------------------------------------------------------------------
   errCnt += thr.GetErrorCount();
   if (errCnt != 0) {
     LOGE("======== TEST FAIL ========== %x\n",errCnt);
   } else {
     LOGI("%s ======== TEST PASS ========== \n",__FUNCTION__);
   }
-  //
-  // shutdown HW side
-  //
+
   thr.Shutdown();
+
   return(errCnt);
+  //--------------------------------------------------------------------------------------
 }

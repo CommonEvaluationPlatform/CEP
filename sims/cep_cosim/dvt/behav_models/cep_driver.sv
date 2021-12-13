@@ -9,7 +9,9 @@
 //
 //                 Also provides some monitoring functions when
 //                 the RISCV_TESTS are enabled (in BARE_MODE)
-// Notes:          
+// Notes:          Backdoor memory access is no longer supported
+//                 from the individual core drivers and is thus only
+//                 accessible from the system thread.
 //
 //--------------------------------------------------------------------------------------
 `include "suite_config.v"
@@ -72,8 +74,8 @@ module cep_driver
         clear         = 1;
         tmp           = tmp << 8;
       end // end if
-    end // end for
-    
+    end // end for    
+
     $sformat(str,"C%-d: %-s", printf_addr[1:0], tmp);
     `logI("%s",str);
     
@@ -85,17 +87,7 @@ module cep_driver
   //--------------------------------------------------------------------------------------
   // Misc support functions
   //--------------------------------------------------------------------------------------
-  // As external memory has been removed the calibration is ALWAYS complete  
-  always @(*) dvtFlags[`DVTF_READ_CALIBRATION_DONE] = 1'b1;
-
-  always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `COSIM_TB_TOP_MODULE.program_loaded;
-
-  // Enable backdoor loading of main memory (this will affect all WRITE32/64_64_DPI and READ32/64_64_DPI calls)
-  always @(posedge dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR]) begin
-    backdoor_enable = dvtFlags[`DVTF_PAT_LO];
-    dvtFlags[`DVTF_ENABLE_MEM_BACKDOOR] = 0;
-    `logI("Setting backdoor_enable = %d", backdoor_enable);
-  end
+  always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
 
   always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
     if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
@@ -124,13 +116,7 @@ module cep_driver
   task READ_STATUS_TASK;
     output [31:0] r_data;
     begin
-
-      `ifdef USE_DPI
-        inBox.mPar[0] = 0;
-      `else     
-        r_data = 0;
-      `endif     
-
+      inBox.mPar[0] = 0;
       @(posedge clk);
     end
   endtask // READ_STATUS_TASK;
@@ -142,17 +128,10 @@ module cep_driver
     input [31:0] lsb;
     input [31:0] value; 
     begin
-      `ifdef USE_DPI
-        for (int s = inBox.mPar[1]; s <= inBox.mPar[0]; s++) begin 
-          dvtFlags[s]   = inBox.mPar[2] & 1'b1; 
-          inBox.mPar[2] = inBox.mPar[2] >> 1; 
-        end      
-      `else
-        for (int s = lsb; s <= msb; s++) begin 
-          dvtFlags[s]   = value[0]; 
-          value         = value >> 1; 
-        end
-      `endif
+      for (int s = inBox.mPar[1]; s <= inBox.mPar[0]; s++) begin 
+        dvtFlags[s]   = inBox.mPar[2] & 1'b1; 
+        inBox.mPar[2] = inBox.mPar[2] >> 1; 
+      end      
       
       @(posedge clk);  
     end
@@ -170,21 +149,14 @@ module cep_driver
     begin
       tmp = 0;
     
-      `ifdef USE_DPI
-        m = inBox.mPar[0];
-        l = inBox.mPar[1];
-        for (int s = m; s >= l; s--) begin       
-          tmp = {tmp[62:0], dvtFlags[s]};
-        end
+      m = inBox.mPar[0];
+      l = inBox.mPar[1];
+
+      for (int s = m; s >= l; s--) begin       
+        tmp = {tmp[62:0], dvtFlags[s]};
+      end
       
-        inBox.mPar[0] = tmp;
-      `else
-        for (int s = msb; s >= lsb; s = s--) begin 
-          tmp = {tmp[62:0], dvtFlags[s]};
-        end
-    
-        r_data = tmp;
-      `endif   
+      inBox.mPar[0] = tmp;
    
       @(posedge clk);   
     end
@@ -195,149 +167,113 @@ module cep_driver
   task READ_ERROR_CNT_TASK;
     output [31:0]   r_data;
     begin
-      `ifdef USE_DPI      
-        $vpp_getErrorCount(inBox.mPar[0]);
-      `else      
-        $vpp_getErrorCount(r_data);
-      `endif      
+      $vpp_getErrorCount(inBox.mPar[0]);
     end
   endtask // READ_ERROR_CNT_TASK;
 
-  // WRITE64_BURST
-  `ifdef USE_DPI
+  //--------------------------------------------------------------------------------------
+  // The following tasks are only supported in BFM mode from the CPU Drivers
+  //--------------------------------------------------------------------------------------
+  `ifdef BFM_MODE
+
+    // WRITE64_BURST
     `define SHIPC_WRITE64_BURST_TASK WRITE64_BURST_DPI()
     task WRITE64_BURST_DPI;
       reg [3:0]   bits_size;
       begin
         bits_size = $clog2(inBox.mAdrHi << 3); // unit of 8 bytes
    
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: begin
-              for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
-              `CORE0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
-            end
-            1: begin
-              for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
-              `CORE1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
-            end
-            2: begin
-              for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
-              `CORE2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
-            end
-            3: begin
-              for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
-              `CORE3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
-            end     
-          endcase // case (MY_CPU_ID)
-        `endif
+        case (MY_CPU_ID)
+          0: begin
+            for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CORE0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+          end
+          1: begin
+            for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CORE1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+          end
+          2: begin
+            for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CORE2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+          end
+          3: begin
+            for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CORE3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+          end     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE64_BURST_TASK
-  `endif
 
-  // ATOMIC_RDW64
-  `ifdef USE_DPI
+    // ATOMIC_RDW64
     `define SHIPC_ATOMIC_RDW64_TASK ATOMIC_RDW64_DPI()
     task ATOMIC_RDW64_DPI;
       reg [3:0]   bits_size;
       begin
         bits_size = 3;
    
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-            1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-            2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-            3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          endcase    
-        `endif
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+        endcase
       end
     endtask // ATOMIC_RDW64_TASK
-  `endif
 
-  // WRITE64_64
-  `ifdef USE_DPI
+    // WRITE64_64
     `define SHIPC_WRITE64_64_TASK WRITE64_64_DPI()
     task WRITE64_64_DPI;
       begin
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,inBox.mPar[0]);
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-              1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-              2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-              3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
-            endcase // case (MY_CPU_ID)
-          end // else: !if(backdoor_enable)
-        `else
-          `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,inBox.mPar[0]);               
-        `endif
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE64_64_TASK
-  `endif
 
-  // READ64_BURST
-  `ifdef USE_DPI   
+    // READ64_BURST
     `define SHIPC_READ64_BURST_TASK READ64_BURST_DPI()
     task READ64_BURST_DPI;
       reg [3:0] bits_size;
       begin
         bits_size = $clog2(inBox.mAdrHi << 3); // unit of 8 bytes
   
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: begin
-              `CORE0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-              for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
-            end
-            1: begin
-              `CORE1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-              for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];  
-            end
-            2: begin
-              `CORE2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-              for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];  
-            end
-            3: begin
-              `CORE3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-              for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];  
-            end     
-          endcase // case (MY_CPU_ID)
-        `endif
+        case (MY_CPU_ID)
+          0: begin
+            `CORE0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
+          end
+          1: begin
+            `CORE1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];  
+          end
+          2: begin
+            `CORE2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];  
+          end
+          3: begin
+            `CORE3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];  
+          end     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE64_BURST_TASK
-  `endif
    
-  // READ64_64
-  `ifdef USE_DPI   
+    // READ64_64
     `define SHIPC_READ64_64_TASK READ64_64_DPI()
     task READ64_64_DPI;
       begin
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr,inBox.mPar[0]);      
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-              1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-              2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-              3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
-            endcase // case (MY_CPU_ID)
-          end
-        `else
-          `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr, inBox.mPar[0]);
-        `endif // !`ifdef BFM_MODE
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // READ64_64_TASK
-  `endif
    
-  //--------------------------------------------------------------------------------------
-  // New DPI Interface
-  //--------------------------------------------------------------------------------------
-  `ifdef USE_DPI
-
     // WRITE32_64
     `define SHIPC_WRITE32_64_TASK WRITE32_64_DPI()
     task WRITE32_64_DPI;
@@ -345,20 +281,13 @@ module cep_driver
       begin
         d[63:32] = inBox.mPar[0];
         d[31:0]  = inBox.mPar[1];
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,d);
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-              1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-              2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-              3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
-            endcase // case (MY_CPU_ID)
-          end // else: !if(backdoor_enable)
-        `else
-          `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr,d);               
-        `endif
+
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_64_TASK
 
@@ -367,20 +296,19 @@ module cep_driver
     task WRITE32_8_DPI;
       reg [63:0] d;
       reg [7:0]  mask, byte8;
+
       begin
-        mask = 1 << inBox.mAdr[2:0];
+        mask  = 1 << inBox.mAdr[2:0];
         byte8 = inBox.mPar[0] & 'hff;
    
         d = {8{byte8}};
-        
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-            1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-            2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-            3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
-          endcase // case (MY_CPU_ID)
-        `endif
+
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_8_DPI
 
@@ -396,14 +324,12 @@ module cep_driver
           
         d = {4{word}};
 
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-            1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-            2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-            3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
-          endcase // case (MY_CPU_ID)
-        `endif
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_16_DPI
 
@@ -421,72 +347,27 @@ module cep_driver
         d[63:32] = inBox.mPar[0];
         d[31:0] = inBox.mPar[0];   
       
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-            1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-            2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-            3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
-          endcase // case (MY_CPU_ID)
-        `endif
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
+        endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_32_DPI
-   
-  //--------------------------------------------------------------------------------------
-  // OLD PLI Interface
-  //--------------------------------------------------------------------------------------
-  `else   
-
-    // WRITE32_64_TASK
-    `define SHIPC_WRITE32_64_TASK WRITE32_64_TASK(__shIpc_address[31:0],{__shIpc_p0[31:0],__shIpc_p1[31:0]})
-    task WRITE32_64_TASK;
-      input [31:0] a;
-      input [63:0] d;
-      begin
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(a,d);      
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
-              1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
-              2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);
-              3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, a, d);     
-            endcase // case (MY_CPU_ID)
-          end // else: !if(backdoor_enable)
-        `endif
-      end
-    endtask // WRITE32_64_TASK
   
-  `endif // `ifdef USE_DPI
-  //--------------------------------------------------------------------------------------
-   
-
-  //--------------------------------------------------------------------------------------
-  // New DPI Interface
-  //--------------------------------------------------------------------------------------
-  `ifdef USE_DPI   
-      
     // READ32_64
     `define SHIPC_READ32_64_TASK READ32_64_DPI()
     task READ32_64_DPI;
       reg [63:0] d;
       begin
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr,d);      
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-              1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-              2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-              3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
-            endcase // case (MY_CPU_ID)
-          end
-        `else
-          `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr,d);            
-        `endif // !`ifdef BFM_MODE
-      
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
+        endcase // case (MY_CPU_ID)
+
         inBox.mPar[0] = d[63:32];
         inBox.mPar[1] = d[31:0];      
       end
@@ -500,25 +381,23 @@ module cep_driver
       begin
         mask = 1 << inBox.mAdr[2:0];
 
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-            1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-            2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-            3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
-          endcase // case (MY_CPU_ID)
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
+        endcase // case (MY_CPU_ID)
       
-          case (inBox.mAdr[2:0])
-            0 : inBox.mPar[0] = d[(8*0)+7:(8*0)];
-            1 : inBox.mPar[0] = d[(8*1)+7:(8*1)];
-            2 : inBox.mPar[0] = d[(8*2)+7:(8*2)];
-            3 : inBox.mPar[0] = d[(8*3)+7:(8*3)];
-            4 : inBox.mPar[0] = d[(8*4)+7:(8*4)];
-            5 : inBox.mPar[0] = d[(8*5)+7:(8*5)];
-            6 : inBox.mPar[0] = d[(8*6)+7:(8*6)];
-            7 : inBox.mPar[0] = d[(8*7)+7:(8*7)];
-          endcase
-        `endif      
+        case (inBox.mAdr[2:0])
+          0 : inBox.mPar[0] = d[(8*0)+7:(8*0)];
+          1 : inBox.mPar[0] = d[(8*1)+7:(8*1)];
+          2 : inBox.mPar[0] = d[(8*2)+7:(8*2)];
+          3 : inBox.mPar[0] = d[(8*3)+7:(8*3)];
+          4 : inBox.mPar[0] = d[(8*4)+7:(8*4)];
+          5 : inBox.mPar[0] = d[(8*5)+7:(8*5)];
+          6 : inBox.mPar[0] = d[(8*6)+7:(8*6)];
+          7 : inBox.mPar[0] = d[(8*7)+7:(8*7)];
+        endcase
       end
     endtask // READ32_8_DPI
 
@@ -530,21 +409,19 @@ module cep_driver
       begin
         mask = 3 << (inBox.mAdr[2:1]*2);      
 
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-            1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-            2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-            3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
-          endcase // case (MY_CPU_ID)
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
+        endcase // case (MY_CPU_ID)
       
-          case (inBox.mAdr[2:1])
-            0 : inBox.mPar[0] = d[(16*0)+15:(16*0)];
-            1 : inBox.mPar[0] = d[(16*1)+15:(16*1)];
-            2 : inBox.mPar[0] = d[(16*2)+15:(16*2)];
-            3 : inBox.mPar[0] = d[(16*3)+15:(16*3)];
-          endcase
-        `endif      
+        case (inBox.mAdr[2:1])
+          0 : inBox.mPar[0] = d[(16*0)+15:(16*0)];
+          1 : inBox.mPar[0] = d[(16*1)+15:(16*1)];
+          2 : inBox.mPar[0] = d[(16*2)+15:(16*2)];
+          3 : inBox.mPar[0] = d[(16*3)+15:(16*3)];
+        endcase
       end
     endtask // READ32_16_DPI
 
@@ -559,48 +436,19 @@ module cep_driver
         else 
           mask = 'h0F;      
 
-        `ifdef BFM_MODE
-          case (MY_CPU_ID)
-            0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-            1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-            2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-            3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
-          endcase // case (MY_CPU_ID)
+        case (MY_CPU_ID)
+          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
+        endcase // case (MY_CPU_ID)
         
-          inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
-        `endif      
+        inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
       end
     endtask // READ32_32_DPI
 
+  `endif // ifdef BFM_MODE
   //--------------------------------------------------------------------------------------
-  // OLD PLI Interface
-  //--------------------------------------------------------------------------------------  
-  `else
-
-    `define SHIPC_READ32_64_TASK READ32_64_TASK(__shIpc_address[31:0],{__shIpc_p0[31:0],__shIpc_p1[31:0]})
-    task READ32_64_TASK;
-      input [31:0] a;
-      output [63:0] d;
-      begin
-
-        `ifdef BFM_MODE
-          if (backdoor_enable) begin
-            `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(a,d);      
-          end else begin
-            case (MY_CPU_ID)
-              0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
-              1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
-              2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);
-              3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, a, d);     
-            endcase // case (MY_CPU_ID)
-          end
-        `else
-          `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(a,d);            
-        `endif
-      end
-    endtask // READ32_64_TASK
-  `endif
-  //--------------------------------------------------------------------------------------  
 
 
 
@@ -689,6 +537,7 @@ module cep_driver
   //--------------------------------------------------------------------------------------
   reg         PassStatus=0;
   reg         FailStatus=0;
+  
   `ifdef RISCV_TESTS
    
     wire        pcPass;

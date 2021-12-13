@@ -129,60 +129,6 @@ module `COSIM_TB_TOP_MODULE;
   );
   //--------------------------------------------------------------------------------------
 
-
-
-  //--------------------------------------------------------------------------------------
-  // C <--> Verilog Deamon and backdoor support are here
-  //--------------------------------------------------------------------------------------
-  reg     program_loaded = 0;
-
-  always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
-    `logI("Program is now loaded");
-    program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
-    `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED] = 0;
-  end // always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED])
-
-  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
-  begin
-    wait (`PBUS_RESET==0);
-    @(negedge `PBUS_CLOCK);
-    #2000;
-    `logI("Asserting pbus_Reset");
-    force `PBUS_RESET = 1;
-    repeat (10) @(negedge `PBUS_CLOCK);
-    #2000;
-    release `PBUS_RESET;      
-    `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT] = 0;
-  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
-
-  always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
-  begin
-    `logI("Forcing topMod_debug_ndreset");
-    force `DEBUG_NDRESET = 1;
-    repeat (10) @(negedge `PBUS_CLOCK);
-    release `DEBUG_NDRESET;
-    `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT] = 0;
-  end // always @(posedge `DVT_FLAG[`DVTF_TOGGLE_DMI_RESET_BIT]) 
-
-  always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT]) 
-  begin
-    `logI("DVTF_GET_SOCKET_ID_BIT");
-    `ifdef OPENOCD_ENABLE
-      `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO] = jtag_getSocketPortId();
-    `endif
-    `logI("SocketId=0x%08x",`DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO]);
-    `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
-  end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
-
-  // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
-  `ifdef BFM_MODE
-    defparam `CORE0_TL_PATH.CHIP_ID = 0;
-    defparam `CORE1_TL_PATH.CHIP_ID = 1;
-    defparam `CORE2_TL_PATH.CHIP_ID = 2;
-    defparam `CORE3_TL_PATH.CHIP_ID = 3;
-  `endif
-  //--------------------------------------------------------------------------------------
-
    
  
   //--------------------------------------------------------------------------------------
@@ -214,32 +160,14 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // Tasks and statements supporting monitoring and access to Main Nemory
-  //--------------------------------------------------------------------------------------
-  reg enableWrTrace   = 0;
-  reg enableRdTrace   = 0;   
-  
-  always @(posedge `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING]) begin
-    enableWrTrace = 0;
-    enableRdTrace = 0;      
-    `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING] = 0;
-  end
-  
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING]) begin
-    enableWrTrace = 1;
-    enableRdTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING] = 0;
-  end
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING]) begin
-    enableWrTrace = 1;
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING] = 0;
-  end
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING]) begin
-    enableRdTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
-  end
-  
-  // Writes data directly to the Scratcpad (Main) Memory
+  // Tasks support "backdoor" read/write access from/to Main Memory
+  //
+  // They should only be accessed from the system thread given that they assert
+  // signals on the memory components vs internal methods (as was the case in the DDR
+  // memory).  Otherwise, you could potentially get multiple threads driving the same
+  // signals concurrently, which will have an unpredictable behavior.
+  //--------------------------------------------------------------------------------------  
+  // Writes data directly to the Scratchpad (Main) Memory
   task write_mainmem_backdoor;
     input [31:0] addr;
     input [63:0] data;
@@ -264,7 +192,7 @@ module `COSIM_TB_TOP_MODULE;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
 
-      `logI("== Main Mem Backdoor Write addr=0x%x data=0x%x",addr,data);
+      `logI("Main Mem Backdoor Write addr = 0x%x data = 0x%x", addr, data);
 
     end
   endtask // write_mainmem_backdoor
@@ -279,8 +207,6 @@ module `COSIM_TB_TOP_MODULE;
       // If the memory is in reset, wait for it to be released
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
       // Reads are registered
       force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
@@ -288,7 +214,7 @@ module `COSIM_TB_TOP_MODULE;
       data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
 
-      `logI("== Main Mem Backdoor Read addr=0x%x data=0x%x",addr,data);
+      `logI("Main Mem Backdoor Read addr = 0x%x data = 0x%x", addr, data);
 
     end
   endtask // read_mainmem_backdoor
