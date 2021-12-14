@@ -6,7 +6,8 @@
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Defines items associated with the Core Driver Mailboxes
 //                 Each core instance has it's own mailbox
-// Notes:          Must be included within a verilog module
+// Notes:          To be included within the cep_driver.sv module after supported
+//                 tasks have been defined.
 //
 //--------------------------------------------------------------------------------------
 `include "dpi_common.incl"
@@ -17,9 +18,10 @@ reg __shIpc_EnableMode;
 reg __shIpc_Active;
 reg __shIpc_InProgress;
 reg __shIpc_Time2Shutdown;
-reg [3:0]  __mSlotId, __mCpuId;
-reg __shIpc_cmdValid=0;
-reg __shIpc_remoteReq=0;
+reg [3:0] __mSlotId;
+reg [3:0] __mCpuId;
+reg __shIpc_cmdValid    = 0;
+reg __shIpc_remoteReq     = 0;
 reg [31:0] __shIpc_cmd;
 reg [63:0] __shIpc_address;
 reg [31:0] __shIpc_p0;
@@ -31,7 +33,7 @@ reg [31:0] __shIpc_p5;
 reg [31:0] __shIpc_p6;
 reg [31:0] __shIpc_p7;
 reg [31:0] __simTime;
-reg __shIpc_C_not_active=1;
+reg __shIpc_C_not_active  = 1;
 
 initial begin
   __shIpc_CheckpointEnable = 0;
@@ -46,279 +48,221 @@ initial begin
   #1 __mSlotId = MY_SLOT_ID ;
   __mCpuId = MY_CPU_ID;
 end
+
 always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 
-
+//--------------------------------------------------------------------------------------
+// Process a received mailbox command
+//--------------------------------------------------------------------------------------
 task processCmd;
   begin
-      case (__shIpc_cmd)
-
-//
-// ATOMIC_RDW64
-//
-  `SHIPC_ATOMIC_RDW64 : begin 
-`ifdef SHIPC_ATOMIC_RDW64_TASK
-  `SHIPC_ATOMIC_RDW64_TASK;
-`undef SHIPC_ATOMIC_RDW64_TASK
-`else
-  unsupportedTask("SHIPC_ATOMIC_RDW64");
-`endif
-  end
-
-//
-// WRITE64_BURST
-//
-  `SHIPC_WRITE64_BURST : begin 
-`ifdef SHIPC_WRITE64_BURST_TASK
-  `SHIPC_WRITE64_BURST_TASK;
-`undef SHIPC_WRITE64_BURST_TASK
-`else
-  unsupportedTask("SHIPC_WRITE64_BURST");
-`endif
-  end
-
-
-//
-// WRITE32_64
-//
-  `SHIPC_WRITE32_64 : begin 
-`ifdef SHIPC_WRITE32_64_TASK
-  `SHIPC_WRITE32_64_TASK;
-`undef SHIPC_WRITE32_64_TASK
-`else
-  unsupportedTask("SHIPC_WRITE32_64");
-`endif
-  end
-
-//
-// WRITE32_32
-//
-  `SHIPC_WRITE32_32 : begin 
-`ifdef SHIPC_WRITE32_32_TASK
-  `SHIPC_WRITE32_32_TASK;
-`undef SHIPC_WRITE32_32_TASK
-`else
-  unsupportedTask("SHIPC_WRITE32_32");
-`endif
-  end
-
-//
-// WRITE32_16
-//
-  `SHIPC_WRITE32_16 : begin 
-`ifdef SHIPC_WRITE32_16_TASK
-  `SHIPC_WRITE32_16_TASK;
-`undef SHIPC_WRITE32_16_TASK
-`else
-  unsupportedTask("SHIPC_WRITE32_16");
-`endif
-  end
-
-//
-// WRITE32_8
-//
-  `SHIPC_WRITE32_8 : begin 
-`ifdef SHIPC_WRITE32_8_TASK
-  `SHIPC_WRITE32_8_TASK;
-`undef SHIPC_WRITE32_8_TASK
-`else
-  unsupportedTask("SHIPC_WRITE32_8");
-`endif
-  end
-
-//
-// WRITE64_64
-//
-  `SHIPC_WRITE64_64 : begin 
-`ifdef SHIPC_WRITE64_64_TASK
-  `SHIPC_WRITE64_64_TASK;
-`undef SHIPC_WRITE64_64_TASK
-`else
-  unsupportedTask("SHIPC_WRITE64_64");
-`endif
-  end
-
-//
-// READ32_8
-//
-  `SHIPC_READ32_8 : begin 
-`ifdef SHIPC_READ32_8_TASK
-  `SHIPC_READ32_8_TASK;
-`undef SHIPC_READ32_8_TASK
-`else
-  unsupportedTask("SHIPC_READ32_8");
-`endif
-  end
-
-//
-// READ32_16
-//
-  `SHIPC_READ32_16 : begin 
-`ifdef SHIPC_READ32_16_TASK
-  `SHIPC_READ32_16_TASK;
-`undef SHIPC_READ32_16_TASK
-`else
-  unsupportedTask("SHIPC_READ32_16");
-`endif
-  end
-
-//
-// READ32_32
-//
-  `SHIPC_READ32_32 : begin 
-`ifdef SHIPC_READ32_32_TASK
-  `SHIPC_READ32_32_TASK;
-`undef SHIPC_READ32_32_TASK
-`else
-  unsupportedTask("SHIPC_READ32_32");
-`endif
-  end
-
-//
-// READ32_64
-//
-  `SHIPC_READ32_64 : begin 
-`ifdef SHIPC_READ32_64_TASK
-  `SHIPC_READ32_64_TASK;
-`undef SHIPC_READ32_64_TASK
-`else
-  unsupportedTask("SHIPC_READ32_64");
-`endif
-  end
-
-//
-// READ64_64
-//
-  `SHIPC_READ64_64 : begin 
-`ifdef SHIPC_READ64_64_TASK
-  `SHIPC_READ64_64_TASK;
-`undef SHIPC_READ64_64_TASK
-`else
-  unsupportedTask("SHIPC_READ64_64");
-`endif
-  end
-//
-// READ64_BURST
-//
-  `SHIPC_READ64_BURST : begin 
-`ifdef SHIPC_READ64_BURST_TASK
-  `SHIPC_READ64_BURST_TASK;
-`undef SHIPC_READ64_BURST_TASK
-`else
-  unsupportedTask("SHIPC_READ64_BURST");
-`endif
-  end
-
-//
-// PRINTF
-//
-  `SHIPC_PRINTF : begin 
-`ifdef SHIPC_PRINTF_TASK
-  `SHIPC_PRINTF_TASK;
-`undef SHIPC_PRINTF_TASK
-`else
-  unsupportedTask("SHIPC_PRINTF");
-`endif
-  end
-//
-// WRITE_STATUS
-//
-  `SHIPC_WRITE_STATUS : begin 
-`ifdef SHIPC_WRITE_STATUS_TASK
-  `SHIPC_WRITE_STATUS_TASK;
-`undef SHIPC_WRITE_STATUS_TASK
-`else
-  unsupportedTask("SHIPC_WRITE_STATUS");
-`endif
-  end
-//
-// READ_STATUS
-//
-  `SHIPC_READ_STATUS : begin 
-`ifdef SHIPC_READ_STATUS_TASK
-  `SHIPC_READ_STATUS_TASK;
-`undef SHIPC_READ_STATUS_TASK
-`else
-  unsupportedTask("SHIPC_READ_STATUS");
-`endif
-  end
-
-//
-// WRITE_DVT_FLAG
-//
-  `SHIPC_WRITE_DVT_FLAG : begin 
-`ifdef SHIPC_WRITE_DVT_FLAG_TASK
-  `SHIPC_WRITE_DVT_FLAG_TASK;
-`undef SHIPC_WRITE_DVT_FLAG_TASK
-`else
-  unsupportedTask("SHIPC_WRITE_DVT_FLAG");
-`endif
-  end
-//
-// READ_DVT_FLAG
-//
-  `SHIPC_READ_DVT_FLAG : begin 
-`ifdef SHIPC_READ_DVT_FLAG_TASK
-  `SHIPC_READ_DVT_FLAG_TASK;
-`undef SHIPC_READ_DVT_FLAG_TASK
-`else
-  unsupportedTask("SHIPC_READ_DVT_FLAG");
-`endif
-  end
-
-//
-// SHIPC_READ_ERROR_CNT
-//
-  `SHIPC_READ_ERROR_CNT : begin 
-`ifdef SHIPC_READ_ERROR_CNT_TASK
-  `SHIPC_READ_ERROR_CNT_TASK;
-`undef SHIPC_READ_ERROR_CNT_TASK
-`else
-  unsupportedTask("SHIPC_READ_ERROR_CNT");
-`endif
-  end
-
-//
-// FRAMER_RDWR
-//
-    `SHIPC_FRAMER_RDWR : begin 
-`ifdef SHIPC_FRAMER_RDWR_TASK
-  `SHIPC_FRAMER_RDWR_TASK;
-`undef SHIPC_FRAMER_RDWR_TASK
-`else
-  unsupportedTask("SHIPC_FRAMER_RDWR");
-`endif
-  end
-
-    `SHIPC_SAMPLE_RDWR : begin 
-`ifdef SHIPC_SAMPLE_RDWR_TASK
-  `SHIPC_SAMPLE_RDWR_TASK;
-`undef SHIPC_SAMPLE_RDWR_TASK
-`else
-  unsupportedTask("SHIPC_SAMPLE_RDWR");
-`endif
-  end
-
-  //
-  // Common Task
-  //
-  `SHIPC_GET_SIM_TIME: r_data = {2{__simTime}};
-  `SHIPC_RUNCLK  : RUNCLK(__shIpc_p0);
-  `SHIPC_SHUTDOWN: __shIpc_Time2Shutdown = 1;
-  `SHIPC_SIMV_SAVE: begin
-      // set the flag!!
-      //`WAIT4RESTART_FLAG = 1;
-      __shIpc_CheckpointEnable = 1;
-  end
-        default        : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
-      endcase
-  //`logI("processCmd __shIpc_p0=%x r_data=%x",__shIpc_p0 , r_data);
+    case (__shIpc_cmd)
+      // ATOMIC_RDW64
+      `SHIPC_ATOMIC_RDW64 : begin 
+        `ifdef SHIPC_ATOMIC_RDW64_TASK
+          `SHIPC_ATOMIC_RDW64_TASK;
+          `undef SHIPC_ATOMIC_RDW64_TASK
+        `else
+          unsupportedCommand("SHIPC_ATOMIC_RDW64");
+        `endif
+      end
+      // WRITE64_BURST
+      `SHIPC_WRITE64_BURST : begin 
+        `ifdef SHIPC_WRITE64_BURST_TASK
+          `SHIPC_WRITE64_BURST_TASK;
+          `undef SHIPC_WRITE64_BURST_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE64_BURST");
+        `endif
+      end
+      // WRITE32_64
+      `SHIPC_WRITE32_64 : begin 
+        `ifdef SHIPC_WRITE32_64_TASK
+          `SHIPC_WRITE32_64_TASK;
+          `undef SHIPC_WRITE32_64_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE32_64");
+        `endif
+      end
+      // WRITE32_32
+      `SHIPC_WRITE32_32 : begin 
+        `ifdef SHIPC_WRITE32_32_TASK
+          `SHIPC_WRITE32_32_TASK;
+          `undef SHIPC_WRITE32_32_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE32_32");
+        `endif
+      end
+      // WRITE32_16
+      `SHIPC_WRITE32_16 : begin 
+        `ifdef SHIPC_WRITE32_16_TASK
+          `SHIPC_WRITE32_16_TASK;
+          `undef SHIPC_WRITE32_16_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE32_16");
+        `endif
+      end
+      // WRITE32_8
+      `SHIPC_WRITE32_8 : begin 
+        `ifdef SHIPC_WRITE32_8_TASK
+          `SHIPC_WRITE32_8_TASK;
+          `undef SHIPC_WRITE32_8_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE32_8");
+        `endif
+      end
+      // WRITE64_64
+      `SHIPC_WRITE64_64 : begin 
+        `ifdef SHIPC_WRITE64_64_TASK
+          `SHIPC_WRITE64_64_TASK;
+          `undef SHIPC_WRITE64_64_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE64_64");
+        `endif
+      end
+      // READ32_8
+      `SHIPC_READ32_8 : begin 
+        `ifdef SHIPC_READ32_8_TASK
+          `SHIPC_READ32_8_TASK;
+          `undef SHIPC_READ32_8_TASK
+        `else
+          unsupportedCommand("SHIPC_READ32_8");
+        `endif
+      end
+      // READ32_16
+      `SHIPC_READ32_16 : begin 
+        `ifdef SHIPC_READ32_16_TASK
+          `SHIPC_READ32_16_TASK;
+          `undef SHIPC_READ32_16_TASK
+        `else
+          unsupportedCommand("SHIPC_READ32_16");
+        `endif
+      end
+      // READ32_32
+      `SHIPC_READ32_32 : begin 
+        `ifdef SHIPC_READ32_32_TASK
+          `SHIPC_READ32_32_TASK;
+          `undef SHIPC_READ32_32_TASK
+        `else
+          unsupportedCommand("SHIPC_READ32_32");
+        `endif
+      end
+      // READ32_64
+      `SHIPC_READ32_64 : begin 
+        `ifdef SHIPC_READ32_64_TASK
+          `SHIPC_READ32_64_TASK;
+          `undef SHIPC_READ32_64_TASK
+        `else
+          unsupportedCommand("SHIPC_READ32_64");
+        `endif
+      end
+      // READ64_64
+      `SHIPC_READ64_64 : begin 
+        `ifdef SHIPC_READ64_64_TASK
+          `SHIPC_READ64_64_TASK;
+          `undef SHIPC_READ64_64_TASK
+        `else
+          unsupportedCommand("SHIPC_READ64_64");
+        `endif
+      end
+      // READ64_BURST
+      `SHIPC_READ64_BURST : begin 
+        `ifdef SHIPC_READ64_BURST_TASK
+          `SHIPC_READ64_BURST_TASK;
+          `undef SHIPC_READ64_BURST_TASK
+        `else
+          unsupportedCommand("SHIPC_READ64_BURST");
+        `endif
+      end
+      // PRINTF
+      `SHIPC_PRINTF : begin 
+        `ifdef SHIPC_PRINTF_TASK
+          `SHIPC_PRINTF_TASK;
+          `undef SHIPC_PRINTF_TASK
+        `else
+          unsupportedCommand("SHIPC_PRINTF");
+        `endif
+      end
+      // WRITE_STATUS
+      `SHIPC_WRITE_STATUS : begin 
+        `ifdef SHIPC_WRITE_STATUS_TASK
+          `SHIPC_WRITE_STATUS_TASK;
+          `undef SHIPC_WRITE_STATUS_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE_STATUS");
+        `endif
+      end
+      // READ_STATUS
+      `SHIPC_READ_STATUS : begin 
+        `ifdef SHIPC_READ_STATUS_TASK
+          `SHIPC_READ_STATUS_TASK;
+          `undef SHIPC_READ_STATUS_TASK
+        `else
+          unsupportedCommand("SHIPC_READ_STATUS");
+        `endif
+      end
+      // WRITE_DVT_FLAG
+      `SHIPC_WRITE_DVT_FLAG : begin 
+        `ifdef SHIPC_WRITE_DVT_FLAG_TASK
+          `SHIPC_WRITE_DVT_FLAG_TASK;
+          `undef SHIPC_WRITE_DVT_FLAG_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE_DVT_FLAG");
+        `endif
+      end
+      // READ_DVT_FLAG
+      `SHIPC_READ_DVT_FLAG : begin 
+        `ifdef SHIPC_READ_DVT_FLAG_TASK
+          `SHIPC_READ_DVT_FLAG_TASK;
+          `undef SHIPC_READ_DVT_FLAG_TASK
+        `else
+          unsupportedCommand("SHIPC_READ_DVT_FLAG");
+        `endif
+      end
+      // SHIPC_READ_ERROR_CNT
+      `SHIPC_READ_ERROR_CNT : begin 
+        `ifdef SHIPC_READ_ERROR_CNT_TASK
+          `SHIPC_READ_ERROR_CNT_TASK;
+          `undef SHIPC_READ_ERROR_CNT_TASK
+        `else
+          unsupportedCommand("SHIPC_READ_ERROR_CNT");
+        `endif
+      end
+      // FRAMER_RDWR
+      `SHIPC_FRAMER_RDWR : begin 
+        `ifdef SHIPC_FRAMER_RDWR_TASK
+          `SHIPC_FRAMER_RDWR_TASK;
+          `undef SHIPC_FRAMER_RDWR_TASK
+        `else
+          unsupportedCommand("SHIPC_FRAMER_RDWR");
+        `endif
+      end
+      // SHIPC_SAMPLE_RDWR
+      `SHIPC_SAMPLE_RDWR : begin 
+        `ifdef SHIPC_SAMPLE_RDWR_TASK
+          `SHIPC_SAMPLE_RDWR_TASK;
+          `undef SHIPC_SAMPLE_RDWR_TASK
+        `else
+          unsupportedCommand("SHIPC_SAMPLE_RDWR");
+        `endif
+      end
+      // Common Task
+      `SHIPC_GET_SIM_TIME   : r_data                    = {2{__simTime}};
+      `SHIPC_RUNCLK         : RUNCLK(__shIpc_p0);
+      `SHIPC_SHUTDOWN       : __shIpc_Time2Shutdown     = 1;
+      `SHIPC_SIMV_SAVE      : __shIpc_CheckpointEnable  = 1;
+      // Trap
+      default        : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+    endcase
   end
 endtask // processCmd
+//--------------------------------------------------------------------------------------
 
-// ===================================
-// New DPI
-// ===================================
+
+
+//--------------------------------------------------------------------------------------
+// Process DPI commands
+//--------------------------------------------------------------------------------------
 always @(posedge (__shIpc_EnableMode && !__playBackEnable)) 
 begin
 
@@ -352,27 +296,28 @@ begin
     end // if (inBox.mCmdValid)
   end // while (__shIpc_EnableMode)
 end // end posedge
+//--------------------------------------------------------------------------------------
 
-//
-// Task to kill the sim job
-//
+
+
+//--------------------------------------------------------------------------------------
+// DPI tasks and support functions
+//--------------------------------------------------------------------------------------
+//  Shutdown the simulation
 always @(posedge __shIpc_Time2Shutdown) begin
   `logI("Running for %d more NS before terminate the simv process");
    #10 $finish;
 end
 
-//
-// =================================================================
-// Default Task Lists 
-// =================================================================
-//
-task unsupportedTask;
+// An unsupported command was received
+task unsupportedCommand;
   input string str; 
   begin 
     `logE("ERROR: %m Command %s NOT SUPPORTED for this module.\n", str); 
   end
 endtask
 
+// Run the clock a specified number of clock cycles
 task RUNCLK;
   input [31:0] clkCnt;
   begin
@@ -381,7 +326,7 @@ task RUNCLK;
   end
 endtask // RUNCLK
 
-// Intialize the share memory for this driver
+// Intialize the shared memory for this driver
 reg myIsActive  = 0;
 always @(posedge enableMe) begin
   $vpp_shMemInit(-1); // use key in file
@@ -402,4 +347,5 @@ always @(posedge enableMe) begin
     __shIpc_EnableMode = 0;
    end  
 end 
+//--------------------------------------------------------------------------------------
 
