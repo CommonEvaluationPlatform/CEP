@@ -40,77 +40,10 @@ module cep_driver
   reg                 clear = 0;
   integer             cnt;
   string              str;
-  reg                 backdoor_enable = 0;
   
   //--------------------------------------------------------------------------------------
-  // Printf support function
-  //--------------------------------------------------------------------------------------
-  always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
-
-    // Address to be printed
-    printf_addr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
-
-    // Load the printer buffer from main memory (8 bytes at a time) and then clear the memory read
-    for (int i = 0; i < 15; i++) begin
-      
-      // MSWord of printer buffer is in the lowest memory position
-      `COSIM_TB_TOP_MODULE.read_mainmem_backdoor  (printf_addr + 8*i, printf_buf[64*(15 - i) +: 64]);
-      `COSIM_TB_TOP_MODULE.write_mainmem_backdoor (printf_addr + 8*i, 0);
-
-    end // end for
-
-    // left justify
-    clear = 0;
-    tmp = 0;
-
-    // move trailing after newline or null
-    for (cnt = 0; cnt < 128; cnt = cnt + 1) begin
-      if (!clear && (printf_buf[(128*8)-1:(127*8)] != 'h0) &&       // '\0'
-                    (printf_buf[(128*8)-1:(127*8)] != 'h0A) &&      // '\n'
-                    (printf_buf[(128*8)-1:(127*8)] != 'h0D)) begin  // '\r'     
-        tmp         = (tmp << 8) | printf_buf[(128*8)-1:(127*8)];
-        printf_buf  = printf_buf << 8;
-      end else begin
-        clear         = 1;
-        tmp           = tmp << 8;
-      end // end if
-    end // end for    
-
-    $sformat(str,"C%-d: %-s", printf_addr[1:0], tmp);
-    `logI("%s",str);
-    
-    dvtFlags[`DVTF_PRINTF_CMD] = 0;
-  end // end always
-  //--------------------------------------------------------------------------------------
-   
-
-  //--------------------------------------------------------------------------------------
-  // Misc support functions
-  //--------------------------------------------------------------------------------------
-  always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
-
-  always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
-    if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
-      force_core_in_reset();
-    end
-    dvtFlags[`DVTF_PUT_CORE_IN_RESET] = 0;  
-  end // end always
-
-  always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
-    if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core0_status;
-    else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core1_status;
-    else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core2_status;
-    else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core3_status;
-    dvtFlags[`DVTF_GET_CORE_STATUS]=0;
-  end
-  //--------------------------------------------------------------------------------------
-   
-
-
-  //--------------------------------------------------------------------------------------
-  // Support Tasks
-  //--------------------------------------------------------------------------------------
-
+  // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
+  //--------------------------------------------------------------------------------------    
   // READ_STATUS_TASK
   `define SHIPC_READ_STATUS_TASK READ_STATUS_TASK(__shIpc_p0)
   task READ_STATUS_TASK;
@@ -171,9 +104,7 @@ module cep_driver
     end
   endtask // READ_ERROR_CNT_TASK;
 
-  //--------------------------------------------------------------------------------------
-  // The following tasks are only supported in BFM mode from the CPU Drivers
-  //--------------------------------------------------------------------------------------
+  // The following support task are only valid in BFM mode
   `ifdef BFM_MODE
 
     // WRITE64_BURST
@@ -462,6 +393,29 @@ module cep_driver
   `undef    SHIPC_XACTOR_ID      
   //--------------------------------------------------------------------------------------
  
+
+
+  //--------------------------------------------------------------------------------------
+  // Misc support functions
+  //--------------------------------------------------------------------------------------
+  always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
+
+  always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
+    if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
+      force_core_in_reset();
+    end
+    dvtFlags[`DVTF_PUT_CORE_IN_RESET] = 0;  
+  end // end always
+
+  always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
+    if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core0_status;
+    else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core1_status;
+    else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core2_status;
+    else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core3_status;
+    dvtFlags[`DVTF_GET_CORE_STATUS]=0;
+  end
+  //--------------------------------------------------------------------------------------
+   
 
 
   //--------------------------------------------------------------------------------------

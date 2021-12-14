@@ -100,91 +100,99 @@ void vpp_shMemDestroy() {
   GlobalShMemory.shMemDestroy();
 }
 
-//
-// =========================================
-// DPI : faster ???
-// =========================================
 // Replacement for vpp_getShIpcCmd()
 void get_v2c_mail(const int slotId, const int cpuId, mailBox *inBox)  {
   shIpc *ptr = GlobalShMemory.getIpcPtr(slotId,cpuId);
   shIpc *localPtr = ptr;
-  //
-  if (ptr->SlotCheckOK(slotId,cpuId)) {
+
+
+  // Ensure a valid slotId / cpuId is specified
+  if (ptr->SlotCheckOK(slotId, cpuId)) {
     int localCmdValid = ptr->IsCmdValid();
     int __shIpc_remoteReq = ptr->GetRemoteReq();
+
     // process remote first => change the pointer
     if (__shIpc_remoteReq) {
       int remoteOffset = ptr->GetRemoteOffset();
       ptr = GlobalShMemory.getIpcPtr(remoteOffset);
     }
-    inBox->mActive    = 1;		
-    Int32U curTime = (Int32U)(tf_gettime() * pow(10,tf_gettimeprecision()+9));
+
+    inBox->mActive    = 1;    
+    Int32U curTime    = (Int32U)(tf_gettime() * pow(10,tf_gettimeprecision()+9));
+    
     // save the time
     int __shIpc_cmdValid = localCmdValid | __shIpc_remoteReq;
-    if (__shIpc_cmdValid) { // get the rest of the argument
+    
+    // Is there a valid command?
+    if (__shIpc_cmdValid) {
+      
+      // Save the command
       Int32U __shIpc_cmd = ptr->GetCmd();
+      
       // check if this is printf command or verbose mode
       char oStr[1024];
+      
       if (ptr->GetPostVerbose()) {
-	sprintf(oStr,"%8d %s %s",ptr->GetCycleCount(),svGetNameFromScope(svGetScope()),ptr->GetPostStr()); 
-	io_printf(oStr);
-	ptr->SetPostVerbose(0);
+       sprintf(oStr,"%8d %s %s",ptr->GetCycleCount(),svGetNameFromScope(svGetScope()),ptr->GetPostStr()); 
+       io_printf(oStr);
+       ptr->SetPostVerbose(0);
       }
+      
       // now update curTime after GetPostVerbose()
       ptr->SetCycleCount(curTime);
+      
       if (__shIpc_cmd == SHIPC_PRINTF) {
-	// just print on done!!!
-	sprintf(oStr,"%8d %s %s",curTime,svGetNameFromScope(svGetScope()),ptr->GetStr());	
-	io_printf(oStr);
-	// done
-	if (__shIpc_remoteReq) {
-	  // clear remote 
-	  ptr->AckRemoteCmdNdone(SHIPC_STATUS_SUCCESS);
-	  // clear the remote req
-	  localPtr->ClrRemoteReq();
-	} else {
-	  ptr->AckCmdNdone(SHIPC_STATUS_SUCCESS); 
-	}
-	inBox->mCmdValid  = 0; 
-	inBox->mRemoteReq = 0; 
+        sprintf(oStr,"%8d %s %s",curTime,svGetNameFromScope(svGetScope()),ptr->GetStr());  
+        io_printf(oStr);
+  
+        if (__shIpc_remoteReq) {
+          ptr->AckRemoteCmdNdone(SHIPC_STATUS_SUCCESS);
+          localPtr->ClrRemoteReq();
+        } else {
+          ptr->AckCmdNdone(SHIPC_STATUS_SUCCESS); 
+        } // end if (__shIpc_remoteReq)
+
+        inBox->mCmdValid  = 0; 
+        inBox->mRemoteReq = 0; 
       } else {
-	// ONLY LOCAL!!!!
-	if (__shIpc_cmd == SHIPC_SHUTDOWN) {
-	  inBox->mActive    = 0;			  
-	  ptr->SetError(0);
-	  ptr->SetThreadDone();
-	}
-	// loaded the verilog
-	inBox->mCmdValid  = __shIpc_cmdValid;  
-	inBox->mRemoteReq = __shIpc_remoteReq; 
-	inBox->mCmd       = __shIpc_cmd;       
-	inBox->mAdrHi     = ptr->GetAdrHi();   
-	inBox->mAdr       = ptr->GetAdr();     
-	//
-	memcpy(&(inBox->mPar[0]),ptr->GetArgPtr(), 32 * sizeof(u_int64_t));	
-	// print it
-	if (ptr->GetVerbose()) {
-	  // print the verbose string before execute the command
-	  sprintf(oStr,"%8d %s %s",curTime,svGetNameFromScope(svGetScope()),ptr->GetStr());
-	  io_printf(oStr);
-	}
-	// wait 
-      }
+        if (__shIpc_cmd == SHIPC_SHUTDOWN) {
+          inBox->mActive    = 0;        
+          ptr->SetError(0);
+          ptr->SetThreadDone();
+        }
+  
+        // loaded the verilog
+        inBox->mCmdValid  = __shIpc_cmdValid;  
+        inBox->mRemoteReq = __shIpc_remoteReq; 
+        inBox->mCmd       = __shIpc_cmd;       
+        inBox->mAdrHi     = ptr->GetAdrHi();   
+        inBox->mAdr       = ptr->GetAdr();     
+ 
+        memcpy(&(inBox->mPar[0]),ptr->GetArgPtr(), 32 * sizeof(u_int64_t)); 
+
+        if (ptr->GetVerbose()) {
+          // print the verbose string before execute the command
+          sprintf(oStr,"%8d %s %s",curTime,svGetNameFromScope(svGetScope()),ptr->GetStr());
+          io_printf(oStr);
+        } // end if (ptr->GetVerbose())
+      } // end if (__shIpc_cmd == SHIPC_PRINTF)
+
     } else if (ptr->IsInActiveStatus() || ptr->GetThreadDone()) { // thread done?
       io_printf((char *)"%s InactiveStatus detected..Shutting down!!!\n",svGetNameFromScope(svGetScope()));
-      inBox->mActive    = 0;	
+      inBox->mActive    = 0;  
       inBox->mCmdValid  = 0; 
       inBox->mRemoteReq = 0; 
     } else {
       inBox->mCmdValid  = 0; 
       inBox->mRemoteReq = 0; 
     }
+  // SlotCheckFailed
   } else {
     io_printf((char *)"ERROR: %s vpp_getShIpcCmd SlotCheckFailed  verilog=%x_%x\n",svGetNameFromScope(svGetScope()), slotId,cpuId);
     inBox->mCmdValid  = 0; //tf_putp ( 3, 0 ); // no cmdValid
     inBox->mRemoteReq = 0; //tf_putp ( 4, 0 );
-  }
-}
+  } // if (ptr->SlotCheckOK(slotId, cpuId))
+} // get_v2c_mail
 
 // Replacement for vpp_clearShIpcCmd()
 void send_v2c_mail(const int slotId, const int cpuId, const mailBox *inBox) {

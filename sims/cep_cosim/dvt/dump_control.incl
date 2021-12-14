@@ -58,13 +58,13 @@
 
   always @(posedge waveDumpFlag) begin
     while (1) begin
-      if (waveDumpFlag && (__simTime > waveOnStartCycle)) begin
-        `logI("Issuing wave_on to enable wave ON simTime = %0d waveonCycleDump = %0d waveonCycleDump = %0d", __simTime, waveOnStartCycle, waveonCycleDump);
+      if (waveDumpFlag && (`SYSTEM_SIM_TIME > waveOnStartCycle)) begin
+        `logI("Issuing wave_on to enable wave ON simTime = %0d waveonCycleDump = %0d waveonCycleDump = %0d", `SYSTEM_SIM_TIME, waveOnStartCycle, waveonCycleDump);
         mti_Command("wave_on");
         waveDumpFlag = 0;
         dumpInProgress = 1;
-      end else if (dumpInProgress && (waveonCycleDump != -1) && (__simTime > (waveOnStartCycle + waveonCycleDump))) begin
-        `logI("Issuing wave_off to disable wave ON simTime = %0d waveonCycleDump = %0d waveonCycleDump = %0d", __simTime, waveOnStartCycle, waveonCycleDump);
+      end else if (dumpInProgress && (waveonCycleDump != -1) && (`SYSTEM_SIM_TIME > (waveOnStartCycle + waveonCycleDump))) begin
+        `logI("Issuing wave_off to disable wave ON simTime = %0d waveonCycleDump = %0d waveonCycleDump = %0d", `SYSTEM_SIM_TIME, waveOnStartCycle, waveonCycleDump);
         mti_Command("wave_off");   
         waveDumpFlag = 0;
         dumpInProgress = 0;

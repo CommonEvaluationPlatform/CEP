@@ -256,6 +256,7 @@ cleanLocal:
 	-rm -f ${TEST_DIR}/testHistory.txt
 	-rm -f ${TEST_DIR}/transcript
 	-rm -f ${TEST_DIR}/status
+	-rm -f ${TEST_DIR}/*.vstf
 	
 cleanLocalDo:
 	-rm -f ${TEST_DIR}/*.do

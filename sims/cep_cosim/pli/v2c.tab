@@ -11,7 +11,7 @@
 //************************************************************************
 
 //
-// Loggin between C,_.Verilog
+// Logging between C,_.Verilog
 //
 $logD		        call=logD				nocallback acc+=r:%task	  
 $logI		        call=logI				nocallback acc+=r:%task 

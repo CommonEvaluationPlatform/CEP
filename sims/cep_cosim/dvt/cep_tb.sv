@@ -68,8 +68,6 @@ module `COSIM_TB_TOP_MODULE;
   wire                sdio_sdio_dat_1; pullup (weak1) (sdio_sdio_dat_1);
   wire                sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
   wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
-
-  wire [31:0]         __simTime;
   //--------------------------------------------------------------------------------------
 
 
@@ -252,8 +250,7 @@ module `COSIM_TB_TOP_MODULE;
 
   // Instantiate the "System" driver (which is ALWAYS enabled)
   v2c_top v2c_inst(
-    .clk        (sys_clk_i),
-    .__simTime  (__simTime)
+    .clk        (sys_clk_i)
   );
   //--------------------------------------------------------------------------------------
   

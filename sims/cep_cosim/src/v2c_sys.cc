@@ -32,7 +32,7 @@ void v2cLogI(const char *fmt, ...) {
   va_list  arglist;
   va_start(arglist,fmt);
 
-  strcpy(gStaticBuffer,"CLOG: ");
+  strcpy(gStaticBuffer,"C_LOG: ");
   lenny = vsprintf (gStaticBuffer2, fmt, arglist );
   va_end(arglist);
   //

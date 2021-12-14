@@ -16,15 +16,26 @@
 `include "v2c_top.incl"
 
 module v2c_top (
-  input               clk,
-  output reg [31:0]   __simTime = 0
+  input               clk
 );
 
   parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
   parameter MY_CPU_ID   = `SYSTEM_CPU_ID;
 
+  reg [255:0]         dvtFlags = 0;
+  reg [255:0]         r_data;
+  reg [31:0]          printf_addr;
+  reg [1:0]           printf_coreId;
+  reg [(128*8)-1:0]   printf_buf;     // 128 bytes
+  reg [(128*8)-1:0]   tmp;
+  reg                 clear = 0;
+  integer             cnt;
+  string              str;
+  reg                 program_loaded = 0;
+  reg                 ipcDelay       = 0;
+
   //--------------------------------------------------------------------------------------
-  // Define system driver supported DPI tasks prior to the inclusion of sys_common.incl
+  // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
   //--------------------------------------------------------------------------------------    
   // WRITE32_64
   `define SHIPC_WRITE32_64_TASK WRITE32_64_DPI()
@@ -49,6 +60,47 @@ module v2c_top (
       inBox.mPar[1] = d[31:0];      
     end
   endtask // READ32_64_DPI
+  
+  // WRITE_DVT_FLAG_TASK
+  `define SHIPC_WRITE_DVT_FLAG_TASK WRITE_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p2)
+  task WRITE_DVT_FLAG_TASK;
+    input [31:0] msb;
+    input [31:0] lsb;
+    input [31:0] value; 
+    begin
+      for (int s = inBox.mPar[1]; s <= inBox.mPar[0]; s++) begin 
+        dvtFlags[s]   = inBox.mPar[2] & 1'b1; 
+        inBox.mPar[2] = inBox.mPar[2] >> 1; 
+      end      
+      
+      @(posedge clk);  
+    end
+  endtask // WRITE_DVT_FLAG_TASK;
+
+  // READ_DVT_FLAG_TASK
+  `define SHIPC_READ_DVT_FLAG_TASK READ_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,{__shIpc_p0[31:0],__shIpc_p1[31:0]})
+  task READ_DVT_FLAG_TASK;
+    input [31:0]    msb;
+    input [31:0]    lsb;
+    output [63:0]   r_data;
+    integer         m;
+    integer         l;
+    reg [63:0]      tmp;
+    begin
+      tmp = 0;
+    
+      m = inBox.mPar[0];
+      l = inBox.mPar[1];
+
+      for (int s = m; s >= l; s--) begin       
+        tmp = {tmp[62:0], dvtFlags[s]};
+      end
+      
+      inBox.mPar[0] = tmp;
+   
+      @(posedge clk);   
+    end
+  endtask // READ_DVT_FLAG_TASK;
   //--------------------------------------------------------------------------------------
 
 
@@ -68,16 +120,55 @@ module v2c_top (
 
 
   //--------------------------------------------------------------------------------------
-  // System Driver supported DVT tasks
+  // Misc support functions
   //--------------------------------------------------------------------------------------
+  
+  // Printf support function for printing from the RISC-V Cores in Bare Metal Mode
+  // Given the use of backdoor main memory access, this can only be called from the system thread
+  always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
+
+    // Address to be printed
+    printf_addr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
+
+    // Load the printer buffer from main memory (8 bytes at a time) and then clear the memory read
+    for (int i = 0; i < 15; i++) begin
+      
+      // MSWord of printer buffer is in the lowest memory position
+      `COSIM_TB_TOP_MODULE.read_mainmem_backdoor  (printf_addr + 8*i, printf_buf[64*(15 - i) +: 64]);
+      `COSIM_TB_TOP_MODULE.write_mainmem_backdoor (printf_addr + 8*i, 0);
+
+    end // end for
+
+    // left justify
+    clear = 0;
+    tmp = 0;
+
+    // move trailing after newline or null
+    for (cnt = 0; cnt < 128; cnt = cnt + 1) begin
+      if (!clear && (printf_buf[(128*8)-1:(127*8)] != 'h0) &&       // '\0'
+                    (printf_buf[(128*8)-1:(127*8)] != 'h0A) &&      // '\n'
+                    (printf_buf[(128*8)-1:(127*8)] != 'h0D)) begin  // '\r'     
+        tmp         = (tmp << 8) | printf_buf[(128*8)-1:(127*8)];
+        printf_buf  = printf_buf << 8;
+      end else begin
+        clear         = 1;
+        tmp           = tmp << 8;
+      end // end if
+    end // end for    
+
+    $sformat(str,"C%-d: %-s", printf_addr[1:0], tmp);
+    `logI("%s",str);
+    
+    dvtFlags[`DVTF_PRINTF_CMD] = 0;
+  end // end always
+  
+
   always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
     `logI("Setting ipcDelay to %0d", ipcDelay);
     ipcDelay = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_SET_IPC_DELAY] = 0;
   end
   
-  reg     program_loaded = 0;
-
   always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
     `logI("Program is now loaded");
     program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
@@ -146,15 +237,7 @@ module v2c_top (
     enableRdTrace = 1;            
     `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
   end
-  
-
-//--------------------------------------------------------------------------------------
-
-
-
-
-
-
+  //--------------------------------------------------------------------------------------
 
 
 

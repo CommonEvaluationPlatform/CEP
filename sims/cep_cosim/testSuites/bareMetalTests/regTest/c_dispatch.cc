@@ -72,10 +72,16 @@ int main(int argc, char *argv[])
   //--------------------------------------------------------------------------------------
   // Have the system thea wait until all threads are complete
   //--------------------------------------------------------------------------------------
-  int Done = 0;
-  while (!Done) {
-    Done = thr.AllThreadDone();
-    sleep(2);
+  int done = 0;
+  while (!done) {
+
+    // Check to see if all the threads are done
+    done = thr.AllThreadDone();
+
+    // Scan through the printf buffers for all the cores
+    for (int i = 0; i < MAX_CORES; i++)
+      check_printf_memory(i);
+
   }
   //--------------------------------------------------------------------------------------
 

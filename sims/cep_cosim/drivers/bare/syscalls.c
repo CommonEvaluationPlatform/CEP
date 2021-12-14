@@ -394,16 +394,22 @@ void inc_printf_idx(void) {
   printf_st[coreId].idx = (printf_st[coreId].idx + 1) % cep_printf_max_lines;
 }
 
-int printf(const char* fmt, ...)
-{
+// Printf overload when operating in bare metal mode
+int printf(const char* fmt, ...) {
 #ifdef BARE_MODE
   int i;
+  
+  // Has printing been enabled?
   if (get_printf()) {
+  
     va_list ap;
+  
     int coreId = read_csr(mhartid);
+  
     uint32_t offS = cep_printf_mem + (cep_printf_core_size * coreId) + (get_printf_idx() * cep_printf_str_max);    
-    char *str = (char *)((intptr_t)offS); // cep_printf_mem + (cep_printf_core_size*coreId) + (__printfIdx[coreId]*cep_printf_str_max));
-    //    char *str0 = str;
+  
+    char *str = (char *)((intptr_t)offS);
+
     va_start(ap, fmt);
     
     void printf_putch(int ch, void** data) {
@@ -411,40 +417,47 @@ int printf(const char* fmt, ...)
        **pstr = ch;
        (*pstr)++;
     }
+
     vprintfmt(printf_putch, (void**)&str, fmt, ap);
+
     *str = 0;
     
     va_end(ap);
+    
     //
     // flush!!
     //
     //asm volatile ("fence"); // flush????    
     //__asm__ volatile (".word 0xFC000073"); // CFLUSH.D.L1
     //
-    #if 1
     uint64_t d64;
     i = 0;
     while (i < 16) {
       d64 = *(volatile uint64_t *)((intptr_t)offS | ((1<<(20-i))*64));
       if (d64 == CEP_BAD_STATUS) { i += 2; } else { i++; }
     }
-    #endif
+    
     // next
     inc_printf_idx();
-    //
-  } // only if on
-  return 0;    
 
+  } // if (get_printf())
+  
+// Not Bare Metal Mode
 #else
+
   va_list ap;
+
   va_start(ap, fmt);
   
   vprintfmt((void*)putchar, 0, fmt, ap);
 
   va_end(ap);
-  return 0; // incorrect return value, but who cares, anyway?
+
 #endif  
-}
+
+  return 0;
+
+} // int printf(const char* fmt, ...)
 
 
 int sprintf(char* str, const char* fmt, ...)

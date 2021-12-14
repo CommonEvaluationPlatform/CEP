@@ -10,84 +10,55 @@
 //--------------------------------------------------------------------------------------
 `include "dpi_common.incl"
 
-// DVT
-reg [255:0]     dvtFlags;
-reg             ipcDelay = 1;
+reg [3:0]   __mSlotId;
+reg [3:0]   __mCpuId;
+reg [31:0]  __shIpc_cmd;
+reg [63:0]  __shIpc_address;
+reg [31:0]  __shIpc_p0;
+reg [31:0]  __shIpc_p1;
+reg [31:0]  __shIpc_p2;
+reg [31:0]  __shIpc_p3;
+reg [31:0]  __shIpc_p4;
+reg [31:0]  __shIpc_p5;
+reg [31:0]  __shIpc_p6;
+reg [31:0]  __shIpc_p7;
+reg         __shIpc_cmdValid;
+reg         __shIpc_remoteReq;
+reg         __shIpc_EnableMode;
+reg         __shIpc_Active;
+reg         __shIpc_InProgress;
+reg         __shIpc_Time2Shutdown;
+reg [31:0]  __shIpc_Status;
+reg         __shIpc_CheckpointEnable;
+reg [31:0]  __simTime;
 
 initial begin
-   dvtFlags = 0;
+  #1 __mSlotId              = MY_SLOT_ID;
+  __mCpuId                  = MY_CPU_ID;
+
+  __shIpc_cmd               = 0;
+  __shIpc_address           = 0;
+  __shIpc_p0                = 0;
+  __shIpc_p1                = 0;
+  __shIpc_p2                = 0;
+  __shIpc_p3                = 0;
+  __shIpc_p4                = 0;
+  __shIpc_p5                = 0;
+  __shIpc_p6                = 0;
+  __shIpc_p7                = 0;
+  __shIpc_cmdValid          = 0;
+  __shIpc_remoteReq         = 0;
+  __shIpc_EnableMode        = 0;
+  __shIpc_Active            = 1;
+  __shIpc_InProgress        = 0; 
+  __shIpc_Time2Shutdown     = 0;    
+  __shIpc_Status            = 0;
+  __shIpc_CheckpointEnable  = 0;
+
+  __simTime                 = 0;
 end
 
-task   WRITE_DVT_FLAG_TASK;
-  input [31:0]  msb;
-  input [31:0]  lsb;
-  input [31:0]  value; 
-  integer       s;
-begin
-  
-  for (s = inBox.mPar[1]; s <= inBox.mPar[0];s = s + 1) begin 
-    dvtFlags[s] = inBox.mPar[2] & 1'b1; 
-    inBox.mPar[2] = inBox.mPar[2] >> 1; 
-  end      
-
-   @(posedge `SHIPC_CLK);   
-
-end
-endtask // WRITE_DVT_FLAG_TASK;
-
-task   READ_DVT_FLAG_TASK;
-  input [31:0]  msb;
-  input [31:0]  lsb;
-  output [64:0] r_data;
-  integer       m;
-  integer       l;
-  integer       s;
-  reg [63:0]  tmp;
-begin
-  tmp   = 0;
-  m     = inBox.mPar[0];
-  l     = inBox.mPar[1];
-    
-  for (int s = m; s >= l; s--) begin       
-    tmp = {tmp[62:0], dvtFlags[s]};
-  end 
-  inBox.mPar[0] = tmp;
-
-  @(posedge `SHIPC_CLK);   
-end
-endtask // READ_DVT_FLAG_TASK;
-   
-// Loop to turn on the shIPC thread
-reg __shIpc_EnableMode;
-reg __shIpc_Active;
-reg __shIpc_InProgress;
-reg __shIpc_Time2Shutdown;
-reg [3:0]  __mSlotId, __mCpuId;
-reg __shIpc_cmdValid;
-reg __shIpc_remoteReq;
-reg [31:0] __shIpc_cmd;
-reg [63:0] __shIpc_address;
-reg [31:0] __shIpc_p0;
-reg [31:0] __shIpc_p1;
-reg [31:0] __shIpc_p2;
-reg [31:0] __shIpc_p3;
-reg [31:0] __shIpc_p4;
-reg [31:0] __shIpc_p5;
-reg [31:0] __shIpc_p6;
-reg [31:0] __shIpc_p7;
-reg [31:0] __shIpcStatus;
-reg [31:0] __shIpcMailboxData;
-initial begin
-  __shIpcStatus = 0;  
-  __shIpc_Active = 1;
-  __shIpc_InProgress = 0;
-  __shIpc_Time2Shutdown = 0;    
-  __shIpc_EnableMode = 0;
-  __shIpc_cmdValid = 0;
-  __shIpc_remoteReq = 0;
-  #1 __mSlotId = MY_SLOT_ID;
-  __mCpuId = MY_CPU_ID;
-end
+// Advance the system time
 always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 
 //--------------------------------------------------------------------------------------
@@ -95,7 +66,7 @@ always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
 //--------------------------------------------------------------------------------------
 always @(posedge __shIpc_EnableMode) begin
   @(posedge `SHIPC_CLK); // wait 1 clock
-  `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
+  `logI("Entering shIpc_EnableMode Loop simTime = %0d", `SYSTEM_SIM_TIME);  
   while (__shIpc_EnableMode) begin
      // get the command
     get_v2c_mail(__mSlotId, __mCpuId, inBox);
@@ -111,56 +82,74 @@ always @(posedge __shIpc_EnableMode) begin
       __shIpc_InProgress = 1;
         
       case (inBox.mCmd)
-        `SHIPC_SHUTDOWN         : __shIpc_Time2Shutdown = 1;
-        `SHIPC_WRITE_DVT_FLAG   : begin
-          WRITE_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p2);
-        end
-        `SHIPC_READ_DVT_FLAG    : begin
-          READ_DVT_FLAG_TASK(__shIpc_p0,__shIpc_p1,__shIpc_p0);
-        end
-
-        // WRITE32_64 to support backdoor
+        // WRITE32_64
         `SHIPC_WRITE32_64       : begin 
           `ifdef SHIPC_WRITE32_64_TASK
               `SHIPC_WRITE32_64_TASK;
               `undef SHIPC_WRITE32_64_TASK
           `else
-              unsupportedTask("SHIPC_WRITE32_64");
+              unsupportedCommand("SHIPC_WRITE32_64");
           `endif
         end
-    
-        // WRITE64_64 to support backdoor
+        // WRITE64_64
         `SHIPC_WRITE64_64       : begin 
           `ifdef SHIPC_WRITE64_64_TASK
             `SHIPC_WRITE64_64_TASK;
             `undef SHIPC_WRITE64_64_TASK
           `else
-            unsupportedTask("SHIPC_WRITE64_64");
+            unsupportedCommand("SHIPC_WRITE64_64");
           `endif
-        end
-    
+        end    
         // READ32_64
         `SHIPC_READ32_64        : begin 
           `ifdef SHIPC_READ32_64_TASK
             `SHIPC_READ32_64_TASK;
             `undef SHIPC_READ32_64_TASK
           `else
-            unsupportedTask("SHIPC_READ32_64");
+            unsupportedCommand("SHIPC_READ32_64");
           `endif
-        end
-    
+        end    
         // READ64_64
         `SHIPC_READ64_64        : begin 
           `ifdef SHIPC_READ64_64_TASK
             `SHIPC_READ64_64_TASK;
             `undef SHIPC_READ64_64_TASK
           `else
-            unsupportedTask("SHIPC_READ64_64");
+            unsupportedCommand("SHIPC_READ64_64");
           `endif
         end
-          
+        // PRINTF
+        `SHIPC_PRINTF : begin 
+          `ifdef SHIPC_PRINTF_TASK
+            `SHIPC_PRINTF_TASK;
+            `undef SHIPC_PRINTF_TASK
+          `else
+            unsupportedCommand("SHIPC_PRINTF");
+          `endif
+        end          
+        // WRITE_DVT_FLAG
+        `SHIPC_WRITE_DVT_FLAG : begin 
+          `ifdef SHIPC_WRITE_DVT_FLAG_TASK
+            `SHIPC_WRITE_DVT_FLAG_TASK;
+            `undef SHIPC_WRITE_DVT_FLAG_TASK
+          `else
+            unsupportedCommand("SHIPC_WRITE_DVT_FLAG");
+          `endif
+        end
+        // READ_DVT_FLAG
+        `SHIPC_READ_DVT_FLAG : begin 
+          `ifdef SHIPC_READ_DVT_FLAG_TASK
+            `SHIPC_READ_DVT_FLAG_TASK;
+            `undef SHIPC_READ_DVT_FLAG_TASK
+          `else
+            unsupportedCommand("SHIPC_READ_DVT_FLAG");
+          `endif
+        end
+        // Common Tasks
+        `SHIPC_GET_SIM_TIME     : r_data                    = {2{`SYSTEM_SIM_TIME}};
         `SHIPC_RUNCLK           : RUNCLK(__shIpc_p0);  
-        `SHIPC_READ_STATUS      : __shIpc_p0 = __shIpcStatus;
+        `SHIPC_SHUTDOWN         : __shIpc_Time2Shutdown = 1;
+        `SHIPC_READ_STATUS      : __shIpc_p0 = __shIpc_Status;
         default                 : `logE("ERROR: %m __shIpc_cmd = %x NOT SUPPORTED!!!!\n",__shIpc_cmd);
       endcase
 
@@ -178,7 +167,7 @@ always @(posedge __shIpc_EnableMode) begin
 end // end posedge
 
 
-task unsupportedTask;
+task unsupportedCommand;
   input string str; 
 begin 
   `logE("ERROR: %m Command %s NOT SUPPORTED for this module.\n", str);
@@ -189,7 +178,7 @@ task RUNCLK;
   input [31:0] clkCnt;
 begin
   repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
-  inBox.mPar[0] = __simTime;
+  inBox.mPar[0] = `SYSTEM_SIM_TIME;
 end
 endtask // RUNCLK
  

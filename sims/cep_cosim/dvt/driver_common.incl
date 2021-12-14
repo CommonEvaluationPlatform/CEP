@@ -12,44 +12,50 @@
 //--------------------------------------------------------------------------------------
 `include "dpi_common.incl"
 
-reg __playBackEnable;
-reg __shIpc_CheckpointEnable;
-reg __shIpc_EnableMode;
-reg __shIpc_Active;
-reg __shIpc_InProgress;
-reg __shIpc_Time2Shutdown;
-reg [3:0] __mSlotId;
-reg [3:0] __mCpuId;
-reg __shIpc_cmdValid    = 0;
-reg __shIpc_remoteReq     = 0;
-reg [31:0] __shIpc_cmd;
-reg [63:0] __shIpc_address;
-reg [31:0] __shIpc_p0;
-reg [31:0] __shIpc_p1;
-reg [31:0] __shIpc_p2;
-reg [31:0] __shIpc_p3;
-reg [31:0] __shIpc_p4;
-reg [31:0] __shIpc_p5;
-reg [31:0] __shIpc_p6;
-reg [31:0] __shIpc_p7;
-reg [31:0] __simTime;
-reg __shIpc_C_not_active  = 1;
+reg [3:0]   __mSlotId;
+reg [3:0]   __mCpuId;
+reg [31:0]  __shIpc_cmd;
+reg [63:0]  __shIpc_address;
+reg [31:0]  __shIpc_p0;
+reg [31:0]  __shIpc_p1;
+reg [31:0]  __shIpc_p2;
+reg [31:0]  __shIpc_p3;
+reg [31:0]  __shIpc_p4;
+reg [31:0]  __shIpc_p5;
+reg [31:0]  __shIpc_p6;
+reg [31:0]  __shIpc_p7;
+reg         __shIpc_cmdValid;
+reg         __shIpc_remoteReq;
+reg         __shIpc_EnableMode;
+reg         __shIpc_Active;
+reg         __shIpc_InProgress;
+reg         __shIpc_Time2Shutdown;
+reg [31:0]  __shIpc_Status;
+reg         __shIpc_CheckpointEnable;
 
 initial begin
-  __shIpc_CheckpointEnable = 0;
-  __simTime = 0;
-  __playBackEnable = 0;
-  __shIpc_Active = 1;
-  __shIpc_InProgress = 0; 
-  __shIpc_Time2Shutdown = 0;    
-  __shIpc_EnableMode = 0;
-  __shIpc_cmdValid = 0;
-  __shIpc_remoteReq = 0;
-  #1 __mSlotId = MY_SLOT_ID ;
-  __mCpuId = MY_CPU_ID;
-end
+  #1 __mSlotId              = MY_SLOT_ID;
+  __mCpuId                  = MY_CPU_ID;
 
-always @(posedge `SHIPC_CLK ) __simTime = __simTime + 1;
+  __shIpc_cmd               = 0;
+  __shIpc_address           = 0;
+  __shIpc_p0                = 0;
+  __shIpc_p1                = 0;
+  __shIpc_p2                = 0;
+  __shIpc_p3                = 0;
+  __shIpc_p4                = 0;
+  __shIpc_p5                = 0;
+  __shIpc_p6                = 0;
+  __shIpc_p7                = 0;
+  __shIpc_cmdValid          = 0;
+  __shIpc_remoteReq         = 0;
+  __shIpc_EnableMode        = 0;
+  __shIpc_Active            = 1;
+  __shIpc_InProgress        = 0; 
+  __shIpc_Time2Shutdown     = 0;    
+  __shIpc_Status            = 0;
+  __shIpc_CheckpointEnable  = 0; 
+end
 
 //--------------------------------------------------------------------------------------
 // Process a received mailbox command
@@ -246,13 +252,33 @@ task processCmd;
           unsupportedCommand("SHIPC_SAMPLE_RDWR");
         `endif
       end
-      // Common Task
-      `SHIPC_GET_SIM_TIME   : r_data                    = {2{__simTime}};
-      `SHIPC_RUNCLK         : RUNCLK(__shIpc_p0);
-      `SHIPC_SHUTDOWN       : __shIpc_Time2Shutdown     = 1;
-      `SHIPC_SIMV_SAVE      : __shIpc_CheckpointEnable  = 1;
+      // WRITE_DVT_FLAG
+      `SHIPC_WRITE_DVT_FLAG : begin 
+        `ifdef SHIPC_WRITE_DVT_FLAG_TASK
+          `SHIPC_WRITE_DVT_FLAG_TASK;
+          `undef SHIPC_WRITE_DVT_FLAG_TASK
+        `else
+          unsupportedCommand("SHIPC_WRITE_DVT_FLAG");
+        `endif
+      end
+      // READ_DVT_FLAG
+      `SHIPC_READ_DVT_FLAG : begin 
+        `ifdef SHIPC_READ_DVT_FLAG_TASK
+          `SHIPC_READ_DVT_FLAG_TASK;
+          `undef SHIPC_READ_DVT_FLAG_TASK
+        `else
+          unsupportedCommand("SHIPC_READ_DVT_FLAG");
+        `endif
+      end
+
+      // Common Tasks
+      `SHIPC_GET_SIM_TIME     : r_data                    = {2{`SYSTEM_SIM_TIME}};
+      `SHIPC_RUNCLK           : RUNCLK(__shIpc_p0);
+      `SHIPC_SHUTDOWN         : __shIpc_Time2Shutdown     = 1;
+      `SHIPC_SIMV_SAVE        : __shIpc_CheckpointEnable  = 1;
+      `SHIPC_READ_STATUS      : __shIpc_p0                = __shIpc_Status;
       // Trap
-      default        : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
+      default                 : `logE("ERROR: %m __shIpc_cmd=%x NOT SUPPORTED!!!!\n",__shIpc_cmd);
     endcase
   end
 endtask // processCmd
@@ -263,11 +289,11 @@ endtask // processCmd
 //--------------------------------------------------------------------------------------
 // Process DPI commands
 //--------------------------------------------------------------------------------------
-always @(posedge (__shIpc_EnableMode && !__playBackEnable)) 
+always @(posedge (__shIpc_EnableMode)) 
 begin
 
   @(posedge `SHIPC_CLK ); // wait 1 clock
-  `logI("Entering shIpc_EnableMode Loop simTime = %0d", __simTime);  
+  `logI("Entering shIpc_EnableMode Loop simTime = %0d", `SYSTEM_SIM_TIME);
   while (__shIpc_EnableMode) begin
     // get the command
     get_v2c_mail(__mSlotId, __mCpuId,inBox);
@@ -322,7 +348,7 @@ task RUNCLK;
   input [31:0] clkCnt;
   begin
     repeat(inBox.mPar[0]) @(posedge `SHIPC_CLK);
-    inBox.mPar[0] = __simTime;
+    inBox.mPar[0] = `SYSTEM_SIM_TIME;
   end
 endtask // RUNCLK
 
@@ -339,11 +365,11 @@ always @(posedge enableMe) begin
      // wait until C-side is alive
      `logI("Calling $vpp_WaitTilStart slot = %0d cpu = %0d", MY_SLOT_ID, MY_CPU_ID);
      $vpp_WaitTilStart(MY_SLOT_ID, MY_CPU_ID);
-     `logI("Turning ON __shIpc_EnableMode simTime = %0d", __simTime);
+     `logI("Turning ON __shIpc_EnableMode simTime = %0d", `SYSTEM_SIM_TIME);
     __shIpc_EnableMode = 1;
    end
    else begin
-    `logI("Turning OFF __shIpc_EnableMode simTime = %0d", __simTime);
+    `logI("Turning OFF __shIpc_EnableMode simTime = %0d", `SYSTEM_SIM_TIME);
     __shIpc_EnableMode = 0;
    end  
 end 

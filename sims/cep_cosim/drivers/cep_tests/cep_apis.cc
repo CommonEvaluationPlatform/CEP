@@ -265,9 +265,31 @@ int check_PassFail_status(int coreId,int maxTimeOut) {
   return errCnt;
 }
 
-// Monitor the "bare" status of the specified core
+// A task to be called from the system thread to scan the specified cpuId's printf buffer for activity
+int check_printf_memory(int cpuId) {
 
-// spin on the scratch mem until it is good or bad
+  int 		errCnt = 0;
+  uint64_t 	d64;
+
+  // Read from printf memory (only applicable in simulation)
+  #ifdef SIM_ENV_ONLY
+    uint32_t p_adr = cep_printf_mem + (cpuId * cep_printf_core_size) + (cep_printf_str_max*__prIdx[cpuId]);
+    DUT_READ32_64(p_adr, d64);
+    LOGI("%s: cpuId = %0d, p_adr = 0x%08x, d64 = 0x%016llx\n", __FUNCTION__, cpuId, p_adr, d64);
+
+    // If a non-zero value is detected, convey that a printf has occured to the testbench and increment the pointer
+    if (d64 != 0) {
+      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (cpuId & 0x3));
+      DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1 );
+      __prIdx[cpuId] = (__prIdx[cpuId] + 1) % cep_printf_max_lines;
+    } // end (d64 != 0)
+  #endif
+
+ return errCnt;
+} // check_printf_memory
+
+
+// Monitor the "bare" status of the specified core
 int check_bare_status(int cpuId, int maxTimeOut) {
 
   int errCnt = 0;
@@ -283,31 +305,10 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   
     LOGI("%s: cpuId = %0d, maxTimeOut = %0d\n", __FUNCTION__, cpuId, maxTimeOut);  
   
-    offS = cep_scratch_mem + (cpuId * cep_cache_size);
-    
     // Loop until a done or timeout is detected
     while (!done && (i < maxTimeOut)) {
     
-      // Check to see if a printf has occurred from the core... capture all of the non-zero buffer
-      while (1) {
-
-        // Read from printf memory
-        uint32_t p_adr = cep_printf_mem + (cpuId * cep_printf_core_size) + (cep_printf_str_max*__prIdx[cpuId]);
-        DUT_READ32_64(p_adr, d64);
-        LOGI("%s: cpuId = %0d, p_adr = 0x%08x, d64 = 0x%016llx\n", __FUNCTION__, cpuId, p_adr, d64);
-
-        // If a non-zero value is detected, convey that a printf has occured to the testbench
-        // and increment the pointer
-        if (d64 != 0) {
-          DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (cpuId & 0x3));
-          DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1);
-          __prIdx[cpuId] = (__prIdx[cpuId] + 1) % cep_printf_max_lines;
-        } else {
-          break;
-        }
-      } // while (1)
-
-      // Read the core status
+      // Read the core status (from the core status register)
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
       DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
       d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
@@ -316,10 +317,10 @@ int check_bare_status(int cpuId, int maxTimeOut) {
 
       // Check status
       if (d32 == CEP_GOOD_STATUS) {
-        LOGI("%s: GOOD offS = 0x%016llx Status = 0x%016llx detected..i = %0d\n",__FUNCTION__,offS, d64, i);
+        LOGI("%s: GOOD Status: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
         done = 1;
       } else if (d32 == CEP_BAD_STATUS) {
-        LOGI("%s: BAD offS = 0x%016llx Status = 0x%016llx detected..i= %0d\n",__FUNCTION__,offS, d64, i);
+        LOGI("%s: BAD Status: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
         done = 1;
         errCnt++;
       } // end if (d32 == CEP_GOOD_STATUS)
@@ -328,7 +329,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
       i++;
 
       if (!done) {
-        LOGI("%s: NOT DONE offS = 0x%016llx d64 = 0x%016llx..i = %0d pIdx = %0d\n",__FUNCTION__,offS, d64, i, __prIdx[cpuId]);
+        LOGI("%s: NOT DONE Status: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
         DUT_RUNCLK(1000);
       } // end if (!done)
 
@@ -336,14 +337,14 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   
   // Has a timeout occurred?
   if (i >= maxTimeOut) {
-      LOGI("%s: max Timeout offS = 0x%016llx Status = 0x%016llx..\n",__FUNCTION__, offS, d64);
+      LOGI("%s: TIMEOUT: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
       errCnt++;    
   }
   
-  // put core in reset
+  // Put the core in reset to stop the program counter
   DUT_RUNCLK(100);
   LOGI("%s: Putting core in reset to stop the PC...\n",__FUNCTION__);
-  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId); // at cycle 10
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
   DUT_WRITE_DVT(DVTF_PUT_CORE_IN_RESET, DVTF_PUT_CORE_IN_RESET, 1);
 
 #endif
