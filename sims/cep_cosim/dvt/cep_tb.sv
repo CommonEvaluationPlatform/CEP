@@ -158,69 +158,6 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // Tasks support "backdoor" read/write access from/to Main Memory
-  //
-  // They should only be accessed from the system thread given that they assert
-  // signals on the memory components vs internal methods (as was the case in the DDR
-  // memory).  Otherwise, you could potentially get multiple threads driving the same
-  // signals concurrently, which will have an unpredictable behavior.
-  //--------------------------------------------------------------------------------------  
-  // Writes data directly to the Scratchpad (Main) Memory
-  task write_mainmem_backdoor;
-    input [31:0] addr;
-    input [63:0] data;
-
-    begin
-    
-      // If the memory is in reset, wait for it to be released
-      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
-
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
-      // All backdoor memory access is 64-bit
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
-      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address = addr;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i       = data;
-
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
-      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
-      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
-      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
-      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
-
-      `logI("Main Mem Backdoor Write addr = 0x%x data = 0x%x", addr, data);
-
-    end
-  endtask // write_mainmem_backdoor
-
-  // Reads data directly from the Scratcpad (Main) Memory
-  task read_mainmem_backdoor;
-    input   [31:0] addr;
-    output  [63:0] data;
-
-    begin
-    
-      // If the memory is in reset, wait for it to be released
-      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
-
-      // Reads are registered
-      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
-      data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
-      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
-
-      `logI("Main Mem Backdoor Read addr = 0x%x data = 0x%x", addr, data);
-
-    end
-  endtask // read_mainmem_backdoor
-  //--------------------------------------------------------------------------------------
-
-
-
-  //--------------------------------------------------------------------------------------
   // Instantiation of the CEP Driver(s) which provide DPI interfaces to all four cores
   // Direct tilelink control is provided when BFM_MODE is enabled
   //--------------------------------------------------------------------------------------
@@ -234,8 +171,8 @@ module `COSIM_TB_TOP_MODULE;
   
  genvar c;
   generate
-    for (c = 0; c < 4; c++) begin : driverX  
-      cep_driver #(
+    for (c = 0; c < `MAX_CORES; c++) begin : cpuId
+      cpu_driver #(
         .MY_SLOT_ID   (0),
         .MY_CPU_ID    (c)
       ) driver (

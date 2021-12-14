@@ -14,14 +14,14 @@
 `define CEP_HIERMAP_INCL
 
 `define SYSTEM_DRIVER             `COSIM_TB_TOP_MODULE.v2c_inst
-`define SYSTEM_SIM_TIME           `SYSTEM_DRIVER.__simTime
-`define CORE0_DRIVER              `COSIM_TB_TOP_MODULE.driverX[0].driver
-`define CORE1_DRIVER              `COSIM_TB_TOP_MODULE.driverX[1].driver
-`define CORE2_DRIVER              `COSIM_TB_TOP_MODULE.driverX[2].driver
-`define CORE3_DRIVER              `COSIM_TB_TOP_MODULE.driverX[3].driver
+`define CORE0_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[0].driver
+`define CORE1_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[1].driver
+`define CORE2_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[2].driver
+`define CORE3_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[3].driver
 
 `define SYSTEM_RESET              `COSIM_TB_TOP_MODULE.sys_rst_n
 `define PROGRAM_LOADED            `SYSTEM_DRIVER.program_loaded
+`define SYSTEM_SIM_TIME           `SYSTEM_DRIVER.__simTime
 
 `define DVT_FLAG                  `SYSTEM_DRIVER.dvtFlags
 `define DUT_INST                  dut

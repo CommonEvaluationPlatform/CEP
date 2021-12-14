@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      cep_driver.sv
+// File Name:      cpu_driver.sv
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Provides the BFM_MODE connections between
 //                 the Tilelink masters and DPI mailboxes
@@ -20,7 +20,7 @@
 `include "v2c_cmds.incl"
 `include "v2c_top.incl"
 
-module cep_driver
+module cpu_driver
 (
   input               clk,
   input               reset,
@@ -644,4 +644,4 @@ module cep_driver
     endgenerate
   `endif //  `ifdef RISCV_TESTS
    
-endmodule // cep_driver
+endmodule // cpu_driver

@@ -210,8 +210,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
   return errCnt;
 } // load_mainMemory
 
-
-
 // Check PassFail
 int check_PassFail_status(int coreId,int maxTimeOut) {
   int errCnt = 0;

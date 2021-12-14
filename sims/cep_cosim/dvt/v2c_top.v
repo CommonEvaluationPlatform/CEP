@@ -45,7 +45,7 @@ module v2c_top (
       d[63:32] = inBox.mPar[0];
       d[31:0]  = inBox.mPar[1];
 
-      `COSIM_TB_TOP_MODULE.write_mainmem_backdoor(inBox.mAdr, d);
+      write_mainmem_backdoor(inBox.mAdr, d);
     end
   endtask // WRITE32_64_DPI
 
@@ -54,7 +54,7 @@ module v2c_top (
   task READ32_64_DPI;
     reg [63:0] d;
     begin
-      `COSIM_TB_TOP_MODULE.read_mainmem_backdoor(inBox.mAdr, d);      
+      read_mainmem_backdoor(inBox.mAdr, d);      
       
       inBox.mPar[0] = d[63:32];
       inBox.mPar[1] = d[31:0];      
@@ -134,8 +134,8 @@ module v2c_top (
     for (int i = 0; i < 15; i++) begin
       
       // MSWord of printer buffer is in the lowest memory position
-      `COSIM_TB_TOP_MODULE.read_mainmem_backdoor  (printf_addr + 8*i, printf_buf[64*(15 - i) +: 64]);
-      `COSIM_TB_TOP_MODULE.write_mainmem_backdoor (printf_addr + 8*i, 0);
+      read_mainmem_backdoor  (printf_addr + 8*i, printf_buf[64*(15 - i) +: 64]);
+      write_mainmem_backdoor (printf_addr + 8*i, 0);
 
     end // end for
 
@@ -237,6 +237,69 @@ module v2c_top (
     enableRdTrace = 1;            
     `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
   end
+  //--------------------------------------------------------------------------------------
+
+
+
+  //--------------------------------------------------------------------------------------
+  // Tasks support "backdoor" read/write access from/to Main Memory
+  //
+  // They should only be accessed from the system thread given that they assert
+  // signals on the memory components vs internal methods (as was the case in the DDR
+  // memory).  Otherwise, you could potentially get multiple threads driving the same
+  // signals concurrently, which will have an unpredictable behavior.
+  //--------------------------------------------------------------------------------------  
+  // Writes data directly to the Scratchpad (Main) Memory
+  task write_mainmem_backdoor;
+    input [31:0] addr;
+    input [63:0] data;
+
+    begin
+    
+      // If the memory is in reset, wait for it to be released
+      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
+
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      // All backdoor memory access is 64-bit
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
+      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i       = data;
+
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
+      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
+
+      `logI("Main Mem Backdoor Write addr = 0x%x data = 0x%x", addr, data);
+
+    end
+  endtask // write_mainmem_backdoor
+
+  // Reads data directly from the Scratcpad (Main) Memory
+  task read_mainmem_backdoor;
+    input   [31:0] addr;
+    output  [63:0] data;
+
+    begin
+    
+      // If the memory is in reset, wait for it to be released
+      if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
+
+      // Reads are registered
+      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
+      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
+      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
+
+      `logI("Main Mem Backdoor Read addr = 0x%x data = 0x%x", addr, data);
+
+    end
+  endtask // read_mainmem_backdoor
   //--------------------------------------------------------------------------------------
 
 

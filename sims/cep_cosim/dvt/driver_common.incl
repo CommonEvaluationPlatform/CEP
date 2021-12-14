@@ -6,7 +6,7 @@
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Defines items associated with the Core Driver Mailboxes
 //                 Each core instance has it's own mailbox
-// Notes:          To be included within the cep_driver.sv module after supported
+// Notes:          To be included within the cpu_driver.sv module after supported
 //                 tasks have been defined.
 //
 //--------------------------------------------------------------------------------------
