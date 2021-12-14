@@ -65,7 +65,7 @@ int access::Atomic_Rdw64(u_int64_t address, int param, int mask, u_int64_t *data
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_BURST mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_BURST mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Atomic_Rdw64(address,param,mask,data);
@@ -82,7 +82,7 @@ int access::Write64_BURST(u_int64_t address, int wordCnt, u_int64_t *data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_BURST mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_BURST mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data[0]);
   }
   ptr->Write64_BURST(address,wordCnt,data);
@@ -100,7 +100,7 @@ int access::Read64_BURST(u_int64_t address, int wordCnt, u_int64_t *data) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   ptr->Read64_BURST(address,wordCnt,data);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read32_32 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read32_32 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return errCnt;
@@ -112,7 +112,7 @@ void access::Write32_32(u_int32_t address, u_int32_t data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Write32_32(address,data);
@@ -128,7 +128,7 @@ void access::Write32_16(u_int32_t address, u_int16_t data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Write32_16(address,data);
@@ -144,7 +144,7 @@ void access::Write32_8(u_int32_t address, u_int8_t data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Write32_8(address,data);
@@ -161,7 +161,7 @@ void access::Write32_64(u_int32_t address, u_int64_t data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Write32_64(address,data);
@@ -176,7 +176,7 @@ void access::Write64_64(u_int64_t address, u_int64_t data) {
 #ifdef DLL_SIM  
 #else
   if (0) { // GetVerbose()) {
-    ptr->PrintVerbose("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
+    LOGI("access::Write64_64 mSlotId=%d mLocalId=%d address=%016llx dat=%016llx\n",
 		      mSlotId,mLocalId,address,data);
   }
   ptr->Write64_64(address,data);
@@ -192,7 +192,7 @@ void access::RunClk(int numClk) {
 #else
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   if (GetVerbose()) {
-    ptr->PrintVerbose("access::RunClk mSlotId=%d mLocalId=%d numClk=%d\n",mSlotId,mLocalId,numClk);
+    LOGI("access::RunClk mSlotId=%d mLocalId=%d numClk=%d\n",mSlotId,mLocalId,numClk);
   }
   ptr->RunClk(numClk);
 #endif
@@ -214,7 +214,7 @@ unsigned access::GetSimClk() {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   dat = (unsigned) ptr->GetSimClk();
   if (GetVerbose()) {
-    ptr->PrintPostVerbose("access::GetSimClk mSlotId=%d mLocalId=%d dat=%08x\n",mSlotId,mLocalId,dat);
+    LOGI("access::GetSimClk mSlotId=%d mLocalId=%d dat=%08x\n",mSlotId,mLocalId,dat);
   }
 #endif
 #else
@@ -232,7 +232,7 @@ u_int8_t access::Read32_8(u_int32_t address) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   data =  ptr->Read32_8(address);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read32_8 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read32_8 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return data;
@@ -244,7 +244,7 @@ u_int16_t access::Read32_16(u_int32_t address) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   data =  ptr->Read32_16(address);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read32_16 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read32_16 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return data;
@@ -256,7 +256,7 @@ u_int32_t access::Read32_32(u_int32_t address) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   data =  ptr->Read32_32(address);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read32_32 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read32_32 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return data;
@@ -268,7 +268,7 @@ u_int64_t access::Read32_64(u_int32_t address) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   data =  ptr->Read32_64(address);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read32_64 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read32_64 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return data;
@@ -279,7 +279,7 @@ u_int64_t access::Read64_64(u_int64_t address) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
   data =  ptr->Read64_64(address);
   if (0) { // GetVerbose()) {
-    ptr->PrintPostVerbose("access::Read64_64 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
+    LOGI("access::Read64_64 mSlotId=%d mLocalId=%d address=%08x dat=%016llx\n",mSlotId,mLocalId,address,data);
   }
 #endif
   return data;
@@ -291,7 +291,7 @@ int access::Framer_RdWr(u_int32_t address, u_int32_t wrDat, u_int32_t *rdDat) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     ptr->Framer_RdWr(address,wrDat,rdDat);
     if (0) { // GetVerbose()) {
-      ptr->PrintPostVerbose("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
+      LOGI("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
     }
 #endif
     return errCnt;
@@ -303,7 +303,7 @@ int access::Sample_RdWr(u_int32_t address, u_int64_t wrDat, u_int64_t *rdDat) {
   //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     ptr->Sample_RdWr(address,wrDat,rdDat);
     if (0) { // GetVerbose()) {
-      ptr->PrintPostVerbose("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
+      LOGI("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
     }
 #endif
     return errCnt;
@@ -357,7 +357,7 @@ void access::WriteDvtFlag(int msb, int lsb, int value) {
   } else {
     //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     //if (GetVerbose()) {
-    //  ptr->PrintVerbose("access::WriteDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
+    //  LOGI("access::WriteDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
     //}
     ptr->WriteDvtFlag(msb,lsb,value);
   }
@@ -381,7 +381,7 @@ u_int64_t access::ReadDvtFlag(int msb, int lsb) {
     //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     value = ptr->ReadDvtFlag(msb,lsb);
     //if (GetVerbose()) {
-    //ptr->PrintVerbose("access::ReadDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
+    //LOGI("access::ReadDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
     //}
   }
 #endif
@@ -408,7 +408,7 @@ int  access::SetInActiveStatus(void) {
   } else {
     //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     //if (GetVerbose()) {
-    //  ptr->PrintVerbose("access::WriteDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
+    //  LOGI("access::WriteDvtFlag mSlotId=%d mLocalId=%d %d:%d=%08x\n",mSlotId,mLocalId,msb,lsb,value);
     //}
     ptr->SetInActiveStatus();
   }
@@ -434,7 +434,7 @@ int access::ReadStatus() {
     //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     value = ptr->ReadStatus();
     //if (GetVerbose()) {
-    //  ptr->PrintVerbose("access::ReadStatus mSlotId=%d mLocalId=%d %08x\n",mSlotId,mLocalId,value);
+    //  LOGI("access::ReadStatus mSlotId=%d mLocalId=%d %08x\n",mSlotId,mLocalId,value);
     //}
   }
 #endif
@@ -462,7 +462,7 @@ int access::ReadErrorCount() {
     //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
     value = ptr->ReadErrorCount();
     if (GetVerbose()) {
-      ptr->PrintVerbose("access::ReadErrorCount mSlotId=%d mLocalId=%d %08x\n",mSlotId,mLocalId,value);
+      LOGI("access::ReadErrorCount mSlotId=%d mLocalId=%d %08x\n",mSlotId,mLocalId,value);
     }
   }
 #endif

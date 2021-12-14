@@ -74,7 +74,6 @@ COSIM_VSIM_ARGS	  			+= -cpppath ${GCC}
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
-COSIM_TB_TOP_FILE			:= ${DVT_DIR}/${COSIM_TB_TOP_MODULE}.sv
 COSIM_TB_CLOCK_PERIOD       := 5000
 COSIM_TB_RESET_DELAY		:= 777.7
 
@@ -89,7 +88,6 @@ COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
-								${BHV_DIR} \
 								${CHIPYARD_BLD_DIR}
 
 CHIPYARD_TOP_FILE_bfm		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bfm.v
@@ -145,7 +143,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
@@ -153,7 +151,6 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
-	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
 else
 # Bare Metal Mode
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
@@ -161,7 +158,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@for i in $(shell ls -x ${BHV_DIR}/*.{v,sv} 2>/dev/null); do \
+	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
@@ -169,7 +166,6 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
-	@echo ${COSIM_TB_TOP_FILE} >> ${COSIM_BUILD_LIST}
 endif
 #--------------------------------------------------------------------------------------
 
@@ -206,16 +202,16 @@ set StdArithNoWarnings 1
 # they are called from inside Verilog
 #
 proc wave_on {} {
-     echo "Enable logging";	
+     echo "vsim.do: Enable logging";	
      log -ports -r /* ;
 }
 
 proc wave_off {} {
-     echo "Stop logging"	
+     echo "vsim.do: Stop logging"	
      nolog -all;
 }
 proc dump_coverage {} {
-     echo "Dumping Coverage";
+     echo "vsim.do: Dumping Coverage";
      coverage save ../coverage/${TEST_NAME}.ucdb
 }
 #

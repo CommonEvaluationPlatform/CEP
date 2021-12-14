@@ -27,32 +27,7 @@
 `define DUT_INST                  dut
 `define DUT_TOP_LEVEL             `COSIM_TB_TOP_MODULE.`DUT_INST
 
-// Path to the four RocketTile Cores within the Chisel-generate verilog hiearchy
-`define CORE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
-`define CORE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
-`define CORE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
-`define CORE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
-
-// Paths to RocketTile constructs in Bare Metal Mode 
-`define CORE0_PC                  `CORE0_PATH.core.coreMonitorBundle_pc
-`define CORE1_PC                  `CORE1_PATH.core.coreMonitorBundle_pc
-`define CORE2_PC                  `CORE2_PATH.core.coreMonitorBundle_pc
-`define CORE3_PC                  `CORE3_PATH.core.coreMonitorBundle_pc
-`define CORE0_VALID               `CORE0_PATH.core.coreMonitorBundle_valid
-`define CORE1_VALID               `CORE1_PATH.core.coreMonitorBundle_valid
-`define CORE2_VALID               `CORE2_PATH.core.coreMonitorBundle_valid
-`define CORE3_VALID               `CORE3_PATH.core.coreMonitorBundle_valid
-
-// Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
-`define CORE0_TL_PATH             `CORE0_PATH.tl_master
-`define CORE1_TL_PATH             `CORE1_PATH.tl_master
-`define CORE2_TL_PATH             `CORE2_PATH.tl_master
-`define CORE3_TL_PATH             `CORE3_PATH.tl_master
-
-`define PBUS_RESET                `DUT_TOP_LEVEL.system.subsystem_pbus_clock
-`define PBUS_CLOCK                `DUT_TOP_LEVEL.system.subsystem_pbus_reset
-`define DEBUG_NDRESET             `DUT_TOP_LEVEL.system.debug_systemjtag_reset
-  
+// Paths to CEP-specific modules
 `define SROT_PATH                 `DUT_TOP_LEVEL.system.srotmodule
 `define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256module
 `define RSA_PATH                  `DUT_TOP_LEVEL.system.rsamodule
@@ -67,6 +42,32 @@
 `define SCRATCHPAD_PATH           `DUT_TOP_LEVEL.system.scratchpadmodule
 `define SCRATCHPAD_WRAPPER_PATH   `SCRATCHPAD_PATH.scratchpad_wrapper_inst
 `define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
+
+// Paths to RocketTile constructs in Bare Metal Mode 
+`ifdef BARE_MODE
+	`define CORE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
+	`define CORE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
+	`define CORE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
+	`define CORE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
+	`define CORE0_PC                  `CORE0_PATH.core.coreMonitorBundle_pc
+	`define CORE1_PC                  `CORE1_PATH.core.coreMonitorBundle_pc
+	`define CORE2_PC                  `CORE2_PATH.core.coreMonitorBundle_pc
+	`define CORE3_PC                  `CORE3_PATH.core.coreMonitorBundle_pc
+	`define CORE0_VALID               `CORE0_PATH.core.coreMonitorBundle_valid
+	`define CORE1_VALID               `CORE1_PATH.core.coreMonitorBundle_valid
+	`define CORE2_VALID               `CORE2_PATH.core.coreMonitorBundle_valid
+	`define CORE3_VALID               `CORE3_PATH.core.coreMonitorBundle_valid
+	`define CORE0_TL_PATH             `CORE0_PATH.tl_master
+	`define CORE1_TL_PATH             `CORE1_PATH.tl_master
+	`define CORE2_TL_PATH             `CORE2_PATH.tl_master
+	`define CORE3_TL_PATH             `CORE3_PATH.tl_master
+`endif
+
+// Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
+`define PBUS_RESET                `DUT_TOP_LEVEL.system.subsystem_pbus_clock
+`define PBUS_CLOCK                `DUT_TOP_LEVEL.system.subsystem_pbus_reset
+`define DEBUG_NDRESET             `DUT_TOP_LEVEL.system.debug_systemjtag_reset
+  
 
 `define MODEXP_RESET_N            `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
 `define MODEXP_CLK                `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.clk

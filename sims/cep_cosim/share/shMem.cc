@@ -90,25 +90,24 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
   // NOW ATTACH IT
   segptr = (shIpc *) shmat(shmid, (void *)  0, 0);
   if ((unsigned long)segptr == -1) {
-    printf("%s:Failed to attach Shared memory segment with mKey=%x shmid=%x\n",(asClient) ? "Client" : "Initiator",
-	 mKey,shmid);
+    printf("%s: %s: Failed to attach Shared memory segment with mKey=%x shmid=%x\n", __FUNCTION__, (asClient) ? "Client" : "Initiator", mKey, shmid);
     exit(2);
   }
   //GlobalShMemory = *this; // make a copy to global space
   // if initiator send mKey to client
   if (!ClientFlag) {
     // init share memory
-    printf("master: shMem->InitMe\n");
+    printf("%s: master: shMem->InitMe\n", __FUNCTION__);
     for (int s=0;s<MAX_SHIPC;s++) {
       (segptr+s)->InitMe(GET_SLOTID(s),GET_CPUID(s));
     }
-    printf("master: shMem->InitMe Done\n");      
+    printf("%s: master: shMem->InitMe Done\n", __FUNCTION__);
   } else {
-    LOGI("Client: %s\n",(segptr+8)->GetStr());
+    LOGI("%s: Client: shMem->InitMe Done\n",__FUNCTION__);
   }
-  printf("%s:shMem OK GlobalShMemory=0x%x segptr=0x%x seed=%x mKey=0x%x shmid=0x%x Size=%d\n",
-       (asClient) ? "Client" : "Initiator",(unsigned long)&GlobalShMemory, (unsigned long) segptr,
-       seedOrKey_key,mKey,shmid, (size_t) (MAX_SHIPC * sizeof(shIpc)));
+  // printf("%s:shMem OK GlobalShMemory=0x%x segptr=0x%x seed=%x mKey=0x%x shmid=0x%x Size=%d\n",
+  //      (asClient) ? "Client" : "Initiator", (unsigned long)&GlobalShMemory, (unsigned long) segptr,
+  //      seedOrKey_key,mKey,shmid, (size_t) (MAX_SHIPC * sizeof(shIpc)));
   
 #endif
 }

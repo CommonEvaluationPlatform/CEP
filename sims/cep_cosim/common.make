@@ -81,7 +81,6 @@ SHR_DIR						:= ${COSIM_TOP_DIR}/share
 PLI_DIR						:= ${COSIM_TOP_DIR}/pli
 DVT_DIR         			:= ${COSIM_TOP_DIR}/dvt
 DRIVERS_DIR					:= ${COSIM_TOP_DIR}/drivers
-BHV_DIR         			:= ${DVT_DIR}/behav_models
 LIB_DIR						:= ${COSIM_TOP_DIR}/lib
 
 # More variables and paths

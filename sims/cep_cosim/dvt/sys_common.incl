@@ -13,6 +13,7 @@
 // DVT
 reg [255:0]     dvtFlags;
 reg             ipcDelay = 1;
+
 initial begin
    dvtFlags = 0;
 end

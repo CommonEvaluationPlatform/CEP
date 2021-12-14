@@ -229,15 +229,12 @@ module `COSIM_TB_TOP_MODULE;
   reg [3:0]   enableMask = 0;
   wire [3:0]  passMask;
 
+  // Enable all the CPU Drivers
   initial begin
-    #1 enableMask = 'hF; // or contrtol from C side
+    #1 enableMask = 'hF;
   end
   
-  always @(passMask) begin
-    `logI("**** passMask=0x%x *****\n", passMask);
-  end
-  
-  genvar c;
+ genvar c;
   generate
     for (c = 0; c < 4; c++) begin : driverX  
       cep_driver #(

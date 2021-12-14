@@ -39,21 +39,21 @@
   integer waveOnStartCycle  = 0;
   integer waveonCycleDump   = -1;
 
-  always @(posedge dvtFlags[`DVTF_WAVE_START_CYCLE]) begin
-    waveOnStartCycle = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
+  always @(posedge `DVT_FLAG[`DVTF_WAVE_START_CYCLE]) begin
+    waveOnStartCycle = `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO];
     `logI("waveOnStartCycle = %0d", waveOnStartCycle);      
-    dvtFlags[`DVTF_WAVE_START_CYCLE]=0;
+    `DVT_FLAG[`DVTF_WAVE_START_CYCLE]=0;
   end
 
-  always @(posedge dvtFlags[`DVTF_WAVE_CYCLE2DUMP]) begin
-    waveonCycleDump = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
+  always @(posedge `DVT_FLAG[`DVTF_WAVE_CYCLE2DUMP]) begin
+    waveonCycleDump = `DVT_FLAG[`DVTF_PAT_HI:`DVTF_PAT_LO];
     `logI("==== waveonCycleDump = %0d", waveonCycleDump);   
-    dvtFlags[`DVTF_WAVE_CYCLE2DUMP]=0;
+    `DVT_FLAG[`DVTF_WAVE_CYCLE2DUMP]=0;
   end
 
-  always @(posedge dvtFlags[`DVTF_WAVE_ON]) begin
+  always @(posedge `DVT_FLAG[`DVTF_WAVE_ON]) begin
     waveDumpFlag = 1;
-    dvtFlags[`DVTF_WAVE_ON] = 0;
+    `DVT_FLAG[`DVTF_WAVE_ON] = 0;
   end
 
   always @(posedge waveDumpFlag) begin
