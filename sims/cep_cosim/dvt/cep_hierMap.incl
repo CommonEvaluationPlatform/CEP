@@ -68,10 +68,5 @@
 `define PBUS_RESET                `DUT_TOP_LEVEL.system.subsystem_pbus_clock
 `define PBUS_CLOCK                `DUT_TOP_LEVEL.system.subsystem_pbus_reset
 `define DEBUG_NDRESET             `DUT_TOP_LEVEL.system.debug_systemjtag_reset
-  
-
-`define MODEXP_RESET_N            `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.reset_n
-`define MODEXP_CLK                `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.clk
-`define MODEXP_EXP_MODE_REG       `RSA_PATH.modexp_core_mock_tss_inst.modexp_core_inst.exponation_mode_reg
 
 `endif // CEP_HIERMAP_INCL

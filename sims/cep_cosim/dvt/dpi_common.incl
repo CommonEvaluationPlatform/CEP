@@ -49,7 +49,6 @@ reg         __shIpc_InProcess;
 reg         __shIpc_Time2Shutdown;
 reg [31:0]  __shIpc_Status;
 reg         __shIpc_CheckpointEnable;
-reg         __shIpc_Delay;
 reg [31:0]  __simTime;
 
 initial begin
@@ -71,7 +70,6 @@ initial begin
   __shIpc_Time2Shutdown     = 0;    
   __shIpc_Status            = 0;
   __shIpc_CheckpointEnable  = 0;
-  __shIpc_Delay             = 1;
   __simTime                 = 0;
 
   // MY_SLOT_ID and MY_CPU_ID must be defined by the driver including this file
@@ -361,10 +359,11 @@ always @(posedge __shIpc_EnableMode) begin
       send_v2c_mail(__mSlotId, __mCpuId, inBox);
       
     // end if (inBox.mCmdValid)
-    // If no command is detected, then wait for a clock.  The system driver has the option
-    // of disabling this delay to accelerate backdoor memory loading
-    end else if (__shIpc_Delay) begin      
-      @(posedge `SHIPC_CLK); // wait 1 clock 
+    // If no command is detected, then have the driver wait for a clock.
+    // Otherwise, the simulation will lock up because of the continuous
+    // zero simulation time polling via get_v2c_mail
+    end else begin      
+      @(posedge `SHIPC_CLK);
     end // else if (ipcDelay)
 
   end // while

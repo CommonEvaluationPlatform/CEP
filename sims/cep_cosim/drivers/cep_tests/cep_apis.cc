@@ -124,9 +124,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     if (fd == NULL) {
       printf("Can't open file %s\n",imageF);
       return 1;
-    } else {
-      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 0);
-      DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
     }
 
     // Read from the file and load into the memory (via backdoor if enabled)
@@ -194,10 +191,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     for (int i = 0; i < MAX_CORES; i++)
       clear_printf_mem(i);
   
-    // Restore clocking of IPC
-    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
-    DUT_WRITE_DVT(DVTF_SET_IPC_DELAY, DVTF_SET_IPC_DELAY, 1);
-
     // Indicate that a program has been loaded (assuming there was no error)
     if (!errCnt) {
       LOGI("%s: Setting program loaded flag\n", __FUNCTION__);

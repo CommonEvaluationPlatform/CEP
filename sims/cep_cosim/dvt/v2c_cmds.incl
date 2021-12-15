@@ -118,7 +118,6 @@
 `define DVTF_SET_PROGRAM_LOADED               87
 `define DVTF_GET_PROGRAM_LOADED               88
 `define DVTF_PRINTF_CMD                       89
-`define DVTF_SET_IPC_DELAY                    90
 
 // Constants related to Cycle-level vector capture, which
 // is no longer supported in the CEP co-simulation environment

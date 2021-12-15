@@ -163,13 +163,7 @@ module system_driver (
     
     dvtFlags[`DVTF_PRINTF_CMD] = 0;
   end // end always
-  
-  always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
-    `logI("Setting ipcDelay to %0d", __shIpc_Delay);
-    __shIpc_Delay = dvtFlags[`DVTF_PAT_LO];
-    dvtFlags[`DVTF_SET_IPC_DELAY] = 0;
-  end
-  
+    
   always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
     `logI("Program is now loaded");
     program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
