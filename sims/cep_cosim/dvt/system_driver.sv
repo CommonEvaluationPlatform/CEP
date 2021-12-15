@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      v2c_top.v
+// File Name:      system_driver.sv
 // Program:        Common Evaluation Platform (CEP)
 // Description:    System Level testbench driver
 // Notes:          
@@ -15,8 +15,9 @@
 `include "v2c_cmds.incl"
 `include "v2c_top.incl"
 
-module v2c_top (
-  input               clk
+module system_driver (
+  input               clk,
+  input               enableMe
 );
 
   parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
@@ -111,10 +112,12 @@ module v2c_top (
   // These includes must remain within the verilog module and
   // is dependent on the SHIPC_CLK macro.
   //--------------------------------------------------------------------------------------
-  `define   SHIPC_CLK   clk
-  `include "sys_common.incl"
-  `include "dump_control.incl"      
-  `undef    SHIPC_CLK
+  `define     SHIPC_XACTOR_ID     MY_CPU_ID
+  `define     SHIPC_CLK           clk
+  `include    "dpi_common.incl"
+  `include    "dump_control.incl"      
+  `undef      SHIPC_CLK
+  `undef      SHIPC_XACTOR_ID      
   //--------------------------------------------------------------------------------------
 
 

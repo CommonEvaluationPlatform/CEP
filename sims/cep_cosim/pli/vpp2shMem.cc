@@ -81,17 +81,16 @@ void vpp_isCActive() {
 }
 
 void vpp_WaitTilStart() {
-  //acc_initialize();
-  // get slot ID, cpuId
-  int slotId = tf_getp ( 1 );
-  int cpuId = tf_getp ( 2 );
+
+  // Get slot and CPU ID
+  int slotId  = tf_getp ( 1 );
+  int cpuId   = tf_getp ( 2 );
+  
   // check if there is a command
-  shIpc *ptr = GlobalShMemory.getIpcPtr(slotId,cpuId);
+  shIpc *ptr = GlobalShMemory.getIpcPtr(slotId, cpuId);
   shIpc *localPtr = ptr;
-  //
-  //io_printf((char *)"%s Entering slotId=%d cpuId=%d\n",tf_mipname(),slotId,cpuId);  
+ 
   if (ptr->SlotCheckOK(slotId,cpuId)) {
-    //    int __shIpc_cmdValid =  ptr->IsCmdValid();
     ptr->WaitTilStart();
   }
 }

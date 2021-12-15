@@ -177,7 +177,6 @@ module `COSIM_TB_TOP_MODULE;
         .MY_CPU_ID    (c)
       ) driver (
         .clk          (sys_clk_i      ),  
-        .reset        (~sys_rst_n     ),
         .enableMe     (enableMask[c]  )
       );
 
@@ -186,8 +185,9 @@ module `COSIM_TB_TOP_MODULE;
   endgenerate
 
   // Instantiate the "System" driver (which is ALWAYS enabled)
-  v2c_top v2c_inst(
-    .clk        (sys_clk_i)
+  system_driver system_driver (
+    .clk        (sys_clk_i),
+    .enableMe   (1'b1)
   );
   //--------------------------------------------------------------------------------------
   

@@ -169,6 +169,7 @@ int shPthread::AddSysThread(int slotId, int cpuId) {
 #endif
   return errCnt;
 }
+
 void shPthread::Shutdown() {
   shIpc *sysptr = GlobalShMemory.getIpcPtr(GetSystemThreadOffset());
   printf("Enter %s\n",__FUNCTION__);

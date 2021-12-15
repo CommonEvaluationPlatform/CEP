@@ -23,7 +23,6 @@
 module cpu_driver
 (
   input               clk,
-  input               reset,
   input               enableMe
 );
 
@@ -40,6 +39,7 @@ module cpu_driver
   reg                 clear = 0;
   integer             cnt;
   string              str;
+  reg                 ipcDelay       = 0;
   
   //--------------------------------------------------------------------------------------
   // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
@@ -386,12 +386,12 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // SHIPC Support Common Codes
   //--------------------------------------------------------------------------------------
-  `define   SHIPC_XACTOR_ID  MY_CPU_ID
-  `define   SHIPC_CLK   clk
-  `include "driver_common.incl"
-  `undef    SHIPC_CLK
-  `undef    SHIPC_XACTOR_ID      
-  //--------------------------------------------------------------------------------------
+  `define     SHIPC_XACTOR_ID     MY_CPU_ID
+  `define     SHIPC_CLK           clk
+  `include    "dpi_common.incl"
+  `undef      SHIPC_CLK
+  `undef      SHIPC_XACTOR_ID      
+ //--------------------------------------------------------------------------------------
  
 
 
@@ -440,50 +440,51 @@ module cpu_driver
           `logI("Forcing CORE#0 in reset...");
           
           `ifdef BARE_MODE
-            force `CORE0_PATH.core.reset =1;
+            force `CPU0_PATH.core.reset =1;
           `endif
            
           `ifdef BFM_MODE
-            force `CORE0_PATH.reset =1;
+            force `CPU0_PATH.reset =1;
           `endif
         end
         1: begin
           `logI("Forcing CORE#1 in reset...");
 
           `ifdef BARE_MODE
-            force `CORE1_PATH.core.reset =1;
+            force `CPU1_PATH.core.reset =1;
           `endif
     
           `ifdef BFM_MODE
-            force `CORE1_PATH.reset =1;
+            force `CPU1_PATH.reset =1;
           `endif        
         end
         2: begin
           `logI("Forcing CORE#2 in reset...");
     
           `ifdef BARE_MODE
-            force `CORE2_PATH.core.reset =1;
+            force `CPU2_PATH.core.reset =1;
           `endif
     
           `ifdef BFM_MODE
-            force `CORE2_PATH.reset =1;
+            force `CPU2_PATH.reset =1;
           `endif        
         end
         3: begin
           `logI("Forcing CORE#3 in reset...");
    
           `ifdef BARE_MODE
-            force `CORE3_PATH.core.reset =1;
+            force `CPU3_PATH.core.reset =1;
           `endif
             
             `ifdef BFM_MODE
-              force `CORE3_PATH.reset =1;
+              force `CPU3_PATH.reset =1;
             `endif        
         end     
       endcase // case (MY_CPU_ID)
     end
   endtask
   //-------------------------------------------------------------------------------------- 
+
 
 
   //--------------------------------------------------------------------------------------
@@ -517,10 +518,10 @@ module cpu_driver
     // Get core reset status    
     always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
       case (MY_CPU_ID)      
-        0: dvtFlags[`DVTF_PAT_LO] = `CORE0_PATH.core.reset;
-        1: dvtFlags[`DVTF_PAT_LO] = `CORE1_PATH.core.reset;
-        2: dvtFlags[`DVTF_PAT_LO] = `CORE2_PATH.core.reset;
-        3: dvtFlags[`DVTF_PAT_LO] = `CORE3_PATH.core.reset;
+        0: dvtFlags[`DVTF_PAT_LO] = `CPU0_PATH.core.reset;
+        1: dvtFlags[`DVTF_PAT_LO] = `CPU1_PATH.core.reset;
+        2: dvtFlags[`DVTF_PAT_LO] = `CPU2_PATH.core.reset;
+        3: dvtFlags[`DVTF_PAT_LO] = `CPU3_PATH.core.reset;
       endcase
       dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
     end
@@ -571,77 +572,78 @@ module cpu_driver
     generate
       if (MY_CPU_ID == 0) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CORE0_PATH.core.reset == 0) begin
+          if (`CPU0_PATH.core.reset == 0) begin
             `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin
               repeat (20) @(posedge clk);
-              force `CORE0_PATH.core.reset =1;
+              force `CPU0_PATH.core.reset =1;
             end
           end
         end // end always
    
         assign curPc       = `CORE0_PC;
         assign curValid    = `CORE0_VALID;
-        assign coreInReset = `CORE0_PATH.core.reset;
-        assign pcValid     = `CORE0_PATH.core.csr_io_trace_0_valid && `CORE0_PATH.core._T_1481;   
+        assign coreInReset = `CPU0_PATH.core.reset;
+        assign pcValid     = `CPU0_PATH.core.csr_io_trace_0_valid && `CPU0_PATH.core._T_1481;   
    
       end else if (MY_CPU_ID == 1) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CORE1_PATH.core.reset == 0) begin      
+          if (`CPU1_PATH.core.reset == 0) begin      
             `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);        
-              force `CORE1_PATH.core.reset =1;
+              force `CPU1_PATH.core.reset =1;
             end
           end
         end // end always
    
         assign curPc       = `CORE1_PC;
         assign curValid    = `CORE1_VALID;
-        assign coreInReset = `CORE1_PATH.core.reset;
-        assign pcValid     = `CORE1_PATH.core.csr_io_trace_0_valid && `CORE1_PATH.core._T_1481;     
+        assign coreInReset = `CPU1_PATH.core.reset;
+        assign pcValid     = `CPU1_PATH.core.csr_io_trace_0_valid && `CPU1_PATH.core._T_1481;     
       
       end else if (MY_CPU_ID == 2) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CORE2_PATH.core.reset == 0) begin      
+          if (`CPU2_PATH.core.reset == 0) begin      
             `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);
-              force `CORE2_PATH.core.reset =1;
+              force `CPU2_PATH.core.reset =1;
             end
           end
         end // end always
    
         assign curPc       = `CORE2_PC;
         assign curValid    = `CORE2_VALID;
-        assign coreInReset = `CORE2_PATH.core.reset;
-        assign pcValid     = `CORE2_PATH.core.csr_io_trace_0_valid && `CORE2_PATH.core._T_1481;     
+        assign coreInReset = `CPU2_PATH.core.reset;
+        assign pcValid     = `CPU2_PATH.core.csr_io_trace_0_valid && `CPU2_PATH.core._T_1481;     
     
       end else if (MY_CPU_ID == 3) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CORE3_PATH.core.reset == 0) begin      
+          if (`CPU3_PATH.core.reset == 0) begin      
             `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);     
-              force `CORE3_PATH.core.reset =1;
+              force `CPU3_PATH.core.reset =1;
             end
           end
         end // end always
     
         assign curPc       = `CORE3_PC;
         assign curValid    = `CORE3_VALID;
-        assign coreInReset = `CORE3_PATH.core.reset;
-        assign pcValid     = `CORE3_PATH.core.csr_io_trace_0_valid && `CORE3_PATH.core._T_1481;     
+        assign coreInReset = `CPU3_PATH.core.reset;
+        assign pcValid     = `CPU3_PATH.core.csr_io_trace_0_valid && `CPU3_PATH.core._T_1481;     
       end  // end if MY_CPU_ID
     endgenerate
   `endif //  `ifdef RISCV_TESTS
+  //--------------------------------------------------------------------------------------
    
 endmodule // cpu_driver

@@ -13,11 +13,11 @@
 `ifndef CEP_HIERMAP_INCL
 `define CEP_HIERMAP_INCL
 
-`define SYSTEM_DRIVER             `COSIM_TB_TOP_MODULE.v2c_inst
-`define CORE0_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[0].driver
-`define CORE1_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[1].driver
-`define CORE2_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[2].driver
-`define CORE3_DRIVER              `COSIM_TB_TOP_MODULE.cpuId[3].driver
+`define SYSTEM_DRIVER             `COSIM_TB_TOP_MODULE.system_driver
+`define CPU0_DRIVER               `COSIM_TB_TOP_MODULE.cpuId[0].driver
+`define CPU1_DRIVER               `COSIM_TB_TOP_MODULE.cpuId[1].driver
+`define CPU2_DRIVER               `COSIM_TB_TOP_MODULE.cpuId[2].driver
+`define CPU3_DRIVER               `COSIM_TB_TOP_MODULE.cpuId[3].driver
 
 `define SYSTEM_RESET              `COSIM_TB_TOP_MODULE.sys_rst_n
 `define PROGRAM_LOADED            `SYSTEM_DRIVER.program_loaded
@@ -45,22 +45,22 @@
 
 // Paths to RocketTile constructs in Bare Metal Mode 
 `ifdef BARE_MODE
-  `define CORE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
-  `define CORE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
-  `define CORE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
-  `define CORE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
-  `define CORE0_PC                  `CORE0_PATH.core.coreMonitorBundle_pc
-  `define CORE1_PC                  `CORE1_PATH.core.coreMonitorBundle_pc
-  `define CORE2_PC                  `CORE2_PATH.core.coreMonitorBundle_pc
-  `define CORE3_PC                  `CORE3_PATH.core.coreMonitorBundle_pc
-  `define CORE0_VALID               `CORE0_PATH.core.coreMonitorBundle_valid
-  `define CORE1_VALID               `CORE1_PATH.core.coreMonitorBundle_valid
-  `define CORE2_VALID               `CORE2_PATH.core.coreMonitorBundle_valid
-  `define CORE3_VALID               `CORE3_PATH.core.coreMonitorBundle_valid
-  `define CORE0_TL_PATH             `CORE0_PATH.tl_master
-  `define CORE1_TL_PATH             `CORE1_PATH.tl_master
-  `define CORE2_TL_PATH             `CORE2_PATH.tl_master
-  `define CORE3_TL_PATH             `CORE3_PATH.tl_master
+  `define CPU0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
+  `define CPU1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
+  `define CPU2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
+  `define CPU3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
+  `define CPU0_PC                  `CPU0_PATH.core.coreMonitorBundle_pc
+  `define CPU1_PC                  `CPU1_PATH.core.coreMonitorBundle_pc
+  `define CPU2_PC                  `CPU2_PATH.core.coreMonitorBundle_pc
+  `define CPU3_PC                  `CPU3_PATH.core.coreMonitorBundle_pc
+  `define CPU0_VALID               `CPU0_PATH.core.coreMonitorBundle_valid
+  `define CPU1_VALID               `CPU1_PATH.core.coreMonitorBundle_valid
+  `define CPU2_VALID               `CPU2_PATH.core.coreMonitorBundle_valid
+  `define CPU3_VALID               `CPU3_PATH.core.coreMonitorBundle_valid
+  `define CPU0_TL_PATH             `CPU0_PATH.tl_master
+  `define CPU1_TL_PATH             `CPU1_PATH.tl_master
+  `define CPU2_TL_PATH             `CPU2_PATH.tl_master
+  `define CPU3_TL_PATH             `CPU3_PATH.tl_master
 `endif
 
 // Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
