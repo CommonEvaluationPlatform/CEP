@@ -186,6 +186,7 @@ VMAKE_CMD					= ${QUESTASIM_PATH}/vmake
 VCOVER_CMD					= ${QUESTASIM_PATH}/vcover
 VSIM_DO_FILE				= ${TEST_DIR}/vsim.do
 COMPILE_LOGFILE				:= ${TEST_DIR}/${TEST_NAME}_questa_compile.log
+OPTIMIZATION_LOGFILE		:= ${TEST_DIR}/${TEST_NAME}_questa_opt.log
 SIMULATION_LOGFILE			:= ${TEST_DIR}/${TEST_NAME}_questa_sim.log
 
 # Quick sanity check if vsim exists
@@ -257,7 +258,7 @@ buildVlog: ${TEST_SUITE_DIR}/.buildVlog
 
 # Perform Questasim's optimization
 ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.buildVlog
-	${VOPT_CMD} -work ${WORK_DIR} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE} -o ${COSIM_TB_TOP_MODULE_OPT}
+	${VOPT_CMD} -work ${WORK_DIR} -l ${OPTIMIZATION_LOGFILE} ${COSIM_VOPT_ARGS} ${WORK_DIR}.${COSIM_TB_TOP_MODULE} -o ${COSIM_TB_TOP_MODULE_OPT}
 	touch $@
 
 # Establish the MODELSIM command line for running simulation (which will be override when operating in CADENCE mode)

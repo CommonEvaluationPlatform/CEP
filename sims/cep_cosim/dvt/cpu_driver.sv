@@ -27,19 +27,19 @@ module cpu_driver
 );
 
   // Overriden at instantiation
-  parameter MY_SLOT_ID    = 4'h0;
-  parameter MY_CPU_ID     = 4'h0;
+  parameter MY_SLOT_ID    				= 4'h0;
+  parameter MY_CPU_ID     				= 4'h0;
 
-  reg [255:0]         dvtFlags = 0;
+  reg [255:0]         dvtFlags 			= 0;
   reg [255:0]         r_data;
   reg [31:0]          printf_addr;
   reg [1:0]           printf_coreId;
-  reg [(128*8)-1:0]   printf_buf;     // 128 bytes
+  reg [(128*8)-1:0]   printf_buf;
   reg [(128*8)-1:0]   tmp;
-  reg                 clear = 0;
+  reg                 clear 			= 0;
   integer             cnt;
   string              str;
-  reg                 ipcDelay       = 0;
+  reg                 program_loaded    = 0;
   
   //--------------------------------------------------------------------------------------
   // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
@@ -396,7 +396,7 @@ module cpu_driver
 
 
   //--------------------------------------------------------------------------------------
-  // Misc support functions
+  // DVT Flag Processing
   //--------------------------------------------------------------------------------------
   always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
 

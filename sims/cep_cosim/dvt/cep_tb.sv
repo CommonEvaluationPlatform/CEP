@@ -158,8 +158,7 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // Instantiation of the CEP Driver(s) which provide DPI interfaces to all four cores
-  // Direct tilelink control is provided when BFM_MODE is enabled
+  // Instantiation of the System and CPU Drivers
   //--------------------------------------------------------------------------------------
   reg [3:0]   enableMask = 0;
   wire [3:0]  passMask;
@@ -185,7 +184,10 @@ module `COSIM_TB_TOP_MODULE;
   endgenerate
 
   // Instantiate the "System" driver (which is ALWAYS enabled)
-  system_driver system_driver (
+  system_driver #(
+        .MY_SLOT_ID   (`SYSTEM_SLOT_ID),
+        .MY_CPU_ID    (`SYSTEM_CPU_ID)
+  ) system_driver (
     .clk        (sys_clk_i),
     .enableMe   (1'b1)
   );

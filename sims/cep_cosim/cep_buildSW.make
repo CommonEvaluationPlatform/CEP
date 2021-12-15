@@ -9,11 +9,8 @@
 #
 #--------------------------------------------------------------------------------------
 
-# BFM Mode
-ifeq "${DUT_SIM_MODE}" "BFM_MODE"
-COMMON_CFLAGS	        += -DBFM_MODE
-# BARE Metal Mode (RISCV_BARE_CFLAGS passes the BARE_MODE define to the appropriate compilations)
-else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
+# If operating in Bare Metal mode, pass the RISCV wrapper name to the compiler
+ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 RISCV_WRAPPER           = ./riscv_wrapper.elf
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
 endif

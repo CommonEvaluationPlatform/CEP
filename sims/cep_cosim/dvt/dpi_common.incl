@@ -49,14 +49,10 @@ reg         __shIpc_InProcess;
 reg         __shIpc_Time2Shutdown;
 reg [31:0]  __shIpc_Status;
 reg         __shIpc_CheckpointEnable;
+reg         __shIpc_Delay;
 reg [31:0]  __simTime;
 
 initial begin
-
-  // MY_SLOT_ID and MY_CPU_ID must be defined by the driver including this file
-  #1 __mSlotId              = MY_SLOT_ID;
-  __mCpuId                  = MY_CPU_ID;
-
   __shIpc_cmd               = 0;
   __shIpc_address           = 0;
   __shIpc_p0                = 0;
@@ -75,7 +71,12 @@ initial begin
   __shIpc_Time2Shutdown     = 0;    
   __shIpc_Status            = 0;
   __shIpc_CheckpointEnable  = 0;
+  __shIpc_Delay             = 1;
   __simTime                 = 0;
+
+  // MY_SLOT_ID and MY_CPU_ID must be defined by the driver including this file
+  #1 __mSlotId              = MY_SLOT_ID;
+  __mCpuId                  = MY_CPU_ID;
 end
 
 // Advance the simulation time (`SYSTEM_SIM_TIME as defined in cep_hierMap.incl is used
@@ -335,6 +336,7 @@ always @(posedge __shIpc_EnableMode) begin
     __shIpc_cmdValid            = inBox.mCmdValid;
     __shIpc_Active              = inBox.mActive;
 
+
     // Is the thread done?
     if (__shIpc_InProcess && !__shIpc_Active) begin
       __shIpc_EnableMode        = 0; 
@@ -358,8 +360,10 @@ always @(posedge __shIpc_EnableMode) begin
       // Send the response
       send_v2c_mail(__mSlotId, __mCpuId, inBox);
       
-    // end if valid
-    end else if (ipcDelay) begin // to help speedup backdoor loading
+    // end if (inBox.mCmdValid)
+    // If no command is detected, then wait for a clock.  The system driver has the option
+    // of disabling this delay to accelerate backdoor memory loading
+    end else if (__shIpc_Delay) begin      
       @(posedge `SHIPC_CLK); // wait 1 clock 
     end // else if (ipcDelay)
 
@@ -419,12 +423,13 @@ always @(posedge enableMe) begin
   $vpp_isCActive(`SHIPC_XACTOR_ID, myIsActive);
   if (myIsActive) begin
     // wait until C-side is alive
-    `logI("Calling $vpp_WaitTilStart slot = %0d cpu = %0d", MY_SLOT_ID, MY_CPU_ID);
 
     // The System Slot/Driver does not wait to start
-    if (MY_SLOT_ID != `SYSTEM_SLOT_ID)
+    if (MY_SLOT_ID != `SYSTEM_SLOT_ID) begin
+      `logI("Calling $vpp_WaitTilStart slot = %0d cpu = %0d", MY_SLOT_ID, MY_CPU_ID);
       $vpp_WaitTilStart(MY_SLOT_ID, MY_CPU_ID);
-
+    end
+    
     `logI("Turning ON __shIpc_EnableMode simTime = %0d", `SYSTEM_SIM_TIME);
     __shIpc_EnableMode = 1;
   end else begin

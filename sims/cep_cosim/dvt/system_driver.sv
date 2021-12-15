@@ -20,20 +20,19 @@ module system_driver (
   input               enableMe
 );
 
-  parameter MY_SLOT_ID  = `SYSTEM_SLOT_ID;
-  parameter MY_CPU_ID   = `SYSTEM_CPU_ID;
+  parameter MY_SLOT_ID                = 4'h0;
+  parameter MY_CPU_ID                 = 4'h0;
 
-  reg [255:0]         dvtFlags = 0;
+  reg [255:0]         dvtFlags        = 0;
   reg [255:0]         r_data;
   reg [31:0]          printf_addr;
   reg [1:0]           printf_coreId;
-  reg [(128*8)-1:0]   printf_buf;     // 128 bytes
+  reg [(128*8)-1:0]   printf_buf;
   reg [(128*8)-1:0]   tmp;
-  reg                 clear = 0;
+  reg                 clear           = 0;
   integer             cnt;
   string              str;
-  reg                 program_loaded = 0;
-  reg                 ipcDelay       = 0;
+  reg                 program_loaded  = 0;
 
   //--------------------------------------------------------------------------------------
   // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
@@ -123,7 +122,7 @@ module system_driver (
 
 
   //--------------------------------------------------------------------------------------
-  // Misc support functions
+  // DVT Flag Processing
   //--------------------------------------------------------------------------------------
   
   // Printf support function for printing from the RISC-V Cores in Bare Metal Mode
@@ -165,10 +164,9 @@ module system_driver (
     dvtFlags[`DVTF_PRINTF_CMD] = 0;
   end // end always
   
-
   always @(posedge dvtFlags[`DVTF_SET_IPC_DELAY]) begin
-    `logI("Setting ipcDelay to %0d", ipcDelay);
-    ipcDelay = dvtFlags[`DVTF_PAT_LO];
+    `logI("Setting ipcDelay to %0d", __shIpc_Delay);
+    __shIpc_Delay = dvtFlags[`DVTF_PAT_LO];
     dvtFlags[`DVTF_SET_IPC_DELAY] = 0;
   end
   
