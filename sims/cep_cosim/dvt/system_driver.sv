@@ -212,10 +212,10 @@ module system_driver (
 
   // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
   `ifdef BFM_MODE
-    defparam `CORE0_TL_PATH.CHIP_ID = 0;
-    defparam `CORE1_TL_PATH.CHIP_ID = 1;
-    defparam `CORE2_TL_PATH.CHIP_ID = 2;
-    defparam `CORE3_TL_PATH.CHIP_ID = 3;
+    defparam `CPU0_TL_PATH.CHIP_ID = 0;
+    defparam `CPU1_TL_PATH.CHIP_ID = 1;
+    defparam `CPU2_TL_PATH.CHIP_ID = 2;
+    defparam `CPU3_TL_PATH.CHIP_ID = 3;
   `endif
 
   reg enableWrTrace   = 0;

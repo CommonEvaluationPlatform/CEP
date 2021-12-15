@@ -116,20 +116,20 @@ module cpu_driver
    
         case (MY_CPU_ID)
           0: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CORE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CORE0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `CPU0_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CPU0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           1: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CORE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CORE1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `CPU1_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CPU1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           2: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CORE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CORE2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `CPU2_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CPU2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           3: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CORE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CORE3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `CPU3_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `CPU3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end     
         endcase // case (MY_CPU_ID)
       end
@@ -143,10 +143,10 @@ module cpu_driver
         bits_size = 3;
    
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          1: `CORE1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          2: `CORE2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          3: `CORE3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          0: `CPU0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          1: `CPU1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          2: `CPU2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          3: `CPU3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
         endcase
       end
     endtask // ATOMIC_RDW64_TASK
@@ -156,10 +156,10 @@ module cpu_driver
     task WRITE64_64_DPI;
       begin
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
+          0: `CPU0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          1: `CPU1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          2: `CPU2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          3: `CPU3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE64_64_TASK
@@ -173,20 +173,20 @@ module cpu_driver
   
         case (MY_CPU_ID)
           0: begin
-            `CORE0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE0_TL_PATH.tl_buf[i];
+            `CPU0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU0_TL_PATH.tl_buf[i];
           end
           1: begin
-            `CORE1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE1_TL_PATH.tl_buf[i];  
+            `CPU1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU1_TL_PATH.tl_buf[i];  
           end
           2: begin
-            `CORE2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE2_TL_PATH.tl_buf[i];  
+            `CPU2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU2_TL_PATH.tl_buf[i];  
           end
           3: begin
-            `CORE3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CORE3_TL_PATH.tl_buf[i];  
+            `CPU3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU3_TL_PATH.tl_buf[i];  
           end     
         endcase // case (MY_CPU_ID)
       end
@@ -197,10 +197,10 @@ module cpu_driver
     task READ64_64_DPI;
       begin
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
+          0: `CPU0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          1: `CPU1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          2: `CPU2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          3: `CPU3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
         endcase // case (MY_CPU_ID)
       end
     endtask // READ64_64_TASK
@@ -214,10 +214,10 @@ module cpu_driver
         d[31:0]  = inBox.mPar[1];
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          1: `CORE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          2: `CORE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          3: `CORE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
+          0: `CPU0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          1: `CPU1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          2: `CPU2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          3: `CPU3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_64_TASK
@@ -235,10 +235,10 @@ module cpu_driver
         d = {8{byte8}};
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
+          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_8_DPI
@@ -256,10 +256,10 @@ module cpu_driver
         d = {4{word}};
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
+          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_16_DPI
@@ -279,10 +279,10 @@ module cpu_driver
         d[31:0] = inBox.mPar[0];   
       
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          1: `CORE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          2: `CORE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          3: `CORE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
+          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_32_DPI
@@ -293,10 +293,10 @@ module cpu_driver
       reg [63:0] d;
       begin
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          1: `CORE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          2: `CORE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          3: `CORE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
+          0: `CPU0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          1: `CPU1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          2: `CPU2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          3: `CPU3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
         endcase // case (MY_CPU_ID)
 
         inBox.mPar[0] = d[63:32];
@@ -313,10 +313,10 @@ module cpu_driver
         mask = 1 << inBox.mAdr[2:0];
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
+          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
         endcase // case (MY_CPU_ID)
       
         case (inBox.mAdr[2:0])
@@ -341,10 +341,10 @@ module cpu_driver
         mask = 3 << (inBox.mAdr[2:1]*2);      
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
+          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
         endcase // case (MY_CPU_ID)
       
         case (inBox.mAdr[2:1])
@@ -368,10 +368,10 @@ module cpu_driver
           mask = 'h0F;      
 
         case (MY_CPU_ID)
-          0: `CORE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          1: `CORE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          2: `CORE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          3: `CORE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
+          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
         endcase // case (MY_CPU_ID)
         
         inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
@@ -583,8 +583,8 @@ module cpu_driver
           end
         end // end always
    
-        assign curPc       = `CORE0_PC;
-        assign curValid    = `CORE0_VALID;
+        assign curPc       = `CPU0_PC;
+        assign curValid    = `CPU0_VALID;
         assign coreInReset = `CPU0_PATH.core.reset;
         assign pcValid     = `CPU0_PATH.core.csr_io_trace_0_valid && `CPU0_PATH.core._T_1481;   
    
@@ -601,8 +601,8 @@ module cpu_driver
           end
         end // end always
    
-        assign curPc       = `CORE1_PC;
-        assign curValid    = `CORE1_VALID;
+        assign curPc       = `CPU1_PC;
+        assign curValid    = `CPU1_VALID;
         assign coreInReset = `CPU1_PATH.core.reset;
         assign pcValid     = `CPU1_PATH.core.csr_io_trace_0_valid && `CPU1_PATH.core._T_1481;     
       
@@ -619,8 +619,8 @@ module cpu_driver
           end
         end // end always
    
-        assign curPc       = `CORE2_PC;
-        assign curValid    = `CORE2_VALID;
+        assign curPc       = `CPU2_PC;
+        assign curValid    = `CPU2_VALID;
         assign coreInReset = `CPU2_PATH.core.reset;
         assign pcValid     = `CPU2_PATH.core.csr_io_trace_0_valid && `CPU2_PATH.core._T_1481;     
     
@@ -637,8 +637,8 @@ module cpu_driver
           end
         end // end always
     
-        assign curPc       = `CORE3_PC;
-        assign curValid    = `CORE3_VALID;
+        assign curPc       = `CPU3_PC;
+        assign curValid    = `CPU3_VALID;
         assign coreInReset = `CPU3_PATH.core.reset;
         assign pcValid     = `CPU3_PATH.core.csr_io_trace_0_valid && `CPU3_PATH.core._T_1481;     
       end  // end if MY_CPU_ID

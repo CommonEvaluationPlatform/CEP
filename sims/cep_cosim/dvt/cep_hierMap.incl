@@ -43,24 +43,25 @@
 `define SCRATCHPAD_WRAPPER_PATH   `SCRATCHPAD_PATH.scratchpad_wrapper_inst
 `define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
 
+`define CPU0_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
+`define CPU1_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
+`define CPU2_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
+`define CPU3_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
+`define CPU0_TL_PATH              `CPU0_PATH.tl_master
+`define CPU1_TL_PATH              `CPU1_PATH.tl_master
+`define CPU2_TL_PATH              `CPU2_PATH.tl_master
+`define CPU3_TL_PATH              `CPU3_PATH.tl_master
+
 // Paths to RocketTile constructs in Bare Metal Mode 
 `ifdef BARE_MODE
-  `define CPU0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
-  `define CPU1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
-  `define CPU2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
-  `define CPU3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
-  `define CPU0_PC                  `CPU0_PATH.core.coreMonitorBundle_pc
-  `define CPU1_PC                  `CPU1_PATH.core.coreMonitorBundle_pc
-  `define CPU2_PC                  `CPU2_PATH.core.coreMonitorBundle_pc
-  `define CPU3_PC                  `CPU3_PATH.core.coreMonitorBundle_pc
-  `define CPU0_VALID               `CPU0_PATH.core.coreMonitorBundle_valid
-  `define CPU1_VALID               `CPU1_PATH.core.coreMonitorBundle_valid
-  `define CPU2_VALID               `CPU2_PATH.core.coreMonitorBundle_valid
-  `define CPU3_VALID               `CPU3_PATH.core.coreMonitorBundle_valid
-  `define CPU0_TL_PATH             `CPU0_PATH.tl_master
-  `define CPU1_TL_PATH             `CPU1_PATH.tl_master
-  `define CPU2_TL_PATH             `CPU2_PATH.tl_master
-  `define CPU3_TL_PATH             `CPU3_PATH.tl_master
+  `define CPU0_PC                 `CPU0_PATH.core.coreMonitorBundle_pc
+  `define CPU1_PC                 `CPU1_PATH.core.coreMonitorBundle_pc
+  `define CPU2_PC                 `CPU2_PATH.core.coreMonitorBundle_pc
+  `define CPU3_PC                 `CPU3_PATH.core.coreMonitorBundle_pc
+  `define CPU0_VALID              `CPU0_PATH.core.coreMonitorBundle_valid
+  `define CPU1_VALID              `CPU1_PATH.core.coreMonitorBundle_valid
+  `define CPU2_VALID              `CPU2_PATH.core.coreMonitorBundle_valid
+  `define CPU3_VALID              `CPU3_PATH.core.coreMonitorBundle_valid
 `endif
 
 // Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
