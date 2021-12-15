@@ -57,8 +57,8 @@ COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
 # Defines for used within the Chisel Generated Verilog
-#COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
-#COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
+COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
+COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
 #--------------------------------------------------------------------------------------
 
 
@@ -74,8 +74,9 @@ COSIM_VSIM_ARGS	  			+= -cpppath ${GCC}
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
-COSIM_TB_CLOCK_PERIOD       := 5000
-COSIM_TB_RESET_DELAY		:= 777.7
+# The following parameters units are based on the Verilog timescale directive (default is 1ns)
+COSIM_TB_CLOCK_PERIOD       := 5
+COSIM_TB_RESET_DELAY		:= 100
 
 COSIM_VLOG_ARGS				+= 	-sv \
 								+define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} \
@@ -144,9 +145,6 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@sed -i.bak -e 's/\\n"/"/g' $@
 	@rm -f $@.bak
 	@touch $@
-
-tweaked: ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare}
-
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
 # BFM Mode

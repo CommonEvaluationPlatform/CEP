@@ -24,10 +24,10 @@
 `include "v2c_top.incl"
 
 `ifndef CLOCK_PERIOD
-  `define CLOCK_PERIOD          5000
+  `define CLOCK_PERIOD          5
 `endif
 `ifndef RESET_DELAY
-  `define RESET_DELAY           777.7
+  `define RESET_DELAY           100
 `endif
 
 // JTAG related DPI imports
