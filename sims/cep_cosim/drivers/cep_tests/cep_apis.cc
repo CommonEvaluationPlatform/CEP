@@ -71,7 +71,7 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 }
 
 // Clear the memory being used for printf "overloading"
-int clear_printf_mem(int coreId) {
+int clear_printf_memory(int coreId) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY
@@ -187,9 +187,9 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     // Close the file descriptor
     fclose(fd);
 
-    // Initialize printf memory
+    // Initialize printf memory for all cores
     for (int i = 0; i < MAX_CORES; i++)
-      clear_printf_mem(i);
+      clear_printf_memory(i);
   
     // Indicate that a program has been loaded (assuming there was no error)
     if (!errCnt) {
@@ -266,7 +266,6 @@ int check_printf_memory(int cpuId) {
   #ifdef SIM_ENV_ONLY
     uint32_t p_adr = cep_printf_mem + (cpuId * cep_printf_core_size) + (cep_printf_str_max*__prIdx[cpuId]);
     DUT_READ32_64(p_adr, d64);
-    LOGI("%s: cpuId = %0d, p_adr = 0x%08x, d64 = 0x%016llx\n", __FUNCTION__, cpuId, p_adr, d64);
 
     // If a non-zero value is detected, convey that a printf has occured to the testbench and increment the pointer
     if (d64 != 0) {

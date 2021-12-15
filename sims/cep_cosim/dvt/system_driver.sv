@@ -269,8 +269,6 @@ module system_driver (
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
 
-      `logI("Main Mem Backdoor Write addr = 0x%x data = 0x%x", addr, data);
-
     end
   endtask // write_mainmem_backdoor
 
@@ -284,14 +282,13 @@ module system_driver (
       // If the memory is in reset, wait for it to be released
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
-      // Reads are registered
+      // Reads are registered, need to be synchronized to the clock
       force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
+      @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
       data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
-
-      `logI("Main Mem Backdoor Read addr = 0x%x data = 0x%x", addr, data);
 
     end
   endtask // read_mainmem_backdoor
