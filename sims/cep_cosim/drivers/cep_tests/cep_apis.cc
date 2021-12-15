@@ -259,7 +259,7 @@ int check_PassFail_status(int coreId,int maxTimeOut) {
 // A task to be called from the system thread to scan the specified cpuId's printf buffer for activity
 int check_printf_memory(int cpuId) {
 
-  int 		errCnt = 0;
+  int 		  errCnt = 0;
   uint64_t 	d64;
 
   // Read from printf memory (only applicable in simulation)

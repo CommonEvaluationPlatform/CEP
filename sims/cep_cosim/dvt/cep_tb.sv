@@ -134,6 +134,15 @@ module `COSIM_TB_TOP_MODULE;
   //
   // I/O manually copied from Chisel generated verilog
   //--------------------------------------------------------------------------------------
+
+  // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
+  `ifdef BFM_MODE
+    defparam `CPU0_TL_PATH.CHIP_ID = 0;
+    defparam `CPU1_TL_PATH.CHIP_ID = 1;
+    defparam `CPU2_TL_PATH.CHIP_ID = 2;
+    defparam `CPU3_TL_PATH.CHIP_ID = 3;
+  `endif
+
   `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
     .jtag_TMS           (jtag_TMS),

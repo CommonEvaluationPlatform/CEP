@@ -96,39 +96,52 @@ CHIPYARD_TOP_SMEMS_FILE_sim	:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}.mems_si
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
 
 
+# Create a BFM compatible verion of the CHIPYARD_TOP_SMEMS_FILE
+# Includes some additional substitutions to the PRINTF_CMDS to
+# make them more friendly with the CEP co-simulation environment
 ${CHIPYARD_TOP_SMEMS_FILE_sim}: .force ${CHIPYARD_TOP_SMEMS_FILE}
 	@rm -f $@
 	@echo "\`include \"suite_config.v\"" > $@
 	@echo "\`include \"cep_hierMap.incl\"" >> $@
-#	@echo "\`include \"v2c_top.incl\"" >> $@
+	@echo "\`include \"v2c_top.incl\"" >> $@
 	@echo "" >> $@
 	@cat ${CHIPYARD_TOP_SMEMS_FILE} >> $@
-#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
+	@sed -i.bak -e 's/%d/%0d/g' $@
+	@sed -i.bak -e 's/\\n"/"/g' $@
 	@rm -f $@.bak
 	@touch $@
 
 # Create a BFM compatible verion of the CHIPYARD_TOP_FILE
+# Includes some additional substitutions to the PRINTF_CMDS to
+# make them more friendly with the CEP co-simulation environment
 ${CHIPYARD_TOP_FILE_bfm}: .force ${CHIPYARD_TOP_FILE} 
 	@rm -f $@
 	@echo "\`include \"suite_config.v\"" > $@
 	@echo "\`include \"cep_hierMap.incl\"" >> $@
-#	@echo "\`include \"v2c_top.incl\"" >>$@
+	@echo "\`include \"v2c_top.incl\"" >>$@
 	@echo "" >> $@
 	@cat ${CHIPYARD_TOP_FILE} >> $@
 	@sed -i.bak -e 's/RocketTile tile/RocketTile_beh tile/g' $@
-#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
+	@sed -i.bak -e 's/%d/%0d/g' $@
+	@sed -i.bak -e 's/\\n"/"/g' $@
 	@rm -f $@.bak
 	@touch $@
 
 # Create a BARE compatible version of the CHIPYARD_TOP_FILE
+# Includes some additional substitutions to the PRINTF_CMDS to
+# make them more friendly with the CEP co-simulation environment
 ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@rm -f $@
 	@echo "\`include \"suite_config.v\"" > $@
 	@echo "\`include \"cep_hierMap.incl\"" >> $@
-#	@echo "\`include \"v2c_top.incl\"" >> $@
+	@echo "\`include \"v2c_top.incl\"" >> $@
 	@echo "" >> $@
 	@cat ${CHIPYARD_TOP_FILE} >> $@
-#	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logE( \\/g' $@
+	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
+	@sed -i.bak -e 's/%d/%0d/g' $@
+	@sed -i.bak -e 's/\\n"/"/g' $@
 	@rm -f $@.bak
 	@touch $@
 

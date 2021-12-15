@@ -202,14 +202,6 @@ module system_driver (
     `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
   end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
 
-  // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
-  `ifdef BFM_MODE
-    defparam `CPU0_TL_PATH.CHIP_ID = 0;
-    defparam `CPU1_TL_PATH.CHIP_ID = 1;
-    defparam `CPU2_TL_PATH.CHIP_ID = 2;
-    defparam `CPU3_TL_PATH.CHIP_ID = 3;
-  `endif
-
   reg enableWrTrace   = 0;
   reg enableRdTrace   = 0;   
   
@@ -324,27 +316,27 @@ module system_driver (
     end
    
     always @(posedge dvtFlags[`DVTF_PASS_IS_TO_HOST]) begin
-      `CORE0_DRIVER.checkToHost = 1;
-      `CORE1_DRIVER.checkToHost = 1;
-      `CORE2_DRIVER.checkToHost = 1;
-      `CORE3_DRIVER.checkToHost = 1;
+      `CPU0_DRIVER.checkToHost = 1;
+      `CPU1_DRIVER.checkToHost = 1;
+      `CPU2_DRIVER.checkToHost = 1;
+      `CPU3_DRIVER.checkToHost = 1;
       dvtFlags[`DVTF_PASS_IS_TO_HOST] = 0; // self-clear
     end   
    
     // Force all cores into reset
     task ResetAllCores;
       begin
-        force `CORE0_PATH.reset = 1;
-        force `CORE1_PATH.reset = 1;
-        force `CORE2_PATH.reset = 1;
-        force `CORE3_PATH.reset = 1;
+        force `CPU0_PATH.reset = 1;
+        force `CPU1_PATH.reset = 1;
+        force `CPU2_PATH.reset = 1;
+        force `CPU3_PATH.reset = 1;
    
         repeat (2) @(posedge clk);
    
-        release `CORE0_PATH.reset;  
-        release `CORE1_PATH.reset;  
-        release `CORE2_PATH.reset;  
-        release `CORE3_PATH.reset;  
+        release `CPU0_PATH.reset;  
+        release `CPU1_PATH.reset;  
+        release `CPU2_PATH.reset;  
+        release `CPU3_PATH.reset;  
       end
     endtask // ResetAllCores
    
@@ -352,23 +344,23 @@ module system_driver (
     always @(posedge singleThread) begin
    
       // Put all the cores into reset
-      force `CORE0_PATH.reset =1; 
-      force `CORE1_PATH.reset =1;
-      force `CORE2_PATH.reset =1;
-      force `CORE3_PATH.reset =1;
+      force `CPU0_PATH.reset =1; 
+      force `CPU1_PATH.reset =1;
+      force `CPU2_PATH.reset =1;
+      force `CPU3_PATH.reset =1;
 
       // Ensure the program is loaded
       @(posedge `COSIM_TB_TOP_MODULE.program_loaded);
       
       // Allow caches to get out of reset but not the core!!!
-      release `CORE0_PATH.reset; 
-      release `CORE1_PATH.reset;
-      release `CORE2_PATH.reset;
-      release `CORE3_PATH.reset;
-      force `CORE0_PATH.core.reset = 1; 
-      force `CORE1_PATH.core.reset = 1;
-      force `CORE2_PATH.core.reset = 1;
-      force `CORE3_PATH.core.reset = 1;      
+      release `CPU0_PATH.reset; 
+      release `CPU1_PATH.reset;
+      release `CPU2_PATH.reset;
+      release `CPU3_PATH.reset;
+      force `CPU0_PATH.core.reset = 1; 
+      force `CPU1_PATH.core.reset = 1;
+      force `CPU2_PATH.core.reset = 1;
+      force `CPU3_PATH.core.reset = 1;      
       
       // Cycle through all the cores
       for (int c = 0; c < 4; c = c + 1) 
@@ -379,42 +371,42 @@ module system_driver (
 
           // Core 0 is active
           0: begin
-            `logI("Releasing CORE0 Reset....");
+            `logI("Releasing CPU0 Reset....");
             if (virtualMode) begin
               ResetAllCores();
             end
-            release `CORE0_PATH.core.reset; 
-            @(posedge (`CORE0_DRIVER.PassStatus || `CORE0_DRIVER.FailStatus));
+            release `CPU0_PATH.core.reset; 
+            @(posedge (`CPU0_DRIVER.PassStatus || `CPU0_DRIVER.FailStatus));
           end // Core 0 is active
 
           // Core 1 is active
           1: begin
-            `logI("Releasing CORE1 Reset....");  
+            `logI("Releasing CPU1 Reset....");  
             if (virtualMode) begin
               ResetAllCores();
             end     
-            release `CORE1_PATH.core.reset;
-            @(posedge (`CORE1_DRIVER.PassStatus || `CORE1_DRIVER.FailStatus));
+            release `CPU1_PATH.core.reset;
+            @(posedge (`CPU1_DRIVER.PassStatus || `CPU1_DRIVER.FailStatus));
           end  // Core 1 is active
 
           // Core 2 is active
           2: begin
-            `logI("Releasing CORE2 Reset....");  
+            `logI("Releasing CPU2 Reset....");  
             if (virtualMode) begin
               ResetAllCores();              
             end     
-            release `CORE2_PATH.core.reset;
-            @(posedge (`CORE2_DRIVER.PassStatus || `CORE2_DRIVER.FailStatus));
+            release `CPU2_PATH.core.reset;
+            @(posedge (`CPU2_DRIVER.PassStatus || `CPU2_DRIVER.FailStatus));
           end // Core 2 is active
         
           // Core 3 is active
           3: begin
-            `logI("Releasing CORE3 Reset....");  
+            `logI("Releasing CPU3 Reset....");  
             if (virtualMode) begin
               ResetAllCores();
             end     
-            release `CORE3_PATH.core.reset;
-            @(posedge (`CORE3_DRIVER.PassStatus || `CORE3_DRIVER.FailStatus));
+            release `CPU3_PATH.core.reset;
+            @(posedge (`CPU3_DRIVER.PassStatus || `CPU3_DRIVER.FailStatus));
           end // Core 3 is active      
       
           endcase
