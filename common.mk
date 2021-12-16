@@ -91,7 +91,7 @@ $(build_dir):
 	mkdir -p $@
 
 ${BOOTROM_SRC_DIR}/bootrom.%.img:
-	(cd ${BOOTROM_SRC_DIR}; make img)
+	(cd ${BOOTROM_SRC_DIR}; make)
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: ${BOOTROM_SRC_DIR}/bootrom.%.img | $(build_dir)
 	cp -f $< $@

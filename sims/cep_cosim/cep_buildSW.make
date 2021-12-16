@@ -31,70 +31,74 @@ endif
 #--------------------------------------------------------------------------------------
 SRC_D           = ${COSIM_TOP_DIR}/src
 APIS_D          = ${DRIVERS_DIR}/cep_tests
-BARE_D          = ${DRIVERS_DIR}/bare
 DIAG_D          = ${DRIVERS_DIR}/diag
 SHARE_D         = ${COSIM_TOP_DIR}/share
 SIMDIAG_D       = ${COSIM_TOP_DIR}/simDiag
 PLI_D           = ${COSIM_TOP_DIR}/pli
+BARE_D          = ${DRIVERS_DIR}/bare
 
 SRC_LIB_DIR     = ${LIB_DIR}/src
 APIS_LIB_DIR    = ${LIB_DIR}/cep_tests
-BARE_LIB_DIR    = ${LIB_DIR}/bare
 DIAG_LIB_DIR    = ${LIB_DIR}/diag
 SHARE_LIB_DIR   = ${LIB_DIR}/share
 SIMDIAG_LIB_DIR = ${LIB_DIR}/simDiag
 PLI_LIB_DIR     = ${LIB_DIR}/pli
+BARE_LIB_DIR    = ${LIB_DIR}/bare
 
 SRC_SRC         = $(wildcard ${SRC_D}/*.cc)
 APIS_SRC        = $(wildcard ${APIS_D}/*.cc)
-BARE_SRC        = $(wildcard ${BARE_D}/*.c)
 DIAG_SRC        = $(wildcard ${DIAG_D}/*.cc)
 SHARE_SRC       = $(wildcard ${SHARE_D}/*.cc)
 SIMDIAG_SRC     = $(wildcard ${SIMDIAG_D}/*.cc)
 PLI_SRC         = $(wildcard ${PLI_D}/*.cc)
 
+# Bare metal source includes both .c and .S files
+BARE_SRC        = $(wildcard ${BARE_D}/*.c)
+BARE_SRC        += $(wildcard ${BARE_D}/*.S)
+
 SRC_H           = $(wildcard ${SRC_D}/*.h)
 APIS_H          = $(wildcard ${APIS_D}/*.h)
-BARE_H          = $(wildcard ${BARE_D}/*.h)
 DIAG_H          = $(wildcard ${DIAG_D}/*.h)
 SHARE_H         = $(wildcard ${SHARE_D}/*.h)
 SIMDIAG_H       = $(wildcard ${SIMDIAG_D}/*.h)
 PLI_H           = $(wildcard ${PLI_D}/*.h)
+BARE_H          = $(wildcard ${BARE_D}/*.h)
 
 # Create list of C/H files
 ALL_C_FILES      = \
 	${SRC_H}         ${SRC_SRC}         \
 	${APIS_H}        ${APIS_SRC}        \
-	${BARE_H}        ${BARE_SRC}        \
 	${DIAG_H}        ${DIAG_SRC}        \
 	${SHARE_H}       ${SHARE_SRC}       \
 	${SIMDIAG_H}     ${SIMDIAG_SRC}     \
-	${PLI_H}         ${PLI_SRC}         
+	${PLI_H}         ${PLI_SRC}         \
+	${BARE_H}        ${BARE_SRC}        
 
 # list of objects: 
 SRC_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${SRC_SRC})},     ${SRC_LIB_DIR}/${t})
 APIS_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,${APIS_SRC})},    ${APIS_LIB_DIR}/${t})
-BARE_O_LIST       = $(foreach t,${notdir $(subst .c,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
 DIAG_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,${DIAG_SRC})},    ${DIAG_LIB_DIR}/${t})
 SHARE_O_LIST      = $(foreach t,${notdir $(subst .cc,.o,${SHARE_SRC})},   ${SHARE_LIB_DIR}/${t})
 SIMDIAG_O_LIST    = $(foreach t,${notdir $(subst .cc,.o,${SIMDIAG_SRC})}, ${SIMDIAG_LIB_DIR}/${t})
 PLI_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${PLI_SRC})},     ${PLI_LIB_DIR}/${t})
+BARE_O_LIST       = $(foreach t,${notdir $(subst .c,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
+BARE_O_LIST       += $(foreach t,${notdir $(subst .S,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
 
 SRC_OBJ_LIST      = $(subst .o,.obj,${SRC_O_LIST})
 APIS_OBJ_LIST     = $(subst .o,.obj,${APIS_O_LIST})
-BARE_OBJ_LIST     = $(subst .o,.obj,${BARE_O_LIST})
 DIAG_OBJ_LIST     = $(subst .o,.obj,${DIAG_O_LIST})
 SHARE_OBJ_LIST    = $(subst .o,.obj,${SHARE_O_LIST})
 SIMDIAG_OBJ_LIST  = $(subst .o,.obj,${SIMDIAG_O_LIST})
 PLI_OBJ_LIST      = $(subst .o,.obj,${PLI_O_LIST})
+BARE_OBJ_LIST     = $(subst .o,.obj,${BARE_O_LIST})
 
 SRC_BOBJ_LIST     = $(subst .o,.bobj,${SRC_O_LIST})
 APIS_BOBJ_LIST    = $(subst .o,.bobj,${APIS_O_LIST})
-BARE_BOBJ_LIST    = $(subst .o,.bobj,${BARE_O_LIST})
 DIAG_BOBJ_LIST    = $(subst .o,.bobj,${DIAG_O_LIST})
 SHARE_BOBJ_LIST   = $(subst .o,.bobj,${SHARE_O_LIST})
 SIMDIAG_BOBJ_LIST = $(subst .o,.bobj,${SIMDIAG_O_LIST})
 PLI_BOBJ_LIST     = $(subst .o,.bobj,${PLI_O_LIST})
+BARE_BOBJ_LIST    = $(subst .o,.bobj,${BARE_O_LIST})
 
 # Create directories if not there (check first via order-only-prerequisites)
 $(SRC_O_LIST)     : | ${SRC_LIB_DIR}
@@ -151,9 +155,6 @@ build_v2c: ${V2C_H_FILE_LIST}
 #-------------------------------------------------------------------------------------
 # Common variables
 #-------------------------------------------------------------------------------------
-# Misc. variables
-BARE_SRC_DIR    		:= ${DRIVERS_DIR}/bare
-
 # Create a common list of include directories.
 ifeq (${MODELSIM}, 1)
 COMMON_INCLUDE_DIR_LIST	:= 	${SRC_D} \
@@ -175,7 +176,7 @@ endif
 
 COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
-# A common set of dependencies
+# A common set of dependencies (for all test modes)
 COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK}
 
 # Variables related to the RISCV Toolset (RISCV must already be defined)
@@ -191,11 +192,28 @@ RISCV_VIRT_LFLAGS  		+= -T${DRIVERS_DIR}/virtual/link.ld
 RISCV_VIRT_CFILES  		+= ${DRIVERS_DIR}/virtual/*.c ${DRIVERS_DIR}/virtual/multi_entry.S 
 RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/scalar 
 
-# Flags related to RISCV Baremetal tests
-RISCV_BARE_CFLAGS  		+= -DBARE_MODE -static -DRISCV_CPU -mcmodel=medany -Wall -O2 -g -fno-common -nostdlib -fno-builtin-printf -I${BARE_SRC_DIR} $(COMMON_INCLUDE_LIST)
-RISCV_BARE_LDFLAGS 		+= -static -nostdlib -nostartfiles -lgcc -DBARE_MODE 
-RISCV_BARE_LDFILE  		= ${BARE_SRC_DIR}/link.ld
-RISCV_BARE_CRTFILE 		:= ${BARE_SRC_DIR}/crt.S
+# Flags related to RISCV Baremetal tests (compiler and linker flags, with the exception of defines, copied from chipyard testchipip and fpga bootrom directories)
+#
+# -DBARE_MODE
+# -DRISCV_CPU           - Defines specific to the CEP test suite
+# -mcmodel=medany       - Generate code for the medium-any code model.  The program and its statically defined symbols must be within any single 2 GiB address range. 
+#                         Programs can be statically or dynamically linked.
+# -O2                   - Optimization level 2
+# -Wall                 - Enable all warnings
+# -nostartfiles         - Do not use the standard system startup files when linking
+# -fno-builtin-printf   - Disable the builtin printf function (cep has a custom printf mechanism for bare metal simulation)
+# -march=rv64ima        - Specify supported instruction set
+# -mabi=lp64            - Specify integer and floating poid calling convention
+# -I                    - Add the directory dir to the list of directories to be searched for header files during preprocessing
+# -static               - On systems that support dynamic linking, this overrides -pie and prevents linking with the shared libraries. On other systems, this option has no effect
+# -nostdlib             - Do not use the standard system startup files or libraries when linking
+# -T                    - Specify linker script
+#
+# -g                    - Produce debugging information in the operating system’s native format
+# -lgcc                 - ?????
+RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -nostartfiles -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} ${COMMON_INCLUDE_LIST}
+RISCV_BARE_LDFILE		+= ${BARE_SRC_DIR}/cep_link.lds
+RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LDFILE}
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
@@ -250,7 +268,7 @@ ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES}
 ${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
-${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
+${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${BARE_D}/%.S ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
@@ -269,18 +287,6 @@ ${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES}
 
 
 # -----------------------------------------------------------------------
-# Unique rules for specific baremetal object files
-# -----------------------------------------------------------------------
-${BARE_LIB_DIR}/crt.bobj: ${RISCV_BARE_CRTFILE}
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
-
-riscv_wrapper.bobj: riscv_wrapper.cc
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
-# -----------------------------------------------------------------------
-
-
-
-# -----------------------------------------------------------------------
 # If set, do not create a seperate ELF wrapper for bare metal mode
 # (applicable for the ISA Tests)
 # -----------------------------------------------------------------------
@@ -292,16 +298,17 @@ RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
 # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
 # so build with -g for dump file only
 ifeq (${VIRTUAL_MODE},1)
-${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES}
+${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES}
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-${RISCV_WRAPPER_ELF}: riscv_wrapper.bobj ${RISCV_LIB}
-	$(RISCV_GCC) -T ${RISCV_BARE_LDFILE} ${RISCV_BARE_LDFLAGS} $^ -o $@
-	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
+${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${RISCV_LIB} ${COMMON_DEPENDENCIES} ${RISCV_BARE_LDFILE}
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LDFLAGS} $< -o $@
+#	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
+	${RISCV_OBJDUMP} -d riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
 endif
@@ -321,11 +328,11 @@ RISCV_LIB          		:= ${LIB_DIR}/riscv_lib.a
 # v2c_lib.a : src/cep_tests/diag/share
 ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
 	$(AR) crv $@ \
-		$(shell ls ${SRC_LIB_DIR}/*.o) \
-		$(shell ls ${APIS_LIB_DIR}/*.o) \
-		$(shell ls ${DIAG_LIB_DIR}/*.o) \
-		$(shell ls ${SHARE_LIB_DIR}/*.o) \
-		$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
+	$(shell ls ${SRC_LIB_DIR}/*.o) \
+	$(shell ls ${APIS_LIB_DIR}/*.o) \
+	$(shell ls ${DIAG_LIB_DIR}/*.o) \
+	$(shell ls ${SHARE_LIB_DIR}/*.o) \
+	$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
 	$(RANLIB) $@
 
 # libvpp.so : pli/share
@@ -336,7 +343,7 @@ ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
 	$(shell ls ${PLI_LIB_DIR}/*.obj) 
 
 # riscv_lib.a: bare/apis/diag
-${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST} ${BARE_LIB_DIR}/crt.bobj
+${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
 	$(RISCV_AR) crv $@ \
 	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
 	$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
@@ -362,7 +369,7 @@ LOCAL_OBJ_FILES 		+= $(LOCAL_CC_FILES:%.cc=%.o)
 c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${COMMON_DEPENDENCIES}
 	$(GCC) $(SIM_SW_CFLAGS) $(COMMON_LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${LIBRARY_SWITCHES} 
 
-%.o: %.cc ${LOCAL_H_FILES} ${LIB_DIR}/v2c_lib.a  ${COMMON_DEPENDENCIES} 
+%.o: %.cc ${LOCAL_H_FILES} ${V2C_LIB} ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 # -----------------------------------------------------------------------
 

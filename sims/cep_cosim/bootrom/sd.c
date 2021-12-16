@@ -240,7 +240,7 @@ void print_greeting()
     kputs("       ./+++++++++++oo+++:  +oo++o++++o+o+oo+oo.- `s+++s`-                   "); 
     kputs("       .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                      "); 
     kputs("                                                                             ");
-    kputs("                     Common Evaluation Platform v3.5                         ");
+    kputs("                  Common Evaluation Platform v3.5Alpha1                      ");
     kputs("         Copyright 2021 Massachusetts Institute of Technology                ");
     kputs("                                                                             ");
     kputs("                                                                             ");
