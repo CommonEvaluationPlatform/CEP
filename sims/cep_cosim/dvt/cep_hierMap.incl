@@ -47,6 +47,10 @@
 `define CPU1_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
 `define CPU2_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
 `define CPU3_PATH                 `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
+`define CPU0_RESET                `CPU0_PATH.reset
+`define CPU1_RESET                `CPU1_PATH.reset
+`define CPU2_RESET                `CPU2_PATH.reset
+`define CPU3_RESET                `CPU3_PATH.reset
 
 // Paths to the Tilelink Masters in BFM mode
 `ifdef BFM_MODE
@@ -54,10 +58,6 @@
   `define CPU1_TL_PATH            `CPU1_PATH.tl_master
   `define CPU2_TL_PATH            `CPU2_PATH.tl_master
   `define CPU3_TL_PATH            `CPU3_PATH.tl_master
-  `define CPU0_RESET              `CPU0_PATH.reset
-  `define CPU1_RESET              `CPU1_PATH.reset
-  `define CPU2_RESET              `CPU2_PATH.reset
-  `define CPU3_RESET              `CPU3_PATH.reset
 `endif
 
 // Paths to RocketTile constructs in Bare Metal Mode 
@@ -70,10 +70,6 @@
   `define CPU1_VALID              `CPU1_PATH.core.coreMonitorBundle_valid
   `define CPU2_VALID              `CPU2_PATH.core.coreMonitorBundle_valid
   `define CPU3_VALID              `CPU3_PATH.core.coreMonitorBundle_valid
-  `define CPU0_RESET              `CPU0_PATH.core.reset
-  `define CPU1_RESET              `CPU1_PATH.core.reset
-  `define CPU2_RESET              `CPU2_PATH.core.reset
-  `define CPU3_RESET              `CPU3_PATH.core.reset
 `endif
 
 // Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
