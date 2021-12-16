@@ -48,6 +48,14 @@ int is_program_loaded(int maxTimeOut) {
   return errCnt;
 }
 
+void release_core_reset(int cpuId)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
+  DUT_WRITE_DVT(DVTF_RELEASE_CORE_RESET, DVTF_RELEASE_CORE_RESET, 1);
+#endif
+}
+
 void dump_wave(int cycle2start, int cycle2capture, int enable)
 {
 #ifdef SIM_ENV_ONLY
@@ -142,7 +150,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     // If we are loading memory using the backdoor, ensure we fill out the cache line
     if ((s & 0x7) != 0) {
       d64 = 0xDEADDEADDEADDEADLL;      
-      LOGI("%s: flushing to cache line s = %d ====\n",__FUNCTION__, s);
+      LOGI("%s: flushing to cache line s = %0d\n",__FUNCTION__, s);
       while ((s & 0x7) != 0) {
         DUT_WRITE32_64(mem_base + d*8,d64);
         d++;
@@ -150,7 +158,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
       }
     } // end if backdoor_on
 
-    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %d bytes\n",__FUNCTION__, imageF, bCnt);
+    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %0d bytes\n",__FUNCTION__, imageF, bCnt);
     
     // Did the loaded program exceed the maximum byte count?
     if (bCnt >= maxByteCnt) {
@@ -335,7 +343,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   DUT_RUNCLK(100);
   LOGI("%s: Putting core in reset to stop the PC...\n",__FUNCTION__);
   DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
-  DUT_WRITE_DVT(DVTF_PUT_CORE_IN_RESET, DVTF_PUT_CORE_IN_RESET, 1);
+  DUT_WRITE_DVT(DVTF_FORCE_CORE_RESET, DVTF_FORCE_CORE_RESET, 1);
 
 #endif
   return errCnt;

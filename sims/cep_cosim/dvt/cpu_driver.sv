@@ -27,16 +27,16 @@ module cpu_driver
 );
 
   // Overriden at instantiation
-  parameter MY_SLOT_ID    				= 4'h0;
-  parameter MY_CPU_ID     				= 4'h0;
+  parameter MY_SLOT_ID            = 4'h0;
+  parameter MY_CPU_ID             = 4'h0;
 
-  reg [255:0]         dvtFlags 			= 0;
+  reg [255:0]         dvtFlags      = 0;
   reg [255:0]         r_data;
   reg [31:0]          printf_addr;
   reg [1:0]           printf_coreId;
   reg [(128*8)-1:0]   printf_buf;
   reg [(128*8)-1:0]   tmp;
-  reg                 clear 			= 0;
+  reg                 clear       = 0;
   integer             cnt;
   string              str;
   reg                 program_loaded    = 0;
@@ -400,12 +400,29 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
 
-  always @(posedge dvtFlags[`DVTF_PUT_CORE_IN_RESET]) begin
+  always @(posedge dvtFlags[`DVTF_FORCE_CORE_RESET]) begin
     if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
-      force_core_in_reset();
+      force_core_reset();
     end
-    dvtFlags[`DVTF_PUT_CORE_IN_RESET] = 0;  
+    dvtFlags[`DVTF_FORCE_CORE_RESET] = 0;  
   end // end always
+
+  always @(posedge dvtFlags[`DVTF_RELEASE_CORE_RESET]) begin
+    if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
+      release_core_reset();
+    end
+    dvtFlags[`DVTF_RELEASE_CORE_RESET] = 0;  
+  end // end always
+
+  always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
+    case (MY_CPU_ID)      
+      0: dvtFlags[`DVTF_PAT_LO] = `CPU0_RESET;
+      1: dvtFlags[`DVTF_PAT_LO] = `CPU1_RESET;
+      2: dvtFlags[`DVTF_PAT_LO] = `CPU2_RESET;
+      3: dvtFlags[`DVTF_PAT_LO] = `CPU3_RESET;
+    endcase
+    dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
+  end
 
   always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
     if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core0_status;
@@ -421,64 +438,69 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Per core reset control
   //-------------------------------------------------------------------------------------- 
+
   // Put the core in reset that is not active
-  `define FORCE_RESET_IF_NOT_USED
-  `ifdef FORCE_RESET_IF_NOT_USED   
-    initial begin
+  initial begin
+
+    // In bare metal mode, the cores will default to reset to allow
+    // for backdoor loading of the executable to main memory.
+    `ifdef BARE_MODE;
+      force_core_reset();
+    `endif
+
+    // In BFM mode,  we'll allow for a few cycles for the C side to come
+    // up, otherwise we'll hold the TL master in reset
+    `ifdef BFM_MODE
       repeat(10) @(posedge clk);
       if (!myIsActive) begin
         force_core_in_reset();  
       end // if (!myIsActive)
-    end // initial begin
-  `endif //  `ifdef FORCE_RESET_IF_NOT_USED
+    `endif
+  end // initial begin
 
   // Task to force the current drivers core into reset
-  task force_core_in_reset;
+  task force_core_reset;
     begin
       case (MY_CPU_ID)
         0: begin
           `logI("Forcing CORE#0 in reset...");
-          
-          `ifdef BARE_MODE
-            force `CPU0_PATH.core.reset =1;
-          `endif
-           
-          `ifdef BFM_MODE
-            force `CPU0_PATH.reset =1;
-          `endif
+          force `CPU0_RESET = 1;
         end
         1: begin
           `logI("Forcing CORE#1 in reset...");
-
-          `ifdef BARE_MODE
-            force `CPU1_PATH.core.reset =1;
-          `endif
-    
-          `ifdef BFM_MODE
-            force `CPU1_PATH.reset =1;
-          `endif        
+          force `CPU1_RESET = 1;
         end
         2: begin
           `logI("Forcing CORE#2 in reset...");
-    
-          `ifdef BARE_MODE
-            force `CPU2_PATH.core.reset =1;
-          `endif
-    
-          `ifdef BFM_MODE
-            force `CPU2_PATH.reset =1;
-          `endif        
+          force `CPU2_RESET = 1;
         end
         3: begin
           `logI("Forcing CORE#3 in reset...");
-   
-          `ifdef BARE_MODE
-            force `CPU3_PATH.core.reset =1;
-          `endif
-            
-            `ifdef BFM_MODE
-              force `CPU3_PATH.reset =1;
-            `endif        
+          force `CPU3_RESET = 1;
+        end     
+      endcase // case (MY_CPU_ID)
+    end
+  endtask
+
+  // Task to force the current drivers core into reset
+  task release_core_reset;
+    begin
+      case (MY_CPU_ID)
+        0: begin
+          `logI("Releasing CORE#0 reset...");
+          release `CPU0_RESET;
+        end
+        1: begin
+          `logI("Releasing CORE#1 reset...");
+          release `CPU1_RESET;
+        end
+        2: begin
+          `logI("Releasing CORE#2 reset...");
+          release `CPU2_RESET;
+        end
+        3: begin
+          `logI("Releasing CORE#3 reset...");
+          release `CPU3_RESET;
         end     
       endcase // case (MY_CPU_ID)
     end
@@ -515,17 +537,6 @@ module cpu_driver
       `logI("PassFail=%x %x %x %x %x",passFail[0],passFail[1],passFail[2],passFail[3],passFail[4]);
     end
    
-    // Get core reset status    
-    always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
-      case (MY_CPU_ID)      
-        0: dvtFlags[`DVTF_PAT_LO] = `CPU0_PATH.core.reset;
-        1: dvtFlags[`DVTF_PAT_LO] = `CPU1_PATH.core.reset;
-        2: dvtFlags[`DVTF_PAT_LO] = `CPU2_PATH.core.reset;
-        3: dvtFlags[`DVTF_PAT_LO] = `CPU3_PATH.core.reset;
-      endcase
-      dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
-    end
-
     // Get Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]) begin
       dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = {FailStatus,PassStatus};

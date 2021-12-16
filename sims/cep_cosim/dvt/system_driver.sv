@@ -172,7 +172,7 @@ module system_driver (
 
   always @(posedge `DVT_FLAG[`DVTF_TOGGLE_CHIP_RESET_BIT]) 
   begin
-    wait (`PBUS_RESET==0);
+    wait (`PBUS_RESET == 0);
     @(negedge `PBUS_CLOCK);
     #2000;
     `logI("Asserting pbus_Reset");

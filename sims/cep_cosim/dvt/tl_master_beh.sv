@@ -80,10 +80,8 @@ module tl_master_beh #(
   output reg [SINK_SIZE-1:0]  tl_master_e_bits_sink = 0
 );
 
-   
-
-   integer              i;
-   reg                  tl_err = 0;
+  integer              i;
+  reg                  tl_err = 0;
 //`define TICK_DELAY #1
 `define TICK_DELAY 
    //

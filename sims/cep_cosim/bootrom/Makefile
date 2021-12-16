@@ -32,7 +32,7 @@ CFLAGS_RV32		=-mabi=ilp32 -march=rv32ima
 LFLAGS 			=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
 
 # default to 1MHz but really should be overridden
-PBUS_CLK 		?= 1000000
+PBUS_CLK 		?= 200000000
 
 default: img dump
 

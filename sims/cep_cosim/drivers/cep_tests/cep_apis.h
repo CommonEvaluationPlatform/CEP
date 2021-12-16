@@ -35,6 +35,7 @@ extern "C" {
   /*
    * Function Prototypes
    */
+  void release_core_reset(int cpuId);
   void dump_wave(int cycle2start, int cycle2capture, int enable);
   int is_program_loaded(int maxTimeOut);  
   int check_bare_status(int coreId,int maxTimeOut);  
