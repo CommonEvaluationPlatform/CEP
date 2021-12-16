@@ -453,7 +453,7 @@ module cpu_driver
     `ifdef BFM_MODE
       repeat(10) @(posedge clk);
       if (!myIsActive) begin
-        force_core_in_reset();  
+        force_core_reset();  
       end // if (!myIsActive)
     `endif
   end // initial begin
