@@ -63,6 +63,10 @@ class CEPASICRocketConfig extends Config(
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithSROT ++
 
+  // Instantiantion of the CEP BootROM with default parameter overrides
+  // The hang parameter sets the system-wide reset vector for ALL RocketTiles
+  new chipyard.config.WithCEPBootROM(address = 0x10000L, size = 0x10000, hang = 0x10000L)++
+
   // CEP Scratchpad memory @ the typical external memory base address
   // Address & Size are in terms of *bytes* even though the memory is
   // 64-bits wide.  Thus, size of 0x7FFFF results in 64K x 64-bit (or 512kB)

@@ -3,6 +3,9 @@ package chipyard.config
 import chisel3._
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.stage.phases.TargetDirKey
+import freechips.rocketchip.tile._
 
 import mitllBlocks.cep_addresses._
 import mitllBlocks.aes._
@@ -232,6 +235,17 @@ class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_ad
       slave_depth         = size,
       dev_name            = s"scratchpad"
     ))
+})
+
+// CEPBootROM allows override of default parameters
+class WithCEPBootROM    (address  : BigInt  = 0x10000, 
+                         size     : Int     = 0x10000,
+                         hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(
+                         address = address,
+                         size    = size,
+                         hang    = hang,
+                         contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
 })
 
 class WithSROT extends Config((site, here, up) => {

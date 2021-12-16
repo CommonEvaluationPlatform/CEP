@@ -34,7 +34,6 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithCustomBootPin ++
 
   // Additional chip configuration items
-  new chipyard.config.WithBootROM ++                             // use default bootrom
   new chipyard.config.WithUART ++                                // add a UART
   new chipyard.config.WithNoSubsystemDrivenClocks ++             // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++      // Unspecified clocks within a bus will receive the bus frequency if set
