@@ -212,8 +212,8 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 # -g                    - Produce debugging information in the operating system’s native format
 # -lgcc                 - ?????
 RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -nostartfiles -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} ${COMMON_INCLUDE_LIST}
-RISCV_BARE_LDFILE		+= ${BARE_SRC_DIR}/cep_link.lds
-RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LDFILE}
+RISCV_BARE_LFILE		+= ${BARE_D}/cep_link.lds
+RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LFILE}
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
@@ -268,7 +268,10 @@ ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES}
 ${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
-${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${BARE_D}/%.S ${COMMON_DEPENDENCIES} 
+${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.S ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
+
+${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
@@ -305,8 +308,8 @@ ${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMO
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${RISCV_LIB} ${COMMON_DEPENDENCIES} ${RISCV_BARE_LDFILE}
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LDFLAGS} $< -o $@
+${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${RISCV_LIB} ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE}
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o $@
 #	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJDUMP} -d riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
