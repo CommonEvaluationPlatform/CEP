@@ -34,10 +34,6 @@
     // Run the specified test 
 //    if (!errCnt) { errCnt = cepRegTest_runTest(coreId, 64, revCheck, coreId * (0x100), 0); }
 
-
-    // Infinite bare-metal loop
-//    while (1) {;}
-
     // Set the core status
     set_status(errCnt, testId[coreId]);
 

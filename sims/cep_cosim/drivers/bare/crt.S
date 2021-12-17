@@ -4,7 +4,7 @@
 #
 # File Name:      crt.S
 # Program:        Common Evaluation Platform (CEP)
-# Description:    
+# Description:    CEP bare-metal initialization driver
 # Notes:          
 #
 #--------------------------------------------------------------------------------------
@@ -142,8 +142,8 @@ _start:
 1:bgeu a0, a1, 1b
 #endif
 	
-  # give each core 128KB of stack + TLS
-#define STKSHIFT 17
+  # give each core 32KB of stack + TLS
+#define STKSHIFT 14
  sll a2, a0, STKSHIFT
   add tp, tp, a2
   add sp, a0, 1
