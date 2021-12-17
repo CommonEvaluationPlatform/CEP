@@ -429,7 +429,7 @@ module cpu_driver
     else if (dvtFlags[1:0] == 1) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core1_status;
     else if (dvtFlags[1:0] == 2) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core2_status;
     else if (dvtFlags[1:0] == 3) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core3_status;
-    dvtFlags[`DVTF_GET_CORE_STATUS]=0;
+    dvtFlags[`DVTF_GET_CORE_STATUS] = 0;
   end
   //--------------------------------------------------------------------------------------
    

@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
     done = thr.AllThreadDone();
 
     // Scan through the printf buffers for all the cores
-    for (int i = 0; i < MAX_CORES; i++)
-      check_printf_memory(i);
+//    for (int i = 0; i < MAX_CORES; i++)
+//      check_printf_memory(i);
 
   }
   //--------------------------------------------------------------------------------------

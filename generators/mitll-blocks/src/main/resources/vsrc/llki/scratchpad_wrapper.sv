@@ -61,9 +61,9 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 
   // Create the structures for communicating with OpenTitan-based Tilelink
   tl_h2d_t                      slave_tl_h2d_i;
-  tl_d2h_t                      slave_tl_d2h_o;
-  tl_d2h_t                      slave_tl_d2h_i;
   tl_h2d_t                      slave_tl_h2d_o;
+  tl_d2h_t                      slave_tl_d2h_i;
+  tl_d2h_t                      slave_tl_d2h_o;
   logic                         tl_err;
   logic                         addr_err;
 

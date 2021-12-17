@@ -310,15 +310,15 @@ int check_bare_status(int cpuId, int maxTimeOut) {
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
       DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
       d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
-      testId = d64 >> 32;
-      d32 = d64 & 0xFFFFFFFF;
+      testId  = (d64 >> 32) & 0xFFFFFFFF;
+      d32     = d64 & 0xFFFFFFFF;
 
       // Check status
       if (d32 == CEP_GOOD_STATUS) {
-        LOGI("%s: GOOD Status: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
+        LOGI("%s: GOOD Status: cpuId = %0d, testId = %0d, i = %0d\n",__FUNCTION__, cpuId, testId, i);
         done = 1;
       } else if (d32 == CEP_BAD_STATUS) {
-        LOGI("%s: BAD Status: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
+        LOGI("%s: BAD Status: cpuId = %0d, testId = %0d, i = %0d\n",__FUNCTION__, cpuId, testId, i);
         done = 1;
         errCnt++;
       } // end if (d32 == CEP_GOOD_STATUS)
@@ -386,46 +386,25 @@ void set_fail(void) {
 }
 
 
+// Store test status and testId in the current core's status register
 int set_status(int errCnt, int testId) {
-#ifdef BARE_MODE  
-  int i=0, coreId;
-  uint64_t d64, offS, myOffs;
-  //
-  // which core???
-  //
-  coreId = read_csr(mhartid);
-  if (errCnt) {
-    d64 = ((u_int64_t)testId << 32) | CEP_BAD_STATUS;
-  } else {
-    d64 = ((u_int64_t)testId << 32) | CEP_GOOD_STATUS;
-  }
-  // Use core status 05/18/20
-  offS = reg_base_addr + cep_core0_status + (coreId * 8);
-  *(volatile uint64_t *)(offS) = d64;
-  //
-  // Below are not predictable due to cache flush
-  //
-  myOffs = cep_scratch_mem + (coreId*cep_cache_size);
-  //
-  // Set the status
-  //
-  *(volatile uint64_t *)(myOffs) = d64;
-  *(volatile uint64_t *)(myOffs+8) = coreId;
-  // write to sratch register that belong to me
-  //
-  //
-  // force a cache flush?? 
-  //
-  //asm volatile ("fence"); // flush????
-  //
-  i=0;
-  while (i < 18) {
-    offS = cep_scratch_mem | ((1<<i)*64);
-    d64 = *(volatile uint64_t *)(offS | ((1<<i)*64));
-    if (d64 == CEP_BAD_STATUS) { i += 2; } else { i++; }
-  }
-  #endif
+  #ifdef BARE_MODE  
+    int       coreId;
+    uint64_t  d64;
+    uint64_t  offS;
 
+    coreId = read_csr(mhartid);
+    if (errCnt) {
+      d64 = ((u_int64_t)testId << 32) | CEP_BAD_STATUS;
+    } else {
+      d64 = ((u_int64_t)testId << 32) | CEP_GOOD_STATUS;
+    }
+
+    // Write status to the current core's status register
+    offS = reg_base_addr + cep_core0_status + (coreId * 8);
+    *(volatile uint64_t *)(offS) = d64;
+    
+  #endif
       
   return errCnt;
 }

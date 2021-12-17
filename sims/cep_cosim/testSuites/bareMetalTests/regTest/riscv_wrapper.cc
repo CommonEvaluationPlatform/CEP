@@ -28,7 +28,7 @@
     int revCheck  = 1;
     set_printf(0);
   
-    // Set the current status to running
+    // Set the current core's status to running
     set_cur_status(CEP_RUNNING_STATUS);
   
     // Run the specified test 
@@ -36,10 +36,10 @@
 
 
     // Infinite bare-metal loop
-    while (1) {;}
+//    while (1) {;}
 
     // Set the core status
-//    set_status(errCnt, testId[coreId]);
+    set_status(errCnt, testId[coreId]);
 
     // Exit with the error count
     exit(errCnt);
