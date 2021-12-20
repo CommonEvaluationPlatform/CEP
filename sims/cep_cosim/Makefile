@@ -13,39 +13,46 @@
 # Default build target
 all: runAll
 
-# Always in regression mode
-override NOWAVE  = 1
-UPDATE_INFO = 1
+# The following flags / variables can be overridden by lower level makefiles or the command line
+MODELSIM        			?= 1
+CADENCE 					?= 0
+override NOWAVE          	= 1
+PROFILE         			?= 0
+COVERAGE        			?= 0
+USE_GDB       				?= 0
+TL_CAPTURE      			?= 0
+UPDATE_INFO 				= 1
+# Each test suite will set its own value
+DUT_SIM_MODE				= BFM
 
 # Basic test variables
-COSIM_DIR_NAME  	= $(shell basename `pwd`)
-REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
-BLD_DIR     	= $(shell cd ./bfmTests; pwd | ../bin/strip_net.pl )
-TEST_SUITE  	= $(shell basename ${BLD_DIR})
+COSIM_TOP_DIR   			= $(strip $(shell pwd))
+COSIM_BIN_DIR       		= $(COSIM_TOP_DIR)/bin
+REPO_TOP_DIR 				= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 
 # Tests to run as part of the default build target
-TEST_GROUP  =  	bareMetalTests	\
-		bfmTests	\
-		isaTests	\
-		vBareTest	\
+TEST_SUITES  =  	bareMetalTests	\
+					bfmTests		\
+					isaTests		\
+					vBareTest
 
 # Run tests for all members of the test group
 runAll: 
 	make cleanAll
 	make buildLibs
-	@for i in ${TEST_GROUP}; do				\
-		rm -f $${i}/$${i}.log;				\
-		(cd $${i}; make STAND_ALONE=0 runAll); 		\
+	@for i in ${TEST_SUITES}; do							\
+		rm -f $${i}/$${i}.log;								\
+		(cd testSuites/$${i}; make STAND_ALONE=0 runAll); 	\
 	done
 
 # Print summary
 summary: .force
-	@date > ${COSIM_DIR_NAME}/regressionSummary
-	@for i in ${TEST_GROUP}; do								\
-		(cd $${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_DIR_NAME}/regressionSummary);	\
+	@date > ${COSIM_TOP_DIR}/regressionSummary
+	@for i in ${TEST_SUITES}; do								\
+		(cd testSuites/$${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
 	done
 
 # Include the common makefile
-include $(COSIM_DIR_NAME)/common.make
+include $(COSIM_TOP_DIR)/common.make
 
 

@@ -12,6 +12,7 @@
 # See LICENSE for license details.
 
 #include "encoding.h"
+#include "cep_adrMap.h"
 
 #if __riscv_xlen == 64
 # define LREG ld
@@ -128,23 +129,27 @@ _start:
   la gp, __global_pointer$
 .option pop
 
+  # Initialize the thread pointer to
+  # the end of the data segment
   la  tp, _end + 63
-  and tp, tp, -64
+  and tp, tp, - 64
 
   # get core id
   csrr a0, mhartid
   
-  # give each core 64KB of stack + TLS
-#define STKSHIFT 15
- sll a2, a0, STKSHIFT
+  # Allocate Stack and Thread Local Storage for each core
+  # cep_stkshift is defined in cep_adrMap.h
+  sll a2, a0, cep_stkshift
   add tp, tp, a2
   add sp, a0, 1
-  sll sp, sp, STKSHIFT
+  sll sp, sp, cep_stkshift
   add sp, sp, tp
 
+  # Jump to program start
   j _init
 
   .align 2
+
 trap_entry:
   addi sp, sp, -272
 

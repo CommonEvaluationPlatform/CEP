@@ -18,10 +18,6 @@
 // Maximum number of cores supports by co-simulation environment
 `define MAX_CORES                       4
 
-// Start address for heap memory and per-core allocation
-`define cep_malloc_heap_start           'hB800_0000
-`define cep_malloc_heap_size_per_core   'h0100_0000
-
 // Values used with the CEP Core Status registers to indicate status
 `define CEP_GOOD_STATUS                 'h600D_BABE
 `define CEP_BAD_STATUS                  'hBAD0_DADE
@@ -42,9 +38,58 @@
 `define other_base_addr                 'h6400_0000
 `define other_base_size                 'h0100_0000
 
+// The following constants
 `define scratchpad_base_addr            'h8000_0000
 `define scratchpad_base_size            'h0008_0000
-`define scratchpad_know_pattern         'h600dbabe_12345678
+
+// Defines the offset from scratchpad_base_addr used to
+// establish the initial SP value by the CEP bootrom.
+// This value is irrelevant to the bare metal
+// executable given that all registers are overwritten
+// in the bare metal bootloader (crt.S)
+// This needs to be "sufficiently" less than
+// scratchpad_base_size to allow sd.c to execute
+// properly
+`define scratchpad_sp_offset            'h0007_0000
+
+// Used by the bare-metal bootloader crt.S to allocate
+// both stack and thread local storage for each core
+// 
+//  2^9  - 512
+//  2^10 - 1k
+//  2^11 - 2k
+//  2^12 - 4k
+//  2^13 - 8k
+//  2^14 - 16k
+//  2^15 - 32k
+//  2^16 - 64k
+//
+// Allocation works is peformed by crt.S in the
+// following fashion:
+//  Core 0 tp = _end
+//  Core 1 tp = _end + 1 << cep_stkshift (x 2^cep_stkshift)
+//  Core 2 tp = _end + 2 << cep_stkshift (x 2^cep_stkshift)
+//  Core 3 tp = _end + 3 << cep_stkshift (x 2^cep_stkshift)
+//  Core 0 sp = _end + 4 << cep_stkshift (x 2^cep_stkshift)
+//  Core 1 sp = _end + 5 << cep_stkshift (x 2^cep_stkshift)
+//  Core 2 sp = _end + 6 << cep_stkshift (x 2^cep_stkshift)
+//  Core 3 sp = _end + 7 << cep_stkshift (x 2^cep_stkshift)
+//
+// 
+`define cep_stkshift                    12
+
+
+// Address constants used by the bare_malloc function
+// This has to fit into the scratchpad memory after
+// the data segment, thread local storage, and the stack
+// (for each core)
+//
+// 32kB of heap space is allocated per core and is
+// justified to the end of scratchpad memoyr
+`define cep_malloc_heap_start           'h8006_0000   // 
+`define cep_malloc_heap_size_per_core   'h0000_8000   // 32kB per core
+
+`define scratchpad_known_pattern        'h600dbabe_12345678
 
 
 // The following constants are used within the CEP Registers
@@ -71,7 +116,6 @@
 `define cep_core3_status                'hFF18
 `define CEP_VERSION_MASK                'h0FFFFFFF_FFFFFFFF
 
-
 // bootrom as 4kx32 = 16Kbytes
 `define bootrom_base_addr               'h0001_0000
 `define bootrom_base_size               (1<<15)
@@ -92,7 +136,6 @@
 `define  clint_mtimecmp_offset          'h4000
 // rtcTick = 1usec interval
 `define  clint_mtimer_offset            'hBFF8
-//
 
 // PLIC: platform-level interrupt controller
 `define plic_base_addr                  'h0c00_0000

@@ -19,7 +19,6 @@
     const uint32_t BITS_PER_BYTE    = 8;
     const uint32_t BYTES_PER_WORD   = 8;    // 64-bit word accesses for RISC-V
 
-
     // Maximum expected name size for the ipCoreData structure
     #define MAX_CONFIG_STRING_K     32
 

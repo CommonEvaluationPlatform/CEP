@@ -1,7 +1,22 @@
+/*--------------------------------------------------------------------------------------*/
+/* Copyright 2021 Massachusetts Institute of Technology                                 */
+/* SPDX short identifier: BSD-2-Clause                                                  */
+/*                                                                                      */
+/* File Name:      cep_boot.lds                                                         */
+/* Program:        Common Evaluation Platform (CEP)                                     */
+/* Description:    Linker script for CEP Bootrom                                        */
+/* Notes:          The original was copied from the Chipyard FPGA resources             */
+/*                                                                                      */
+/*--------------------------------------------------------------------------------------*/
+
 OUTPUT_ARCH("riscv")
 ENTRY(_prog_start)
 
-INCLUDE memory.lds
+MEMORY
+{
+  bootrom_mem (rx) : ORIGIN = 0x10000, LENGTH = 0x2000
+  memory_mem (rwx) : ORIGIN = 0x80000000, LENGTH = 0x00080000
+}
 
 PHDRS
 {

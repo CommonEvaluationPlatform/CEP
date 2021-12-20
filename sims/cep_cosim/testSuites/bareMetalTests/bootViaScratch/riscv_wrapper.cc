@@ -45,7 +45,7 @@ void thread_entry(int cid, int nc)
   // so read them here to verify core0 did go thru the boot sequrce via scratchpad.
   //
   uint64_t rdDat;
-  uint64_t wrDat = scratchpad_know_pattern;
+  uint64_t wrDat = scratchpad_known_pattern;
   //
   for (int i=0;i<8;i++) {
     DUT_READ32_64(scratchpad_base_addr + (i*0x100),rdDat);    

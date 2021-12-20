@@ -33,7 +33,7 @@
  *****************************************************************************/
 
 // CPU info
-#define NUM_CORES 1
+#define NUM_CORES 4
 #define GLOBAL_INT_SIZE 38
 #define GLOBAL_INT_MAX_PRIORITY 7
 

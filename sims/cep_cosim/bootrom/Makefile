@@ -16,20 +16,24 @@ endif
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
+SHARE_DIR       := $(strip $(shell cd ../share; pwd))
 
 BOOTROM_IMG 	= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_DUMP	= bootrom.rv64.dump bootrom.rv32.dump
 BOOTROM_ELF  	= bootrom.rv64.elf bootrom.rv32.elf
+
+CEP_ADR_FILE    = ${ROOT_DIR}/share/cep_adrMap.h
+CEP_LDS_FILE    = ${ROOT_DIR}/cep_boot.lds
 
 CC 				=$(RISCV)/bin/riscv64-unknown-elf-gcc
 OBJCOPY 		=$(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		=$(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			=-mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS 			+=-fno-common -g -DENTROPY=0 -DNONSMP_HART=0
-CFLAGS  		+=-I $(ROOT_DIR)/include -I. -D_SIM_ONLY
+CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR} -I ${SHARE_DIR} -D_SIM_ONLY
 CFLAGS_RV64		=-mabi=lp64 -march=rv64ima
 CFLAGS_RV32		=-mabi=ilp32 -march=rv32ima
-LFLAGS 			=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
+LFLAGS 			=-static -nostdlib -T ${CEP_LDS_FILE}
 
 # default to 1MHz but really should be overridden
 PBUS_CLK 		?= 200000000
@@ -42,16 +46,20 @@ dump: $(BOOTROM_DUMP)
 
 elf: $(BOOTROM_ELF)
 
+# The bootrom requires that the cep_adrMap.h be built
+${CEP_ADR_FILE}:
+	@(cd ..; make build_v2c)
+
 %.img: %.elf
 	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@
 
 %.dump: %.elf
 	$(OBJDUMP) -d $< > $@
 
-bootrom.rv32.elf: head.S kprintf.c sd.c $(ROOT_DIR)/linker/sdboot.elf.lds
+bootrom.rv32.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE} ${CEP_ADR_FILE}
 	$(CC) $(CFLAGS) $(CFLAGS_RV32) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
 
-bootrom.rv64.elf: head.S kprintf.c sd.c $(ROOT_DIR)/linker/sdboot.elf.lds
+bootrom.rv64.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE} ${CEP_ADR_FILE}
 	$(CC) $(CFLAGS) $(CFLAGS_RV64) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
 
 clean:

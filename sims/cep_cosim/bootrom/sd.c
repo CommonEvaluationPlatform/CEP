@@ -253,23 +253,25 @@ void print_greeting()
 int main(void)
 {
 
-    REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
+  REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
 
-    print_greeting();
-    kputs("INIT");
-    sd_poweron();
-    if (sd_cmd0() ||
-        sd_cmd8() ||
-        sd_acmd41() ||
-        sd_cmd58() ||
-        sd_cmd16() ||
-        copy()) {
-      kputs("ERROR");
-      return 1;
-    }
+  print_greeting();
+  kputs("INIT");
+  
+  sd_poweron();
+  if (sd_cmd0() ||
+      sd_cmd8() ||
+      sd_acmd41() ||
+      sd_cmd58() ||
+      sd_cmd16() ||
+      copy()) {
+        kputs("ERROR");
+    return 1;
+  }
 
-    kputs("BOOT");
+  kputs("BOOT");
 
+  // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");
 
   return 0;

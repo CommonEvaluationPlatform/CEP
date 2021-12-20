@@ -27,11 +27,6 @@ COVERAGE        			?= 0
 USE_GDB       				?= 0
 TL_CAPTURE      			?= 0
 
-$(info )
-$(info CEP_COSIM: ----------------------------------------------------------------------)
-$(info CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           )
-$(info CEP_COSIM: ----------------------------------------------------------------------)
-
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
 # The following check ensures one and only one is set
 ifeq (${CADENCE},1)
@@ -127,26 +122,31 @@ include ${BUILD_SW_MAKEFILE}
 #--------------------------------------------------------------------------------------
 # Provide some status of the user contronable parameters
 #--------------------------------------------------------------------------------------
-$(info )
-$(info CEP_COSIM: Running with the following variables:)
-$(info CEP_COSIM:   RISCV                  = $(RISCV))
+sim_info:
+	@echo ""
+	@echo "CEP_COSIM: ----------------------------------------------------------------------"
+	@echo "CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           "
+	@echo "CEP_COSIM: ----------------------------------------------------------------------"
+	@echo ""
+	@echo " CEP_COSIM: Running with the following variables:"
+	@echo " CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
-$(info CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH})
+	@echo " CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH})"
 else ifeq (${CADENCE},1)
-$(info CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH})
-$(info CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL})
+	@echo " CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH})"
+	@echo " CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL})"
 endif
-$(info CEP_COSIM:   MODELSIM               = $(MODELSIM))
-$(info CEP_COSIM:   CADENCE                = $(CADENCE))
-$(info CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE})
-$(info CEP_COSIM:   NOWAVE                 = ${NOWAVE})
-$(info CEP_COSIM:   PROFILE                = ${PROFILE})
-$(info CEP_COSIM:   COVERAGE               = ${COVERAGE})
-$(info CEP_COSIM:   USE_GDB                = ${USE_GDB})
-$(info CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE})
-$(info CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE})
-$(info CEP_COSIM:   SINGLE_THREAD          = ${SINGLE_THREAD})
-$(info )
+	@echo " CEP_COSIM:   MODELSIM               = $(MODELSIM))""
+	@echo " CEP_COSIM:   CADENCE                = $(CADENCE))"
+	@echo " CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE})"
+	@echo " CEP_COSIM:   NOWAVE                 = ${NOWAVE})"
+	@echo " CEP_COSIM:   PROFILE                = ${PROFILE})"
+	@echo " CEP_COSIM:   COVERAGE               = ${COVERAGE})"
+	@echo " CEP_COSIM:   USE_GDB                = ${USE_GDB})"
+	@echo " CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
+	@echo " CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
+	@echo " CEP_COSIM:   SINGLE_THREAD          = ${SINGLE_THREAD}"
+	@echo ""
 #--------------------------------------------------------------------------------------
 
 
@@ -280,7 +280,7 @@ cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
+	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog

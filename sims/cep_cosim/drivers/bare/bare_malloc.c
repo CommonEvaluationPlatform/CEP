@@ -2,23 +2,17 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      bare_malloc.c
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
+// Description:    CEP malloc functionality for bare metal
 // Notes:          
 //
 //************************************************************************
 
-//
-// Very simple/premitive maaloc to support malloc in bare metal
-//
 #include "cep_adrMap.h"
 #include "encoding.h"
 #include "bare_malloc.h"
 
-//
-//
-//
 bareMalloc_t malloc_st[MAX_CORES] __attribute__((aligned(64))) = {
   {.start_heap=(cep_malloc_heap_start),                                .end_heap=(cep_malloc_heap_start + cep_malloc_heap_size_per_core)},
   {.start_heap=(cep_malloc_heap_start+cep_malloc_heap_size_per_core),  .end_heap=(cep_malloc_heap_start + 2*cep_malloc_heap_size_per_core)},
@@ -28,7 +22,7 @@ bareMalloc_t malloc_st[MAX_CORES] __attribute__((aligned(64))) = {
 				      
 
 void* bare_malloc(uint32_t nbytes) {
-  int coreId = read_csr(mhartid);;
+  int coreId = read_csr(mhartid);;\
   if (malloc_st[coreId].start_heap + nbytes >= malloc_st[coreId].end_heap)
         return 0;
   uint32_t temp = (uint32_t)malloc_st[coreId].start_heap;
@@ -38,6 +32,6 @@ void* bare_malloc(uint32_t nbytes) {
 
 void bare_free(void *ptr) {
   // TODO: does nothing for now
-  // assuming test never maaloc more then allocated
+  // assuming test never malloc more then allocated
   return;
 }
