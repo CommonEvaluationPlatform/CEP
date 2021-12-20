@@ -10,6 +10,7 @@
 //************************************************************************
 
 #include "simdiag_global.h"
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cepCsrTest.h"
 
@@ -53,7 +54,7 @@ int cepCsrTest_runTest(int cpuId, int accessSize,int revCheck,int seed, int verb
   // testing custom CSR @0x7c1
   // 
   asm volatile ("csrr	%0,0x7c1" : "=r"(saveCustom));
-  DUT_WRITE32_64(reg_base_addr + cep_scratch0_reg,saveCustom); // to observe
+  DUT_WRITE32_64(CEPREGS_BASE_ADDR + cep_scratch0_reg,saveCustom); // to observe
   if (saveCustom != 0x208) errCnt++;
   if (errCnt) goto apiDone;
   //
@@ -61,7 +62,7 @@ int cepCsrTest_runTest(int cpuId, int accessSize,int revCheck,int seed, int verb
   asm volatile ("csrw	0x7c1,%0" : : "r"(dat64));
   //
   asm volatile ("csrr	%0,0x7c1" : "=r"(dat64));
-  DUT_WRITE32_64(reg_base_addr + cep_scratch0_reg,dat64); // to observe
+  DUT_WRITE32_64(CEPREGS_BASE_ADDR + cep_scratch0_reg,dat64); // to observe
   if (dat64 != 0) errCnt++;
   if (errCnt) goto apiDone;
   // put back

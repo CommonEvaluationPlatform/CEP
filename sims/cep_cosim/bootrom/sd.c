@@ -253,9 +253,6 @@ void print_greeting()
 int main(void)
 {
 
-  // Disable UART and SD initialization when in simulation mode
-  #ifndef _SIM_ONLY
-
     REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
 
     print_greeting();
@@ -272,7 +269,6 @@ int main(void)
     }
 
     kputs("BOOT");
-  #endif
 
   __asm__ __volatile__ ("fence.i" : : : "memory");
 

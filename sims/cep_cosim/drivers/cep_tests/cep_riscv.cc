@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_riscv.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -75,6 +75,7 @@ char get_selfModCodeValue(void) {
 #include <stdint.h>
 #endif
 //
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "cep_riscv.h"
@@ -114,7 +115,7 @@ int cep_exchAtomicTest(int coreId, uint64_t *ptr, uint64_t mySig, uint64_t partS
   int timeOut = 2000;
   int i=1;
   uint64_t myCurSig = mySig;
-  uint32_t regAdr = reg_base_addr + cep_scratch0_reg + (coreId * 16);
+  uint32_t regAdr = CEPREGS_BASE_ADDR + cep_scratch0_reg + (coreId * 16);
   //
   while (i <= loop) {
     // strong compare

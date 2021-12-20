@@ -10,6 +10,7 @@
 //************************************************************************
 
 #include "simdiag_global.h"
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cepLockTest.h"
 
@@ -64,7 +65,7 @@ int cepLockTest_runTest(int cpuId, int accessSize,int loop,int lockNum, int seed
   // add 8 scratch pads
   //
   for (int i=0;i<8;i++) {
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch0_reg + (i*8),(uint64_t)(-1));    
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch0_reg + (i*8),(uint64_t)(-1));    
   }
   int maxTO = 50000;
   for (int i=0;i<loop;i++) {
@@ -116,7 +117,7 @@ int cepLockTest_runTest2(int cpuId, int accessSize,int loop,int seed, int verbos
       //
       (*regp->ClearAll_p)(regp);
       for (int j=0;j<2;j++) {
-	(*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch0_reg + (lockNum * 0x10) + (j*8),(uint64_t)(-1));    
+	(*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch0_reg + (lockNum * 0x10) + (j*8),(uint64_t)(-1));    
       }
       // get the lock      
       int lockStat = cep_get_lock(cpuId, lockNum, maxTO);

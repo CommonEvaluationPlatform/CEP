@@ -32,7 +32,7 @@
     set_cur_status(CEP_RUNNING_STATUS);
   
     // Run the specified test 
-//    if (!errCnt) { errCnt = cepRegTest_runTest(coreId, 64, revCheck, coreId * (0x100), 0); }
+    if (!errCnt) { errCnt = cepRegTest_runTest(coreId, 64, revCheck, coreId * (0x100), 0); }
 
     // Set the core status
     set_status(errCnt, testId[coreId]);

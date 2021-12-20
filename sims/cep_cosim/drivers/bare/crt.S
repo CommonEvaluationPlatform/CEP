@@ -4,8 +4,8 @@
 #
 # File Name:      crt.S
 # Program:        Common Evaluation Platform (CEP)
-# Description:    CEP bare-metal initialization driver
-# Notes:          
+# Description:    CEP bare-metal multi-core initialization driver
+# Notes:          Bare metal executable entry point
 #
 #--------------------------------------------------------------------------------------
 
@@ -25,6 +25,7 @@
 
   .section ".text.init"
   .globl _start
+# Inialize registers
 _start:
   li  x1, 0
   li  x2, 0
@@ -132,18 +133,9 @@ _start:
 
   # get core id
   csrr a0, mhartid
-  # for now, assume only 1 core
-  li a1, 1
-	#
-	# Tony, allow any core to run
-	# 
-	
-#if 0	
-1:bgeu a0, a1, 1b
-#endif
-	
-  # give each core 32KB of stack + TLS
-#define STKSHIFT 14
+  
+  # give each core 64KB of stack + TLS
+#define STKSHIFT 15
  sll a2, a0, STKSHIFT
   add tp, tp, a2
   add sp, a0, 1

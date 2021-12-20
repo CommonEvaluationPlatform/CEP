@@ -20,10 +20,10 @@
 //
 //
 bareMalloc_t malloc_st[MAX_CORES] __attribute__((aligned(64))) = {
-  {.start_heap=(cep_malloc_heap_core0_start),                            .end_heap=(cep_malloc_heap_core0_start + cep_malloc_heap_core_size)},
-  {.start_heap=(cep_malloc_heap_core0_start+cep_malloc_heap_core_size),  .end_heap=(cep_malloc_heap_core0_start + 2*cep_malloc_heap_core_size)},
-  {.start_heap=(cep_malloc_heap_core0_start+2*cep_malloc_heap_core_size),.end_heap=(cep_malloc_heap_core0_start + 3*cep_malloc_heap_core_size)},
-  {.start_heap=(cep_malloc_heap_core0_start+3*cep_malloc_heap_core_size),.end_heap=(cep_malloc_heap_core0_start + 4*cep_malloc_heap_core_size)},
+  {.start_heap=(cep_malloc_heap_start),                                .end_heap=(cep_malloc_heap_start + cep_malloc_heap_size_per_core)},
+  {.start_heap=(cep_malloc_heap_start+cep_malloc_heap_size_per_core),  .end_heap=(cep_malloc_heap_start + 2*cep_malloc_heap_size_per_core)},
+  {.start_heap=(cep_malloc_heap_start+2*cep_malloc_heap_size_per_core),.end_heap=(cep_malloc_heap_start + 3*cep_malloc_heap_size_per_core)},
+  {.start_heap=(cep_malloc_heap_start+3*cep_malloc_heap_size_per_core),.end_heap=(cep_malloc_heap_start + 4*cep_malloc_heap_size_per_core)},
 } ;
 				      
 

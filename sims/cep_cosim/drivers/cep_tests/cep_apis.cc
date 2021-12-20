@@ -18,6 +18,7 @@
   #include <stdint.h>
 #endif
 
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 
@@ -360,7 +361,7 @@ void set_cur_status(int status) {
   // which core???
   coreId = read_csr(mhartid);
   d64 = ((u_int64_t)coreId << 32) | (u_int64_t)status;
-  offS = reg_base_addr + cep_core0_status + (coreId * 8);
+  offS = CEPREGS_BASE_ADDR + cep_core0_status + (coreId * 8);
   *(volatile uint64_t *)(offS) = d64;
 #endif
 }
@@ -371,7 +372,7 @@ void set_pass(void) {
 #ifdef BARE_MODE    
   uint64_t d64, offS;
   d64 = CEP_GOOD_STATUS;
-  offS = reg_base_addr + cep_core0_status;
+  offS = CEPREGS_BASE_ADDR + cep_core0_status;
   *(volatile uint64_t *)(offS) = d64;
 #endif
 }
@@ -380,7 +381,7 @@ void set_fail(void) {
 #ifdef BARE_MODE    
   uint64_t d64, offS;
   d64 = CEP_BAD_STATUS;
-  offS = reg_base_addr + cep_core0_status;
+  offS = CEPREGS_BASE_ADDR + cep_core0_status;
   *(volatile uint64_t *)(offS) = d64;
 #endif
 }
@@ -401,7 +402,7 @@ int set_status(int errCnt, int testId) {
     }
 
     // Write status to the current core's status register
-    offS = reg_base_addr + cep_core0_status + (coreId * 8);
+    offS = CEPREGS_BASE_ADDR + cep_core0_status + (coreId * 8);
     *(volatile uint64_t *)(offS) = d64;
     
   #endif
@@ -508,8 +509,8 @@ int cep_get_lock(int myId, int lockNum, int timeOut) {
   exp = 1 | (myId << 1); // expected
   do {
     // request the lock
-    cep_raw_write(reg_base_addr + testNset_reg, dat64);
-    rdDat = cep_raw_read(reg_base_addr + testNset_reg);
+    cep_raw_write(CEPREGS_BASE_ADDR + testNset_reg, dat64);
+    rdDat = cep_raw_read(CEPREGS_BASE_ADDR + testNset_reg);
     if (((rdDat >> (8*lockNum)) & 0xFF) == exp) {
       gotIt = 1;
       break;
@@ -530,12 +531,12 @@ void cep_release_lock(int myId, int lockNum) {
   dat64 = (((uint64_t)1 << releaseLock_bit ) |
      ((uint64_t)(lockNum & reqLockNum_mask) << reqLockNum_bit) |
      ((uint64_t)(myId & reqId_mask) << reqId_bit_lo));  
-  cep_raw_write(reg_base_addr + testNset_reg, dat64);
+  cep_raw_write(CEPREGS_BASE_ADDR + testNset_reg, dat64);
 }
 
 int cep_get_lock_status(int myId, int lockNum, int *lockMaster) {
   uint64_t dat64;
-  dat64 = cep_raw_read(reg_base_addr + testNset_reg);
+  dat64 = cep_raw_read(CEPREGS_BASE_ADDR + testNset_reg);
   dat64 = (dat64 >> (8*lockNum)) & 0xFF;
   *lockMaster = dat64>>1;
   return (dat64 & 0x1) ? 1 : 0;

@@ -203,6 +203,9 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 # -nostartfiles         - Do not use the standard system startup files when linking
 # -fno-builtin-printf   - Disable the builtin printf function (cep has a custom printf mechanism for bare metal simulation)
 # -march=rv64ima        - Specify supported instruction set
+#                         RV64I - Base Integer Instruction Set v2.0
+#                         M     - Standard Extension for Multiplication and Division v2.0
+#                         A     - Standard Extension for Atomic Instructions v2.0
 # -mabi=lp64            - Specify integer and floating poid calling convention
 # -I                    - Add the directory dir to the list of directories to be searched for header files during preprocessing
 # -static               - On systems that support dynamic linking, this overrides -pie and prevents linking with the shared libraries. On other systems, this option has no effect

@@ -10,9 +10,10 @@
 //************************************************************************
 
 
-#ifndef cep_H
-#define cep_H
-#include "cep_version.h"
+#ifndef CEP_H
+#define CEP_H
+
+#include <stdint.h>
 
     // General Constants
     const uint32_t BITS_PER_BYTE    = 8;
@@ -54,30 +55,51 @@
     // Array containing the base addresses and enable status of
     // all the CEP cores (index in array == core index)
     // cepMacroMix.cc implementation limits this to 32 total cores.
+    // This MUSTl
     const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
-        {"AES",         AES_CORE,         0x70000000, true },     // AES
-        {"MD5",         MD5_CORE,         0x70010000, true },     // MD5
-        {"SHA256.0",    SHA256_CORE,      0x70020000, true },     // SHA256 .0
-        {"SHA256.1",    SHA256_CORE,      0x70021000, true },     // SHA256 .1
-        {"SHA256.2",    SHA256_CORE,      0x70022000, true },     // SHA256 .2
-        {"SHA256.3",    SHA256_CORE,      0x70023000, true },     // SHA256 .3
-        {"RSA",         RSA_CORE,         0x70030000, true },     // RSA
-        {"DES3",        DES3_CORE,        0x70040000, true },     // DES3
-        {"DFT",         DFT_CORE,         0x70050000, true },     // DFT
-        {"IDFT",        IDFT_CORE,        0x70060000, true },     // IDFT
-        {"FIR",         FIR_CORE,         0x70070000, true },     // FIR
-        {"IIR",         IIR_CORE,         0x70080000, true },     // IIR
-        {"GPS.0",       GPS_CORE,         0x70090000, true },     // GPS .0
-        {"GPS.1",       GPS_CORE,         0x70091000, true },     // GPS .1
-        {"GPS.2",       GPS_CORE,         0x70092000, true },     // GPS .2
-        {"GPS.3",       GPS_CORE,         0x70093000, true },     // GPS .3
-        {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true },     // CEP Version Register
-        {"SROT",        SROT_CORE,        0x70200000, true }};    // SRoT
+        {"AES",         AES_CORE,         0x70000000, true },     // 0 - AES
+        {"MD5",         MD5_CORE,         0x70010000, true },     // 1 - MD5
+        {"SHA256.0",    SHA256_CORE,      0x70020000, true },     // 2 - SHA256 .0
+        {"SHA256.1",    SHA256_CORE,      0x70021000, true },     // 3 - SHA256 .1
+        {"SHA256.2",    SHA256_CORE,      0x70022000, true },     // 4 - SHA256 .2
+        {"SHA256.3",    SHA256_CORE,      0x70023000, true },     // 5 - SHA256 .3
+        {"RSA",         RSA_CORE,         0x70030000, true },     // 6 - RSA
+        {"DES3",        DES3_CORE,        0x70040000, true },     // 7 - DES3
+        {"DFT",         DFT_CORE,         0x70050000, true },     // 8 - DFT
+        {"IDFT",        IDFT_CORE,        0x70060000, true },     // 9 - IDFT
+        {"FIR",         FIR_CORE,         0x70070000, true },     // 10 - FIR
+        {"IIR",         IIR_CORE,         0x70080000, true },     // 11 - IIR
+        {"GPS.0",       GPS_CORE,         0x70090000, true },     // 12 - GPS .0
+        {"GPS.1",       GPS_CORE,         0x70091000, true },     // 13 - GPS .1
+        {"GPS.2",       GPS_CORE,         0x70092000, true },     // 14 - GPS .2
+        {"GPS.3",       GPS_CORE,         0x70093000, true },     // 15 - GPS .3
+        {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true },     // 16 - CEP Version Register
+        {"SROT",        SROT_CORE,        0x70200000, true }};    // 17 - SRoT
     
     // Direct indexes of version+SROT "cores"
-    #define CEP_VERSION_REG_INDEX  (CEP_TOTAL_CORES - 2)
-    #define SROT_INDEX             (CEP_TOTAL_CORES - 1)
+    #define CEP_VERSION_REG_INDEX   (CEP_TOTAL_CORES - 2)
+    #define SROT_INDEX              (CEP_TOTAL_CORES - 1)
    
+    // The following defines are used by the co-simulation tests that run in BFM and Bare Metal Mode
+    
+    #define AES_BASE_ADDR           cep_core_info[0].base_address
+    #define MD5_BASE_ADDR           cep_core_info[1].base_address
+    #define SHA256_0_BASE_ADDR      cep_core_info[2].base_address
+    #define SHA256_1_BASE_ADDR      cep_core_info[3].base_address
+    #define SHA256_2_BASE_ADDR      cep_core_info[4].base_address
+    #define SHA256_3_BASE_ADDR      cep_core_info[5].base_address
+    #define RSA_BASE_ADDR           cep_core_info[6].base_address
+    #define DES3_BASE_ADDR          cep_core_info[7].base_address
+    #define DFT_BASE_ADDR           cep_core_info[8].base_address
+    #define IDFT_BASE_ADDR          cep_core_info[9].base_address
+    #define FIR_BASE_ADDR           cep_core_info[10].base_address
+    #define IIR_BASE_ADDR           cep_core_info[11].base_address
+    #define GPS_0_BASE_ADDR         cep_core_info[12].base_address
+    #define GPS_1_BASE_ADDR         cep_core_info[13].base_address
+    #define GPS_2_BASE_ADDR         cep_core_info[14].base_address
+    #define GPS_3_BASE_ADDR         cep_core_info[15].base_address
+    #define CEPREGS_BASE_ADDR       cep_core_info[16].base_address
+    #define SROT_BASE_ADDR          cep_core_info[17].base_address
 
     // ------------------------------------------------------------------------------------------------------------
     // The constants below, copied from the original implementations of the CEP

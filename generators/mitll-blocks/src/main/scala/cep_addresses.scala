@@ -294,22 +294,20 @@ object FIRAddresses {
 }
 
 object CEPRegisterAddresses {
-    val version_register            = 0x0000
-    val testNset                    = 0xFD10    
-    //
-    val scratch_w0                  = 0xFE00
-    val scratch_w1                  = 0xFE08
-    val scratch_w2                  = 0xFE10
-    val scratch_w3                  = 0xFE18
-    val scratch_w4                  = 0xFE20
-    val scratch_w5                  = 0xFE28
-    val scratch_w6                  = 0xFE30
-    val scratch_w7                  = 0xFE38
-    //
-    val core0_status                = 0xFF00
-    val core1_status                = 0xFF08
-    val core2_status                = 0xFF10
-    val core3_status                = 0xFF18
+  val version_register              = 0x0000
+  val testNset                      = 0xFD10        
+  val scratch_w0                    = 0xFE00
+  val scratch_w1                    = 0xFE08
+  val scratch_w2                    = 0xFE10
+  val scratch_w3                    = 0xFE18
+  val scratch_w4                    = 0xFE20
+  val scratch_w5                    = 0xFE28
+  val scratch_w6                    = 0xFE30
+  val scratch_w7                    = 0xFE38
+  val core0_status                  = 0xFF00
+  val core1_status                  = 0xFF08
+  val core2_status                  = 0xFF10
+  val core3_status                  = 0xFF18
 }
 
 // These are intended to be the universal TL parameters

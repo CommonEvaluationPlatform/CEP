@@ -2,15 +2,15 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cepSrotMemTest.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
 //************************************************************************
-#include <string.h>
 
 #include "simdiag_global.h"
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cepSrotMemTest.h"
 #include "cepMemTest.h"
@@ -39,10 +39,10 @@ int cepSrotMemTest_runTest(int cpuId, int seed, int verbose) {
   for (int i=0;i<2;i++) {
     if (i == 0) {
       adrWidth = 11; // 2048 locations
-      mem_base = srot_base_addr + SROT_KEYRAM_ADDR;
+      mem_base = SROT_BASE_ADDR + SROT_KEYRAM_ADDR;
     } else {
       adrWidth = 6; // 32 locations
-      mem_base = srot_base_addr + SROT_KEYINDEXRAM_ADDR;
+      mem_base = SROT_BASE_ADDR + SROT_KEYINDEXRAM_ADDR;
     }
     if (!errCnt) { errCnt = cepMemTest_runTest(cpuId, mem_base, adrWidth, dataWidth ,seed, verbose, full); }
   }

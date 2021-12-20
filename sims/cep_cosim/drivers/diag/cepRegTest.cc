@@ -10,10 +10,10 @@
 //************************************************************************
 
 #include "simdiag_global.h"
+#include "CEP.h"
 #include "cep_version.h"
 #include "cep_adrMap.h"
 #include "cepRegTest.h"
-#include "CEP.h"
 
 #include "cep_apis.h"
 #include "portable_io.h"
@@ -71,43 +71,43 @@ int cepRegTest_runTest(int cpuId, int accessSize, int revCheck, int seed, int ve
 			      ((uint64_t)(CEP_MINOR_VERSION & 0xFF) << 56));
     
   if (revCheck) {
-    (*regp->AddROReg_p)(regp, CEP_VERSION_REG, expectedVersion, CEP_VERSION_MASK);
+    (*regp->AddROReg_p)(regp, CEPREGS_BASE_ADDR + version_register, expectedVersion, CEP_VERSION_MASK);
   }
   switch (cpuId) {
   case 0: {
-    (*regp->AddAReg_p)(regp, aes_base_addr + aes_pt0_addr,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, aes_base_addr + aes_pt1_addr,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch0_reg,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch4_reg,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_PT_BASE,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_PT_BASE + 8,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch0_reg,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch4_reg,(uint64_t)(-1));
 
 #ifdef SIM_ENV_ONLY    
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_core0_status,(uint64_t)(-1));            
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_core1_status,(uint64_t)(-1));            
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_core2_status,(uint64_t)(-1));            
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_core3_status,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_core0_status,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_core1_status,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_core2_status,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_core3_status,(uint64_t)(-1));            
 #endif
     
     break;
   }
   case 1: {
-    (*regp->AddAReg_p)(regp, aes_base_addr + aes_key0_addr,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch1_reg,(uint64_t)(-1));                
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch5_reg,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_KEY_BASE,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch1_reg,(uint64_t)(-1));                
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch5_reg,(uint64_t)(-1));            
 
-    (*regp->AddAReg_p)(regp, srot_base_addr + SROT_LLKIC2_SCRATCHPAD0_ADDR, (uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, srot_base_addr + SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, SROT_BASE_ADDR + SROT_LLKIC2_SCRATCHPAD0_ADDR, (uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, SROT_BASE_ADDR + SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
     break;
   }    
   case 2: {
-    (*regp->AddAReg_p)(regp, aes_base_addr + aes_key1_addr,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch2_reg,(uint64_t)(-1));                
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch6_reg,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_KEY_BASE + 8,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch2_reg,(uint64_t)(-1));                
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch6_reg,(uint64_t)(-1));            
     break;
   }
   case 3: {
-    (*regp->AddAReg_p)(regp, aes_base_addr + aes_key2_addr,(uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch3_reg,(uint64_t)(-1));                
-    (*regp->AddAReg_p)(regp, reg_base_addr + cep_scratch7_reg,(uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_KEY_BASE + 16,(uint64_t)(-1));
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch3_reg,(uint64_t)(-1));                
+    (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch7_reg,(uint64_t)(-1));            
     
     break;
   }    

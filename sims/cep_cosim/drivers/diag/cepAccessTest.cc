@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "simdiag_global.h"
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cepAccessTest.h"
 
@@ -173,19 +174,19 @@ int cepAccessTest_runTest(int cpuId, int seed, int verbose) {
   //
   // Reg Space
   // 
-  adr = reg_base_addr + cep_scratch0_reg + (cpuId*8);
+  adr = CEPREGS_BASE_ADDR + cep_scratch0_reg + (cpuId*8);
   pat = (uint64_t)0x123456789abcdef0;
   modeSupportMask = 3;
   if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
 
   // SHA256
-  adr = sha256_base_addr + 0x8 + (cpuId*8); // msg input word 0 - 7
+  adr = SHA256_0_BASE_ADDR + 0x8 + (cpuId*8); // msg input word 0 - 7
   pat = (uint64_t)0x33445566778899aa;
   modeSupportMask = 3;
   if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
 
   // MD5
-  adr = md5_base_addr + 0x8 + (cpuId*8); // msg_padded.word0 - 7
+  adr = MD5_BASE_ADDR + 0x8 + (cpuId*8); // msg_padded.word0 - 7
   pat = (uint64_t)0xbbccddeeff55aa55;
   modeSupportMask = 3;
   if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
@@ -194,12 +195,12 @@ int cepAccessTest_runTest(int cpuId, int seed, int verbose) {
   // Other spaces & cpuId = 0 Only since only 1 register
   //
   if (cpuId == 0) {
-    adr = aes_base_addr + aes_pt0_addr;
+    adr = AES_BASE_ADDR + AES_PT_BASE;
     pat = (uint64_t)0xaabbccddeeff1234;
     modeSupportMask = 3;
     if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
     // DES3
-    adr = des3_base_addr + 0x10; // DES3 Plaintext Word 1
+    adr = DES3_BASE_ADDR + 0x10; // DES3 Plaintext Word 1
     pat = (uint64_t)0x56789abcdef01122;
     modeSupportMask = 3;
     if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
