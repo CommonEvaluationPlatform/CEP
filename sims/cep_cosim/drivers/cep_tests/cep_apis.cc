@@ -49,6 +49,14 @@ int is_program_loaded(int maxTimeOut) {
   return errCnt;
 }
 
+void release_tile_reset(int cpuId)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
+  DUT_WRITE_DVT(DVTF_RELEASE_TILE_RESET, DVTF_RELEASE_TILE_RESET, 1);
+#endif
+}
+
 void release_core_reset(int cpuId)
 {
 #ifdef SIM_ENV_ONLY
@@ -80,16 +88,16 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 }
 
 // Clear the memory being used for printf "overloading"
-int clear_printf_memory(int coreId) {
+int clear_printf_memory(int cpuId) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY
-    LOGI("%s: coreid = %d\n",__FUNCTION__,coreId);
+    LOGI("%s: cpuid = %d\n",__FUNCTION__, cpuId);
 
     for (int i = 0; i < cep_printf_max_lines; i++) {
       for (int j=0; j < 16; j++) {
         
-        DUT_WRITE32_64(cep_printf_mem + (coreId * cep_printf_core_size) + (i * cep_printf_str_max) + (j*8), 0);
+        DUT_WRITE32_64(cep_printf_mem + (cpuId * cep_printf_core_size) + (i * cep_printf_str_max) + (j*8), 0);
       }
     }
   #endif // #ifdef SIM_ENV_ONLY
@@ -213,14 +221,14 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
 } // load_mainMemory
 
 // Check PassFail
-int check_PassFail_status(int coreId,int maxTimeOut) {
-  int errCnt = 0;
+int check_PassFail_status(int cpuId, int maxTimeOut) {
+  int errCnt      = 0;
 #ifdef SIM_ENV_ONLY  
-  int passMask = 0;
-  int failMask = 0;
+  int passMask    = 0;
+  int failMask    = 0;
   int inReset;
   uint64_t d64;
-  int wait4reset = 1000;
+  int wait4reset  = 1000;
   //
   while (wait4reset > 0) {
     DUT_WRITE_DVT(DVTF_GET_CORE_RESET_STATUS, DVTF_GET_CORE_RESET_STATUS, 1);
@@ -231,7 +239,7 @@ int check_PassFail_status(int coreId,int maxTimeOut) {
     d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
     passMask = (d64 & 0x1); 
     failMask = ((d64>>1) & 0x1); 
-    LOGI("Current Pass=0x%x Fail=0x%x maxTimeOut=%d\n",passMask,failMask,maxTimeOut);
+    LOGI("Current Pass = 0x%x Fail = 0x%x maxTimeOut = %d\n", passMask, failMask, maxTimeOut);
     if (passMask | failMask) break;    
     //
     wait4reset--;
@@ -279,7 +287,7 @@ int check_printf_memory(int cpuId) {
     // If a non-zero value is detected, convey that a printf has occured to the testbench and increment the pointer
     if (d64 != 0) {
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (cpuId & 0x3));
-      DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD,1 );
+      DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD, 1);
       __prIdx[cpuId] = (__prIdx[cpuId] + 1) % cep_printf_max_lines;
     } // end (d64 != 0)
   #endif
@@ -293,8 +301,8 @@ int check_bare_status(int cpuId, int maxTimeOut) {
 
   int errCnt = 0;
 
-  // This function is only relevant in simulation mode
-  #ifdef SIM_ENV_ONLY
+  // This function is only relevant in Bare Metal and Simulation Mode
+  #ifdef defined(SIM_ENV_ONLY) && defined(BARE_MODE)
     uint64_t  d64;
     uint64_t  offS;
     uint32_t  d32;
@@ -340,7 +348,9 @@ int check_bare_status(int cpuId, int maxTimeOut) {
       errCnt++;    
   }
   
-  // Put the core in reset to stop the program counter
+  // Put the core, not the tile into reset to stop the program counter
+  // If the tile is reset, then it MIGHT lock up the tilelink bus... and thus
+  // prevent other cores from completing their work
   DUT_RUNCLK(100);
   LOGI("%s: Putting core in reset to stop the PC...\n",__FUNCTION__);
   DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);

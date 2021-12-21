@@ -86,6 +86,9 @@
 //
 // 32kB of heap space is allocated per core and is
 // justified to the end of scratchpad memoyr
+//
+// regBaseTest and memBaseTest (the only tests that use bare_malloc)
+// MUST fit within this memory footprint
 `define cep_malloc_heap_start           'h8006_0000   // 
 `define cep_malloc_heap_size_per_core   'h0000_8000   // 32kB per core
 

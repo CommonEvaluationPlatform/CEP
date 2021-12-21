@@ -34,19 +34,20 @@ extern "C" {
   /*
    * Function Prototypes
    */
+  void release_tile_reset(int cpuId);
   void release_core_reset(int cpuId);
   void dump_wave(int cycle2start, int cycle2capture, int enable);
   int is_program_loaded(int maxTimeOut);  
-  int check_bare_status(int coreId,int maxTimeOut);  
+  int check_bare_status(int cpuId, int maxTimeOut);  
   int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int verify, int maxByteCnt);
   int read_binFile(char *imageF, uint64_t *buf, int wordCnt);
-  int clear_printf_memory(int coreId);
+  int clear_printf_memory(int cpuId);
   int check_printf_memory(int cpuId);
   int set_status(int errCnt, int testId);
   void set_pass(void);
   void set_fail(void);
   void set_cur_status(int status);
-  int check_PassFail_status(int coreMask,int maxTimeOut);
+  int check_PassFail_status(int cpuMask, int maxTimeOut);
   //
   void cep_raw_write(uint64_t pAddress, uint64_t pData);
   uint64_t cep_raw_read(uint64_t pAddress);

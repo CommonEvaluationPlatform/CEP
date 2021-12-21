@@ -137,10 +137,10 @@ module `COSIM_TB_TOP_MODULE;
 
   // Force CHIP_ID's when operating in BFM_MODE (otherwise these parameters don't exist)
   `ifdef BFM_MODE
-    defparam `CPU0_TL_PATH.CHIP_ID = 0;
-    defparam `CPU1_TL_PATH.CHIP_ID = 1;
-    defparam `CPU2_TL_PATH.CHIP_ID = 2;
-    defparam `CPU3_TL_PATH.CHIP_ID = 3;
+    defparam `TILE0_TL_PATH.CHIP_ID = 0;
+    defparam `TILE1_TL_PATH.CHIP_ID = 1;
+    defparam `TILE2_TL_PATH.CHIP_ID = 2;
+    defparam `TILE3_TL_PATH.CHIP_ID = 3;
   `endif
 
   `CHIPYARD_TOP_MODULE `DUT_INST ( 

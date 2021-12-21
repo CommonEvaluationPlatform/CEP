@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      regBaseTest.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -11,7 +11,6 @@
 
 #ifndef REGBASETEST_H
 #define REGBASETEST_H
-// ---------------------------
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -28,78 +27,68 @@
 #endif
 
 
-//
-// ==================================
 // Register base test converted from C++ class
-// ==================================
-//
 typedef struct regBaseTest_ regBaseTest_t;
-//
-// Constructor/Destructor
-//
-#define REGBASETEST_CREATE(me,target,accessSize,seed,verbose)		\
-  { me=(regBaseTest_t *)my_malloc(sizeof(regBaseTest_t));		\
-    if (me==NULL) return(1);						\
-    me->Construct_p = regBaseTest_Construct;				\
-    (*me->Construct_p)(me,target,accessSize,seed,verbose);  }
+
+// Constructor/Destructor Macros
+#define REGBASETEST_CREATE(me, target, accessSize, seed, verbose)   \
+{   me=(regBaseTest_t *)my_malloc(sizeof(regBaseTest_t));           \
+    if (me==NULL) return(1);                                        \
+    me->Construct_p = regBaseTest_Construct;                        \
+    (*me->Construct_p)(me, target, accessSize, seed, verbose);      \
+}
 
 #define REGBASETEST_DELETE(me) my_free(me)
 
 
 struct regBaseTest_ {
-  //
+  
   // Constructor/Destructors
-  //
-  void (*Construct_p)         (regBaseTest_t *me,
-			       int target,
-			       int accessSize,
-			       int seed,
-			       int verbose);
+  void (*Construct_p) (regBaseTest_t *me,
+    int target,
+    int accessSize,
+    int seed,
+    int verbose
+  );
   int (*SetSeed_p)              (regBaseTest_t *, int);
-  //
+  
   // Function Pointers/ Methods
-  //
-  void (*ClearAll_p)             (regBaseTest_t *);
+  void (*ClearAll_p)            (regBaseTest_t *);
   int (*AddAReg_p)              (regBaseTest_t *, uint32_t, uint64_t);
   int (*AddAHole_p)             (regBaseTest_t *, uint32_t, uint64_t);
-  int (*AddROReg_p)             (regBaseTest_t *,uint32_t, uint64_t, uint64_t );
+  int (*AddROReg_p)             (regBaseTest_t *, uint32_t, uint64_t, uint64_t );
   int (*GetMaxBits_p)           (regBaseTest_t *, uint64_t);
-  int (*WriteReg_p)             (regBaseTest_t *,uint32_t,uint64_t);
-  uint64_t (*ReadReg_p)         (regBaseTest_t *,uint32_t);
-  int (*ReadRegNCompare_p)      (regBaseTest_t *,uint32_t, uint64_t, uint64_t);
-  int (*uniquifyTest_p)         (regBaseTest_t *,int, int);
+  int (*WriteReg_p)             (regBaseTest_t *, uint32_t, uint64_t);
+  uint64_t (*ReadReg_p)         (regBaseTest_t *, uint32_t);
+  int (*ReadRegNCompare_p)      (regBaseTest_t *, uint32_t, uint64_t, uint64_t);
+  int (*uniquifyTest_p)         (regBaseTest_t *, int, int);
   int (*punchSomeHoles_p)       (regBaseTest_t *);
-  int (*walk_1_thruDatTest_p)   (regBaseTest_t *,int, int);
-  int (*walk_0_thruDatTest_p)   (regBaseTest_t *,int, int);
+  int (*walk_1_thruDatTest_p)   (regBaseTest_t *, int, int);
+  int (*walk_0_thruDatTest_p)   (regBaseTest_t *, int, int);
   int (*checkerBoardTest_p)     (regBaseTest_t *);
   int (*doRORegTest_p)          (regBaseTest_t *);
   int (*doRegTest_p)            (regBaseTest_t *);
-  void (*SetNoWr2ROreg_p)        (regBaseTest_t *,int);
-  void (*SetAccessSize_p)        (regBaseTest_t *,int);
-  void (*Srand48_p)              (regBaseTest_t *,uint64_t);
+  void (*SetNoWr2ROreg_p)       (regBaseTest_t *, int);
+  void (*SetAccessSize_p)       (regBaseTest_t *, int);
+  void (*Srand48_p)             (regBaseTest_t *, uint64_t);
 
-  //
-  // Member
-  //
-  int mTarget;
-  // members
-  int mVerbose;
-  int mAccessSize;
-  int mRegCnt;
-  int mStep;
-  int mSeed;
-  int mMaxBits;
-  uint64_t mRegList[0x1000*2]; 
-  uint64_t mHoleList[0x1000*2]; // non existing register to write garbage to
-  int mHoleCnt;
-  int mROcnt;
-  int mNoWr2ROreg;
-  uint64_t mROList[0x1000*3]; 
-  int mLogLevelMask;
-  // random
-  uint64_t customDiagRandomNumber;
+  // Members
+  int       mTarget;
+  int       mVerbose;
+  int       mAccessSize;
+  int       mRegCnt;
+  int       mStep;
+  int       mSeed;
+  int       mMaxBits;
+  uint64_t  mRegList[0x100*2];  // List of Real Registersq
+  uint64_t  mHoleList[0x100*2]; // List of Non-Existing Registers
+  int       mHoleCnt;
+  int       mROcnt;
+  int       mNoWr2ROreg;
+  uint64_t  mROList[0x100*3];   // List of Read-Only Registers
+  int       mLogLevelMask;
+  uint64_t  customDiagRandomNumber;
   
 };
 
-//
-#endif
+#endif // REGBASETEST_H

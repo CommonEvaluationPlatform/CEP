@@ -56,8 +56,8 @@ void *c_module(void *arg) {
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;
 
-  // Release the core reset
-  release_core_reset(cpuId);
+  // Release the tile reset
+  release_tile_reset(cpuId);
 
   // Check the status of the bare metal program
   errCnt += check_bare_status(cpuId, 500);

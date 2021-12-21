@@ -30,13 +30,13 @@ module cpu_driver
   parameter MY_SLOT_ID            = 4'h0;
   parameter MY_CPU_ID             = 4'h0;
 
-  reg [255:0]         dvtFlags      = 0;
+  reg [255:0]         dvtFlags          = 0;
   reg [255:0]         r_data;
   reg [31:0]          printf_addr;
   reg [1:0]           printf_coreId;
   reg [(128*8)-1:0]   printf_buf;
   reg [(128*8)-1:0]   tmp;
-  reg                 clear       = 0;
+  reg                 clear             = 0;
   integer             cnt;
   string              str;
   reg                 program_loaded    = 0;
@@ -116,20 +116,20 @@ module cpu_driver
    
         case (MY_CPU_ID)
           0: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CPU0_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CPU0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `TILE0_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `TILE0_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           1: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CPU1_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CPU1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `TILE1_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `TILE1_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           2: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CPU2_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CPU2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `TILE2_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `TILE2_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end
           3: begin
-            for (int i=0;i<inBox.mAdrHi;i++) `CPU3_TL_PATH.tl_buf[i] = inBox.mPar[i];
-            `CPU3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) `TILE3_TL_PATH.tl_buf[i] = inBox.mPar[i];
+            `TILE3_TL_PATH.tl_a_ul_write_burst(MY_CPU_ID & 'h1, inBox.mAdr,'hFF,bits_size);
           end     
         endcase // case (MY_CPU_ID)
       end
@@ -143,10 +143,10 @@ module cpu_driver
         bits_size = 3;
    
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          1: `CPU1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          2: `CPU2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
-          3: `CPU3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          0: `TILE0_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          1: `TILE1_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          2: `TILE2_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
+          3: `TILE3_TL_PATH.tl_a_ul_logical_data(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mAdrHi,inBox.mPar[0],inBox.mPar[1],bits_size);
         endcase
       end
     endtask // ATOMIC_RDW64_TASK
@@ -156,10 +156,10 @@ module cpu_driver
     task WRITE64_64_DPI;
       begin
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          1: `CPU1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          2: `CPU2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
-          3: `CPU3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
+          0: `TILE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          1: `TILE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          2: `TILE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);
+          3: `TILE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,inBox.mPar[0]);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE64_64_TASK
@@ -173,20 +173,20 @@ module cpu_driver
   
         case (MY_CPU_ID)
           0: begin
-            `CPU0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU0_TL_PATH.tl_buf[i];
+            `TILE0_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `TILE0_TL_PATH.tl_buf[i];
           end
           1: begin
-            `CPU1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU1_TL_PATH.tl_buf[i];  
+            `TILE1_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `TILE1_TL_PATH.tl_buf[i];  
           end
           2: begin
-            `CPU2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU2_TL_PATH.tl_buf[i];  
+            `TILE2_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `TILE2_TL_PATH.tl_buf[i];  
           end
           3: begin
-            `CPU3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
-            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `CPU3_TL_PATH.tl_buf[i];  
+            `TILE3_TL_PATH.tl_a_ul_read_burst(MY_CPU_ID & 'h1, inBox.mAdr,bits_size);
+            for (int i=0;i<inBox.mAdrHi;i++) inBox.mPar[i] = `TILE3_TL_PATH.tl_buf[i];  
           end     
         endcase // case (MY_CPU_ID)
       end
@@ -197,10 +197,10 @@ module cpu_driver
     task READ64_64_DPI;
       begin
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          1: `CPU1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          2: `CPU2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
-          3: `CPU3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
+          0: `TILE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          1: `TILE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          2: `TILE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);
+          3: `TILE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, inBox.mPar[0]);     
         endcase // case (MY_CPU_ID)
       end
     endtask // READ64_64_TASK
@@ -214,10 +214,10 @@ module cpu_driver
         d[31:0]  = inBox.mPar[1];
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          1: `CPU1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          2: `CPU2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
-          3: `CPU3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
+          0: `TILE0_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          1: `TILE1_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          2: `TILE2_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);
+          3: `TILE3_TL_PATH.tl_x_ul_write(MY_CPU_ID & 'h1, inBox.mAdr,d);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_64_TASK
@@ -235,10 +235,10 @@ module cpu_driver
         d = {8{byte8}};
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
-          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
+          0: `TILE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          1: `TILE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          2: `TILE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);
+          3: `TILE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,0);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_8_DPI
@@ -256,10 +256,10 @@ module cpu_driver
         d = {4{word}};
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
-          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
+          0: `TILE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          1: `TILE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          2: `TILE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);
+          3: `TILE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,1);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_16_DPI
@@ -279,10 +279,10 @@ module cpu_driver
         d[31:0] = inBox.mPar[0];   
       
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          1: `CPU1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          2: `CPU2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
-          3: `CPU3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
+          0: `TILE0_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          1: `TILE1_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          2: `TILE2_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);
+          3: `TILE3_TL_PATH.tl_a_ul_write_generic(MY_CPU_ID & 'h1, inBox.mAdr,d,mask,2);     
         endcase // case (MY_CPU_ID)
       end
     endtask // WRITE32_32_DPI
@@ -293,10 +293,10 @@ module cpu_driver
       reg [63:0] d;
       begin
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          1: `CPU1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          2: `CPU2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
-          3: `CPU3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
+          0: `TILE0_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          1: `TILE1_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          2: `TILE2_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);
+          3: `TILE3_TL_PATH.tl_x_ul_read(MY_CPU_ID & 'h1, inBox.mAdr, d);     
         endcase // case (MY_CPU_ID)
 
         inBox.mPar[0] = d[63:32];
@@ -313,10 +313,10 @@ module cpu_driver
         mask = 1 << inBox.mAdr[2:0];
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
-          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
+          0: `TILE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          1: `TILE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          2: `TILE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);
+          3: `TILE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 0, d);     
         endcase // case (MY_CPU_ID)
       
         case (inBox.mAdr[2:0])
@@ -341,10 +341,10 @@ module cpu_driver
         mask = 3 << (inBox.mAdr[2:1]*2);      
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
-          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
+          0: `TILE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          1: `TILE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          2: `TILE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);
+          3: `TILE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 1, d);     
         endcase // case (MY_CPU_ID)
       
         case (inBox.mAdr[2:1])
@@ -368,10 +368,10 @@ module cpu_driver
           mask = 'h0F;      
 
         case (MY_CPU_ID)
-          0: `CPU0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          1: `CPU1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          2: `CPU2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
-          3: `CPU3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
+          0: `TILE0_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          1: `TILE1_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          2: `TILE2_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);
+          3: `TILE3_TL_PATH.tl_x_ul_read_generic(MY_CPU_ID & 'h1, inBox.mAdr, mask, 2, d);     
         endcase // case (MY_CPU_ID)
         
         inBox.mPar[0] = inBox.mAdr[2] ? d[63:32] : d[31:0];
@@ -398,31 +398,49 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing
   //--------------------------------------------------------------------------------------
+  // Core reset only makes sense in Bare Metal Mode
+  `ifdef BARE_MODE
+    always @(posedge dvtFlags[`DVTF_FORCE_CORE_RESET]) begin
+      if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
+        force_core_reset();
+      end
+      dvtFlags[`DVTF_FORCE_CORE_RESET] = 0;  
+    end // end always
+
+    always @(posedge dvtFlags[`DVTF_RELEASE_CORE_RESET]) begin
+      if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
+        release_core_reset();
+      end
+      dvtFlags[`DVTF_RELEASE_CORE_RESET] = 0;  
+    end // end always
+
+    always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
+      case (MY_CPU_ID)      
+        0: dvtFlags[`DVTF_PAT_LO] = `CORE0_RESET;
+        1: dvtFlags[`DVTF_PAT_LO] = `CORE1_RESET;
+        2: dvtFlags[`DVTF_PAT_LO] = `CORE2_RESET;
+        3: dvtFlags[`DVTF_PAT_LO] = `CORE3_RESET;
+      endcase
+      dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
+    end // end always
+
+  `endif
+
   always @(*) dvtFlags[`DVTF_GET_PROGRAM_LOADED]    = `PROGRAM_LOADED;
 
-  always @(posedge dvtFlags[`DVTF_FORCE_CORE_RESET]) begin
+  always @(posedge dvtFlags[`DVTF_FORCE_TILE_RESET]) begin
     if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
-      force_core_reset();
+      force_tile_reset();
     end
-    dvtFlags[`DVTF_FORCE_CORE_RESET] = 0;  
+    dvtFlags[`DVTF_FORCE_TILE_RESET] = 0;  
   end // end always
 
-  always @(posedge dvtFlags[`DVTF_RELEASE_CORE_RESET]) begin
+  always @(posedge dvtFlags[`DVTF_RELEASE_TILE_RESET]) begin
     if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
-      release_core_reset();
+      release_tile_reset();
     end
-    dvtFlags[`DVTF_RELEASE_CORE_RESET] = 0;  
+    dvtFlags[`DVTF_RELEASE_TILE_RESET] = 0;
   end // end always
-
-  always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
-    case (MY_CPU_ID)      
-      0: dvtFlags[`DVTF_PAT_LO] = `CPU0_RESET;
-      1: dvtFlags[`DVTF_PAT_LO] = `CPU1_RESET;
-      2: dvtFlags[`DVTF_PAT_LO] = `CPU2_RESET;
-      3: dvtFlags[`DVTF_PAT_LO] = `CPU3_RESET;
-    endcase
-    dvtFlags[`DVTF_GET_CORE_RESET_STATUS] = 0; // self-clear
-  end
 
   always @(posedge dvtFlags[`DVTF_GET_CORE_STATUS]) begin
     if      (dvtFlags[1:0] == 0) dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] = `CEPREGS_PATH.core0_status;
@@ -445,7 +463,7 @@ module cpu_driver
     // In bare metal mode, the cores will default to reset to allow
     // for backdoor loading of the executable to main memory.
     `ifdef BARE_MODE;
-      force_core_reset();
+      force_tile_reset();
     `endif
 
     // In BFM mode,  we'll allow for a few cycles for the C side to come
@@ -453,58 +471,111 @@ module cpu_driver
     `ifdef BFM_MODE
       repeat(10) @(posedge clk);
       if (!myIsActive) begin
-        force_core_reset();  
+        force_tile_reset();  
       end // if (!myIsActive)
     `endif
   end // initial begin
 
-  // Task to force the current drivers core into reset
-  task force_core_reset;
+  // Task to force the current drivers tile to reset
+  task force_tile_reset;
     begin
       case (MY_CPU_ID)
         0: begin
-          `logI("Forcing CORE#0 in reset...");
-          force `CPU0_RESET = 1;
+          `logI("Forcing Tile #0 in reset...");
+          force `TILE0_RESET = 1;
         end
         1: begin
-          `logI("Forcing CORE#1 in reset...");
-          force `CPU1_RESET = 1;
+          `logI("Forcing Tile #1 in reset...");
+          force `TILE1_RESET = 1;
         end
         2: begin
-          `logI("Forcing CORE#2 in reset...");
-          force `CPU2_RESET = 1;
+          `logI("Forcing Tile #2 in reset...");
+          force `TILE2_RESET = 1;
         end
         3: begin
-          `logI("Forcing CORE#3 in reset...");
-          force `CPU3_RESET = 1;
+          `logI("Forcing Tile #3 in reset...");
+          force `TILE3_RESET = 1;
         end     
       endcase // case (MY_CPU_ID)
     end
   endtask
 
-  // Task to force the current drivers core into reset
-  task release_core_reset;
+  // Task to release the current drivers tile from reset
+  task release_tile_reset;
     begin
       case (MY_CPU_ID)
         0: begin
-          `logI("Releasing CORE#0 reset...");
-          release `CPU0_RESET;
+          `logI("Releasing Tile #0 reset...");
+          release `TILE0_RESET;
         end
         1: begin
-          `logI("Releasing CORE#1 reset...");
-          release `CPU1_RESET;
+          `logI("Releasing Tile #1 reset...");
+          release `TILE1_RESET;
         end
         2: begin
-          `logI("Releasing CORE#2 reset...");
-          release `CPU2_RESET;
+          `logI("Releasing Tile #2 reset...");
+          release `TILE2_RESET;
         end
         3: begin
-          `logI("Releasing CORE#3 reset...");
-          release `CPU3_RESET;
+          `logI("Releasing Tile #3 reset...");
+          release `TILE3_RESET;
         end     
       endcase // case (MY_CPU_ID)
     end
   endtask
+
+  // The following tasks allow for stimulation of the Core (within the Tile) reset
+  `ifdef BARE_MODE
+
+    // Task to force the current drivers core into reset
+    task force_core_reset;
+      begin
+        case (MY_CPU_ID)
+          0: begin
+            `logI("Forcing Core #0 in reset...");
+            force `CORE0_RESET = 1;
+          end
+          1: begin
+            `logI("Forcing Core #1 in reset...");
+            force `CORE1_RESET = 1;
+          end
+          2: begin
+            `logI("Forcing Core #2 in reset...");
+            force `CORE2_RESET = 1;
+          end
+          3: begin
+            `logI("Forcing Core #3 in reset...");
+            force `CORE3_RESET = 1;
+          end     
+        endcase // case (MY_CPU_ID)
+      end
+    endtask
+
+    // Task to release the current drivers core from reset
+    task release_core_reset;
+      begin
+        case (MY_CPU_ID)
+          0: begin
+            `logI("Releasing Core #0 reset...");
+            release `CORE0_RESET;
+          end
+          1: begin
+            `logI("Releasing Core #1 reset...");
+            release `CORE1_RESET;
+          end
+          2: begin
+            `logI("Releasing Core #2 reset...");
+            release `CORE2_RESET;
+          end
+          3: begin
+            `logI("Releasing Core #3 reset...");
+            release `CORE3_RESET;
+          end     
+        endcase // case (MY_CPU_ID)
+      end
+    endtask
+  
+  `endif
   //-------------------------------------------------------------------------------------- 
 
 

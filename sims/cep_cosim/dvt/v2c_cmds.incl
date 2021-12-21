@@ -110,15 +110,17 @@
 `define DVTF_GET_CORE_STATUS                  73
 
 // Main memory related items
-`define DVTF_ENABLE_MAIN_MEM_LOGGING          81
-`define DVTF_ENABLE_MAIN_MEMWR_LOGGING        82
-`define DVTF_ENABLE_MAIN_MEMRD_LOGGING        83
-`define DVTF_DISABLE_MAIN_MEM_LOGGING         84
-`define DVTF_FORCE_CORE_RESET                 85
-`define DVTF_RELEASE_CORE_RESET               86
-`define DVTF_SET_PROGRAM_LOADED               87
-`define DVTF_GET_PROGRAM_LOADED               88
-`define DVTF_PRINTF_CMD                       89
+`define DVTF_ENABLE_MAIN_MEM_LOGGING          80
+`define DVTF_ENABLE_MAIN_MEMWR_LOGGING        81
+`define DVTF_ENABLE_MAIN_MEMRD_LOGGING        82
+`define DVTF_DISABLE_MAIN_MEM_LOGGING         83
+`define DVTF_FORCE_CORE_RESET                 84
+`define DVTF_RELEASE_CORE_RESET               85
+`define DVTF_FORCE_TILE_RESET                 86
+`define DVTF_RELEASE_TILE_RESET               87
+`define DVTF_SET_PROGRAM_LOADED               88
+`define DVTF_GET_PROGRAM_LOADED               89
+`define DVTF_PRINTF_CMD                       90
 
 // Constants related to Cycle-level vector capture, which
 // is no longer supported in the CEP co-simulation environment
