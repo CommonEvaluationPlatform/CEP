@@ -1,32 +1,25 @@
 #//************************************************************************
-#// Copyright (C) 2020 Massachusetts Institute of Technology
+#// Copyright 2021 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
 #//
-#// File Name:      
+#// File Name:      Makefile
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    
 #// Notes:          
 #//
 #//************************************************************************
-#
-#
-#
-COSIM_DIR_NAME  = $(shell cd ../..; basename `pwd`)
-REPO_TOP_DIR = $(shell cd ../../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
-BLD_DIR     = $(shell cd ..; pwd | ../bin/strip_net.pl )
-TEST_SUITE  = $(shell basename ${BLD_DIR})
-TEST_DIR    = $(shell cd .; pwd | ../../bin/strip_net.pl )
-TEST_NAME   = $(shell basename `pwd`)
-SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_DIR_NAME}
 
+COSIM_TOP_DIR   	= $(strip $(shell cd ../../..; pwd))
+COSIM_BIN_DIR       = $(COSIM_TOP_DIR)/bin
+REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
+TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))
+TEST_SUITE_NAME		= $(shell cd ..; basename `pwd`)
+TEST_DIR			= $(strip $(shell cd .; pwd))
+TEST_NAME			= $(shell cd .; basename `pwd`)
 
-#
-# Top target!!!
-#
+# default target
 all: .vrun_flag riscv_wrapper.elf
 
-#
 # override anything here before calling the common file
-#
-include ${BLD_DIR}/common.make
+include ${TEST_SUITE_DIR}/common.make
 

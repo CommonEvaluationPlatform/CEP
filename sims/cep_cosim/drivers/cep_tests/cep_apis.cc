@@ -302,7 +302,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   int errCnt = 0;
 
   // This function is only relevant in Bare Metal and Simulation Mode
-  #ifdef defined(SIM_ENV_ONLY) && defined(BARE_MODE)
+  #ifdef SIM_ENV_ONLY
     uint64_t  d64;
     uint64_t  offS;
     uint32_t  d32;

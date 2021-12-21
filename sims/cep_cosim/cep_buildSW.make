@@ -227,7 +227,7 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 COMMON_LDFLAGS        	=
 
 # Flags for Hardware and Software simulation compilations
-SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_HW_ENV -D_REENTRANT
+SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_HW_ENV
 SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV 
 
 # Switches to indicate what libraries are being used
