@@ -87,24 +87,6 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 #endif
 }
 
-// Clear the memory being used for printf "overloading"
-int clear_printf_memory(int cpuId) {
-  int errCnt = 0;
-
-  #ifdef SIM_ENV_ONLY
-    LOGI("%s: cpuid = %d\n",__FUNCTION__, cpuId);
-
-    for (int i = 0; i < cep_printf_max_lines; i++) {
-      for (int j=0; j < 16; j++) {
-        
-        DUT_WRITE32_64(cep_printf_mem + (cpuId * cep_printf_core_size) + (i * cep_printf_str_max) + (j*8), 0);
-      }
-    }
-  #endif // #ifdef SIM_ENV_ONLY
-  
-  return errCnt;
-}
-
 // Load the image into main memory
 int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
 #ifdef SIM_ENV_ONLY  
@@ -204,10 +186,6 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffs
     // Close the file descriptor
     fclose(fd);
 
-    // Initialize printf memory for all cores
-    for (int i = 0; i < MAX_CORES; i++)
-      clear_printf_memory(i);
-  
     // Indicate that a program has been loaded (assuming there was no error)
     if (!errCnt) {
       LOGI("%s: Setting program loaded flag\n", __FUNCTION__);
@@ -272,29 +250,6 @@ int check_PassFail_status(int cpuId, int maxTimeOut) {
 #endif
   return errCnt;
 }
-
-// A task to be called from the system thread to scan the specified cpuId's printf buffer for activity
-int check_printf_memory(int cpuId) {
-
-  int 		  errCnt = 0;
-  uint64_t 	d64;
-
-  // Read from printf memory (only applicable in simulation)
-  #ifdef SIM_ENV_ONLY
-    uint32_t p_adr = cep_printf_mem + (cpuId * cep_printf_core_size) + (cep_printf_str_max*__prIdx[cpuId]);
-    DUT_READ32_64(p_adr, d64);
-
-    // If a non-zero value is detected, convey that a printf has occured to the testbench and increment the pointer
-    if (d64 != 0) {
-      DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, (p_adr & ~0x3) | (cpuId & 0x3));
-      DUT_WRITE_DVT(DVTF_PRINTF_CMD,DVTF_PRINTF_CMD, 1);
-      __prIdx[cpuId] = (__prIdx[cpuId] + 1) % cep_printf_max_lines;
-    } // end (d64 != 0)
-  #endif
-
- return errCnt;
-} // check_printf_memory
-
 
 // Monitor the "bare" status of the specified core
 int check_bare_status(int cpuId, int maxTimeOut) {

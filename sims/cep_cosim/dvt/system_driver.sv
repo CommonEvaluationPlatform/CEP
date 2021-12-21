@@ -124,46 +124,6 @@ module system_driver (
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing
   //--------------------------------------------------------------------------------------
-  
-  // Printf support function for printing from the RISC-V Cores in Bare Metal Mode
-  // Given the use of backdoor main memory access, this can only be called from the system thread
-  always @(posedge dvtFlags[`DVTF_PRINTF_CMD]) begin
-
-    // Address to be printed
-    printf_addr = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO];
-
-    // Load the printer buffer from main memory (8 bytes at a time) and then clear the memory read
-    for (int i = 0; i < 15; i++) begin
-      
-      // MSWord of printer buffer is in the lowest memory position
-      read_mainmem_backdoor  (printf_addr + 8*i, printf_buf[64*(15 - i) +: 64]);
-      write_mainmem_backdoor (printf_addr + 8*i, 0);
-
-    end // end for
-
-    // left justify
-    clear = 0;
-    tmp = 0;
-
-    // move trailing after newline or null
-    for (cnt = 0; cnt < 128; cnt = cnt + 1) begin
-      if (!clear && (printf_buf[(128*8)-1:(127*8)] != 'h0) &&       // '\0'
-                    (printf_buf[(128*8)-1:(127*8)] != 'h0A) &&      // '\n'
-                    (printf_buf[(128*8)-1:(127*8)] != 'h0D)) begin  // '\r'     
-        tmp         = (tmp << 8) | printf_buf[(128*8)-1:(127*8)];
-        printf_buf  = printf_buf << 8;
-      end else begin
-        clear         = 1;
-        tmp           = tmp << 8;
-      end // end if
-    end // end for    
-
-    $sformat(str,"C%-d: %-s", printf_addr[1:0], tmp);
-    `logI("%s",str);
-    
-    dvtFlags[`DVTF_PRINTF_CMD] = 0;
-  end // end always
-    
   always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
     `logI("Program is now loaded");
     program_loaded = `DVT_FLAG[`DVTF_PAT_LO];

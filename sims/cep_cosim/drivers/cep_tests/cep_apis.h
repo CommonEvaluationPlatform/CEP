@@ -41,8 +41,6 @@ extern "C" {
   int check_bare_status(int cpuId, int maxTimeOut);  
   int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int verify, int maxByteCnt);
   int read_binFile(char *imageF, uint64_t *buf, int wordCnt);
-  int clear_printf_memory(int cpuId);
-  int check_printf_memory(int cpuId);
   int set_status(int errCnt, int testId);
   void set_pass(void);
   void set_fail(void);
