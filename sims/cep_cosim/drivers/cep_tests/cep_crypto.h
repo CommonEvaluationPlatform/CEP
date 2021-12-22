@@ -100,7 +100,6 @@ public: //
   //
   int mCapture;
   int mSrotFlag;
-  int mC2C_Capture;
   char mTestName[128];
   FILE *mFd;
   int mCount;

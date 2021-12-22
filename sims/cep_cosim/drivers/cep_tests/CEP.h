@@ -54,7 +54,6 @@
     // Array containing the base addresses and enable status of
     // all the CEP cores (index in array == core index)
     // cepMacroMix.cc implementation limits this to 32 total cores.
-    // This MUSTl
     const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
         {"AES",         AES_CORE,         0x70000000, true },     // 0 - AES
         {"MD5",         MD5_CORE,         0x70010000, true },     // 1 - MD5
@@ -80,7 +79,6 @@
     #define SROT_INDEX              (CEP_TOTAL_CORES - 1)
    
     // The following defines are used by the co-simulation tests that run in BFM and Bare Metal Mode
-    
     #define AES_BASE_ADDR           cep_core_info[0].base_address
     #define MD5_BASE_ADDR           cep_core_info[1].base_address
     #define SHA256_0_BASE_ADDR      cep_core_info[2].base_address

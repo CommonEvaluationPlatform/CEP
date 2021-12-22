@@ -220,7 +220,7 @@ RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LFILE}
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
-							-DCAPTURE_CMD_SEQUENCE=${TL_CAPTURE} \
+							-DTL_CAPTURE=${TL_CAPTURE} \
 							-g -std=gnu++11 \
 							-Wno-format -Wno-narrowing \
 							-DBIG_ENDIAN

@@ -67,14 +67,13 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
   int errCnt = 0;
 
 #ifndef BARE_MODE
-  //
-  // ONly if in the coreMask
-  //
-  //
+  
   int captureOn = 0;
-#ifdef CAPTURE_CMD_SEQUENCE
-  captureOn = CAPTURE_CMD_SEQUENCE;
-#endif
+
+  #ifdef TL_CAPTURE
+    captureOn = TL_CAPTURE;
+  #endif
+
   int maxLoop;
   if (VERBOSE1()) {
     LOGI("%s: cpuId=%d, cpuActiveMask=0x%08x coreMask=0x%08x, seed=0x%08x\n",__FUNCTION__, cpuId, cpuActiveMask, coreMask, seed);
@@ -105,7 +104,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 0) {
           cep_aes aes(coreIndex,seed,verbose);
-          aes.SetCaptureMode(captureOn,"../../drivers/vectors","aes");
+          aes.SetCaptureMode(captureOn,"../../../drivers/vectors","aes");
 
           maxLoop =  200;
           errCnt += aes.RunAes192Test(maxLoop);
@@ -119,7 +118,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 0) {
           cep_des3 des3(coreIndex,seed,verbose);
-          des3.SetCaptureMode(captureOn,"../../drivers/vectors","des3");
+          des3.SetCaptureMode(captureOn,"../../../drivers/vectors","des3");
 
           maxLoop = 150;
           errCnt += des3.RunDes3Test(maxLoop);
@@ -133,7 +132,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 0) {
           cep_md5 md5(coreIndex,seed,verbose);
-          md5.SetCaptureMode(captureOn,"../../drivers/vectors","md5");
+          md5.SetCaptureMode(captureOn,"../../../drivers/vectors","md5");
 
           maxLoop = 32;
           errCnt += md5.RunMd5Test(maxLoop);
@@ -147,7 +146,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 1) {
           cep_fir fir(coreIndex,seed,verbose);
-          fir.SetCaptureMode(captureOn,"../../drivers/vectors","fir");
+          fir.SetCaptureMode(captureOn,"../../../drivers/vectors","fir");
 
           maxLoop = 10;
           errCnt += fir.RunFirTest(maxLoop);
@@ -161,7 +160,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 1) {
           cep_iir iir(coreIndex,seed,verbose);
-          iir.SetCaptureMode(captureOn,"../../drivers/vectors","iir");
+          iir.SetCaptureMode(captureOn,"../../../drivers/vectors","iir");
 
           maxLoop = 10;
           errCnt += iir.RunIirTest(maxLoop);
@@ -175,7 +174,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 1) {
           cep_sha256 sha256(coreIndex,seed,verbose);
-          sha256.SetCaptureMode(captureOn,"../../drivers/vectors","sha256");
+          sha256.SetCaptureMode(captureOn,"../../../drivers/vectors","sha256");
 
           maxLoop = 32;
           errCnt += sha256.RunSha256Test(maxLoop);
@@ -189,7 +188,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 2) {
           cep_gps gps(coreIndex,seed,verbose);
-          gps.SetCaptureMode(captureOn,"../../drivers/vectors","gps");
+          gps.SetCaptureMode(captureOn,"../../../drivers/vectors","gps");
 
           maxLoop  = 38;
           errCnt += gps.RunGpsTest(maxLoop);
@@ -203,7 +202,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 2) {
           cep_dft dft(coreIndex,seed,verbose);
-          dft.SetCaptureMode(captureOn,"../../drivers/vectors","dft");
+          dft.SetCaptureMode(captureOn,"../../../drivers/vectors","dft");
 
           maxLoop = 10;
           errCnt += dft.RunDftTest(maxLoop);
@@ -217,7 +216,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 2) {
           cep_idft idft(coreIndex,seed,verbose);
-          idft.SetCaptureMode(captureOn,"../../drivers/vectors","idft");
+          idft.SetCaptureMode(captureOn,"../../../drivers/vectors","idft");
 
           maxLoop = 10;
           errCnt += idft.RunIdftTest(maxLoop);
@@ -232,7 +231,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
         //
         if (cpuId == 3) {
           cep_rsa rsa(coreIndex,seed,verbose);
-          rsa.SetCaptureMode(captureOn,"../../drivers/vectors","rsa");
+          rsa.SetCaptureMode(captureOn,"../../../drivers/vectors","rsa");
 
           maxLoop = 4;
           errCnt += rsa.RunRsaTest(maxLoop,8);
@@ -249,7 +248,8 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
   srot.freeMe();
 
 // else do nothing
-#endif
+#endif // #ifndef BARE_MODE
+  
   return errCnt;
 }
 
@@ -295,7 +295,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 0) {
           cep_aes aes(coreIndex,seed,verbose);
-          aes.SetCaptureMode(captureOn,"../../drivers/vectors","aes");
+          aes.SetCaptureMode(captureOn,"../../../drivers/vectors","aes");
           aes.SetExpErr(1);
 
           maxLoop =  2;
@@ -312,7 +312,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 0) {
           cep_des3 des3(coreIndex,seed,verbose);
-          des3.SetCaptureMode(captureOn,"../../drivers/vectors","des3");
+          des3.SetCaptureMode(captureOn,"../../../drivers/vectors","des3");
           des3.SetExpErr(1);
 
           maxLoop = 2;
@@ -329,7 +329,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 0) {
           cep_md5 md5(coreIndex,seed,verbose);
-          md5.SetCaptureMode(captureOn,"../../drivers/vectors","md5");
+          md5.SetCaptureMode(captureOn,"../../../drivers/vectors","md5");
           md5.SetExpErr(1);
 
           maxLoop = 2;
@@ -346,7 +346,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 1) {
           cep_fir fir(coreIndex,seed,verbose);
-          fir.SetCaptureMode(captureOn,"../../drivers/vectors","fir");
+          fir.SetCaptureMode(captureOn,"../../../drivers/vectors","fir");
           fir.SetExpErr(1);
 
           maxLoop = 2;
@@ -363,7 +363,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 1) {
           cep_iir iir(coreIndex,seed,verbose);
-          iir.SetCaptureMode(captureOn,"../../drivers/vectors","iir");
+          iir.SetCaptureMode(captureOn,"../../../drivers/vectors","iir");
           iir.SetExpErr(1);
 
           maxLoop = 2;
@@ -380,7 +380,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 1) {
           cep_sha256 sha256(coreIndex,seed,verbose);
-          sha256.SetCaptureMode(captureOn,"../../drivers/vectors","sha256");
+          sha256.SetCaptureMode(captureOn,"../../../drivers/vectors","sha256");
           sha256.SetExpErr(1);
 
           maxLoop = 2;
@@ -397,7 +397,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 2) {
           cep_gps gps(coreIndex,seed,verbose);
-          gps.SetCaptureMode(captureOn,"../../drivers/vectors","gps");
+          gps.SetCaptureMode(captureOn,"../../../drivers/vectors","gps");
           gps.SetExpErr(1);
 
           maxLoop  = 2;
@@ -414,7 +414,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 2) {
           cep_dft dft(coreIndex,seed,verbose);
-          dft.SetCaptureMode(captureOn,"../../drivers/vectors","dft");
+          dft.SetCaptureMode(captureOn,"../../../drivers/vectors","dft");
           dft.SetExpErr(1);
 
           maxLoop = 2;
@@ -431,7 +431,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 2) {
           cep_idft idft(coreIndex,seed,verbose);
-          idft.SetCaptureMode(captureOn,"../../drivers/vectors","idft");
+          idft.SetCaptureMode(captureOn,"../../../drivers/vectors","idft");
           idft.SetExpErr(1);
 
           maxLoop = 2;
@@ -449,7 +449,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
         //
         if (cpuId == 3) {
           cep_rsa rsa(coreIndex,seed,verbose);
-          rsa.SetCaptureMode(captureOn,"../../drivers/vectors","rsa");
+          rsa.SetCaptureMode(captureOn,"../../../drivers/vectors","rsa");
           rsa.SetExpErr(1);
 
           maxLoop = 2;
@@ -469,6 +469,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
   srot.freeMe();
 
 // else do nothing
-#endif
+#endif // #ifndef BARE_MODE
+
   return errCnt;
 }

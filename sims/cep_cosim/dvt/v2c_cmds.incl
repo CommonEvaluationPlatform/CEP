@@ -122,19 +122,6 @@
 `define DVTF_GET_PROGRAM_LOADED               89
 `define DVTF_PRINTF_CMD                       90
 
-// Constants related to Cycle-level vector capture, which
-// is no longer supported in the CEP co-simulation environment
-`define DVTF_AES_CAPTURE_EN_BIT               91
-`define DVTF_SHA256_CAPTURE_EN_BIT            92
-`define DVTF_MD5_CAPTURE_EN_BIT               93
-`define DVTF_RSA_CAPTURE_EN_BIT               94
-`define DVTF_DES3_CAPTURE_EN_BIT              95
-`define DVTF_GPS_CAPTURE_EN_BIT               96
-`define DVTF_DFT_CAPTURE_EN_BIT               97
-`define DVTF_IDFT_CAPTURE_EN_BIT              98
-`define DVTF_IIR_CAPTURE_EN_BIT               99
-`define DVTF_FIR_CAPTURE_EN_BIT               100
-
 `define DVTF_TOGGLE_CHIP_RESET_BIT            101
 `define DVTF_GET_CORE_RESET_STATUS            102
 `define DVTF_GET_PASS_FAIL_STATUS             103

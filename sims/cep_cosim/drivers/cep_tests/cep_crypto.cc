@@ -26,16 +26,16 @@ void cep_crypto::init(int coreIndex) {
 #ifndef  BARE_MODE        
   mFd     = 0;
 #endif
-  mCoreIndex = coreIndex;
-  mCapture = 0;
-  mSrotFlag = 0;
-  mC2C_Capture = 0;
-  mErrCnt  = 0;
-  mCount   = 0;
-  mSingle  = 0;
-  mWordCnt = 0;
-  mAdrBase = 0;
-  mAdrSize  = 0x10000; // default
+  mCoreIndex  = coreIndex;
+  mCapture    = 0;
+  mSrotFlag   = 0;
+  mErrCnt     = 0;
+  mCount      = 0;
+  mSingle     = 0;
+  mWordCnt    = 0;
+  mAdrBase    = 0;
+  mAdrSize    = 0x10000;
+
   SetExpErr(0);
 }
 
@@ -53,14 +53,7 @@ void cep_crypto::freeMe(void) {
     //
     fclose(mFd);
   }
-  // turn off the capturing
-  if (mC2C_Capture) {
-    writeDvt(mC2C_Capture, mC2C_Capture, 0);
-    if (mC2C_Capture == DVTF_DFT_CAPTURE_EN_BIT) { // also stop IDFT
-      writeDvt(DVTF_IDFT_CAPTURE_EN_BIT, DVTF_IDFT_CAPTURE_EN_BIT, 0);
-    }
-  }
-  
+
 #endif
 } 
 //
@@ -110,10 +103,10 @@ void cep_crypto::PrintMe(const char *name, uint8_t *buf, int size) {
   for (int i=0;i<size;i++) {
     if (bC == 0)        { 
       if (first) {
-	sprintf(str,"%s: %02x",name,*(buf+i) & 0xff); 
-	first = 0;
+  sprintf(str,"%s: %02x",name,*(buf+i) & 0xff); 
+  first = 0;
       } else {
-	sprintf(str,"             %02x",*(buf+i) & 0xff); 
+  sprintf(str,"             %02x",*(buf+i) & 0xff); 
       }
     }  // start of line
     else if (bC & 0x1)  { sprintf(str,"%s%02x",str,*(buf+i) & 0xff); } // add 1 byte
@@ -138,10 +131,10 @@ void cep_crypto::PrintMe(const char *name, double *buf1, double *buf2, int size)
   for (int i=0;i<size;i++) {
     if (bC == 0)        { 
       if (first) {
-	sprintf(str,"%s: %f %f",name,*(buf1+i),*(buf2+i));
-	first = 0;
+  sprintf(str,"%s: %f %f",name,*(buf1+i),*(buf2+i));
+  first = 0;
       } else {
-	sprintf(str,"             %f %f",*(buf1+i),*(buf2+i));
+  sprintf(str,"             %f %f",*(buf1+i),*(buf2+i));
       }
     }  // start of line
     else if (bC & 0x1)  { sprintf(str,"%s%f %f ",str,*(buf1+i),*(buf2+i) ); } // add 1 byte
@@ -153,61 +146,16 @@ void cep_crypto::PrintMe(const char *name, double *buf1, double *buf2, int size)
     } else { bC++; }
   }
 }
-//
-// To support bareMetal and unit level testbench
-//
 
 void cep_crypto::SetCaptureMode(int mode, const char *path, const char *testName) {
 #ifndef BARE_MODE
-  //
+  
   char fName[512];
-  //  
-  //init();
-  //
-  // Sim Only
-  //
-  if (Get_C2C_Capture()) {
-    if (strcmp(testName,"aes") == 0) {
-      mC2C_Capture = DVTF_AES_CAPTURE_EN_BIT;
-    }
-    else if (strcmp(testName,"sha256") == 0) {
-      mC2C_Capture = DVTF_SHA256_CAPTURE_EN_BIT;
-    }    
-    else if (strcmp(testName,"md5") == 0) {
-      mC2C_Capture = DVTF_MD5_CAPTURE_EN_BIT;
-    }    
-    else if (strcmp(testName,"rsa") == 0) {
-      mC2C_Capture = DVTF_RSA_CAPTURE_EN_BIT;
-    }
-    else if (strcmp(testName,"des3") == 0) {
-      mC2C_Capture = DVTF_DES3_CAPTURE_EN_BIT;
-    }        
-    else if (strcmp(testName,"gps") == 0) {
-      mC2C_Capture = DVTF_GPS_CAPTURE_EN_BIT;
-    }    
-    else if (strcmp(testName,"dft") == 0) {
-      // both in one test
-      mC2C_Capture = DVTF_DFT_CAPTURE_EN_BIT; 
-      // also the IDFT since it is in same test
-      writeDvt(DVTF_IDFT_CAPTURE_EN_BIT, DVTF_IDFT_CAPTURE_EN_BIT, 1);      
-    }    
-    else if (strcmp(testName,"idft") == 0) {
-      mC2C_Capture = DVTF_IDFT_CAPTURE_EN_BIT;
-    }    
-    else if (strcmp(testName,"iir") == 0) {
-      mC2C_Capture = DVTF_IIR_CAPTURE_EN_BIT;
-    }    
-    else if (strcmp(testName,"fir") == 0) {
-      mC2C_Capture = DVTF_FIR_CAPTURE_EN_BIT;
-    }    
-    //
-    writeDvt(mC2C_Capture, mC2C_Capture, 1);      
-  }
-  //  
-  //
+  
   mCapture = mode;
-  //strcpy(mPath,path);
+  
   strcpy(mTestName,testName);
+  
   // open file if on
   if (mCapture) {
     // for input
@@ -315,10 +263,10 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
   if (mCapture) {
     if (mCount++ == 0) {
       fprintf(mFd,"\t  RDSPIN_CMD, 0x%08x, 0x%016lx, 0x%lx, 0x%x // %d\n",
-	      (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);
+        (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);
     } else {
       fprintf(mFd,"\t, RDSPIN_CMD, 0x%08x, 0x%016lx, 0x%lx, 0x%x // %d\n",
-	      (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);      
+        (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);      
     }
     mWordCnt += 5;    
   }
