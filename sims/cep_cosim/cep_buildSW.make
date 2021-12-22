@@ -32,6 +32,7 @@ endif
 SRC_D           = ${COSIM_TOP_DIR}/src
 APIS_D          = ${DRIVERS_DIR}/cep_tests
 DIAG_D          = ${DRIVERS_DIR}/diag
+VECTOR_D		= ${DRIVERS_DIR}/vectors
 SHARE_D         = ${COSIM_TOP_DIR}/share
 SIMDIAG_D       = ${COSIM_TOP_DIR}/simDiag
 PLI_D           = ${COSIM_TOP_DIR}/pli
@@ -214,7 +215,7 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 #
 # -g                    - Produce debugging information in the operating system’s native format
 # -lgcc                 - ?????
-RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -nostartfiles -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} ${COMMON_INCLUDE_LIST}
+RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -nostartfiles -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
 RISCV_BARE_LFILE		+= ${BARE_D}/cep_link.lds
 RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LFILE}
 

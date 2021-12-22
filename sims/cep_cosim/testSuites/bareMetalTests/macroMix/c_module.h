@@ -1,13 +1,13 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      c_module.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
+//--------------------------------------------------------------------------------------
 #ifndef c_module_H
 #define c_module_H
 

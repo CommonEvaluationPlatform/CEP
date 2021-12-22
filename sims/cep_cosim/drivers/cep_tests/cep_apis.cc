@@ -104,84 +104,74 @@ int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
 }
 
 // Load a file into Main Memory (must be called from the system thread)
-int load_mainMemory(char *imageF, uint32_t mem_base, int srcOffset, int destOffset, int verify, int maxByteCnt) {
+int load_mainMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
-    FILE      *fd   = NULL;
+    FILE      *fd       = NULL;
     uint64_t  d64;
     uint64_t  rd64;
-    int       s     = 0;
-    int       d     = 0;
-    int       bCnt  = 0;  
-    
+    int       f         = 0;
+    int       d         = 0;
+    int       bCnt      = 0;  
+    int       fileSize  = 0;
+
     // Open binary file
     fd = fopen(imageF, "rb");
-  
-    LOGI("%s: Loading file %s to memory base = 0x%08x\n",__FUNCTION__, imageF, mem_base);
 
     if (fd == NULL) {
       printf("Can't open file %s\n",imageF);
       return 1;
     }
 
+    // Determine if file size (minus fileOffset exceeds the maximum byte count)
+    fseek(fd, 0, SEEK_END);
+    fileSize = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+
+    if (fileOffset >= fileSize) {
+      LOGE("%s: fileOffset exceeds file size = %0dB/%0dB\n", __FUNCTION__, fileOffset, fileSize);
+      fclose(fd);
+      return 1;
+    }
+
+    if ((fileSize - fileOffset) > maxByteCnt) {
+      LOGE("%s: File size (minus starting offset) exceeds maximum allowed = %0dB/%0dB\n", __FUNCTION__, fileSize - fileOffset, maxByteCnt);
+      fclose(fd);
+      return 1;
+    }
+
+    LOGI("%s: Loading file %s to memory base 0x%08x with maxByteCnt of %0dB\n",__FUNCTION__, imageF, mem_base, maxByteCnt);
+
     // Read from the file and load into the memory (via backdoor if enabled)
     while (!feof(fd)) {
+
+      // Read 8-bytes from the file      
       fread(&d64, sizeof(uint64_t), 1, fd);
-      if ((s * 8) >= srcOffset) {
-        DUT_WRITE32_64(mem_base + destOffset + d * 8, d64);
+
+      // If we have reached the file offset, then write the value to memory
+      if ((f * 8) >= fileOffset) {
+        DUT_WRITE32_64(mem_base + d * 8, d64);
         d++;
       }
-      s++;
+
+      // Increment the file "offset"
+      f++;
+
+      // Calculate the current byte count
+      bCnt = (d + 1) * 8;
+
     } // end while
     
-    // Calculate the number of bytes loaded
-    bCnt=(s + 1) * 8;
-    
-    // If we are loading memory using the backdoor, ensure we fill out the cache line
-    if ((s & 0x7) != 0) {
+    // Ensure we fill out the cache line
+    if ((d & 0x7) != 0) {
       d64 = 0xDEADDEADDEADDEADLL;      
-      LOGI("%s: flushing to cache line s = %0d\n",__FUNCTION__, s);
-      while ((s & 0x7) != 0) {
+      LOGI("%s: flushing cache line\n",__FUNCTION__);
+      while ((d & 0x7) != 0) {
         DUT_WRITE32_64(mem_base + d*8,d64);
         d++;
-        s++;
       }
-    } // end if backdoor_on
-
-    LOGI("%s: DONE backdoor loading file %s to main memory.  Size = %0d bytes\n",__FUNCTION__, imageF, bCnt);
-    
-    // Did the loaded program exceed the maximum byte count?
-    if (bCnt >= maxByteCnt) {
-      errCnt++;
-    // Verify if enabled
-    } else if (verify) {
-      rewind(fd);
-      s = 0;
-      d = 0;
-
-      while (!feof(fd)) {
-        fread(&d64, sizeof(uint64_t), 1 ,fd);
-        if ((s * 8) >= srcOffset) {
-          DUT_READ32_64(mem_base + destOffset + d*8, rd64);
-          if (d64 != rd64) {
-            LOGE("%s: Miscompare addr=0x%08x act=0x%016llx exp=0x%016llx\n",__FUNCTION__,mem_base + d*8, rd64, d64);
-            errCnt++;
-            break;
-          } // end if (d64 != rd64)
-          d++;
-        } // end if ((s*8) >= srcOffset)
-        s++;
-      } // end while (!feof(fd))
-
-      // Report comparison status
-      if (!errCnt) {
-        LOGI("%s: File %s preload and read-back OK\n",__FUNCTION__,imageF);
-      } else {
-        LOGE("%s: File %s preload and read-back ERROR\n",__FUNCTION__,imageF); 
-      } // end if (!errCnt)
-
-    } // if (verify)
+    }
 
     // Close the file descriptor
     fclose(fd);
