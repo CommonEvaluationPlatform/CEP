@@ -185,6 +185,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     mitllBlocks,
+    asicBlocks,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
     gemmini, icenet, tracegen, cva6, nvdla, sodor)
@@ -328,5 +329,11 @@ lazy val fpga_platforms = (project in file("./fpga"))
 // Add the MIT LL Development Blocks
 lazy val mitllBlocks = (project in file("generators/mitll-blocks"))
   .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+// Add the MIT LL Development Blocks
+lazy val asicBlocks = (project in file("CEP_Chipyard_ASIC/generators/asicblocks"))
+  .dependsOn(rocketchip, mitllBlocks)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)

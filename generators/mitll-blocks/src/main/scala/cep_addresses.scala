@@ -121,7 +121,6 @@ object CEPBaseAddresses {
       val iir_llki_sendrecv_addr    = 0x70088008L
     val iir_llki_depth              = 0x000000ffL
 
-
     val gps_0_base_addr             = 0x70090000L
     val gps_0_depth                 = 0xFFL
     val gps_0_llki_base_addr        = 0x70090800L

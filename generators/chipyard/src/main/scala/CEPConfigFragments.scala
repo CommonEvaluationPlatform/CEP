@@ -22,6 +22,8 @@ import mitllBlocks.cep_registers._
 import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
 
+import asicBlocks.sha256Redaction._
+
 //
 // CEP Specific Configuration Fragments
 //
@@ -143,6 +145,18 @@ class WithRSA ( params  : Seq[COREParams] = Seq(
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
     dev_name            = s"rsa"))) extends Config((site, here, up) => {
   case PeripheryRSAKey => params
+})
+
+class WithSHA256Redaction ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.sha256_0_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.sha256_0_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_0_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
+    dev_name            = s"sha256"))) extends Config((site, here, up) => {
+  case PeripherySHA256RedactionKey => params
 })
 
 class WithCEPRegisters extends Config((site, here, up) => {
