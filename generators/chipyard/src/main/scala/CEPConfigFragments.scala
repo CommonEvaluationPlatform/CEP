@@ -25,196 +25,124 @@ import mitllBlocks.srot._
 //
 // CEP Specific Configuration Fragments
 //
-class WithAES extends Config((site, here, up) => {
-  case PeripheryAESKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.aes_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.aes_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.aes_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.aes_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.aes_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.aes_llki_sendrecv_addr),
-      dev_name            = s"aes"
-    ))
+class WithAES ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.aes_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.aes_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.aes_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.aes_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.aes_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.aes_llki_sendrecv_addr),
+    dev_name            = s"aes"))) extends Config((site, here, up) => {
+  case PeripheryAESKey => params
 })
 
-class WithDES3 extends Config((site, here, up) => {
-  case PeripheryDES3Key => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.des3_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.des3_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.des3_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.des3_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.des3_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.des3_llki_sendrecv_addr),
-      dev_name            = s"des3"
-    ))
+class WithDES3 ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.des3_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.des3_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.des3_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.des3_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.des3_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.des3_llki_sendrecv_addr),
+    dev_name            = s"des3"))) extends Config((site, here, up) => {
+  case PeripheryDES3Key => params
 })
 
-class WithIIR extends Config((site, here, up) => {
-  case PeripheryIIRKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.iir_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.iir_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.iir_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.iir_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.iir_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.iir_llki_sendrecv_addr),
-      dev_name            = s"iir"
-    ))
+class WithIIR ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.iir_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.iir_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.iir_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.iir_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.iir_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.iir_llki_sendrecv_addr),
+    dev_name            = s"iir"))) extends Config((site, here, up) => {
+  case PeripheryIIRKey => params
 })
 
-class WithIDFT extends Config((site, here, up) => {
-  case PeripheryIDFTKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.idft_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.idft_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.idft_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.idft_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.idft_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.idft_llki_sendrecv_addr),
-      dev_name            = s"idft"
-    ))
+class WithIDFT ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.idft_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.idft_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.idft_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.idft_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.idft_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.idft_llki_sendrecv_addr),
+    dev_name            = s"idft"))) extends Config((site, here, up) => {
+  case PeripheryIDFTKey => params
 })
 
-class WithGPS extends Config((site, here, up) => {
-  case PeripheryGPSKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
-      dev_name            = s"gps_0",
-      verilog_module_name = Some(s"gps_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.gps_1_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.gps_1_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.gps_1_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.gps_1_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_1_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_1_llki_sendrecv_addr),
-      dev_name            = s"gps_1",
-      verilog_module_name = Some(s"gps_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.gps_2_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.gps_2_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.gps_2_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_2_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_2_llki_sendrecv_addr),
-      dev_name            = s"gps_2",
-      verilog_module_name = Some(s"gps_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.gps_3_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.gps_3_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.gps_3_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.gps_3_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_3_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_3_llki_sendrecv_addr),
-      dev_name            = s"gps_3",
-      verilog_module_name = Some(s"gps_mock_tss")
-    ))
+class WithGPS ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
+    dev_name            = s"gps"))) extends Config((site, here, up) => {
+  case PeripheryGPSKey => params
 })
 
-class WithMD5 extends Config((site, here, up) => {
-  case PeripheryMD5Key => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.md5_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.md5_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.md5_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.md5_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.md5_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.md5_llki_sendrecv_addr),
-      dev_name            = s"md5"
-    ))
+class WithMD5 ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.md5_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.md5_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.md5_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.md5_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.md5_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.md5_llki_sendrecv_addr),
+    dev_name            = s"md5"))) extends Config((site, here, up) => {
+  case PeripheryMD5Key => params
 })
 
-class WithDFT extends Config((site, here, up) => {
-  case PeripheryDFTKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.dft_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.dft_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.dft_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.dft_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.dft_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.dft_llki_sendrecv_addr),
-      dev_name            = s"dft"
-    ))
+class WithDFT ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.dft_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.dft_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.dft_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.dft_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.dft_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.dft_llki_sendrecv_addr),
+    dev_name            = s"dft"))) extends Config((site, here, up) => {
+  case PeripheryDFTKey => params
 })
 
-class WithFIR extends Config((site, here, up) => {
-  case PeripheryFIRKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.fir_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.fir_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.fir_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.fir_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.fir_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.fir_llki_sendrecv_addr),
-      dev_name            = s"fir"
-    ))
+class WithFIR ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.fir_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.fir_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.fir_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.fir_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.fir_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.fir_llki_sendrecv_addr),
+    dev_name            = s"fir"))) extends Config((site, here, up) => {
+  case PeripheryFIRKey => params
 })
 
-class WithSHA256 extends Config((site, here, up) => {
-  case PeripherySHA256Key => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_0_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.sha256_0_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_0_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
-      dev_name            = s"sha256_0",
-      verilog_module_name = Some(s"sha256_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_1_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.sha256_1_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_1_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.sha256_1_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_1_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_1_llki_sendrecv_addr),
-      dev_name            = s"sha256_1",
-      verilog_module_name = Some(s"sha256_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_2_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.sha256_2_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_2_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.sha256_2_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_2_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_2_llki_sendrecv_addr),
-      dev_name            = s"sha256_2",
-      verilog_module_name = Some(s"sha256_mock_tss")
-    ),
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_3_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.sha256_3_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_3_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.sha256_3_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_3_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_3_llki_sendrecv_addr),
-      dev_name            = s"sha256_3",
-      verilog_module_name = Some(s"sha256_mock_tss")
-    ))
+class WithSHA256 ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.sha256_0_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.sha256_0_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_0_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
+    dev_name            = s"sha256"))) extends Config((site, here, up) => {
+  case PeripherySHA256Key => params
 })
 
-class WithRSA extends Config((site, here, up) => {
-  case PeripheryRSAKey => List(
-    COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.rsa_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.rsa_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.rsa_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.rsa_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
-      dev_name            = s"rsa"
-    ))
+class WithRSA ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.rsa_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.rsa_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.rsa_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.rsa_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
+    dev_name            = s"rsa"))) extends Config((site, here, up) => {
+  case PeripheryRSAKey => params
 })
 
 class WithCEPRegisters extends Config((site, here, up) => {
