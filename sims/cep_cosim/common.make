@@ -131,18 +131,18 @@ sim_info:
 	@echo " CEP_COSIM: Running with the following variables:"
 	@echo " CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
-	@echo " CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH})"
+	@echo " CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH}"
 else ifeq (${CADENCE},1)
-	@echo " CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH})"
-	@echo " CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL})"
+	@echo " CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH}"
+	@echo " CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL}"
 endif
-	@echo " CEP_COSIM:   MODELSIM               = $(MODELSIM))""
-	@echo " CEP_COSIM:   CADENCE                = $(CADENCE))"
-	@echo " CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE})"
-	@echo " CEP_COSIM:   NOWAVE                 = ${NOWAVE})"
-	@echo " CEP_COSIM:   PROFILE                = ${PROFILE})"
-	@echo " CEP_COSIM:   COVERAGE               = ${COVERAGE})"
-	@echo " CEP_COSIM:   USE_GDB                = ${USE_GDB})"
+	@echo " CEP_COSIM:   MODELSIM               = $(MODELSIM)"
+	@echo " CEP_COSIM:   CADENCE                = $(CADENCE)"
+	@echo " CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
+	@echo " CEP_COSIM:   NOWAVE                 = ${NOWAVE}"
+	@echo " CEP_COSIM:   PROFILE                = ${PROFILE}"
+	@echo " CEP_COSIM:   COVERAGE               = ${COVERAGE}"
+	@echo " CEP_COSIM:   USE_GDB                = ${USE_GDB}"
 	@echo " CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
 	@echo " CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
 	@echo " CEP_COSIM:   SINGLE_THREAD          = ${SINGLE_THREAD}"
@@ -156,7 +156,7 @@ endif
 #
 # ${VSIM_CMD_LINE} is set in the ${BUILD_HW_MAKEFILE} makefile based on simulator type
 #--------------------------------------------------------------------------------------
-.vrun_flag: ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
+.vrun_flag: sim_info ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
 ifeq (${COVERAGE},1)
 	@if test ! -d ${COSIM_COVERAGE_PATH}; then	\
 		mkdir  ${COSIM_COVERAGE_PATH};		\
@@ -334,7 +334,7 @@ endef
 
 export MAKE_USAGE_HELP_BODY
 
-usage:
+usage: sim_info
 	@echo "$$MAKE_USAGE_HELP_BODY"
 #--------------------------------------------------------------------------------------
 
