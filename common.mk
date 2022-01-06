@@ -176,7 +176,7 @@ verilog: $(sim_vsrcs)
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> CHIPYARD_BUILD_INFO.make
 
 	@# Call the blackbox sorting script
-	${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
+	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
 
 #########################################################################################
 # helper rules to run simulations
