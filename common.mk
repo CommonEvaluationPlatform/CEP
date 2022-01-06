@@ -162,7 +162,7 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 #########################################################################################
 .PHONY: verilog
 verilog: $(sim_vsrcs)
-# Save the name of some of the files needed by the CEP Cosimulation enviornment
+	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> CHIPYARD_BUILD_INFO.make
@@ -174,6 +174,9 @@ verilog: $(sim_vsrcs)
 	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> CHIPYARD_BUILD_INFO.make
+
+	@# Call the blackbox sorting script
+	${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
 
 #########################################################################################
 # helper rules to run simulations

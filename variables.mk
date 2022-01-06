@@ -67,6 +67,8 @@ ifeq ($(SUB_PROJECT),cep)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
 	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
 endif
 
 # Common Evaluation Platform Default Build
@@ -81,6 +83,9 @@ ifeq ($(SUB_PROJECT),cep_asic)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
 	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+
 endif
 
 # default chipyard build
