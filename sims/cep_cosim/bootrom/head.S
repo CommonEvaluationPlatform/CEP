@@ -9,7 +9,7 @@
 //
 //--------------------------------------------------------------------------------------
 // See LICENSE.Sifive for license details.
-#include <cep_adrMap.h>
+#include <platform.h>
 #include <smp.h>
 
   .section .text.init

@@ -4,9 +4,10 @@
 //
 // File Name:       cep_packages.f
 // Program:         Common Evaluation Platform (CEP)
-// Description:     Ordered prioritized file list to aid
-//                  in proper elaboration during simulation
-// Note:      
+// Description:     Prioriterized Verilog package list used to sort
+//                  the Chipyard-generate file list in order to ensure
+//                  proper elaboration for simulation
+// Note:      		Used by the ./scripts/sort-blackbox.py script
 //
 //************************************************************************
 llki_pkg.sv

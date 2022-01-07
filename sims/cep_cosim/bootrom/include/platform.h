@@ -37,6 +37,14 @@
 #define GLOBAL_INT_SIZE 38
 #define GLOBAL_INT_MAX_PRIORITY 7
 
+
+// Address constants taken from cep_adrMap.h.  This is
+// explicitly included here (versus using the CEP CoSim generated file)
+// to avoid a circular 
+#define scratchpad_sp_offset	0x00070000
+#define scratchpad_base_addr    0x80000000
+#define scratchpad_base_size    0x00080000
+
 // Memory map
 #define CLINT_CTRL_ADDR _AC(0x2000000,UL)
 #define CLINT_CTRL_SIZE _AC(0x10000,UL)

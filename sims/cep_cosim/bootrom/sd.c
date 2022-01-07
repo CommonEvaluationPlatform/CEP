@@ -11,7 +11,6 @@
 
 // See LICENSE.Sifive for license details.
 #include <stdint.h>
-
 #include <platform.h>
 
 #define DEBUG
