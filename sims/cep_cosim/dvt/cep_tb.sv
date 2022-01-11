@@ -62,13 +62,13 @@ module `COSIM_TB_TOP_MODULE;
   wire                gpio_0_6; pullup (weak1) (gpio_0_6);
   wire                gpio_0_7; pullup (weak1) (gpio_0_7);
 
-  wire                sdio_sdio_clk; 
-  wire                sdio_sdio_cmd;    
-  wire                sdio_sdio_dat_0; pullup (weak1) (sdio_sdio_dat_0);
-  wire                sdio_sdio_dat_1; pullup (weak1) (sdio_sdio_dat_1);
-  wire                sdio_sdio_dat_2; pullup (weak1) (sdio_sdio_dat_2);   
-  wire                sdio_sdio_dat_3; pullup (weak1) (sdio_sdio_dat_3);
-  //--------------------------------------------------------------------------------------
+  wire                sdio_sck; 
+  wire                sdio_cs_0;    
+  wire                sdio_dq_0; pullup (weak1) (sdio_dq_0);
+  wire                sdio_dq_1; pullup (weak1) (sdio_dq_1);
+  wire                sdio_dq_2; pullup (weak1) (sdio_dq_2);
+  wire                sdio_dq_3; pullup (weak1) (sdio_dq_3);
+  //-------------------------------------------------------------------------------------
 
 
 
@@ -114,16 +114,16 @@ module `COSIM_TB_TOP_MODULE;
   assign uart_rxd = uart_txd ^ noise;
   //--------------------------------------------------------------------------------------
   
-
-
+  
+  
   //--------------------------------------------------------------------------------------
   // SPI loopback instantiation
   //--------------------------------------------------------------------------------------
   spi_loopback spi_loopback_inst (
-    .SCK    (sdio_sdio_clk  ),
-    .CS_n   (sdio_sdio_dat_3),
-    .MOSI   (sdio_sdio_cmd  ),
-    .MISO   (sdio_sdio_dat_0) 
+    .SCK    (sdio_sck       ),
+    .CS_n   (sdio_dq_3      ),
+    .MOSI   (sdio_cs_0      ),
+    .MISO   (sdio_dq_0      ) 
   );
   //--------------------------------------------------------------------------------------
 
@@ -148,7 +148,6 @@ module `COSIM_TB_TOP_MODULE;
     .jtag_TMS           (jtag_TMS),
     .jtag_TDI           (jtag_TDI),
     .jtag_TDO           (jtag_TDO),
-    .custom_boot        (1'b0),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
     .gpio_0_2           (gpio_0_2),

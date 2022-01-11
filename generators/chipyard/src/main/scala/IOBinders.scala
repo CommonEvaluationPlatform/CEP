@@ -5,6 +5,7 @@ import chisel3.experimental.{Analog, IO, DataMirror}
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.diplomacy.{ResourceBinding, Resource, ResourceAddress, InModuleBody}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -160,7 +161,7 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
-class WithSPIIOCells extends OverrideIOBinder({
+class WithSPIFlashIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
     val (ports: Seq[SPIChipIO], cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
       val name = s"spi_${i}"
@@ -187,6 +188,46 @@ class WithSPIIOCells extends OverrideIOBinder({
     (ports, cells2d.flatten)
   }
 })
+
+// Class to support the instantiation of a SDIO/MMC capable interface
+// Generated based on WithSPIFlashIOCells and WithSPIIOPassThrough from VCU118 implementation
+class WithSPIIOCells extends OverrideLazyIOBinder({
+  (system: HasPeripherySPI) => {
+    
+    // attach resource to 1st SPI
+    ResourceBinding {
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+    }
+
+    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+      val (ports: Seq[SPIChipIO], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
+        val name = s"spi_${i}"
+        val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(name)
+        val iocellBase = s"iocell_${name}"
+
+        // SCK and CS are unidirectional outputs
+        val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey), IOCell.toAsyncReset)
+        val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey), IOCell.toAsyncReset)
+
+        // DQ are bidirectional, so then need special treatment
+        val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
+          iocell.io.o := pin.o
+          iocell.io.oe := pin.oe
+          iocell.io.ie := true.B
+          pin.i := iocell.io.i
+          iocell.io.pad <> ana
+          iocell
+        } // val dqIOs
+        
+          (port, dqIOs ++ csIOs ++ sckIOs)
+      }).unzip // system.spi.zipWithIndex.map
+      
+      (ports, cells2d.flatten)
+
+    }}} // InModuleBody 
+  }  // system: HasPeripherySPI
+}) // WithSPIIOCells
 
 class WithExtInterruptIOCells extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {

@@ -17,8 +17,8 @@ class AbstractConfig extends Config(
   new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
   new chipyard.harness.WithSimSerial ++                         // add external serial-adapter and RAM
   new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
+  new chipyard.harness.WithSimSPIFlashModel ++
   new chipyard.harness.WithGPIOTiedOff ++                       // tie-off chiptop GPIOs, if GPIOs are present
-  new chipyard.harness.WithSimSPIFlashModel ++                  // add simulated SPI flash memory, if SPI is enabled
   new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
   new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
   new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
@@ -36,7 +36,7 @@ class AbstractConfig extends Config(
   new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithUARTIOCells ++
-  new chipyard.iobinders.WithSPIIOCells ++
+  new chipyard.iobinders.WithSPIFlashIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithCustomBootPin ++

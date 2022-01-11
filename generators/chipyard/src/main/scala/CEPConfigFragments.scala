@@ -24,6 +24,14 @@ import mitllBlocks.srot._
 
 import asicBlocks.sha256Redaction._
 
+import sifive.blocks.devices.spi._
+
+// For adding a SPI Core to the CEP
+class WithSPI(address: BigInt = 0x64001000) extends Config((site, here, up) => {
+  case PeripherySPIKey => Seq(
+    SPIParams(rAddress = address))
+})
+
 //
 // CEP Specific Configuration Fragments
 //

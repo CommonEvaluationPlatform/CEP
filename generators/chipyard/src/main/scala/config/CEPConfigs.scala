@@ -117,9 +117,9 @@ class CEPRocketConfig extends Config(
   new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x7FFFFL) ++
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
-  new chipyard.config.WithUART(address = 0x64000000L) ++
-  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
-
+  new chipyard.config.WithUART  (address = 0x64000000L) ++
+  new chipyard.config.WithGPIO  (address = 0x64002000L, width = 8) ++
+  
   // These configuration items have been inherited from the default configuration of the Freedom U500
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++
   new WithNMemoryChannels(1) ++
@@ -228,6 +228,7 @@ class CEPASICRocketConfig extends Config(
   // Moved IO declerations from AbstractCEPConfig to here for readability
   new chipyard.config.WithUART(address = 0x64000000L) ++
   new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+  new chipyard.config.WithSPI (address = 0x64001000L) ++
 
   // These configuration items have been inherited from the default configuration of the Freedom U500
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++
