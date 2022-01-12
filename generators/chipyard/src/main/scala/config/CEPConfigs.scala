@@ -145,14 +145,6 @@ class CEPASICRocketConfig extends Config(
   new chipyard.config.WithRSA ++
   new chipyard.config.WithGPS(params = Seq(
     COREParams(
-      slave_base_addr     = BigInt(CEPBaseAddresses.gps_1_base_addr),
-      slave_depth         = BigInt(CEPBaseAddresses.gps_1_depth),
-      llki_base_addr      = BigInt(CEPBaseAddresses.gps_1_llki_base_addr),
-      llki_depth          = BigInt(CEPBaseAddresses.gps_1_llki_depth),
-      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_1_llki_ctrlsts_addr),
-      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_1_llki_sendrecv_addr),
-      dev_name            = s"gps_1"),
-    COREParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.gps_2_depth),
       llki_base_addr      = BigInt(CEPBaseAddresses.gps_2_llki_base_addr),
@@ -214,6 +206,16 @@ class CEPASICRocketConfig extends Config(
       llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
       llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
       dev_name            = s"gps_lbll"),
+  ))++
+  new chipyard.config.WithGPSRedaction(params = Seq(
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_1_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_1_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.gps_1_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.gps_1_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_1_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_1_llki_sendrecv_addr),
+      dev_name            = s"gps_redaction"),
   ))++
 
 

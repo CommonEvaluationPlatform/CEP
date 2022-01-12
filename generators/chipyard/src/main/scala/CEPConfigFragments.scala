@@ -24,6 +24,7 @@ import mitllBlocks.srot._
 
 import asicBlocks.sha256Redaction._
 import asicBlocks.gpslbll._
+import asicBlocks.gpsRedaction._
 
 import sifive.blocks.devices.spi._
 
@@ -181,7 +182,19 @@ class WithGPSLBLL ( params  : Seq[COREParams] = Seq(
   case PeripheryGPSLBLLKey => params
 })
 
-class WithCEPRegisters extends Config((site, here, up) => {
+class WithGPSRedaction ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
+    dev_name            = s"gps"))) extends Config((site, here, up) => {
+  case PeripheryGPSRedactionKey => params
+})
+
+    class WithCEPRegisters extends Config((site, here, up) => {
   case PeripheryCEPRegistersKey => List(
     CEPREGSParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.cepregs_base_addr),
