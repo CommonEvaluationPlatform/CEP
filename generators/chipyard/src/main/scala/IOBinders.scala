@@ -20,6 +20,8 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import tracegen.{TraceGenSystemModuleImp}
 
+import mitllBlocks.testIO._
+
 import barstools.iocell.chisel._
 
 import testchipip._
@@ -161,6 +163,29 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
+/*
+// WithTestIOCells instantiates placeholder IOCells for the testIO
+class WithTestIOCells extends OverrideIOBinder({
+  (system: HasTestIOImp) => {
+    val name = s"testio"
+    val ports = Seq[Analog]
+    val iocellBase = s"iocell_${name}"
+
+    // DQ are bidirectional, so then need special treatment
+    val testIOs = system.testio.testio.zip(port.testio).zipWithIndex.map { case (pin, i) =>
+      val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_${i}")
+      //iocell.io.o := pin.o
+      iocell.io.oe := true.B
+      iocell.io.ie := false.B
+      iocell.io.i := false.B
+      iocell.io.pad <> pin
+      iocell
+    } // val testIOs
+    (ports, testIOs)
+  }
+})
+*/
+
 class WithSPIFlashIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
     val (ports: Seq[SPIChipIO], cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
@@ -188,6 +213,7 @@ class WithSPIFlashIOCells extends OverrideIOBinder({
     (ports, cells2d.flatten)
   }
 })
+
 
 // Class to support the instantiation of a SDIO/MMC capable interface
 // Generated based on WithSPIFlashIOCells and WithSPIIOPassThrough from VCU118 implementation
@@ -424,4 +450,6 @@ class WithCustomBootPin extends OverrideIOBinder({
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
+
+
 

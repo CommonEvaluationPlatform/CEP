@@ -23,10 +23,12 @@ import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
 
 import asicBlocks.sha256Redaction._
+import asicBlocks.gpslbll._
 
 import sifive.blocks.devices.spi._
 
 // For adding a SPI Core to the CEP
+// WithSPIIOCells in IOBinders.scala esnures the MMCDevice resource is added to this core (for the CEP)
 class WithSPI(address: BigInt = 0x64001000) extends Config((site, here, up) => {
   case PeripherySPIKey => Seq(
     SPIParams(rAddress = address))
@@ -165,6 +167,18 @@ class WithSHA256Redaction ( params  : Seq[COREParams] = Seq(
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
     dev_name            = s"sha256"))) extends Config((site, here, up) => {
   case PeripherySHA256RedactionKey => params
+})
+
+class WithGPSLBLL ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
+    dev_name            = s"gps"))) extends Config((site, here, up) => {
+  case PeripheryGPSLBLLKey => params
 })
 
 class WithCEPRegisters extends Config((site, here, up) => {
