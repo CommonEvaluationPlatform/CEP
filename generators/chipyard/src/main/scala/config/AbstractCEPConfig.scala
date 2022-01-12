@@ -28,6 +28,7 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
+  new chipyard.iobinders.WithTestIOPassthrough ++
   //new chipyard.iobinders.WithTestIOCells ++
 
   // Additional chip configuration items

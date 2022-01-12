@@ -163,6 +163,15 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
+class WithTestIOPassthrough extends OverrideIOBinder({
+    (system: HasTestIOImp) => {
+        // clones the internal DigitalTopIO to make pins visible to ChipTop
+        val test_io_temp = IO(DataMirror.internal.chiselTypeClone[TestIO](system.testio)).suggestName("my_block") // prefix to "test_io"
+        test_io_temp <> system.testio // connecting ChipTop to DigitalTop
+        (Seq(test_io_temp), Nil)      // return for harness binder
+    }
+})
+
 /*
 // WithTestIOCells instantiates placeholder IOCells for the testIO
 class WithTestIOCells extends OverrideIOBinder({
