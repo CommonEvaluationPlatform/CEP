@@ -17,6 +17,7 @@ import chipyard.clocking.{SimplePllConfiguration, ClockDividerN}
 // -------------------------------
 
 case object BuildTop extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTop()(p))
+case object BuildTopASIC extends Field[Parameters => LazyModule]((p: Parameters) => new ChipTopASIC()(p))
 
 trait HasTestHarnessFunctions {
   val harnessFunctions = ArrayBuffer.empty[HasHarnessSignalReferences => Seq[Any]]
@@ -113,5 +114,43 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   implicitHarnessClockBundle.clock := clock
   implicitHarnessClockBundle.reset := reset
   p(HarnessClockInstantiatorKey).instantiateHarnessDividerPLL(implicitHarnessClockBundle)
-}
+} // TestHarness
 
+
+class TestHarnessASIC(implicit val p: Parameters) extends Module with HasHarnessSignalReferences {
+  val io = IO(new Bundle {
+    val success = Output(Bool())
+  })
+
+  val buildtopClock = Wire(Clock())
+  val buildtopReset = Wire(Reset())
+
+  val lazyDut = LazyModule(p(BuildTopASIC)(p)).suggestName("chiptop")
+  val dut = Module(lazyDut.module)
+
+  io.success := false.B
+
+  val freqMHz = lazyDut match {
+    case d: HasReferenceClockFreq => d.refClockFreqMHz
+    case _ => p(DefaultClockFrequencyKey)
+  }
+  val refClkBundle = p(HarnessClockInstantiatorKey).requestClockBundle("buildtop_reference_clock", freqMHz * (1000 * 1000))
+
+  buildtopClock := refClkBundle.clock
+  buildtopReset := WireInit(refClkBundle.reset)
+  val dutReset = refClkBundle.reset.asAsyncReset
+
+  val success = io.success
+
+  lazyDut match { case d: HasTestHarnessFunctions =>
+    d.harnessFunctions.foreach(_(this))
+  }
+  lazyDut match { case d: HasIOBinders =>
+    ApplyHarnessBinders(this, d.lazySystem, d.portMap)
+  }
+
+  val implicitHarnessClockBundle = Wire(new ClockBundle(ClockBundleParameters()))
+  implicitHarnessClockBundle.clock := clock
+  implicitHarnessClockBundle.reset := reset
+  p(HarnessClockInstantiatorKey).instantiateHarnessDividerPLL(implicitHarnessClockBundle)
+} // TestHarness
