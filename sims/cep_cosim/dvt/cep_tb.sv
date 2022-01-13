@@ -62,12 +62,12 @@ module `COSIM_TB_TOP_MODULE;
   wire                gpio_0_6; pullup (weak1) (gpio_0_6);
   wire                gpio_0_7; pullup (weak1) (gpio_0_7);
 
-  wire                sdio_sck; 
-  wire                sdio_cs_0;    
-  wire                sdio_dq_0; pullup (weak1) (sdio_dq_0);
-  wire                sdio_dq_1; pullup (weak1) (sdio_dq_1);
-  wire                sdio_dq_2; pullup (weak1) (sdio_dq_2);
-  wire                sdio_dq_3; pullup (weak1) (sdio_dq_3);
+  wire                sdio_0_sck; 
+  wire                sdio_0_cs_0;    
+  wire                sdio_0_dq_0; pullup (weak1) (sdio_0_dq_0);
+  wire                sdio_0_dq_1; pullup (weak1) (sdio_0_dq_1);
+  wire                sdio_0_dq_2; pullup (weak1) (sdio_0_dq_2);
+  wire                sdio_0_dq_3; pullup (weak1) (sdio_0_dq_3);
   //-------------------------------------------------------------------------------------
 
 
@@ -120,10 +120,10 @@ module `COSIM_TB_TOP_MODULE;
   // SPI loopback instantiation
   //--------------------------------------------------------------------------------------
   spi_loopback spi_loopback_inst (
-    .SCK    (sdio_sck       ),
-    .CS_n   (sdio_dq_3      ),
-    .MOSI   (sdio_cs_0      ),
-    .MISO   (sdio_dq_0      ) 
+    .SCK    (sdio_0_sck   ),
+    .CS_n   (sdio_0_dq_3  ),
+    .MOSI   (sdio_0_cs_0  ),
+    .MISO   (sdio_0_dq_0  ) 
   );
   //--------------------------------------------------------------------------------------
 
@@ -148,6 +148,16 @@ module `COSIM_TB_TOP_MODULE;
     .jtag_TMS           (jtag_TMS),
     .jtag_TDI           (jtag_TDI),
     .jtag_TDO           (jtag_TDO),
+    .spi_0_sck          (spi_0_sck),
+    .spi_0_cs_0         (spi_0_cs_0),
+    .spi_0_dq_0         (spi_0_dq_0),
+    .spi_0_dq_1         (spi_0_dq_1),
+    .spi_0_dq_2         (spi_0_dq_2),
+    .spi_0_dq_3         (spi_0_dq_3),
+    .scan_testio_0      (),
+    .scan_testio_1      (),
+    .scan_testio_2      (),
+    .scan_testio_3      (),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
     .gpio_0_2           (gpio_0_2),
@@ -158,7 +168,7 @@ module `COSIM_TB_TOP_MODULE;
     .gpio_0_7           (gpio_0_7),
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
-    .reset_wire_reset   (~sys_rst_n),
+    .reset              (~sys_rst_n),
     .clock              (sys_clk_i)
   );
   //--------------------------------------------------------------------------------------

@@ -27,7 +27,8 @@ trait HasReferenceClockFreq {
  */
 
 class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
-    with HasTestHarnessFunctions with HasReferenceClockFreq with HasIOBinders {
+  with HasTestHarnessFunctions with HasReferenceClockFreq with HasIOBinders {
+  
   // The system module specified by BuildSystem
   lazy val lazySystem = LazyModule(p(BuildSystem)(p)).suggestName("system")
 
@@ -54,4 +55,3 @@ class ChipTop(implicit p: Parameters) extends LazyModule with BindingScope
     }}
   }
 }
-

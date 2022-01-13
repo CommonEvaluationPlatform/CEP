@@ -24,10 +24,10 @@ import chipyard.iobinders._
 object GenerateReset {
   def apply(chiptop: ChipTop, clock: Clock): Reset = {
     implicit val p = chiptop.p
+    
     // this needs directionality so generateIOFromSignal works
     val async_reset_wire = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey),
-      abstractResetAsAsync = true)
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey), abstractResetAsAsync = true)
 
     chiptop.iocells ++= resetIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
@@ -38,6 +38,31 @@ object GenerateReset {
   }
 }
 
+object GenerateClockAndReset {
+  def apply(chiptop: ChipTop): (Clock, Reset) = {
+    implicit val p = chiptop.p
+    
+    // this needs directionality so generateIOFromSignal works
+    val async_reset_wire = Wire(Input(AsyncReset()))
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey), abstractResetAsAsync = true)
+    chiptop.iocells ++= resetIOCell
+
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      reset_io := th.dutReset
+      Nil
+    })
+
+    val clock_wire = Wire(Input(Clock()))
+    val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+    chiptop.iocells ++= clockIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      clock_io := th.buildtopClock
+      Nil
+    })
+
+    (clock_wire, async_reset_wire)
+  }
+}
 
 case object ClockingSchemeKey extends Field[ChipTop => ModuleValue[Double]](ClockingSchemeGenerators.dividerOnlyClockGenerator)
 /*
@@ -102,10 +127,7 @@ object ClockingSchemeGenerators {
     asyncResetBroadcast := asyncResetSource
 
     InModuleBody {
-      val clock_wire = Wire(Input(Clock()))
-      val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
-      chiptop.iocells ++= clockIOCell
+      val (clock_wire, reset_wire) = GenerateClockAndReset(chiptop)
 
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire
@@ -116,10 +138,6 @@ object ClockingSchemeGenerators {
         o.clock := false.B.asClock // async reset broadcast network does not provide a clock
         o.reset := reset_wire
       }
-
-      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.buildtopClock
-        Nil })
 
       // return the reference frequency
       dividerOnlyClkGenerator.module.referenceFreq
