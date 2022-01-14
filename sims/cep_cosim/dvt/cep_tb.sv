@@ -169,7 +169,9 @@ module `COSIM_TB_TOP_MODULE;
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
     .reset              (~sys_rst_n),
-    .clock              (sys_clk_i)
+    .clock              (sys_clk_i),
+    .pll_bypass         (1'b1),
+    .pll_observe        ()
   );
   //--------------------------------------------------------------------------------------
 

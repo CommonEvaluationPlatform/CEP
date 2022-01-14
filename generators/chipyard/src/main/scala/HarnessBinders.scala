@@ -23,6 +23,8 @@ import testchipip._
 
 import chipyard.{HasHarnessSignalReferences, HarnessClockInstantiatorKey}
 import chipyard.iobinders.{GetSystemParameters, JTAGChipIO}
+import chipyard.config._
+import asicBlocks.ceppll._
 
 import tracegen.{TraceGenSystemModuleImp}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}

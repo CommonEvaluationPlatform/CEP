@@ -17,6 +17,7 @@ import testchipip.{TLTileResetCtrl}
 import chipyard.clocking._
 import chipyard.iobinders._
 
+import asicBlocks.ceppll._
 
 //
 // A combined Clock and REset implementation to facilitate blackbox insertion of a PLL
@@ -52,60 +53,58 @@ object GenerateClockAndReset {
   }
 }
 
-// Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of a PLL
+// Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of the CEP PLL
 object GenerateClockAndResetPLL {
   def apply(chiptop: ChipTop): (Clock, Reset) = {
     implicit val p = chiptop.p
     
     // this needs directionality so generateIOFromSignal works
-    val async_reset_wire = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey), abstractResetAsAsync = true)
+    val reset_in = Wire(Input(AsyncReset()))
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_in, "reset", p(IOCellKey), abstractResetAsAsync = true)
     chiptop.iocells ++= resetIOCell
-
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
       Nil
     })
 
-    val clock_wire = Wire(Input(Clock()))
-    val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+    val clk_in = Wire(Input(Clock()))
+    val (clk_io, clockIOCell) = IOCell.generateIOFromSignal(clk_in, "clock", p(IOCellKey))
     chiptop.iocells ++= clockIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-      clock_io := th.buildtopClock
+      clk_io := th.buildtopClock
       Nil
     })
 
-    // Create and instantiate the blackbox wrapper for the System PLL
-    class pll_wrapper() extends BlackBox with HasBlackBoxResource {
+    val pll_bypass = Wire(Input(Bool()))
+    val (pllbypass_io, pllbypassIOCell) = IOCell.generateIOFromSignal(pll_bypass, "pll_bypass", p(IOCellKey))
+    chiptop.iocells ++= pllbypassIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      pllbypass_io := th.logicLow
+      Nil
+    })
 
-      val io = IO(new Bundle {
-        val clk_in            = Input(Clock())
-        val reset_in          = Input(AsyncReset())
-        val clk_out           = Output(Clock())
-        val reset_out         = Output(AsyncReset())
-      })
 
-      // Add the SystemVerilog/Verilog files associated with the BlackBox
-      // Relative to ./src/main/resources
-      addResource("/vsrc/pll_wrapper.sv")
-      
-    } // pll_wrapper
+    val pll_observe = Wire(Output(Clock()))
+    val (pllobserve_io, pllobserveIOCell) = IOCell.generateIOFromSignal(pll_observe, "pll_observe", p(IOCellKey))
+    chiptop.iocells ++= pllobserveIOCell
 
-    // Instantiate the blackbox
-    val pll_wrapper_inst      = Module(new pll_wrapper())
+    // Output wire definitions (not routed to chip IO)
+    val reset_out               = Wire(Output(AsyncReset()))
+    val clk_out                 = Wire(Output(Clock()))
 
-    // Output wire definitions
-    val reset_wire_out        = Wire(Output(AsyncReset()))
-    val clock_wire_out        = Wire(Output(Clock()))
+    // Instantiate the CEP PLL Chisel module
+    val module                  = Module(new CEPPLLModule()).suggestName(s"pll")
 
-    // Connect to the blackbox signals
-    pll_wrapper_inst.io.clk_in    := clock_wire
-    pll_wrapper_inst.io.reset_in  := async_reset_wire
-    clock_wire_out                := pll_wrapper_inst.io.clk_out
-    reset_wire_out                := pll_wrapper_inst.io.reset_out
+    // Connect to the CEP PLL Chisel module I/O
+    module.io.reset_in          := reset_in
+    module.io.clk_in            := clk_in
+    module.io.pll_bypass        := pll_bypass
+    reset_out                   := module.io.reset_out
+    clk_out                     := module.io.clk_out
+    pll_observe                 := module.io.pll_observe
 
-    // Pass the outputs
-    (clock_wire_out, reset_wire_out)
+    // Return the clock and reset outputs to the "calling function"
+    (clk_out, reset_out)
   }
 }
 
