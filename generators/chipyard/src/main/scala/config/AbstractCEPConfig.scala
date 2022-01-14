@@ -28,7 +28,7 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
-  new chipyard.iobinders.WithTestIOPassthrough ++
+  new chipyard.iobinders.WithTestIOStubs ++
 
   // Additional chip configuration items
   new chipyard.config.WithBlackBoxPLL ++                          // The System Clock & Reset will be routed through a Black Box PLL component

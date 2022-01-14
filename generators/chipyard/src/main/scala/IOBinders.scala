@@ -20,8 +20,6 @@ import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 import tracegen.{TraceGenSystemModuleImp}
 
-import mitllBlocks.testIO._
-
 import barstools.iocell.chisel._
 
 import testchipip._
@@ -163,37 +161,22 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
-class WithTestIOPassthrough extends OverrideIOBinder({
-    (system: HasTestIOImp) => {
-        // clones the internal DigitalTopIO to make pins visible to ChipTop
-        val test_io_temp = IO(DataMirror.internal.chiselTypeClone[TestIO](system.testio)).suggestName("scan") // prefix to "test_io"
-        test_io_temp <> system.testio // connecting ChipTop to DigitalTop
-        (Seq(test_io_temp), Nil)      // return for harness binder
-    }
-})
+// Create test IO w/IOCells that are not connected to anything in DigitalTop
+class WithTestIOStubs extends OverrideIOBinder({
+  (system: DontTouch) => {
+    val ports = IO(new Bundle {val io = Vec(4, Analog(1.W))}).suggestName(s"test")
 
-/*
-// WithTestIOCells instantiates placeholder IOCells for the testIO
-class WithTestIOCells extends OverrideIOBinder({
-  (system: HasTestIOImp) => {
-    val name = s"testio"
-    val ports = Seq[Analog]
-    val iocellBase = s"iocell_${name}"
-
-    // DQ are bidirectional, so then need special treatment
-    val testIOs = system.testio.testio.zip(port.testio).zipWithIndex.map { case (pin, i) =>
-      val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_${i}")
-      //iocell.io.o := pin.o
-      iocell.io.oe := true.B
-      iocell.io.ie := false.B
-      iocell.io.i := false.B
+    val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"scan_${i}")
       iocell.io.pad <> pin
+      iocell.io.o  := false.B
+      iocell.io.ie := false.B
+      iocell.io.oe := true.B
       iocell
-    } // val testIOs
-    (ports, testIOs)
+    }
+    (Nil, iocells)
   }
 })
-*/
 
 class WithSPIFlashIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
