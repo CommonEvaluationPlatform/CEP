@@ -58,5 +58,5 @@ include $(base_dir)/common.mk
 clean:
 	(cd ${BOOTROM_SRC_DIR}; make clean)
 	@rm -f $(sim_dir)/CHIPYARD_BUILD_INFO.make
-	@rm -rf $(build_dir)
+	@rm -rf $(gen_dir)/*
 

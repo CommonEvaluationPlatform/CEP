@@ -54,7 +54,7 @@ object GenerateClockAndReset {
 
 // Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of a PLL
 object GenerateClockAndResetPLL {
-  def apply(chiptop: ChipTopASIC): (Clock, Reset) = {
+  def apply(chiptop: ChipTop): (Clock, Reset) = {
     implicit val p = chiptop.p
     
     // this needs directionality so generateIOFromSignal works
@@ -110,8 +110,7 @@ object GenerateClockAndResetPLL {
 }
 
 case object ClockingSchemeKey extends Field[ChipTop => ModuleValue[Double]](ClockingSchemeGenerators.dividerOnlyClockGenerator)
-case object ClockingPLLSchemeKey extends Field[ChipTopASIC => ModuleValue[Double]](ClockingSchemeGenerators.pllClockGenerator)
-
+case object EnableBlackBoxPLLKey extends Field[Boolean](false)
 /*
   * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
   * Functions that appear later in this seq have higher precedence that earlier ones.
@@ -175,10 +174,14 @@ object ClockingSchemeGenerators {
     asyncResetBroadcast := asyncResetSource
 
     InModuleBody {
-      
-      // Create the object that creates the wires and instantiates the I/O Cells for system Clock and Reset
-      val (clock_wire, reset_wire) = GenerateClockAndReset(chiptop)
 
+      // Generate the I/O Cells and optional Blackbox PLL for system Clock and Reset
+      val (clock_wire, reset_wire): (Clock, Reset) = if (p(EnableBlackBoxPLLKey) == true) {
+        GenerateClockAndResetPLL(chiptop)
+      } else {
+        GenerateClockAndReset(chiptop)
+      }
+      
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire
         o.reset := reset_wire
@@ -191,69 +194,7 @@ object ClockingSchemeGenerators {
 
       // return the reference frequency
       dividerOnlyClkGenerator.module.referenceFreq
+
     } // InModuleBody
   } // dividerOnlyClockGenerator
-
-
-  // Clock and Reset generation for ChipTop that uses a PLL 
-  val pllClockGenerator: ChipTopASIC => ModuleValue[Double] = { chiptop =>
-    implicit val p = chiptop.p
-
-    // Requires existence of undriven asyncClockGroups in subsystem
-    val systemAsyncClockGroup = chiptop.lazySystem match {
-      case l: BaseSubsystem if (p(SubsystemDriveAsyncClockGroupsKey).isEmpty) =>
-        l.asyncClockGroupsNode
-    }
-
-    // Add a control register for each tile's reset
-    val resetSetter = chiptop.lazySystem match {
-      case sys: BaseSubsystem with InstantiatesTiles => Some(TLTileResetCtrl(sys))
-      case _ => None
-    }
-    val resetSetterResetProvider = resetSetter.map(_.tileResetProviderNode).getOrElse(ClockGroupEphemeralNode())
-
-    val aggregator = LazyModule(new ClockGroupAggregator("allClocks")).node
-    // provides the implicit clock to the system
-    (chiptop.implicitClockSinkNode
-      := ClockGroup()
-      := aggregator)
-    // provides the system clock (ex. the bus clocks)
-    (systemAsyncClockGroup
-      :*= ClockGroupNamePrefixer()
-      :*= aggregator)
-
-    val referenceClockSource =  ClockSourceNode(Seq(ClockSourceParameters()))
-    val dividerOnlyClkGenerator = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
-    // provides all the divided clocks (from the top-level clock)
-    (aggregator
-      := ClockGroupFrequencySpecifier(p(ClockFrequencyAssignersKey), p(DefaultClockFrequencyKey))
-      := ClockGroupResetSynchronizer()
-      := resetSetterResetProvider
-      := dividerOnlyClkGenerator.node
-      := referenceClockSource)
-
-    val asyncResetBroadcast = FixedClockBroadcast(None)
-    resetSetter.foreach(_.asyncResetSinkNode := asyncResetBroadcast)
-    val asyncResetSource = ClockSourceNode(Seq(ClockSourceParameters()))
-    asyncResetBroadcast := asyncResetSource
-
-    InModuleBody {
-      
-      // Create the object that creates the wires and instantiates the I/O Cells for system Clock and Reset
-      val (clock_wire, reset_wire) = GenerateClockAndResetPLL(chiptop)
-
-      referenceClockSource.out.unzip._1.map { o =>
-        o.clock := clock_wire
-        o.reset := reset_wire
-      }
-
-      asyncResetSource.out.unzip._1.map { o =>
-        o.clock := false.B.asClock // async reset broadcast network does not provide a clock
-        o.reset := reset_wire
-      }
-
-      // return the reference frequency
-      dividerOnlyClkGenerator.module.referenceFreq
-    } // InModuleBody
-  } // pllClockGenerator
 } // ClockingSchemeGenerators

@@ -218,8 +218,6 @@ class CEPASICRocketConfig extends Config(
       dev_name            = s"gps_redaction"),
   ))++
 
-
-
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithSROT ++
 
