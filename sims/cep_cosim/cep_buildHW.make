@@ -56,6 +56,11 @@ ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
+# Pass on the ASIC_MODE argument
+ifeq (${ASIC_MODE},1)
+COSIM_VLOG_ARGS				+= +define+ASIC_MODE
+endif
+
 # If the PLL is enabled
 ifeq (${BYPASS_PLL},1)
 COSIM_VLOG_ARGS				+= +define+BYPASS_PLL

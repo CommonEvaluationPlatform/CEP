@@ -38,9 +38,11 @@
 `define other_base_addr                 'h6400_0000
 `define other_base_size                 'h0100_0000
 
-// The following constants
+// The following constants define the base address and
+// size of the scratchpad memory (as defined in the 
+// selected configuration of CEPConfigs.scala)
 `define scratchpad_base_addr            'h8000_0000
-`define scratchpad_base_size            'h0008_0000
+`define scratchpad_base_size            'h0010_0000
 
 // Defines the offset from scratchpad_base_addr used to
 // establish the initial SP value by the CEP bootrom.
@@ -89,7 +91,7 @@
 //
 // regBaseTest and memBaseTest (the only tests that use bare_malloc)
 // MUST fit within this memory footprint
-`define cep_malloc_heap_start           'h8006_0000   // 
+`define cep_malloc_heap_start           'h800A_0000   // 
 `define cep_malloc_heap_size_per_core   'h0000_8000   // 32kB per core
 
 `define scratchpad_known_pattern        'h600dbabe_12345678

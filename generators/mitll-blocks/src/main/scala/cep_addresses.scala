@@ -32,7 +32,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
 
-object CEPBaseAddresses {
+object CEPBaseAddresses {  
   val scratchpad_base_addr          = 0x64800000L
   val scratchpad_depth              = 0x0001FFFFL 
 

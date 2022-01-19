@@ -25,6 +25,7 @@ import mitllBlocks.srot._
 import asicBlocks.sha256Redaction._
 import asicBlocks.gpslbll._
 import asicBlocks.gpsRedaction._
+import asicBlocks.cep_scratchpad_asic._
 
 import sifive.blocks.devices.spi._
 
@@ -220,6 +221,18 @@ class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_ad
       dev_name            = s"scratchpad"
     ))
 })
+
+// Instantiate the ASIC version which uses technology specify libraries
+class WithCEPASICScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_addr,
+                             size:      BigInt = CEPBaseAddresses.scratchpad_depth) extends Config((site, here, up) => {
+  case CEPScratchpadASICKey => List(
+    CEPScratchpadParams(
+      slave_address       = address,
+      slave_depth         = size,
+      dev_name            = s"scratchpad"
+    ))
+})
+
 
 // CEPBootROM allows override of default parameters
 class WithCEPBootROM    (address  : BigInt  = 0x10000, 

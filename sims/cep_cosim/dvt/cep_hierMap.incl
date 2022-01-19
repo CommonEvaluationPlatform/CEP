@@ -39,8 +39,13 @@
 `define DFT_PATH                  `DUT_TOP_LEVEL.system.dftmodule
 `define DES3_PATH                 `DUT_TOP_LEVEL.system.des3module
 `define AES_PATH                  `DUT_TOP_LEVEL.system.aesmodule
-`define SCRATCHPAD_PATH           `DUT_TOP_LEVEL.system.scratchpadmodule
-`define SCRATCHPAD_WRAPPER_PATH   `SCRATCHPAD_PATH.scratchpad_wrapper_inst
+`ifdef ASIC_MODE
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadasicmodule
+  `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_asic_wrapper_inst
+`else
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadmodule
+  `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_wrapper_inst
+`endif 
 `define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
 
 `define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile

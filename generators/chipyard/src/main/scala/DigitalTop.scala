@@ -47,6 +47,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with asicBlocks.sha256Redaction.CanHavePeripherySHA256Redaction
   with asicBlocks.gpslbll.CanHavePeripheryGPSLBLL
   with asicBlocks.gpsRedaction.CanHavePeripheryGPSRedaction
+  with asicBlocks.cep_scratchpad_asic.CanHaveCEPScratchpadASIC
 {
   override lazy val module = new DigitalTopModule(this)
 }
