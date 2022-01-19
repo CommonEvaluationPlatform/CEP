@@ -30,7 +30,7 @@ class AbstractCEPASICConfig extends Config(
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
-
+  
   // Additional chip configuration items
   new chipyard.config.WithBlackBoxPLL ++                          // The System Clock & Reset will be routed through a Black Box PLL component
   new chipyard.config.WithNoSubsystemDrivenClocks ++              // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks

@@ -24,7 +24,7 @@
 `include "v2c_top.incl"
 
 `ifndef CLOCK_PERIOD
-  `define CLOCK_PERIOD          5
+  `define CLOCK_PERIOD          10
 `endif
 `ifndef RESET_DELAY
   `define RESET_DELAY           100
@@ -62,12 +62,15 @@ module `COSIM_TB_TOP_MODULE;
   wire                gpio_0_6; pullup (weak1) (gpio_0_6);
   wire                gpio_0_7; pullup (weak1) (gpio_0_7);
 
-  wire                sdio_0_sck; 
-  wire                sdio_0_cs_0;    
-  wire                sdio_0_dq_0; pullup (weak1) (sdio_0_dq_0);
-  wire                sdio_0_dq_1; pullup (weak1) (sdio_0_dq_1);
-  wire                sdio_0_dq_2; pullup (weak1) (sdio_0_dq_2);
-  wire                sdio_0_dq_3; pullup (weak1) (sdio_0_dq_3);
+  wire                spi_0_sck; 
+  wire                spi_0_cs_0;    
+  wire                spi_0_dq_0; pullup (weak1) (spi_0_dq_0);
+  wire                spi_0_dq_1; pullup (weak1) (spi_0_dq_1);
+  wire                spi_0_dq_2; pullup (weak1) (spi_0_dq_2);
+  wire                spi_0_dq_3; pullup (weak1) (spi_0_dq_3);
+
+  reg                 pll_bypass;
+  wire                pll_observe;
   //-------------------------------------------------------------------------------------
 
 
@@ -120,10 +123,10 @@ module `COSIM_TB_TOP_MODULE;
   // SPI loopback instantiation
   //--------------------------------------------------------------------------------------
   spi_loopback spi_loopback_inst (
-    .SCK    (sdio_0_sck   ),
-    .CS_n   (sdio_0_dq_3  ),
-    .MOSI   (sdio_0_cs_0  ),
-    .MISO   (sdio_0_dq_0  ) 
+    .SCK    (spi_0_sck   ),
+    .CS_n   (spi_0_dq_3  ),
+    .MOSI   (spi_0_cs_0  ),
+    .MISO   (spi_0_dq_0  ) 
   );
   //--------------------------------------------------------------------------------------
 
@@ -143,6 +146,16 @@ module `COSIM_TB_TOP_MODULE;
     defparam `TILE3_TL_PATH.CHIP_ID = 3;
   `endif
 
+  initial begin
+  `ifdef BYPASS_PLL
+    `logI("PLL is set to bypass mode");
+    pll_bypass = 1'b1;
+  `else
+    `logI("PLL is set to normal mode");
+    pll_bypass = 1'b0;
+  `endif
+  end
+
   `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
     .jtag_TMS           (jtag_TMS),
@@ -154,10 +167,24 @@ module `COSIM_TB_TOP_MODULE;
     .spi_0_dq_1         (spi_0_dq_1),
     .spi_0_dq_2         (spi_0_dq_2),
     .spi_0_dq_3         (spi_0_dq_3),
+    .test_mode_0        (),
+    .test_mode_1        (),
+    .test_mode_2        (),
+    .test_mode_3        (),
     .test_io_0          (),
     .test_io_1          (),
     .test_io_2          (),
     .test_io_3          (),
+    .test_io_4          (),
+    .test_io_5          (),
+    .test_io_6          (),
+    .test_io_7          (),
+    .test_io_8          (),
+    .test_io_9          (),
+    .test_io_10         (),
+    .test_io_11         (),
+    .test_io_12         (),
+    .test_io_13         (),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
     .gpio_0_2           (gpio_0_2),
@@ -170,8 +197,8 @@ module `COSIM_TB_TOP_MODULE;
     .uart_0_rxd         (uart_rxd),
     .reset              (~sys_rst_n),
     .clock              (sys_clk_i),
-    .pll_bypass         (1'b1),
-    .pll_observe        ()
+    .pll_bypass         (pll_bypass),
+    .pll_observe        (pll_observe)
   );
   //--------------------------------------------------------------------------------------
 
@@ -316,7 +343,7 @@ module `COSIM_TB_TOP_MODULE;
       .io_requestor_x_resp_bits_pte_x       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_x     ),
       .io_requestor_x_resp_bits_pte_w       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_w     ),
       .io_requestor_x_resp_bits_pte_r       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_r     ),
-      .io_requestor_x_resp_bits_pte_v     (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_v       )
+      .io_requestor_x_resp_bits_pte_v       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_v     )
     );
   `endif
   //--------------------------------------------------------------------------------------

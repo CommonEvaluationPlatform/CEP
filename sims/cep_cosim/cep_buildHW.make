@@ -56,6 +56,15 @@ ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
+# If the PLL is enabled
+ifeq (${BYPASS_PLL},1)
+COSIM_VLOG_ARGS				+= +define+BYPASS_PLL
+endif
+# These need to be included even if the pll_bypass is asserted
+COSIM_VSIM_ARGS				+= +PLLLIB_M40
+COSIM_VSIM_ARGS				+= +PLLLIB_SHORT_LOCK
+
+
 # Defines for used within the Chisel Generated Verilog
 COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
 COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
@@ -75,7 +84,7 @@ COSIM_VSIM_ARGS	  			+= -cpppath ${GCC}
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
 # The following parameters units are based on the Verilog timescale directive (default is 1ns)
-COSIM_TB_CLOCK_PERIOD       := 5
+COSIM_TB_CLOCK_PERIOD       := 10
 COSIM_TB_RESET_DELAY		:= 100
 
 COSIM_VLOG_ARGS				+= 	-sv \

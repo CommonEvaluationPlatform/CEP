@@ -161,20 +161,31 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
-// Create test IO w/IOCells that are not connected to anything in DigitalTop
 class WithTestIOStubs extends OverrideIOBinder({
   (system: DontTouch) => {
-    val ports = IO(new Bundle {val io = Vec(4, Analog(1.W))}).suggestName(s"test")
+    val ports = IO(new Bundle {
+    	val io 		= Vec(14, Analog(1.W))
+    	val mode  	= Vec(4, Analog(1.W))
+    }).suggestName(s"test")
 
     val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
-      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"scan_${i}")
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"testio_${i}")
       iocell.io.pad <> pin
       iocell.io.o  := false.B
       iocell.io.ie := false.B
       iocell.io.oe := true.B
       iocell
     }
-    (Nil, iocells)
+
+    val modecells = ports.mode.zipWithIndex.map { case (pin, i) =>
+      val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"testmode_${i}")
+      modecell.io.pad <> pin
+      modecell.io.o  := false.B
+      modecell.io.ie := false.B
+      modecell.io.oe := true.B
+      modecell
+    }
+    (Nil, iocells ++ modecells)
   }
 })
 
