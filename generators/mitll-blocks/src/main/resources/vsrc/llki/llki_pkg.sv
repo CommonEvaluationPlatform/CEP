@@ -13,6 +13,10 @@
 //
 //************************************************************************
 
+// The following is a "dummy" module that facilitates addResources in the
+// cep_registers.scala file (which has no real blackbox)
+module import_resources (); endmodule
+
 package llki_pkg;
 
     // SROT Control / Status Register

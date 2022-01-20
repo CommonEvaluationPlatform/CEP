@@ -226,26 +226,6 @@ class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyM
     // Relative to /src/main/resources
     addResource("/vsrc/llki/srot_wrapper.sv")
 
-    // LLKI Resources
-    addResource("/vsrc/llki/llki_pp_wrapper.sv")
-    addResource("/vsrc/llki/mock_tss_fsm.sv")
-    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-    addResource("/vsrc/llki/tlul_err.sv")
-    addResource("/vsrc/llki/tlul_adapter_reg.sv")
-    addResource("/vsrc/llki/tlul_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
-
-    // Packages and Supporting Files
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/llki/top_pkg.sv")
-    addResource("/vsrc/llki/llki_pkg.sv")
-
   } // end class srot_wrapper
 
   // Pack core index array
