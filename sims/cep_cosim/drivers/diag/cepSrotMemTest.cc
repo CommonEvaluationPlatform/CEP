@@ -34,17 +34,25 @@ int cepSrotMemTest_runTest(int cpuId, int seed, int verbose) {
   int full = 1;
   u_int32_t mem_base;
   int adrWidth ;
+
+  // SROT Memory does not support sub-word access
   int dataWidth = 64;
 
-  for (int i=0;i<2;i++) {
-    if (i == 0) {
-      adrWidth = 11; // 2048 locations
-      mem_base = SROT_BASE_ADDR + SROT_KEYRAM_ADDR;
-    } else {
-      adrWidth = 6; // 32 locations
-      mem_base = SROT_BASE_ADDR + SROT_KEYINDEXRAM_ADDR;
-    }
-    if (!errCnt) { errCnt = cepMemTest_runTest(cpuId, mem_base, adrWidth, dataWidth ,seed, verbose, full); }
-  }
+  // This will be a single-threaded test (only CPU#0)
+
+  if (cpuId == 0) {   
+    for (int i=0;i<2;i++) {
+      if (i == 0) {
+        // Test the KeyRAM
+        adrWidth = 11; // 2048 locations
+        mem_base = SROT_BASE_ADDR + SROT_KEYRAM_ADDR;
+      } else {
+        // Test the KeyIndex RAM
+        adrWidth = 6; // 32 locations
+        mem_base = SROT_BASE_ADDR + SROT_KEYINDEXRAM_ADDR;
+      } // end if (i == 0)
+      if (!errCnt) { errCnt = cepMemTest_runTest(cpuId, mem_base, adrWidth, dataWidth ,seed, verbose, full); }
+    } // end for (int i=0;i<2;i++)
+  } // end if (cpuId == 0)
   return errCnt;
 }

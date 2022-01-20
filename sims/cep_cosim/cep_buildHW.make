@@ -82,9 +82,6 @@ COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
 #--------------------------------------------------------------------------------------
 COSIM_VLOG_ARGS 			+= +libext+.v +libext+.sv
 
-# Use specified GCC vs Questasim builtin
-COSIM_VSIM_ARGS	  			+= -cpppath ${GCC}
-
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
@@ -258,7 +255,7 @@ ${VSIM_DO_FILE}:
 	fi
 
 COSIM_VLOG_ARGS 			+= +acc -64 -incr +define+MODELSIM
-COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630
+COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630 -cpppath ${GCC}
 COSIM_VOPT_ARGS	  			+= +acc -64 +nolibcell +nospecify +notimingchecks
 
 # Enable coverage for Modelsim
@@ -309,30 +306,34 @@ IMC_CMD  						:= ${IMC_INSTALL}/tools/bin/imc
 SAHANLDER_FILE    				:= ${SHR_DIR}/sahandler.c
 COMPILE_LOGFILE					:= ${TEST_DIR}/${TEST_NAME}_compile_xrun.log
 SIMULATION_LOGFILE				:= ${TEST_DIR}/${TEST_NAME}_sim_xrun.log
+
 # Allow Value Parameters without default values
 export CADENCE_ENABLE_AVSREQ_44905_PHASE_1 = 1
 
 # Quick sanity check if xrun exists
 ifeq (,$(shell which ${XRUN_CMD}))
-$(error CEP_COSIM: xrun not found.  Check XCELIUM_INSTALL)
+	$(error CEP_COSIM: xrun not found.  Check XCELIUM_INSTALL)
 endif
 
 # Add to PATH if they are not there yet
 XCELIUM_IN_PATH					= $(shell echo $PATH | grep '$(XCELIUM_VERSION)')
 IMC_IN_PATH						= $(shell echo $PATH | grep '$(VMGR_VERSION)')
+
 ifeq ($(XCELIUM_IN_PATH),)
-export PATH 					:= ${XCELIUM_INSTALL}/tools/bin:${XCELIUM_INSTALL}/tools/dfII/bin:${PATH}
+	export PATH 				:= ${XCELIUM_INSTALL}/tools/bin:${XCELIUM_INSTALL}/tools/dfII/bin:${PATH}
 endif
 ifeq ($(IMC_IN_PATH),)
-export PATH 					:= ${IMC_INSTALL}/tools/bin:${PATH}
+	export PATH 				:= ${IMC_INSTALL}/tools/bin:${PATH}
 endif
 
-COSIM_VLOG_ARGS 				+=  -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE
+# Default parameters
+COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE
+COSIM_VSIM_ARGS 				+= -64bit -R 
 
 # Enable coverage for Cadence
 ifeq (${COVERAGE},1)
-COSIM_VLOG_ARGS 				+= -covfile ${COSIM_TOP_DIR}/cadence_cov.ccf
-COSIM_VSIM_ARGS 				+= -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
+	COSIM_VLOG_ARGS 			+= -covfile ${COSIM_TOP_DIR}/cadence_cov.ccf
+	COSIM_VSIM_ARGS 			+= -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
 endif
 
 CAD_TOP_COVERAGE				?= ${COSIM_TOP_DIR}/cad_coverage
@@ -340,7 +341,7 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${LIB_DIR}/.buildLibs ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_TOP_DIR}/common.make ${COSIM_TOP_DIR}/cep_buildHW.make ${PERSUITE_CHECK}
-	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${CADENCE_COV_COM_ARGS} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
+	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -sv_lib ${COSIM_TOP_DIR}/lib/libvpp.so -dpiimpheader imp.h -loadpli1 ${COSIM_TOP_DIR}/lib/libvpp.so:export -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot
 	touch $@
 
 # Test build target
@@ -387,7 +388,7 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 
 # override the VPP command for Cadence tool
-override VSIM_CMD_LINE = "${XRUN_CMD} -64bit -R -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE} ${CADENCE_COV_RUN_ARGS} "
+override VSIM_CMD_LINE = "${XRUN_CMD} ${COSIM_VSIM_ARGS} -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE}"
 
 endif	
 #--------------------------------------------------------------------------------------
