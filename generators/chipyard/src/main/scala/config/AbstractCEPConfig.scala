@@ -26,7 +26,7 @@ class AbstractCEPASICConfig extends Config(
   new chipyard.iobinders.WithDebugIOCells ++
   new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithSPIIOCells ++
+  new chipyard.iobinders.WithSPIGPIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
