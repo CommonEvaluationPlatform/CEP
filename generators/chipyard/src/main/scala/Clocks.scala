@@ -2,6 +2,7 @@ package chipyard
 
 import chisel3._
 import chisel3.util._
+import chisel3.experimental.{Analog, IO}
 
 import scala.collection.mutable.{ArrayBuffer}
 
@@ -54,16 +55,26 @@ object GenerateClockAndReset {
 }
 
 // Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of the CEP PLL
+// Like all other top level IO, GenericDigitalGPIOCells will be used
 object GenerateClockAndResetPLL {
   def apply(chiptop: ChipTop): (Clock, Reset) = {
     implicit val p = chiptop.p
     
     // this needs directionality so generateIOFromSignal works
-    val reset_in = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_in, "reset", p(IOCellKey), abstractResetAsAsync = true)
+    val reset_in      = Wire(Input(AsyncReset()))
+    val reset_in_pad  = IO(Analog(1.W)).suggestName(s"reset")
+    val resetIOCell = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_reset")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          reset_in      := (iocell.io.i).asAsyncReset
+          iocell.io.pad <> reset_in_pad
+          Seq(iocell)
+        }
     chiptop.iocells ++= resetIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-      reset_io := th.dutReset
+      UIntToAnalog(th.dutReset.do_asUInt, reset_in_pad, true.B)
       Nil
     })
 
@@ -82,7 +93,6 @@ object GenerateClockAndResetPLL {
       pllbypass_io := th.logicLow
       Nil
     })
-
 
     val pll_observe = Wire(Output(Clock()))
     val (pllobserve_io, pllobserveIOCell) = IOCell.generateIOFromSignal(pll_observe, "pll_observe", p(IOCellKey))

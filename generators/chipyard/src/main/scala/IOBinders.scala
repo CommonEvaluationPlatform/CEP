@@ -210,7 +210,7 @@ class WithTestIOStubs extends OverrideIOBinder({
     }).suggestName(s"test")
 
     val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
-      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"testio_${i}")
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testio_${i}")
       iocell.io.pad <> pin
       iocell.io.o  := false.B
       iocell.io.ie := false.B
@@ -219,7 +219,7 @@ class WithTestIOStubs extends OverrideIOBinder({
     }
 
     val modecells = ports.mode.zipWithIndex.map { case (pin, i) =>
-      val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"testmode_${i}")
+      val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testmode_${i}")
       modecell.io.pad <> pin
       modecell.io.o  := false.B
       modecell.io.ie := false.B
