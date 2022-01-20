@@ -161,11 +161,52 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
+// Class to support GPIO Instantiation for the UART Interface
+class UARTChipGPIO extends Bundle {
+  val txd = Analog(1.W)
+  val rxd = Analog(1.W)
+}
+
+// Variant of the UART Binder that forces the instantiation of GPIO cells for ALL pins
+class WithUARTGPIOCells extends OverrideIOBinder({
+  (system: HasPeripheryUARTModuleImp) => {
+    val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
+      val name        = s"uart_${i}"
+      val port        = IO(new UARTChipGPIO).suggestName(name)
+      val iocellBase  = s"iocell_${name}"
+
+      // txd is unidirectional, but is being mapped to a GPIO Cell
+      val txdIOs = {
+        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_txd")
+        iocell.io.o := u.txd
+        iocell.io.oe := true.B
+        iocell.io.ie := false.B
+        iocell.io.pad <> port.txd
+        Seq(iocell)
+      }
+
+      // txd is unidirectional, but is being mapped to a GPIO Cell
+      val rxdIOs = {
+        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_rxd")
+        iocell.io.o   := false.B
+        iocell.io.oe  := false.B
+        iocell.io.ie  := true.B
+        u.rxd         := iocell.io.i
+        iocell.io.pad <> port.rxd
+        Seq(iocell)
+      }
+      (port, txdIOs ++ rxdIOs)
+    }).unzip
+    (ports, cells2d.flatten)
+  }
+})
+
+// Class to insert internally unconnected pads
 class WithTestIOStubs extends OverrideIOBinder({
   (system: DontTouch) => {
     val ports = IO(new Bundle {
-    	val io 		= Vec(14, Analog(1.W))
-    	val mode  	= Vec(4, Analog(1.W))
+      val io      = Vec(16, Analog(1.W))
+      val mode    = Vec(4, Analog(1.W))
     }).suggestName(s"test")
 
     val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
@@ -259,9 +300,9 @@ class WithSPIIOCells extends OverrideLazyIOBinder({
 
 // Class to support GPIO Instantiation for the SPI Interface
 class SPIChipGPIO(val csWidth: Int = 1) extends Bundle {
-  val sck 	= Analog(1.W)
-  val cs 	= Vec(csWidth, Analog(1.W))
-  val dq 	= Vec(4, Analog(1.W)) // Not using Analog(4.W) because we can't connect these to IO cells
+  val sck   = Analog(1.W)
+  val cs    = Vec(csWidth, Analog(1.W))
+  val dq    = Vec(4, Analog(1.W)) // Not using Analog(4.W) because we can't connect these to IO cells
 }
 
 // Class to support the instantiation of a SDIO/MMC capable interface
@@ -282,7 +323,7 @@ class WithSPIGPIOCells extends OverrideLazyIOBinder({
         val iocellBase = s"iocell_${name}"
 
         // CS is unidirectional, but is being mapped to a GPIO Cell
-		val sckIOs = {
+        val sckIOs = {
           val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_sck")
           iocell.io.o := s.sck
           iocell.io.oe := true.B
@@ -292,8 +333,8 @@ class WithSPIGPIOCells extends OverrideLazyIOBinder({
         }
 
         // CS is unidirectional, but is being mapped to a GPIO Cell
-		val csIOs = s.cs.zip(port.cs).zipWithIndex.map { case ((pin, ana), j) =>
-          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_cs_${i}")
+        val csIOs = s.cs.zip(port.cs).zipWithIndex.map { case ((pin, ana), j) =>
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_cs_${j}")
           iocell.io.o := pin
           iocell.io.oe := true.B
           iocell.io.ie := false.B

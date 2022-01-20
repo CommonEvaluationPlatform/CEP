@@ -5,9 +5,8 @@ import freechips.rocketchip.subsystem._
 
 // The following AbstractCEPConfig removes the L2 cache (when compared to AbstractConfig)
 class AbstractCEPASICConfig extends Config(
+  // Currently, the CEP does not depends/leverage the Chipyard TestHarness
   // The HarnessBinders control generation of hardware in the TestHarness
-  //new chipyard.harness.WithPLLBypassTiedOff ++
-  new chipyard.harness.WithUARTAdapter ++                       // add UART adapter to display UART on stdout, if uart is present
   new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
   new chipyard.harness.WithSimSerial ++                         // add external serial-adapter and RAM
   new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
@@ -24,7 +23,7 @@ class AbstractCEPASICConfig extends Config(
   new chipyard.iobinders.WithNICIOPunchthrough ++
   new chipyard.iobinders.WithSerialTLIOCells ++
   new chipyard.iobinders.WithDebugIOCells ++
-  new chipyard.iobinders.WithUARTIOCells ++
+  new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIGPIOCells ++
   new chipyard.iobinders.WithTraceIOPunchthrough ++

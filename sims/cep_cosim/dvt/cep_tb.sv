@@ -185,6 +185,8 @@ module `COSIM_TB_TOP_MODULE;
     .test_io_11         (),
     .test_io_12         (),
     .test_io_13         (),
+    .test_io_14         (),
+    .test_io_15         (),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
     .gpio_0_2           (gpio_0_2),
