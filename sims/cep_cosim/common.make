@@ -301,6 +301,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*dump
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*elf
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/*vstf
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/wlf*
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/transcript
 	-rm -f ${COSIM_TOP_DIR}/drivers/vectors/*

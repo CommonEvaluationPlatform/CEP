@@ -315,7 +315,6 @@ else
 ${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${RISCV_LIB} ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE}
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o $@
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
-#	${RISCV_OBJDUMP} -d riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
 endif
