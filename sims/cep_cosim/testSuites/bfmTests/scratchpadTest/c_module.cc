@@ -53,7 +53,7 @@ void *c_module(void *arg) {
   pio.RunClk(500);
 
   int full            = 0;
-  int addrWidth       = 17 - 2; // 128k (17 bits) for all 4 cores => each one will test 1/4 of that
+  int addrWidth       = 20 - 2; // 1024K (20 bits) for all 4 cores => each one will test 1/4 of that
   u_int32_t mem_base  = scratchpad_base_addr + ((cpuId&0x3) << addrWidth);  
 
   int dataWidth = 0;

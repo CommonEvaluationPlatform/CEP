@@ -54,7 +54,7 @@ int cepMemTest_WriteEntry(memBaseTest_t *me, uint64_t adr)
     DUT_WRITE32_32(me->mBAR + adr*4,dat32); 
     break;
   case 64: 
-    DUT_WRITE32_64(me->mBAR + adr*4,dat64); 
+    DUT_WRITE32_64(me->mBAR + adr*8,dat64); 
     break;
   }
   //
@@ -84,7 +84,7 @@ int cepMemTest_ReadEntry(memBaseTest_t *me, uint64_t adr)
     me->rdPat[0] = dat32 ;
     break;
   case 64: 
-    DUT_READ32_64(me->mBAR + adr*4,dat64);  
+    DUT_READ32_64(me->mBAR + adr*8,dat64);  
     me->rdPat[0] = dat64 ;
     break;
   }
@@ -102,7 +102,7 @@ int cepMemTest_runTest(int cpuId,uint64_t mem_base, int adrWidth, int dataWidth,
 
   memBaseTest_t *memp; 
 
-  int step = (full) ? 1 : 0x10000;
+  int step = (full) ? 1 : 0x1000;
 
   cepMemTest_CREATE(memp, cpuId, mem_base, adrWidth - 3, dataWidth, step, seed + (cpuId*100));
 
