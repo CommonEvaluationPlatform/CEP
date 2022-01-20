@@ -19,7 +19,7 @@ import mitllBlocks.cep_registers._
 import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
 
-import asicBlocks.cep_scratchpad_asic._
+//import asicBlocks.cep_scratchpad_asic._
 
 class CEPASICRocketConfig extends Config(
   // Add the CEP Accelerator Cores
@@ -107,7 +107,7 @@ class CEPASICRocketConfig extends Config(
   ))++
 
   new chipyard.config.WithCEPRegisters ++
-  new chipyard.config.WithSROT ++
+  new chipyard.config.WithSROTASIC ++
 
   // Instantiantion of the CEP BootROM with default parameter overrides
   // The hang parameter sets the system-wide reset vector for ALL RocketTiles

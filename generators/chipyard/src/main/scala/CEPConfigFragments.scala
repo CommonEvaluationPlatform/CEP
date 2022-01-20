@@ -26,6 +26,7 @@ import asicBlocks.sha256Redaction._
 import asicBlocks.gpslbll._
 import asicBlocks.gpsRedaction._
 import asicBlocks.cep_scratchpad_asic._
+import asicBlocks.srot_asic._
 
 import sifive.blocks.devices.spi._
 
@@ -247,6 +248,36 @@ class WithCEPBootROM    (address  : BigInt  = 0x10000,
 
 class WithSROT extends Config((site, here, up) => {
   case SROTKey => List(
+    SROTParams(
+      slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
+      cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),
+      cep_cores_depth     = BigInt(CEPBaseAddresses.cep_cores_depth),
+      // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
+      // The SRoT uses these indicies for routing keys to the appropriate core
+      llki_cores_array    = Array(
+        CEPBaseAddresses.aes_llki_base_addr,      // Core Index 0 
+        CEPBaseAddresses.md5_llki_base_addr,      // Core Index 1 
+        CEPBaseAddresses.sha256_0_llki_base_addr, // Core Index 2 
+        CEPBaseAddresses.sha256_1_llki_base_addr, // Core Index 3 
+        CEPBaseAddresses.sha256_2_llki_base_addr, // Core Index 4 
+        CEPBaseAddresses.sha256_3_llki_base_addr, // Core Index 5 
+        CEPBaseAddresses.rsa_llki_base_addr,      // Core Index 6 
+        CEPBaseAddresses.des3_llki_base_addr,     // Core Index 7 
+        CEPBaseAddresses.dft_llki_base_addr,      // Core Index 8 
+        CEPBaseAddresses.idft_llki_base_addr,     // Core Index 9 
+        CEPBaseAddresses.fir_llki_base_addr,      // Core Index 10
+        CEPBaseAddresses.iir_llki_base_addr,      // Core Index 11
+        CEPBaseAddresses.gps_0_llki_base_addr,    // Core Index 12
+        CEPBaseAddresses.gps_1_llki_base_addr,    // Core Index 13
+        CEPBaseAddresses.gps_2_llki_base_addr,    // Core Index 14
+        CEPBaseAddresses.gps_3_llki_base_addr     // Core Index 15
+      )
+    ))
+})
+
+class WithSROTASIC extends Config((site, here, up) => {
+  case SROTASICKey => List(
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
