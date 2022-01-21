@@ -55,7 +55,7 @@ object GenerateClockAndReset {
 }
 
 // Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of the CEP PLL
-// Like all other top level IO, GenericDigitalGPIOCells will be used
+// Like all other top level IO in the ASIC, GenericDigitalGPIOCells will be used
 object GenerateClockAndResetPLL {
   def apply(chiptop: ChipTop): (Clock, Reset) = {
     implicit val p = chiptop.p
@@ -63,7 +63,7 @@ object GenerateClockAndResetPLL {
     // this needs directionality so generateIOFromSignal works
     val reset_in      = Wire(Input(AsyncReset()))
     val reset_in_pad  = IO(Analog(1.W)).suggestName(s"reset")
-    val resetIOCell = {
+    val resetIOCell   = {
           val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_reset")
           iocell.io.o   := false.B
           iocell.io.oe  := false.B
@@ -78,25 +78,51 @@ object GenerateClockAndResetPLL {
       Nil
     })
 
-    val clk_in = Wire(Input(Clock()))
-    val (clk_io, clockIOCell) = IOCell.generateIOFromSignal(clk_in, "clock", p(IOCellKey))
-    chiptop.iocells ++= clockIOCell
+    val clk_in      = Wire(Input(Clock()))
+    val clk_in_pad  = IO(Analog(1.W)).suggestName(s"clock")
+    val clkIOCell   = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_clk")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          clk_in        := (iocell.io.i).asClock
+          iocell.io.pad <> clk_in_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= clkIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-      clk_io := th.buildtopClock
+      UIntToAnalog(th.buildtopClock.do_asUInt, clk_in_pad, true.B)
       Nil
     })
 
-    val pll_bypass = Wire(Input(Bool()))
-    val (pllbypass_io, pllbypassIOCell) = IOCell.generateIOFromSignal(pll_bypass, "pll_bypass", p(IOCellKey))
-    chiptop.iocells ++= pllbypassIOCell
+    val pll_bypass        = Wire(Input(Bool()))
+    val pll_bypass_pad    = IO(Analog(1.W)).suggestName(s"pll_bypass")
+    val pll_bypassIOCell  = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_bypass")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          pll_bypass    := iocell.io.i
+          iocell.io.pad <> pll_bypass_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= pll_bypassIOCell
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-      pllbypass_io := th.logicLow
+      UIntToAnalog(th.logicLow.asUInt, pll_bypass_pad, true.B)
       Nil
     })
 
-    val pll_observe = Wire(Output(Clock()))
-    val (pllobserve_io, pllobserveIOCell) = IOCell.generateIOFromSignal(pll_observe, "pll_observe", p(IOCellKey))
-    chiptop.iocells ++= pllobserveIOCell
+    val pll_observe       = Wire(Output(Clock()))
+    val pll_observe_pad   = IO(Analog(1.W)).suggestName(s"pll_observe")
+    val pll_observeIOCell  = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_observe")
+          iocell.io.o   := pll_observe.asBool
+          iocell.io.oe  := true.B
+          iocell.io.ie  := false.B
+          iocell.io.pad <> pll_observe_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= pll_observeIOCell
 
     // Output wire definitions (not routed to chip IO)
     val reset_out               = Wire(Output(AsyncReset()))

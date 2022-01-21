@@ -43,7 +43,8 @@ module `COSIM_TB_TOP_MODULE;
   // Wire & Reg Declarations
   //--------------------------------------------------------------------------------------
   reg                 sys_rst_n;
-  reg                 sys_clk_i;  
+  reg                 sys_clk;
+  wire                sys_clk_pad;
     
   wire                jtag_TCK; pullup (weak1) (jtag_TCK);
   wire                jtag_TMS; pullup (weak1) (jtag_TMS);
@@ -70,6 +71,7 @@ module `COSIM_TB_TOP_MODULE;
   wire                spi_0_dq_3; pullup (weak1) (spi_0_dq_3);
 
   reg                 pll_bypass;
+  wire                pll_bypass_pad;
   wire                pll_observe;
   //-------------------------------------------------------------------------------------
 
@@ -93,9 +95,10 @@ module `COSIM_TB_TOP_MODULE;
   // Clock Generation
   //--------------------------------------------------------------------------------------
   initial
-    sys_clk_i = 1'b0;
+    sys_clk = 1'b0;
   always
-    sys_clk_i = #(`CLOCK_PERIOD/2.0) ~sys_clk_i;
+    sys_clk = #(`CLOCK_PERIOD/2.0) ~sys_clk;
+  assign sys_clk_pad = sys_clk;
   //--------------------------------------------------------------------------------------
 
 
@@ -108,9 +111,9 @@ module `COSIM_TB_TOP_MODULE;
   always @(uart_txd) 
   begin
     for (int i = 0; i < 3; i++) begin
-      repeat (2) @(posedge sys_clk_i);
+      repeat (2) @(posedge sys_clk);
       noise = 1;
-      repeat (2) @(posedge sys_clk_i);
+      repeat (2) @(posedge sys_clk);
       noise = 0;
     end
   end
@@ -155,6 +158,7 @@ module `COSIM_TB_TOP_MODULE;
     pll_bypass = 1'b0;
   `endif
   end
+  assign  pll_bypass_pad  = pll_bypass;
 
   `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
@@ -198,8 +202,8 @@ module `COSIM_TB_TOP_MODULE;
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
     .reset              (~sys_rst_n),
-    .clock              (sys_clk_i),
-    .pll_bypass         (pll_bypass),
+    .clock              (sys_clk_pad),
+    .pll_bypass         (pll_bypass_pad),
     .pll_observe        (pll_observe)
   );
   //--------------------------------------------------------------------------------------
@@ -224,7 +228,7 @@ module `COSIM_TB_TOP_MODULE;
         .MY_SLOT_ID   (0),
         .MY_CPU_ID    (c)
       ) driver (
-        .clk          (sys_clk_i      ),  
+        .clk          (sys_clk        ),  
         .enableMe     (enableMask[c]  )
       );
 
@@ -237,7 +241,7 @@ module `COSIM_TB_TOP_MODULE;
         .MY_SLOT_ID   (`SYSTEM_SLOT_ID),
         .MY_CPU_ID    (`SYSTEM_CPU_ID)
   ) system_driver (
-    .clk        (sys_clk_i),
+    .clk        (sys_clk),
     .enableMe   (1'b1)
   );
   //--------------------------------------------------------------------------------------
@@ -263,7 +267,7 @@ module `COSIM_TB_TOP_MODULE;
 
   `ifdef OPENOCD_ENABLE
     always @(posedge passMask[3]) begin
-      repeat (40000) @(posedge sys_clk_i);
+      repeat (40000) @(posedge sys_clk);
       `logI("Initialting QUIT to close socket...");
       junk = jtag_quit();
     end
@@ -271,13 +275,13 @@ module `COSIM_TB_TOP_MODULE;
     initial begin
       junk = jtag_init();
       jtag_TRSTn = 0;
-      repeat (20) @(posedge sys_clk_i);
+      repeat (20) @(posedge sys_clk);
       jtag_TRSTn = 1;
-      repeat (20) @(posedge sys_clk_i);
+      repeat (20) @(posedge sys_clk);
       jtag_TRSTn = 0;
     end
 
-    always @(posedge sys_clk_i) begin
+    always @(posedge sys_clk) begin
       if (sys_rst) begin
         enableDel   <= 0;
         clkCnt      <= 5;
