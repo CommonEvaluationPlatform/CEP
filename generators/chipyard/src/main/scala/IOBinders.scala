@@ -359,6 +359,14 @@ class JTAGChipGPIO extends Bundle {
   val TDO     = Analog(1.W)
 }
 
+class JTAGChipRstGPIO extends Bundle {
+  val TCK     = Analog(1.W)
+  val TMS     = Analog(1.W)
+  val TDI     = Analog(1.W)
+  val TRSTn   = Analog(1.W)
+  val TDO     = Analog(1.W)
+}
+
 // Class to insert internally unconnected pads
 class WithTestIOStubs extends OverrideIOBinder({
   (system: DontTouch) => {
@@ -386,7 +394,7 @@ class WithTestIOStubs extends OverrideIOBinder({
     }
 
     val name          = s"socjtag"  
-    val socjtag_wire  = IO(new JTAGChipGPIO).suggestName(s"${name}")
+    val socjtag_wire  = IO(new JTAGChipRstGPIO).suggestName(s"${name}")
     val iocellBase    = s"iocell_${name}"
          
     val jtag_tckIO = {
@@ -416,6 +424,15 @@ class WithTestIOStubs extends OverrideIOBinder({
       Seq(iocell)
     }
 
+    val jtag_TRSTnIO = {
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_TRSTn")
+      iocell.io.o   := false.B
+      iocell.io.oe  := false.B
+      iocell.io.ie  := false.B
+      iocell.io.pad <> socjtag_wire.TRSTn
+      Seq(iocell)
+    }
+
     val jtag_tdoIO = {
       val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_tdo")
       iocell.io.o   := false.B
@@ -425,7 +442,7 @@ class WithTestIOStubs extends OverrideIOBinder({
       Seq(iocell)
     }
 
-    (Nil, iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_tdoIO)
+    (Nil, iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_TRSTnIO ++ jtag_tdoIO)
   }
 })
 

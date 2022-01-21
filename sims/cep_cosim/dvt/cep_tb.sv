@@ -195,6 +195,7 @@ module `COSIM_TB_TOP_MODULE;
     .socjtag_TCK        (),
     .socjtag_TMS        (),
     .socjtag_TDI        (),
+    .socjtag_TRSTn      (),
     .socjtag_TDO        (),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
