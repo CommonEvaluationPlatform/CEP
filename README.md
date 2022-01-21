@@ -1,8 +1,10 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 
-Common Evaluation Platform v3.5beta+
+Common Evaluation Platform v3.5beta
 
-## DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
+DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
+
+For questions about commercial license, reference MIT TLO Case number 24004L
 
 WARNING: This document may contain technical data whose export is restricted by the Arms Export Control Act (AECA) or the Export Administration Act (EAA). Transfer of this data by any means to a non-US person who is not eligible to obtain export-controlled data is prohibited. By accepting this data, the consignee agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For unclassified, limited distribution documents, destroy by any method that will prevent disclosure of the contents or reconstruction of the document.
 
