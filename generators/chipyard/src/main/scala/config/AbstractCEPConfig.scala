@@ -7,27 +7,13 @@ import freechips.rocketchip.subsystem._
 class AbstractCEPASICConfig extends Config(
   // Currently, the CEP does not depends/leverage the Chipyard TestHarness
   // The HarnessBinders control generation of hardware in the TestHarness
-  new chipyard.harness.WithBlackBoxSimMem ++                    // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
-  new chipyard.harness.WithSimSerial ++                         // add external serial-adapter and RAM
-  new chipyard.harness.WithSimDebug ++                          // add SimJTAG or SimDTM adapters if debug module is enabled
-  new chipyard.harness.WithSimAXIMMIO ++                        // add SimAXIMem for axi4 mmio port, if enabled
-  new chipyard.harness.WithTieOffInterrupts ++                  // tie-off interrupt ports, if present
-  new chipyard.harness.WithTieOffL2FBusAXI ++                   // tie-off external AXI4 master, if present
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
-  new chipyard.iobinders.WithAXI4MemPunchthrough ++
-  new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
-  new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
-  new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
-  new chipyard.iobinders.WithNICIOPunchthrough ++
-  new chipyard.iobinders.WithSerialTLIOCells ++
-  new chipyard.iobinders.WithDebugIOCells ++
+  new chipyard.iobinders.WithDebugIOCells(enableJtagGPIO = true) ++
   new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIGPIOCells ++
-  new chipyard.iobinders.WithTraceIOPunchthrough ++
-  new chipyard.iobinders.WithExtInterruptIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
   
   // Additional chip configuration items

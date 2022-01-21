@@ -49,6 +49,7 @@ module `COSIM_TB_TOP_MODULE;
   wire                jtag_TCK; pullup (weak1) (jtag_TCK);
   wire                jtag_TMS; pullup (weak1) (jtag_TMS);
   wire                jtag_TDI; pullup (weak1) (jtag_TDI);
+  wire                jtag_TRSTn; pullup (weak1) (jtag_TRSTn);
   wire                jtag_TDO;   
 
   wire                uart_rxd; pullup (weak1) (uart_rxd);
