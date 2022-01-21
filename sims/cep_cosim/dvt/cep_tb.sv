@@ -43,6 +43,7 @@ module `COSIM_TB_TOP_MODULE;
   // Wire & Reg Declarations
   //--------------------------------------------------------------------------------------
   reg                 sys_rst_n;
+  wire                sys_rst;
   reg                 sys_clk;
   wire                sys_clk_pad;
     
@@ -88,6 +89,7 @@ module `COSIM_TB_TOP_MODULE;
 
     sys_rst_n = 1'b1;
   end
+  assign sys_rst = ~sys_rst_n;
   //--------------------------------------------------------------------------------------
 
   
@@ -207,7 +209,7 @@ module `COSIM_TB_TOP_MODULE;
     .gpio_0_7           (gpio_0_7),
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
-    .reset              (~sys_rst_n),
+    .reset              (sys_rst),
     .clock              (sys_clk_pad),
     .pll_bypass         (pll_bypass_pad),
     .pll_observe        (pll_observe)
