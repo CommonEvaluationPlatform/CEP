@@ -41,6 +41,7 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with mitllBlocks.fir.CanHavePeripheryFIR
   with mitllBlocks.sha256.CanHavePeripherySHA256
   with mitllBlocks.rsa.CanHavePeripheryRSA
+  with asicBlocks.rsa_asic.CanHavePeripheryRSAASIC
   with mitllBlocks.cep_registers.CanHavePeripheryCEPRegisters
   with mitllBlocks.cep_scratchpad.CanHaveCEPScratchpad
   with mitllBlocks.srot.CanHaveSROT

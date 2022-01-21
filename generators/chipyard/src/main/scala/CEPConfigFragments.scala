@@ -27,6 +27,7 @@ import asicBlocks.gpslbll._
 import asicBlocks.gpsRedaction._
 import asicBlocks.cep_scratchpad_asic._
 import asicBlocks.srot_asic._
+import asicBlocks.rsa_asic._
 
 import sifive.blocks.devices.spi._
 
@@ -165,6 +166,18 @@ class WithRSA ( params  : Seq[COREParams] = Seq(
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
     dev_name            = s"rsa"))) extends Config((site, here, up) => {
   case PeripheryRSAKey => params
+})
+
+class WithRSAASIC ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.rsa_depth),
+    llki_base_addr      = BigInt(CEPBaseAddresses.rsa_llki_base_addr),
+    llki_depth          = BigInt(CEPBaseAddresses.rsa_llki_depth),
+    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.rsa_llki_ctrlsts_addr),
+    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
+    dev_name            = s"rsa"))) extends Config((site, here, up) => {
+  case PeripheryRSAASICKey => params
 })
 
 class WithSHA256Redaction ( params  : Seq[COREParams] = Seq(

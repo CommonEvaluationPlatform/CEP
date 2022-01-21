@@ -30,7 +30,7 @@ class CEPASICRocketConfig extends Config(
   new chipyard.config.WithDFT ++
   new chipyard.config.WithIDFT ++
   new chipyard.config.WithMD5 ++
-  new chipyard.config.WithRSA ++
+  new chipyard.config.WithRSAASIC ++
   new chipyard.config.WithGPS(params = Seq(
     COREParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
