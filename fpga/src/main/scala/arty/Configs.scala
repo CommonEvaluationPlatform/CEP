@@ -38,4 +38,8 @@ class WithArtyTweaks extends Config(
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
   new chipyard.TinyRocketConfig)
+
+class TinyCEPRocketArtyConfig extends Config(
+  new WithArtyTweaks ++
+  new chipyard.TinyCEPRocketConfig)
 // DOC include end: AbstractArty and Rocket

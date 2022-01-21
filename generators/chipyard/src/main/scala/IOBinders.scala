@@ -5,6 +5,7 @@ import chisel3.experimental.{Analog, IO, DataMirror}
 
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.diplomacy.{ResourceBinding, Resource, ResourceAddress, InModuleBody}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.subsystem._
@@ -160,7 +161,47 @@ class WithUARTIOCells extends OverrideIOBinder({
 })
 // DOC include end: WithUARTIOCells
 
-class WithSPIIOCells extends OverrideIOBinder({
+// Class to support GPIO Instantiation for the UART Interface
+class UARTChipGPIO extends Bundle {
+  val txd = Analog(1.W)
+  val rxd = Analog(1.W)
+}
+
+// Variant of the UART Binder that forces the instantiation of GPIO cells for ALL pins
+class WithUARTGPIOCells extends OverrideIOBinder({
+  (system: HasPeripheryUARTModuleImp) => {
+    val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
+      val name        = s"uart_${i}"
+      val port        = IO(new UARTChipGPIO).suggestName(name)
+      val iocellBase  = s"iocell_${name}"
+
+      // txd is unidirectional, but is being mapped to a GPIO Cell
+      val txdIOs = {
+        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_txd")
+        iocell.io.o := u.txd
+        iocell.io.oe := true.B
+        iocell.io.ie := false.B
+        iocell.io.pad <> port.txd
+        Seq(iocell)
+      }
+
+      // txd is unidirectional, but is being mapped to a GPIO Cell
+      val rxdIOs = {
+        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_rxd")
+        iocell.io.o   := false.B
+        iocell.io.oe  := false.B
+        iocell.io.ie  := true.B
+        u.rxd         := iocell.io.i
+        iocell.io.pad <> port.rxd
+        Seq(iocell)
+      }
+      (port, txdIOs ++ rxdIOs)
+    }).unzip
+    (ports, cells2d.flatten)
+  }
+})
+
+class WithSPIFlashIOCells extends OverrideIOBinder({
   (system: HasPeripherySPIFlashModuleImp) => {
     val (ports: Seq[SPIChipIO], cells2d) = system.qspi.zipWithIndex.map({ case (s, i) =>
       val name = s"spi_${i}"
@@ -188,6 +229,110 @@ class WithSPIIOCells extends OverrideIOBinder({
   }
 })
 
+// Class to support the instantiation of a SDIO/MMC capable interface
+// Generated based on WithSPIFlashIOCells and WithSPIIOPassThrough from VCU118 implementation
+class WithSPIIOCells extends OverrideLazyIOBinder({
+  (system: HasPeripherySPI) => {
+    
+    // attach resource to 1st SPI
+    ResourceBinding {
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+    }
+
+    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+      val (ports: Seq[SPIChipIO], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
+        val name = s"spi_${i}"
+        val port = IO(new SPIChipIO(s.c.csWidth)).suggestName(name)
+        val iocellBase = s"iocell_${name}"
+
+        // SCK and CS are unidirectional outputs
+        val sckIOs = IOCell.generateFromSignal(s.sck, port.sck, Some(s"${iocellBase}_sck"), system.p(IOCellKey), IOCell.toAsyncReset)
+        val csIOs = IOCell.generateFromSignal(s.cs, port.cs, Some(s"${iocellBase}_cs"), system.p(IOCellKey), IOCell.toAsyncReset)
+
+        // DQ are bidirectional, so then need special treatment
+        val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
+          iocell.io.o := pin.o
+          iocell.io.oe := pin.oe
+          iocell.io.ie := true.B
+          pin.i := iocell.io.i
+          iocell.io.pad <> ana
+          iocell
+        } // val dqIOs
+        
+          (port, dqIOs ++ csIOs ++ sckIOs)
+      }).unzip // system.spi.zipWithIndex.map
+      
+      (ports, cells2d.flatten)
+
+    }}} // InModuleBody 
+  }  // system: HasPeripherySPI
+}) // WithSPIIOCells
+
+// Class to support GPIO Instantiation for the SPI Interface
+class SPIChipGPIO(val csWidth: Int = 1) extends Bundle {
+  val sck   = Analog(1.W)
+  val cs    = Vec(csWidth, Analog(1.W))
+  val dq    = Vec(4, Analog(1.W)) // Not using Analog(4.W) because we can't connect these to IO cells
+}
+
+// Class to support the instantiation of a SDIO/MMC capable interface
+// Generated based on WithSPIFlashIOCells and WithSPIIOPassThrough from VCU118 implementation
+// This variant forces the instantiation of GPIO cells for ALL pins
+class WithSPIGPIOCells extends OverrideLazyIOBinder({
+  (system: HasPeripherySPI) => {
+    
+    // attach resource to 1st SPI
+    ResourceBinding {
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+    }
+
+    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+      val (ports: Seq[SPIChipIO], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
+        val name = s"spi_${i}"
+        val port = IO(new SPIChipGPIO(s.c.csWidth)).suggestName(name)
+        val iocellBase = s"iocell_${name}"
+
+        // CS is unidirectional, but is being mapped to a GPIO Cell
+        val sckIOs = {
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_sck")
+          iocell.io.o := s.sck
+          iocell.io.oe := true.B
+          iocell.io.ie := false.B
+          iocell.io.pad <> port.sck
+          Seq(iocell)
+        }
+
+        // CS is unidirectional, but is being mapped to a GPIO Cell
+        val csIOs = s.cs.zip(port.cs).zipWithIndex.map { case ((pin, ana), j) =>
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_cs_${j}")
+          iocell.io.o := pin
+          iocell.io.oe := true.B
+          iocell.io.ie := false.B
+          iocell.io.pad <> ana
+          iocell
+        }
+
+        // DQ are bidirectional, so then need special treatment
+        val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
+          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
+          iocell.io.o := pin.o
+          iocell.io.oe := pin.oe
+          iocell.io.ie := true.B
+          pin.i := iocell.io.i
+          iocell.io.pad <> ana
+          iocell
+        } // val dqIOs
+        
+        (port, dqIOs ++ csIOs ++ sckIOs)
+      }).unzip // system.spi.zipWithIndex.map
+      
+      (ports, cells2d.flatten)
+
+    }}} // InModuleBody 
+  }  // system: HasPeripherySPI
+}) // WithSPIIOCells
+
 class WithExtInterruptIOCells extends OverrideIOBinder({
   (system: HasExtInterruptsModuleImp) => {
     if (system.outer.nExtInterrupts > 0) {
@@ -201,13 +346,90 @@ class WithExtInterruptIOCells extends OverrideIOBinder({
 
 // Rocketchip's JTAGIO exposes the oe signal, which doesn't go off-chip
 class JTAGChipIO extends Bundle {
-  val TCK = Input(Clock())
-  val TMS = Input(Bool())
-  val TDI = Input(Bool())
-  val TDO = Output(Bool())
+  val TCK     = Input(Clock())
+  val TMS     = Input(Bool())
+  val TDI     = Input(Bool())
+  val TDO     = Output(Bool())
 }
 
-class WithDebugIOCells extends OverrideLazyIOBinder({
+class JTAGChipGPIO extends Bundle {
+  val TCK     = Analog(1.W)
+  val TMS     = Analog(1.W)
+  val TDI     = Analog(1.W)
+  val TDO     = Analog(1.W)
+}
+
+// Class to insert internally unconnected pads
+class WithTestIOStubs extends OverrideIOBinder({
+  (system: DontTouch) => {
+    val ports = IO(new Bundle {
+      val io      = Vec(16, Analog(1.W))
+      val mode    = Vec(4, Analog(1.W))
+    }).suggestName(s"test")
+
+    val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testio_${i}")
+      iocell.io.pad <> pin
+      iocell.io.o  := false.B
+      iocell.io.ie := false.B
+      iocell.io.oe := true.B
+      iocell
+    }
+
+    val modecells = ports.mode.zipWithIndex.map { case (pin, i) =>
+      val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testmode_${i}")
+      modecell.io.pad <> pin
+      modecell.io.o  := false.B
+      modecell.io.ie := false.B
+      modecell.io.oe := true.B
+      modecell
+    }
+
+    val name          = s"socjtag"  
+    val socjtag_wire  = IO(new JTAGChipGPIO).suggestName(s"${name}")
+    val iocellBase    = s"iocell_${name}"
+         
+    val jtag_tckIO = {
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_tck")
+      iocell.io.o   := false.B
+      iocell.io.oe  := false.B
+      iocell.io.ie  := false.B 
+      iocell.io.pad <> socjtag_wire.TCK
+      Seq(iocell)
+    }
+
+    val jtag_tmsIO = {
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_tms")
+      iocell.io.o   := false.B
+      iocell.io.oe  := false.B
+      iocell.io.ie  := false.B
+      iocell.io.pad <> socjtag_wire.TMS
+      Seq(iocell)
+    }
+
+    val jtag_tdiIO = {
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_tdi")
+      iocell.io.o   := false.B
+      iocell.io.oe  := false.B
+      iocell.io.ie  := false.B
+      iocell.io.pad <> socjtag_wire.TDI
+      Seq(iocell)
+    }
+
+    val jtag_tdoIO = {
+      val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"${iocellBase}_tdo")
+      iocell.io.o   := false.B
+      iocell.io.oe  := false.B 
+      iocell.io.ie  := false.B
+      iocell.io.pad <> socjtag_wire.TDO
+      Seq(iocell)
+    }
+
+    (Nil, iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_tdoIO)
+  }
+})
+
+class WithDebugIOCells(enableJtagGPIO: Boolean = false) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
@@ -244,14 +466,62 @@ class WithDebugIOCells extends OverrideLazyIOBinder({
           IOCell.generateIOFromSignal(d, "dmi", p(IOCellKey), abstractResetAsAsync = true)
         }
 
+        // Selectively insert GenericDigitalGPIO Cells
         val jtagTuple = debug.systemjtag.map { j =>
-          val jtag_wire = Wire(new JTAGChipIO)
-          j.jtag.TCK := jtag_wire.TCK
-          j.jtag.TMS := jtag_wire.TMS
-          j.jtag.TDI := jtag_wire.TDI
-          jtag_wire.TDO := j.jtag.TDO.data
-          IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
-        }
+          if (enableJtagGPIO) {
+            val jtag_wire   = IO(new JTAGChipGPIO).suggestName(s"jtag")
+            val name        = s"jtag"
+            val iocellBase  = s"iocell_${name}"
+            
+            val jtag_tckIO = {
+              val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tck")
+              j.jtag.TCK    := (iocell.io.i).asClock
+              iocell.io.o   := false.B
+              iocell.io.oe  := false.B
+              iocell.io.ie  := true.B 
+              iocell.io.pad <> jtag_wire.TCK
+              Seq(iocell)
+            }
+
+            val jtag_tmsIO = {
+              val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tms")
+              j.jtag.TMS    := iocell.io.i
+              iocell.io.o   := false.B
+              iocell.io.oe  := false.B
+              iocell.io.ie  := true.B
+              iocell.io.pad <> jtag_wire.TMS
+              Seq(iocell)
+            }
+
+            val jtag_tdiIO = {
+              val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tdi")
+              j.jtag.TDI    := iocell.io.i
+              iocell.io.o   := false.B
+              iocell.io.oe  := false.B
+              iocell.io.ie  := true.B
+              iocell.io.pad <> jtag_wire.TDI
+              Seq(iocell)
+            }
+
+            val jtag_tdoIO = {
+              val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tdo")
+              iocell.io.o   := j.jtag.TDO.data
+              iocell.io.oe  := true.B   // TDO uses the tristate() data type (JtagTap.scala) 
+                                        // This could be set to j.jtag.TDO.driven
+              iocell.io.ie  := false.B
+              iocell.io.pad <> jtag_wire.TDO
+              Seq(iocell)
+            }
+            (jtag_wire, jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_tdoIO)
+          } else {
+            val jtag_wire = Wire(new JTAGChipIO)
+            j.jtag.TCK    := jtag_wire.TCK
+            j.jtag.TMS    := jtag_wire.TMS
+            j.jtag.TDI    := jtag_wire.TDI
+            jtag_wire.TDO := j.jtag.TDO.data
+            IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)           
+          }
+        } // end jtagTuple
 
         val apbTuple = debug.apb.map { a =>
           IOCell.generateIOFromSignal(a, "apb", p(IOCellKey), abstractResetAsAsync = true)
@@ -383,4 +653,6 @@ class WithCustomBootPin extends OverrideIOBinder({
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
+
+
 

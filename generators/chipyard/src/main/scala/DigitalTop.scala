@@ -31,6 +31,25 @@ class DigitalTop(implicit p: Parameters) extends ChipyardSystem
   with chipyard.example.CanHavePeripheryStreamingFIR // Enables optionally adding the DSPTools FIR example widget
   with chipyard.example.CanHavePeripheryStreamingPassthrough // Enables optionally adding the DSPTools streaming-passthrough example widget
   with nvidia.blocks.dla.CanHavePeripheryNVDLA // Enables optionally having an NVDLA
+  with mitllBlocks.aes.CanHavePeripheryAES
+  with mitllBlocks.des3.CanHavePeripheryDES3
+  with mitllBlocks.iir.CanHavePeripheryIIR
+  with mitllBlocks.idft.CanHavePeripheryIDFT
+  with mitllBlocks.gps.CanHavePeripheryGPS
+  with mitllBlocks.md5.CanHavePeripheryMD5
+  with mitllBlocks.dft.CanHavePeripheryDFT
+  with mitllBlocks.fir.CanHavePeripheryFIR
+  with mitllBlocks.sha256.CanHavePeripherySHA256
+  with mitllBlocks.rsa.CanHavePeripheryRSA
+  with asicBlocks.rsa_asic.CanHavePeripheryRSAASIC
+  with mitllBlocks.cep_registers.CanHavePeripheryCEPRegisters
+  with mitllBlocks.cep_scratchpad.CanHaveCEPScratchpad
+  with mitllBlocks.srot.CanHaveSROT
+  with asicBlocks.sha256Redaction.CanHavePeripherySHA256Redaction
+  with asicBlocks.gpslbll.CanHavePeripheryGPSLBLL
+  with asicBlocks.gpsRedaction.CanHavePeripheryGPSRedaction
+  with asicBlocks.cep_scratchpad_asic.CanHaveCEPScratchpadASIC
+  with asicBlocks.srot_asic.CanHaveSROTASIC
 {
   override lazy val module = new DigitalTopModule(this)
 }

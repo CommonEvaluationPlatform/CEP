@@ -85,12 +85,15 @@ else
 endif
 
 #########################################################################################
-# copy over bootrom files
+# build and copy over bootrom files
 #########################################################################################
 $(build_dir):
 	mkdir -p $@
 
-$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom/bootrom.%.img | $(build_dir)
+${BOOTROM_SRC_DIR}/bootrom.%.img:
+	(cd ${BOOTROM_SRC_DIR}; make)
+
+$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: ${BOOTROM_SRC_DIR}/bootrom.%.img | $(build_dir)
 	cp -f $< $@
 
 #########################################################################################
@@ -159,6 +162,21 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 #########################################################################################
 .PHONY: verilog
 verilog: $(sim_vsrcs)
+	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
+	@rm -f CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> CHIPYARD_BUILD_INFO.make
+
+	@# Call the blackbox sorting script
+	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
 
 #########################################################################################
 # helper rules to run simulations

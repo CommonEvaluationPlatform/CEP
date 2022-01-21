@@ -1,6 +1,8 @@
 package chipyard
 
 import chisel3._
+import chisel3.util._
+import chisel3.experimental.{Analog, IO}
 
 import scala.collection.mutable.{ArrayBuffer}
 
@@ -16,30 +18,134 @@ import testchipip.{TLTileResetCtrl}
 import chipyard.clocking._
 import chipyard.iobinders._
 
-/**
- * A simple reset implementation that punches out reset ports
- * for standard Module classes. The ChipTop reset pin is Async.
- * Synchronization is performed in the ClockGroupResetSynchronizer
- */
-object GenerateReset {
-  def apply(chiptop: ChipTop, clock: Clock): Reset = {
+import asicBlocks.ceppll._
+
+//
+// A combined Clock and REset implementation to facilitate blackbox insertion of a PLL
+//
+// Original reset implementation comments:
+//   A simple reset implementation that punches out reset ports
+//   for standard Module classes. The ChipTop reset pin is Async.
+//   Synchronization is performed in the ClockGroupResetSynchronizer
+//
+object GenerateClockAndReset {
+  def apply(chiptop: ChipTop): (Clock, Reset) = {
     implicit val p = chiptop.p
+    
     // this needs directionality so generateIOFromSignal works
     val async_reset_wire = Wire(Input(AsyncReset()))
-    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey),
-      abstractResetAsAsync = true)
-
+    val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(async_reset_wire, "reset", p(IOCellKey), abstractResetAsAsync = true)
     chiptop.iocells ++= resetIOCell
+
     chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
       reset_io := th.dutReset
       Nil
     })
-    async_reset_wire
+
+    val clock_wire = Wire(Input(Clock()))
+    val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+    chiptop.iocells ++= clockIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      clock_io := th.buildtopClock
+      Nil
+    })
+
+    (clock_wire, async_reset_wire)
   }
 }
 
+// Using GenerateClockAndReset as a baseline, this object has been created to allow substitution of the CEP PLL
+// Like all other top level IO in the ASIC, GenericDigitalGPIOCells will be used
+object GenerateClockAndResetPLL {
+  def apply(chiptop: ChipTop): (Clock, Reset) = {
+    implicit val p = chiptop.p
+    
+    // this needs directionality so generateIOFromSignal works
+    val reset_in      = Wire(Input(AsyncReset()))
+    val reset_in_pad  = IO(Analog(1.W)).suggestName(s"reset")
+    val resetIOCell   = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_reset")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          reset_in      := (iocell.io.i).asAsyncReset
+          iocell.io.pad <> reset_in_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= resetIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      UIntToAnalog(th.dutReset.do_asUInt, reset_in_pad, true.B)
+      Nil
+    })
+
+    val clk_in      = Wire(Input(Clock()))
+    val clk_in_pad  = IO(Analog(1.W)).suggestName(s"clock")
+    val clkIOCell   = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_clk")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          clk_in        := (iocell.io.i).asClock
+          iocell.io.pad <> clk_in_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= clkIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      UIntToAnalog(th.buildtopClock.do_asUInt, clk_in_pad, true.B)
+      Nil
+    })
+
+    val pll_bypass        = Wire(Input(Bool()))
+    val pll_bypass_pad    = IO(Analog(1.W)).suggestName(s"pll_bypass")
+    val pll_bypassIOCell  = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_bypass")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          pll_bypass    := iocell.io.i
+          iocell.io.pad <> pll_bypass_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= pll_bypassIOCell
+    chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
+      UIntToAnalog(th.logicLow.asUInt, pll_bypass_pad, true.B)
+      Nil
+    })
+
+    val pll_observe       = Wire(Output(Clock()))
+    val pll_observe_pad   = IO(Analog(1.W)).suggestName(s"pll_observe")
+    val pll_observeIOCell  = {
+          val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_observe")
+          iocell.io.o   := pll_observe.asBool
+          iocell.io.oe  := true.B
+          iocell.io.ie  := false.B
+          iocell.io.pad <> pll_observe_pad
+          Seq(iocell)
+        }
+    chiptop.iocells ++= pll_observeIOCell
+
+    // Output wire definitions (not routed to chip IO)
+    val reset_out               = Wire(Output(AsyncReset()))
+    val clk_out                 = Wire(Output(Clock()))
+
+    // Instantiate the CEP PLL Chisel module
+    val module                  = Module(new CEPPLLModule()).suggestName(s"pll")
+
+    // Connect to the CEP PLL Chisel module I/O
+    module.io.reset_in          := reset_in
+    module.io.clk_in            := clk_in
+    module.io.pll_bypass        := pll_bypass
+    reset_out                   := module.io.reset_out
+    clk_out                     := module.io.clk_out
+    pll_observe                 := module.io.pll_observe
+
+    // Return the clock and reset outputs to the "calling function"
+    (clk_out, reset_out)
+  }
+}
 
 case object ClockingSchemeKey extends Field[ChipTop => ModuleValue[Double]](ClockingSchemeGenerators.dividerOnlyClockGenerator)
+case object EnableBlackBoxPLLKey extends Field[Boolean](false)
 /*
   * This is a Seq of assignment functions, that accept a clock name and return an optional frequency.
   * Functions that appear later in this seq have higher precedence that earlier ones.
@@ -60,6 +166,7 @@ class ClockNameContainsAssignment(name: String, fMHz: Double) extends Config((si
 })
 
 object ClockingSchemeGenerators {
+  // Default clock and reset generation
   val dividerOnlyClockGenerator: ChipTop => ModuleValue[Double] = { chiptop =>
     implicit val p = chiptop.p
 
@@ -102,11 +209,14 @@ object ClockingSchemeGenerators {
     asyncResetBroadcast := asyncResetSource
 
     InModuleBody {
-      val clock_wire = Wire(Input(Clock()))
-      val reset_wire = GenerateReset(chiptop, clock_wire)
-      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
-      chiptop.iocells ++= clockIOCell
 
+      // Generate the I/O Cells and optional Blackbox PLL for system Clock and Reset
+      val (clock_wire, reset_wire): (Clock, Reset) = if (p(EnableBlackBoxPLLKey) == true) {
+        GenerateClockAndResetPLL(chiptop)
+      } else {
+        GenerateClockAndReset(chiptop)
+      }
+      
       referenceClockSource.out.unzip._1.map { o =>
         o.clock := clock_wire
         o.reset := reset_wire
@@ -117,12 +227,9 @@ object ClockingSchemeGenerators {
         o.reset := reset_wire
       }
 
-      chiptop.harnessFunctions += ((th: HasHarnessSignalReferences) => {
-        clock_io := th.buildtopClock
-        Nil })
-
       // return the reference frequency
       dividerOnlyClkGenerator.module.referenceFreq
-    }
-  }
-}
+
+    } // InModuleBody
+  } // dividerOnlyClockGenerator
+} // ClockingSchemeGenerators

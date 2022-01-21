@@ -44,7 +44,7 @@ ifeq ($(SUB_PROJECT),bringup)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),arty)
+ifeq ($(SUB_PROJECT),arty-35)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
@@ -56,6 +56,36 @@ ifeq ($(SUB_PROJECT),arty)
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty-100)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= ArtyFPGATestHarness
+	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty
+	CONFIG            ?= TinyRocketArtyConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),cep-arty-100)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= ArtyFPGATestHarness
+	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty
+	CONFIG            ?= TinyCEPRocketArtyConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
 endif
 
@@ -121,6 +151,13 @@ $(BIT_FILE): $(synth_list_f)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
 			-board "$(BOARD)"
 
+MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
+$(MCS_FILE): $(BIT_FILE)
+	cd $(build_dir)/obj; vivado -nojournal -mode batch -source $(fpga_common_script_dir)/write_cfgmem.tcl -tclargs $(BOARD) $@ $<
+
+.PHONY: mcs
+mcs: $(MCS_FILE)
+
 .PHONY: bitstream
 bitstream: $(BIT_FILE)
 
@@ -134,6 +171,25 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(BOARD) \
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
+
+.PHONY: program
+program: mcs
+ifeq ($(SUB_PROJECT),vcu118)
+ifdef REMOTE_IP
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/vcu118_program.tcl \
+		-tclargs \
+			$(build_dir)/obj/$(MODEL) \
+			$(REMOTE_IP)
+else
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/vcu118_program.tcl \
+		-tclargs \
+			$(build_dir)/obj/$(MODEL)
+endif
+endif
 
 #########################################################################################
 # general cleanup rules

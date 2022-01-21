@@ -55,6 +55,24 @@ HELP_LINES = "" \
 #########################################################################################
 SUB_PROJECT ?= chipyard
 
+# Common Evaluation Platform ASIC Build
+ifeq ($(SUB_PROJECT),cep_asic)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	CONFIG            ?= CEPASICRocketConfig
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+
+endif
+
+# default chipyard build
 ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
@@ -138,11 +156,13 @@ HARNESS_SMEMS_FILE ?= $(build_dir)/$(long_name).harness.mems.v
 HARNESS_SMEMS_CONF ?= $(build_dir)/$(long_name).harness.mems.conf
 HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 
+# Set the defauly bootrom location (unless previously set)
+BOOTROM_SRC_DIR ?= $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
-SIM_FILE_REQS =
+SIM_FILE_REQS 			=
 sim_files              ?= $(build_dir)/sim_files.f
 sim_top_blackboxes     ?= $(build_dir)/firrtl_black_box_resource_files.top.f
 sim_harness_blackboxes ?= $(build_dir)/firrtl_black_box_resource_files.harness.f
@@ -163,6 +183,11 @@ SBT_OPTS_FILE := $(base_dir)/.sbtopts
 ifneq (,$(wildcard $(SBT_OPTS_FILE)))
 override SBT_OPTS += $(subst $$PWD,$(base_dir),$(shell cat $(SBT_OPTS_FILE)))
 endif
+
+# Workaround: Specify a firrtl version in system properties so that Treadle uses a
+# compatible version of FIRRTL and not 1.5-SNAPSHOT (which is the default
+# specified in it's build.sbt, and is not overridden by Chipyard's build.sbt)
+override SBT_OPTS += -DfirrtlVersion=1.4.1
 
 SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
 

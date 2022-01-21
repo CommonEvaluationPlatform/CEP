@@ -72,6 +72,9 @@ git config --local submodule.sims/firesim.update none
 # Only shallow clone needed for basic SW tests
 git submodule update --init software/firemarshal
 
+# Initialize the OpenTitan submodule
+git submodule update --init opentitan
+
 # Configure firemarshal to know where our firesim installation is
 if [ ! -f ./software/firemarshal/marshal-config.yaml ]; then
   echo "firesim-dir: '../../sims/firesim/'" > ./software/firemarshal/marshal-config.yaml
