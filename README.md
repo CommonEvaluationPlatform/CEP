@@ -1,6 +1,6 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 
-Readme needs to be updated.
+Common Evaluation Platform v3.5beta+
 
 ## DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
 
