@@ -170,7 +170,7 @@ class UARTChipGPIO extends Bundle {
 // Variant of the UART Binder that forces the instantiation of GPIO cells for ALL pins
 class WithUARTGPIOCells extends OverrideIOBinder({
   (system: HasPeripheryUARTModuleImp) => {
-    val (ports: Seq[UARTPortIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
+    val (ports: Seq[UARTChipGPIO], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
       val name        = s"uart_${i}"
       val port        = IO(new UARTChipGPIO).suggestName(name)
       val iocellBase  = s"iocell_${name}"
@@ -288,7 +288,7 @@ class WithSPIGPIOCells extends OverrideLazyIOBinder({
     }
 
     InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
-      val (ports: Seq[SPIChipIO], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
+      val (ports: Seq[SPIChipGPIO], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
         val name = s"spi_${i}"
         val port = IO(new SPIChipGPIO(s.c.csWidth)).suggestName(name)
         val iocellBase = s"iocell_${name}"
