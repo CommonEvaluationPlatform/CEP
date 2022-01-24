@@ -722,6 +722,7 @@ always @*
         modexp_ctrl_we      = 1'b0;
         cycle_ctr_start     = 1'b0;
         cycle_ctr_stop      = 1'b0;
+        exponation_mode_we  = 1'b0;
 
         residue_calculate = 1'b0;
 
