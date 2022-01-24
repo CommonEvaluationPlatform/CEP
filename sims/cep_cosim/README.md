@@ -1,6 +1,8 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 
-Common Evaluation Platform v3.5beta
+# Common Evaluation Platform v3.6
+
+## For now, this is intended as a placeholder for a descriptive CoSim README.md (as was included with <= CEPv3.41)
 
 DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
 
