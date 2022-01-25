@@ -30,6 +30,8 @@ import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
 
+import asicBlocks.ASICBootROM._
+
 import chipyard._
 
 // -----------------------

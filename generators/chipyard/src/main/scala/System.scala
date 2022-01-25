@@ -14,6 +14,8 @@ import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util.{DontTouch}
 
+import asicBlocks.ASICBootROM._
+
 // ---------------------------------------------------------------------
 // Base system that uses the debug test module (dtm) to bringup the core
 // ---------------------------------------------------------------------
@@ -29,8 +31,9 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with CanHaveSlaveAXI4Port
 {
 
-  val bootROM  = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
-  val maskROMs = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
+  val bootROM     = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
+  val bootROMASIC = p(ASICBootROMLocated(location)).map { ASICBootROM.attach(_, this, CBUS) }
+  val maskROMs    = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
   override lazy val module = new ChipyardSystemModule(this)
 }
 

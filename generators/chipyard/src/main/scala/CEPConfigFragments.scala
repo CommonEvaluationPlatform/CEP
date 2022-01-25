@@ -28,6 +28,7 @@ import asicBlocks.gpsRedaction._
 import asicBlocks.cep_scratchpad_asic._
 import asicBlocks.srot_asic._
 import asicBlocks.rsa_asic._
+import asicBlocks.ASICBootROM.{ASICBootROMLocated}
 
 import sifive.blocks.devices.spi._
 
@@ -248,15 +249,33 @@ class WithCEPASICScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_bas
 })
 
 
+// Do not define BootROMLocated and ASICBootROMLocated at the same time
+
 // CEPBootROM allows override of default parameters
 class WithCEPBootROM    (address  : BigInt  = 0x10000, 
-                         size     : Int     = 0x10000,
-                         hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(
+                          size     : Int     = 0x10000,
+                          hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
+   case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(
+                          address = address,
+                          size    = size,
+                          hang    = hang,
+                          contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
+ case ASICBootROMLocated(x) => None
+})
+
+// CEPASICBootROM allows override of default parameters and subsitutes in a black-box ROM component
+class WithCEPASICBootROM  (address  : BigInt  = 0x10000, 
+                           size     : Int     = 0x10000,
+                           hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
+  case ASICBootROMLocated(x) => up(ASICBootROMLocated(x), site).map(_.copy(
                          address = address,
                          size    = size,
                          hang    = hang,
                          contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
+
+  // The underlying freechips.rocketchip.system.BaseConfig configuration defines a default BootROMLocated
+  // This is an override to prevent it's elaboration when using the ASICBootROM
+  case BootROMLocated(x) => None
 })
 
 class WithSROT extends Config((site, here, up) => {
