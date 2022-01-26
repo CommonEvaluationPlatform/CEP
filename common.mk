@@ -20,7 +20,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)"
 
-EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
+EXTRA_GENERATOR_REQS ?= 
 EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
@@ -85,8 +85,13 @@ else
 endif
 
 #########################################################################################
-# build and copy over bootrom files
+# CEP: The following targets support CEP BootROM customizations
 #########################################################################################
+.PHONY: $(ASICBOOTROM_DEST_DIR)
+$(ASICBOOTROM_DEST_DIR):
+	@echo "CEP: Copying BootROM files to $(ASICBOOTROM_DEST_DIR)..."
+	cp -f ${ASICBOOTROM_SRC_FILES} $@
+
 $(build_dir):
 	mkdir -p $@
 

@@ -3,7 +3,7 @@ package chipyard.config
 import chisel3._
 
 import freechips.rocketchip.config.{Field, Parameters, Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.tile._
 
@@ -28,7 +28,6 @@ import asicBlocks.gpsRedaction._
 import asicBlocks.cep_scratchpad_asic._
 import asicBlocks.srot_asic._
 import asicBlocks.rsa_asic._
-import asicBlocks.ASICBootROM.{ASICBootROMLocated}
 
 import sifive.blocks.devices.spi._
 
@@ -250,20 +249,19 @@ class WithCEPASICScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_bas
 
 
 // Do not define BootROMLocated and ASICBootROMLocated at the same time
-
-// CEPBootROM allows override of default parameters
-class WithCEPBootROM    (address  : BigInt  = 0x10000, 
-                          size     : Int     = 0x10000,
-                          hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
+// WithCEPBootROM allows override of default parameters
+class WithCEPBootROM    (address  : BigInt    = 0x10000, 
+                          size     : Int      = 0x10000,
+                          hang     : BigInt   = 0x10040) extends Config((site, here, up) => {
    case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(
                           address = address,
                           size    = size,
                           hang    = hang,
                           contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
- case ASICBootROMLocated(x) => None
+  case ASICBootROMLocated(x) => None
 })
 
-// CEPASICBootROM allows override of default parameters and subsitutes in a black-box ROM component
+// WithCEPASICBootROM defines the key for the CEP ASIC blackbox BootROM
 class WithCEPASICBootROM  (address  : BigInt  = 0x10000, 
                            size     : Int     = 0x10000,
                            hang     : BigInt  = 0x10040) extends Config((site, here, up) => {

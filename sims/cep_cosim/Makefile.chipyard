@@ -57,6 +57,7 @@ include $(base_dir)/common.mk
 .PHONY: clean
 clean:
 	(cd ${BOOTROM_SRC_DIR}; make clean)
-	@rm -f $(sim_dir)/CHIPYARD_BUILD_INFO.make
-	@rm -rf $(gen_dir)/*
+	-rm -f $(sim_dir)/CHIPYARD_BUILD_INFO.make
+	-rm -rf $(gen_dir)/*
+	-rm -f $(ASICBOOTROM_DEST_FILES)
 

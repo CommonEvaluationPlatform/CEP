@@ -10,12 +10,10 @@ import chisel3._
 import freechips.rocketchip.config.{Parameters, Field}
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.devices.tilelink.{BootROMLocated}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util.{DontTouch}
-
-import asicBlocks.ASICBootROM._
-
+import freechips.rocketchip.devices.tilelink._
 // ---------------------------------------------------------------------
 // Base system that uses the debug test module (dtm) to bringup the core
 // ---------------------------------------------------------------------
@@ -31,9 +29,12 @@ class ChipyardSystem(implicit p: Parameters) extends ChipyardSubsystem
   with CanHaveSlaveAXI4Port
 {
 
+  // System.scala has been modified to support a custom rocket-chip bootrom.  The appropriate Config and Configuration Fragments
+  // ensures the desired BootROM's key is defined (and the undesirable one is not)
   val bootROM     = p(BootROMLocated(location)).map { BootROM.attach(_, this, CBUS) }
   val bootROMASIC = p(ASICBootROMLocated(location)).map { ASICBootROM.attach(_, this, CBUS) }
   val maskROMs    = p(MaskROMLocated(location)).map { MaskROM.attach(_, this, CBUS) }
+
   override lazy val module = new ChipyardSystemModule(this)
 }
 
