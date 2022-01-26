@@ -5,21 +5,6 @@ import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem._
 
 import mitllBlocks.cep_addresses._
-import mitllBlocks.aes._
-import mitllBlocks.des3._
-import mitllBlocks.iir._
-import mitllBlocks.idft._
-import mitllBlocks.gps._
-import mitllBlocks.md5._
-import mitllBlocks.dft._
-import mitllBlocks.fir._
-import mitllBlocks.sha256._
-import mitllBlocks.rsa._
-import mitllBlocks.cep_registers._
-import mitllBlocks.cep_scratchpad._
-import mitllBlocks.srot._
-
-//import asicBlocks.cep_scratchpad_asic._
 
 class CEPASICRocketConfig extends Config(
   // Add the CEP Accelerator Cores

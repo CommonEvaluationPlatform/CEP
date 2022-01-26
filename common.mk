@@ -87,10 +87,17 @@ endif
 #########################################################################################
 # CEP: The following targets support CEP BootROM customizations
 #########################################################################################
-.PHONY: $(ASICBOOTROM_DEST_DIR)
-$(ASICBOOTROM_DEST_DIR):
+
+.PHONY: asic_bootrom
+asic_bootrom :
 	@echo "CEP: Copying BootROM files to $(ASICBOOTROM_DEST_DIR)..."
-	cp -f ${ASICBOOTROM_SRC_FILES} $@
+	cp -f ${ASICBOOTROM_SRC_FILES} $(ASICBOOTROM_DEST_DIR)
+	-sed -ie '/^.*case BootROMLocated(InSubsystem).*/a \ \ case ASICBootROMLocated(InSubsystem) => Some(ASICBootROMParams(contentFileName = "./bootrom/bootrom.img"))' \
+		$(base_dir)/generators/rocket-chip/src/main/scala/subsystem/Configs.scala
+
+.PHONY: asic_bootrom_clean
+asic_bootrom_clean : 
+	git submodule update --init --force $(base_dir)/generators/rocket-chip
 
 $(build_dir):
 	mkdir -p $@
