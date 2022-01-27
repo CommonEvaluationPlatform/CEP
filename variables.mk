@@ -57,25 +57,27 @@ SUB_PROJECT ?= chipyard
 
 # Common Evaluation Platform ASIC Build
 ifeq ($(SUB_PROJECT),cep_asic)
-	SBT_PROJECT       		?= 	chipyard
-	MODEL             		?= 	TestHarness
-	VLOG_MODEL        		?= 	TestHarness
-	MODEL_PACKAGE     		?= 	$(SBT_PROJECT)
-	CONFIG            		?= 	CEPASICRocketConfig
-	CONFIG_PACKAGE    		?= 	$(SBT_PROJECT)
-	GENERATOR_PACKAGE 		?= 	$(SBT_PROJECT)
-	TB                		?= 	TestDriver
-	TOP               		?= 	ChipTop
-	BOOTROM_SRC_DIR	  		:= 	$(base_dir)/sims/cep_cosim/bootrom
-	SORT_SCRIPT       		:= 	$(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         		:= 	$(base_dir)/cep_sort.f
-	ASICBOOTROM_SRC_FILES   := 	$(base_dir)/CEP_Chipyard_ASIC/asicbootrom_support_files/ASICBootROM.scala \
-								$(base_dir)/CEP_Chipyard_ASIC/generators/asicblocks/src/main/resources/vsrc/arm_memories/romviahdd8192x32.v \
-								$(base_dir)/CEP_Chipyard_ASIC/generators/asicblocks/src/main/resources/vsrc/arm_memories/romviahdd8192x32_verilog.rcf
-	ASICBOOTROM_DEST_DIR	:= 	${base_dir}/generators/rocket-chip/src/main/scala/devices/tilelink
-	ASICBOOTROM_DEST_FILES	:= 	$(addprefix $(ASICBOOTROM_DEST_DIR)/, $(notdir $(ASICBOOTROM_SRC_FILES)))
-	ASICBOOTROM_SUBST_FILE  := $(base_dir)/generators/rocket-chip/src/main/scala/subsystem/Configs.scala
-	EXTRA_GENERATOR_REQS 	+= 	$(BOOTROM_TARGETS) asic_bootrom_insert
+	SBT_PROJECT       			?= chipyard
+	MODEL             			?= TestHarness
+	VLOG_MODEL        			?= TestHarness
+	MODEL_PACKAGE     			?= $(SBT_PROJECT)
+	CONFIG            			?= CEPASICRocketConfig
+	CONFIG_PACKAGE    			?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE 			?= $(SBT_PROJECT)
+	TB                			?= TestDriver
+	TOP               			?= ChipTop
+	BOOTROM_SRC_DIR	  			:= $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       			:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         			:= $(base_dir)/cep_sort.f
+	ASICBOOTROM_SCALA_FILES 	:= $(base_dir)/CEP_Chipyard_ASIC/asicbootrom_support_files/ASICBootROM.scala 
+	ASICBOOTROM_VER_FILES   	:= $(base_dir)/CEP_Chipyard_ASIC/asicbootrom_support_files/bootrom_asic_wrapper.sv \
+								   $(base_dir)/CEP_Chipyard_ASIC/generators/asicblocks/src/main/resources/vsrc/arm_memories/romviahdd8192x32.v
+	ASICBOOTROM_SCALA_DEST_DIR	:= ${base_dir}/generators/rocket-chip/src/main/scala/devices/tilelink
+	ASICBOOTROM_VER_DEST_DIR	:= ${base_dir}/generators/rocket-chip/src/main/resources/vsrc
+	ASICBOOTROM_DEST_FILES		:= $(addprefix $(ASICBOOTROM_SCALA_DEST_DIR)/, $(notdir $(ASICBOOTROM_SCALA_FILES)))
+	ASICBOOTROM_DEST_FILES		+= $(addprefix $(ASICBOOTROM_VER_DEST_DIR)/, $(notdir $(ASICBOOTROM_VER_FILES)))
+	ASICBOOTROM_SUBST_FILE  	:= $(base_dir)/generators/rocket-chip/src/main/scala/subsystem/Configs.scala
+	EXTRA_GENERATOR_REQS 		+= $(BOOTROM_TARGETS) asic_bootrom_insert
 endif
 
 # default chipyard build

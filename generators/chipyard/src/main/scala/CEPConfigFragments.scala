@@ -261,15 +261,15 @@ class WithCEPBootROM    (address  : BigInt    = 0x10000,
   case ASICBootROMLocated(x) => None
 })
 
-// WithCEPASICBootROM defines the key for the CEP ASIC blackbox BootROM
+// WithCEPASICBootROM defines the key for the CEP ASIC blackbox BootROM.  The contentFileName parameter
+// is not used as the filename is specified in the ROM model
 class WithCEPASICBootROM  (address  : BigInt  = 0x10000, 
                            size     : Int     = 0x10000,
                            hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
   case ASICBootROMLocated(x) => up(ASICBootROMLocated(x), site).map(_.copy(
                          address = address,
                          size    = size,
-                         hang    = hang,
-                         contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
+                         hang    = hang))
 
   // The underlying freechips.rocketchip.system.BaseConfig configuration defines a default BootROMLocated
   // This is an override to prevent it's elaboration when using the ASICBootROM

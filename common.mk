@@ -102,10 +102,10 @@ endif
 # reference the desired bootrom.img as well as disabling of the default BootROM
 #
 asic_bootrom_insert :
-	@echo "CEP: Copying BootROM files to $(ASICBOOTROM_DEST_DIR)..."
-	cp -f ${ASICBOOTROM_SRC_FILES} $(ASICBOOTROM_DEST_DIR)
+	cp -f ${ASICBOOTROM_SCALA_FILES} $(ASICBOOTROM_SCALA_DEST_DIR)
+	cp -f ${ASICBOOTROM_VER_FILES} $(ASICBOOTROM_VER_DEST_DIR)
 ifeq ($(shell grep ASICBootROMLocated $(ASICBOOTROM_SUBST_FILE)),)
-	-sed -ie '/^.*case BootROMLocated(InSubsystem).*/a \ \ case ASICBootROMLocated(InSubsystem) => Some(ASICBootROMParams(contentFileName = "./bootrom/bootrom.img"))' \
+	-sed -ie '/^.*case BootROMLocated(InSubsystem).*/a \ \ case ASICBootROMLocated(InSubsystem) => Some(ASICBootROMParams())' \
 		$(ASICBOOTROM_SUBST_FILE)
 endif
 
