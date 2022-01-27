@@ -74,6 +74,7 @@ ifeq ($(SUB_PROJECT),cep_asic)
 								$(base_dir)/CEP_Chipyard_ASIC/generators/asicblocks/src/main/resources/vsrc/arm_memories/romviahdd8192x32_verilog.rcf
 	ASICBOOTROM_DEST_DIR	:= 	${base_dir}/generators/rocket-chip/src/main/scala/devices/tilelink
 	ASICBOOTROM_DEST_FILES	:= 	$(addprefix $(ASICBOOTROM_DEST_DIR)/, $(notdir $(ASICBOOTROM_SRC_FILES)))
+	ASICBOOTROM_SUBST_FILE  := $(base_dir)/generators/rocket-chip/src/main/scala/subsystem/Configs.scala
 	EXTRA_GENERATOR_REQS 	+= 	$(BOOTROM_TARGETS) asic_bootrom
 endif
 
