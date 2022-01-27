@@ -75,7 +75,7 @@ ifeq ($(SUB_PROJECT),cep_asic)
 	ASICBOOTROM_DEST_DIR	:= 	${base_dir}/generators/rocket-chip/src/main/scala/devices/tilelink
 	ASICBOOTROM_DEST_FILES	:= 	$(addprefix $(ASICBOOTROM_DEST_DIR)/, $(notdir $(ASICBOOTROM_SRC_FILES)))
 	ASICBOOTROM_SUBST_FILE  := $(base_dir)/generators/rocket-chip/src/main/scala/subsystem/Configs.scala
-	EXTRA_GENERATOR_REQS 	+= 	$(BOOTROM_TARGETS) asic_bootrom
+	EXTRA_GENERATOR_REQS 	+= 	$(BOOTROM_TARGETS) asic_bootrom_insert
 endif
 
 # default chipyard build

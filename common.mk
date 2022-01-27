@@ -88,7 +88,7 @@ endif
 # CEP: The following targets support CEP BootROM customizations
 #########################################################################################
 
-.PHONY: asic_bootrom
+.PHONY: asic_bootrom_insert
 #
 # The asic_bootrom and asic_bootrom_clean targets support  "hacking" the rocket-chip to allow
 # for substitution of the default BootROM w/a BlackBox ROM in support of the CEP ASIC Build
@@ -101,7 +101,7 @@ endif
 # to be added to the rocket-chip's BaseSubsystemConfig.  This is overriding @ the chipyard level to
 # reference the desired bootrom.img as well as disabling of the default BootROM
 #
-asic_bootrom :
+asic_bootrom_insert :
 	@echo "CEP: Copying BootROM files to $(ASICBOOTROM_DEST_DIR)..."
 	cp -f ${ASICBOOTROM_SRC_FILES} $(ASICBOOTROM_DEST_DIR)
 ifeq ($(shell grep ASICBootROMLocated $(ASICBOOTROM_SUBST_FILE)),)
