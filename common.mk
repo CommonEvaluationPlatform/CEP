@@ -114,6 +114,7 @@ asic_bootrom_clean :
 ifneq ($(shell grep ASICBootROMLocated $(ASICBOOTROM_SUBST_FILE)),)
 	-sed -ie '/ASICBootROMLocated/d' $(ASICBOOTROM_SUBST_FILE)
 endif
+	-rm -f $(ASICBOOTROM_DEST_FILES)
 
 $(build_dir):
 	mkdir -p $@
