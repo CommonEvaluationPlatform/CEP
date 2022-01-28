@@ -79,7 +79,7 @@ object GenerateClockAndResetPLL {
     })
 
     val clk_in      = Wire(Input(Clock()))
-    val clk_in_pad  = IO(Analog(1.W)).suggestName(s"clock")
+    val clk_in_pad  = IO(Analog(1.W)).suggestName(s"refclk")
     val clkIOCell   = {
           val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_clk")
           iocell.io.o   := false.B

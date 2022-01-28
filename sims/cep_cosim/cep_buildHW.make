@@ -158,6 +158,11 @@ ${CHIPYARD_TOP_FILE_bare}: .force ${CHIPYARD_TOP_FILE}
 	@touch $@
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
+#
+# The ${CHIPYARD_SIM_TOP_BLACKBOXES} file created by the chipyard
+# build is filtered for .v/.sv file to ensure non-verilog resources
+# are not run through the compiler
+#
 # BFM Mode
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
 ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
@@ -168,7 +173,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
+	@grep "\.v\|\.sv" ${CHIPYARD_SIM_TOP_BLACKBOXES}  >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
@@ -183,7 +188,7 @@ ${COSIM_BUILD_LIST}: ${COSIM_TOP_DIR}/cep_buildHW.make .force
 	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@cat ${CHIPYARD_SIM_TOP_BLACKBOXES} >> ${COSIM_BUILD_LIST}
+	@grep "\.v\|\.sv" ${CHIPYARD_SIM_TOP_BLACKBOXES}  >> ${COSIM_BUILD_LIST}
 	@echo "" >> ${COSIM_BUILD_LIST}
 	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
 	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
