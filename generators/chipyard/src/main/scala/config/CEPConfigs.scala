@@ -98,13 +98,13 @@ class CEPASICRocketConfig extends Config(
   // The hang parameter sets the system-wide reset vector for ALL RocketTiles
 
   // Do not define WithCEPBootROM and WithCEPASICBootROM at the same time
-//  new chipyard.config.WithCEPBootROM(address = 0x10000L, size = 0x10000, hang = 0x10000L) ++
+  // new chipyard.config.WithCEPBootROM(address = 0x10000L, size = 0x8000, hang = 0x10000L) ++
   new chipyard.config.WithCEPASICBootROM(address = 0x10000L, size = 0x8000, hang = 0x10000L) ++
 
   // CEP Scratchpad memory @ the typical external memory base address
   // Address & Size are in terms of *bytes* even though the memory is
   // 64-bits wide.  
-//  new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
+  // new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
   new chipyard.config.WithCEPASICScratchpad(address = 0x80000000L, size = 0x000FFFFFL) ++
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
