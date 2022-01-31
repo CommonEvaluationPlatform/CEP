@@ -55,7 +55,7 @@ include $(base_dir)/common.mk
 # general cleanup rules
 #########################################################################################
 .PHONY: clean
-clean: asic_bootrom_clean
+clean: 
 	(cd ${BOOTROM_SRC_DIR}; make clean)
 	-rm -f $(sim_dir)/CHIPYARD_BUILD_INFO.make
 	-rm -rf $(gen_dir)/*

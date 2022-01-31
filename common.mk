@@ -87,20 +87,6 @@ endif
 #########################################################################################
 # CEP: The following targets support CEP BootROM customizations
 #########################################################################################
-
-.PHONY: asic_bootrom_insert
-#
-# The asic_bootrom and asic_bootrom_clean targets support  "hacking" the rocket-chip to allow
-# for substitution of the default BootROM w/a BlackBox ROM in support of the CEP ASIC Build
-#
-asic_bootrom_insert :
-	cp -f ${ASICBOOTROM_SCALA_FILES} $(ASICBOOTROM_SCALA_DEST_DIR)
-	cp -f ${ASICBOOTROM_VER_FILES} $(ASICBOOTROM_VER_DEST_DIR)
-
-.PHONY: asic_bootrom_clean
-asic_bootrom_clean : 
-	-rm -f $(ASICBOOTROM_DEST_FILES)
-
 $(build_dir):
 	mkdir -p $@
 

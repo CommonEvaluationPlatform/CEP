@@ -28,6 +28,7 @@ import asicBlocks.gpsRedaction._
 import asicBlocks.cep_scratchpad_asic._
 import asicBlocks.srot_asic._
 import asicBlocks.rsa_asic._
+import asicBlocks.ASICBootROM._
 
 import sifive.blocks.devices.spi._
 
