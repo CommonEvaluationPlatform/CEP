@@ -25,7 +25,7 @@ package top_pkg;
 // this component will provide for a flexible assignment, when necessary
 localparam int TL_DW 	= 64;	// = TL_DBW * 8; TL_DBW must be a power-of-two
 localparam int TL_AW 	= 32;
-localparam int TL_AIW 	= 4;    // a_source, d_source
+localparam int TL_AIW 	= 10;   // a_source, d_source
 localparam int TL_DIW 	= 2;    // d_sink
 localparam int TL_SZW   = 4;	// a_size, d_size
 
