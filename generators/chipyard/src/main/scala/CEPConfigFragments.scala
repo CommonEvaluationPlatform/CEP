@@ -276,6 +276,10 @@ class WithCEPASICBootROM  (address  : BigInt  = 0x10000,
   case BootROMLocated(x) => None
 })
 
+class WithCEPASICBootROMStub extends Config((site, here, up) => {
+  case ASICBootROMLocated(x) => Some(ASICBootROMParams())
+})
+
 class WithSROT extends Config((site, here, up) => {
   case SROTKey => List(
     SROTParams(

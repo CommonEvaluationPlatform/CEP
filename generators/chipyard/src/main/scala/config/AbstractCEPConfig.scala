@@ -28,5 +28,6 @@ class AbstractCEPASICConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++           // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++  // no external interrupts
   new chipyard.WithMulticlockCoherentBusTopology ++               // hierarchical buses including mbus+l2
-  new freechips.rocketchip.system.BaseConfig)                     // "base" rocketchip system
+  new freechips.rocketchip.system.BaseConfig
+)                     // "base" rocketchip system
 

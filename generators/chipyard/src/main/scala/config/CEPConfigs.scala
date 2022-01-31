@@ -122,5 +122,8 @@ class CEPASICRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMemPort ++
 
   // Set the remainder of the configuration items
-  new chipyard.config.AbstractCEPASICConfig
+  new chipyard.config.AbstractCEPASICConfig ++
+
+  // This config fragment needs to be defined early to allow for proper elaboration
+  new chipyard.config.WithCEPASICBootROMStub
 )

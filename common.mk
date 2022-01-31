@@ -93,27 +93,12 @@ endif
 # The asic_bootrom and asic_bootrom_clean targets support  "hacking" the rocket-chip to allow
 # for substitution of the default BootROM w/a BlackBox ROM in support of the CEP ASIC Build
 #
-# As circular dependencies between projects can't be supported by Scala and thus the rocket-chip
-# can't include a block that also depends on the rocket-chip, code is copied into the rocket-chip
-# generator directory as a temporary "object-like" file.  
-#
-# Additional, given the multi-phase rocket-chip elaboration, a "hook" for our custom bootrom needs
-# to be added to the rocket-chip's BaseSubsystemConfig.  This is overriding @ the chipyard level to
-# reference the desired bootrom.img as well as disabling of the default BootROM
-#
 asic_bootrom_insert :
 	cp -f ${ASICBOOTROM_SCALA_FILES} $(ASICBOOTROM_SCALA_DEST_DIR)
 	cp -f ${ASICBOOTROM_VER_FILES} $(ASICBOOTROM_VER_DEST_DIR)
-ifeq ($(shell grep ASICBootROMLocated $(ASICBOOTROM_SUBST_FILE)),)
-	-sed -ie '/^.*case BootROMLocated(InSubsystem).*/a \ \ case ASICBootROMLocated(InSubsystem) => Some(ASICBootROMParams())' \
-		$(ASICBOOTROM_SUBST_FILE)
-endif
 
 .PHONY: asic_bootrom_clean
 asic_bootrom_clean : 
-ifneq ($(shell grep ASICBootROMLocated $(ASICBOOTROM_SUBST_FILE)),)
-	-sed -ie '/ASICBootROMLocated/d' $(ASICBOOTROM_SUBST_FILE)
-endif
 	-rm -f $(ASICBOOTROM_DEST_FILES)
 
 $(build_dir):
