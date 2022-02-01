@@ -29,17 +29,17 @@ if (not os.path.exists(inputFile)) or (inputFile == outputFile):
   sys.exit(sys.argv[0] + " : [ERROR] inputFile does not exist or inputFile == outputFile.")
 
 # Open input nad output files
-inputFile_fd    = open(inputFile, "rb")
-#outputFile_fd   = open(outputFile, "w")
+b 		= open(inputFile, "rb").read()
+nrows 	= 0
 
-# Read input file into byte array
-inputFile_data  = bytearray(inputFile_fd.read())
+with open(outputFile, "w") as outfile:
+    while b:
+        row_bin = b[:8]
+        b = b[8:]
+        outfile.write("".join([bin(c)[2:].rjust(8,"0") for c in row_bin]).ljust(64,"0")+"\n")
+        nrows += 1
 
-print(sys.argv[0] + " : Input file is",len(inputFile_data), "bytes.")
+    while nrows < int(padToLines):
+        outfile.write("0"*64 + "\n")
+        nrows += 1
 
-for x in inputFile_data:
-  print(binascii.b2a_hex(x))
-
-# Close open files
-inputFile_fd.close()
-#outputFile_fd.close()

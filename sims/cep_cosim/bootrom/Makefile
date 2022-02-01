@@ -19,6 +19,8 @@ FULL_BOOT		?= 0
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
+COSIM_DIR 		:= $(strip $(shell cd ..; pwd))
+CONVERT_BOOTROM	:= ${COSIM_DIR}/bin/convert-bootrom.py
 
 BOOTROM_IMG 	= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_DUMP	= bootrom.rv64.dump bootrom.rv32.dump
@@ -26,19 +28,19 @@ BOOTROM_ELF  	= bootrom.rv64.elf bootrom.rv32.elf
 
 CEP_LDS_FILE    = ${ROOT_DIR}/cep_boot.lds
 
-CC 				=$(RISCV)/bin/riscv64-unknown-elf-gcc
-OBJCOPY 		=$(RISCV)/bin/riscv64-unknown-elf-objcopy
-OBJDUMP 		=$(RISCV)/bin/riscv64-unknown-elf-objdump
-CFLAGS 			=-mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
-CFLAGS 			+=-fno-common -g -DENTROPY=0 -DNONSMP_HART=0
+CC 				= $(RISCV)/bin/riscv64-unknown-elf-gcc
+OBJCOPY 		= $(RISCV)/bin/riscv64-unknown-elf-objcopy
+OBJDUMP 		= $(RISCV)/bin/riscv64-unknown-elf-objdump
+CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
+CFLAGS 			+= -fno-common -g -DENTROPY=0 -DNONSMP_HART=0
 ifeq (${FULL_BOOT},1)
-	CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR}
+	CFLAGS  		+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
 else 
-	CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR} -D_SIM_ONLY
+	CFLAGS  		+= -I $(ROOT_DIR)/include -I ${ROOT_DIR} -D_SIM_ONLY
 endif
-CFLAGS_RV64		=-mabi=lp64 -march=rv64ima
-CFLAGS_RV32		=-mabi=ilp32 -march=rv32ima
-LFLAGS 			=-static -nostdlib -T ${CEP_LDS_FILE}
+CFLAGS_RV64		= -mabi=lp64 -march=rv64ima
+CFLAGS_RV32		= -mabi=ilp32 -march=rv32ima
+LFLAGS 			= -static -nostdlib -T ${CEP_LDS_FILE}
 
 # default to 1MHz but really should be overridden
 PBUS_CLK 		?= 200000000
@@ -52,8 +54,7 @@ dump: $(BOOTROM_DUMP)
 elf: $(BOOTROM_ELF)
 
 hex: img
-	binary2ascii -b 2 -t uq < bootrom.rv64.img > bootrom.rv64.hex
-	binary2ascii -b 2 -t ui < bootrom.rv32.img > bootrom.rv32.hex
+	$(CONVERT_BOOTROM) bootrom.rv64.img bootrom.rv64.hex 4096
 
 %.img: %.elf
 	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@
