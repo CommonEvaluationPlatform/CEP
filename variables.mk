@@ -70,6 +70,7 @@ ifeq ($(SUB_PROJECT),cep_asic)
 	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
 	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
 	SORT_FILE         := $(base_dir)/cep_sort.f
+	BOOTROM_FILES	  := bootrom.rv64.img bootrom.rv64.rcf
 endif
 
 # default chipyard build
@@ -160,6 +161,7 @@ HARNESS_SMEMS_FIR  ?= $(build_dir)/$(long_name).harness.mems.fir
 BOOTROM_SRC_DIR ?= $(TESTCHIP_RSRCS_DIR)/testchipip/bootrom
 BOOTROM_FILES   ?= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
+BOOTROM_SOURCES ?= $(addprefix $(BOOTROM_SRC_DIR)/, $(BOOTROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
 SIM_FILE_REQS 			=

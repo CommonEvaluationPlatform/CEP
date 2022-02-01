@@ -34,7 +34,7 @@ nrows 	= 0
 
 with open(outputFile, "w") as outfile:
     while b:
-        row_bin = b[:8]
+        row_bin = b[:8][::-1]
         b = b[8:]
         outfile.write("".join([bin(c)[2:].rjust(8,"0") for c in row_bin]).ljust(64,"0")+"\n")
         nrows += 1

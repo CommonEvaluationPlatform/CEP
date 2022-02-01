@@ -94,11 +94,11 @@ endif
 $(build_dir):
 	mkdir -p $@
 
-${BOOTROM_SRC_DIR}/bootrom.%.img:
+$(BOOTROM_SOURCES):
 	(cd ${BOOTROM_SRC_DIR}; make FULL_BOOT=$(FULL_BOOT))
 
-$(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: ${BOOTROM_SRC_DIR}/bootrom.%.img | $(build_dir)
-	cp -f $< $@
+$(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
+	cp -f $(BOOTROM_SOURCES) $(build_dir)
 
 #########################################################################################
 # create firrtl file rule and variables

@@ -45,7 +45,7 @@ LFLAGS 			= -static -nostdlib -T ${CEP_LDS_FILE}
 # default to 1MHz but really should be overridden
 PBUS_CLK 		?= 200000000
 
-default: img dump elf hex
+default: img dump elf rcf
 
 img: $(BOOTROM_IMG)
 
@@ -53,8 +53,8 @@ dump: $(BOOTROM_DUMP)
 
 elf: $(BOOTROM_ELF)
 
-hex: img
-	$(CONVERT_BOOTROM) bootrom.rv64.img bootrom.rv64.hex 4096
+rcf: img
+	$(CONVERT_BOOTROM) bootrom.rv64.img bootrom.rv64.rcf 4096
 
 %.img: %.elf
 	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@
@@ -69,5 +69,5 @@ bootrom.rv64.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE}
 	$(CC) $(CFLAGS) $(CFLAGS_RV64) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
 
 clean:
-	rm -f *.elf *.img *.dump *.hex
+	rm -f *.elf *.img *.dump *.hex *.rcf
 
