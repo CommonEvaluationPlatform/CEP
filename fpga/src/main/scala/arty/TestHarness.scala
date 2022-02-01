@@ -31,6 +31,11 @@ class ArtyFPGATestHarness(override implicit val p: Parameters) extends ArtyShell
   val buildtopReset = hReset
   val success = false.B
 
+  val logicHigh     = Wire(Bool())
+  val logicLow      = Wire(Bool())
+  logicHigh         := true.B
+  logicLow          := false.B
+
   val dutReset = dReset
 
   // must be after HasHarnessSignalReferences assignments

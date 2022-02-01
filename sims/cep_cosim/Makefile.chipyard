@@ -17,6 +17,9 @@
 base_dir=$(abspath ../..)
 sim_dir=$(abspath .)
 
+# do not generate simulation files
+sim_name := cep_cosim
+
 #########################################################################################
 # Default sub project and build target
 #########################################################################################

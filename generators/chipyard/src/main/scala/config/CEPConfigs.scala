@@ -15,7 +15,6 @@ class CEPASICRocketConfig extends Config(
   new chipyard.config.WithDFT ++
   new chipyard.config.WithIDFT ++
   new chipyard.config.WithMD5 ++
-  new chipyard.config.WithRSAASIC ++
   new chipyard.config.WithGPS(params = Seq(
     COREParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
@@ -92,6 +91,14 @@ class CEPASICRocketConfig extends Config(
   ))++
 
   new chipyard.config.WithCEPRegisters ++
+
+  // Instantiation of the RSA core with or w/o the ARM compiled memories
+  //new chipyard.config.WithRSA ++
+  new chipyard.config.WithRSAASIC ++
+
+
+  // Instantiation of the Surrogate Root of Trust (with or w/o the ARM compiled memories)
+  // new chipyard.config.WithSROT ++
   new chipyard.config.WithSROTASIC ++
 
   // Instantiantion of the CEP BootROM with default parameter overrides

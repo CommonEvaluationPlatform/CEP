@@ -125,6 +125,11 @@ class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawMod
   val dutReset = hReset.asAsyncReset
   val success = false.B
 
+  val logicHigh     = Wire(Bool())
+  val logicLow      = Wire(Bool())
+  logicHigh         := true.B
+  logicLow          := false.B
+
   childClock := buildtopClock
   childReset := buildtopReset
 

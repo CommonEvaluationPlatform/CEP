@@ -20,12 +20,16 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_SIM_REQS         = additional make requirements to build the simulator" \
 "   ENABLE_SBT_THIN_CLIENT = if set, use sbt's experimental thin client (works best with sbtn or sbt script)"
 
-EXTRA_GENERATOR_REQS ?= 
-EXTRA_SIM_CXXFLAGS   ?=
-EXTRA_SIM_LDFLAGS    ?=
-EXTRA_SIM_SOURCES    ?=
-EXTRA_SIM_REQS       ?=
+EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS)
+EXTRA_SIM_CXXFLAGS   	?=
+EXTRA_SIM_LDFLAGS    	?=
+EXTRA_SIM_SOURCES    	?=
+EXTRA_SIM_REQS       	?=
 
+# Flag to pass to the BootROM makefile.  In the case of the bootrom source in the CEP CoSim directory,
+# this will be used to define a compiler flag that bypasses the main function in order to acceleration
+# simulation,
+FULL_BOOT				?= 0
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
 "   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
@@ -91,7 +95,7 @@ $(build_dir):
 	mkdir -p $@
 
 ${BOOTROM_SRC_DIR}/bootrom.%.img:
-	(cd ${BOOTROM_SRC_DIR}; make)
+	(cd ${BOOTROM_SRC_DIR}; make FULL_BOOT=$(FULL_BOOT))
 
 $(BOOTROM_TARGETS): $(build_dir)/bootrom.%.img: ${BOOTROM_SRC_DIR}/bootrom.%.img | $(build_dir)
 	cp -f $< $@

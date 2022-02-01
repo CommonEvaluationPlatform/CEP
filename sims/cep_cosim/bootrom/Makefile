@@ -5,7 +5,7 @@
 # File Name:      Makefile
 # Program:        Common Evaluation Platform (CEP)
 # Description:    Makefile for CEP Bootrom
-# Notes:          The original was copied from the Chipyard FPGA resources
+# Notes:          The original was copied from the Chipyard FPGA resources (VCU118)
 #
 #--------------------------------------------------------------------------------------
 
@@ -13,6 +13,9 @@
 ifndef RISCV
 $(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
+
+# By default, FULL_BOOT is NOT enabled
+FULL_BOOT		?= 0
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
@@ -28,7 +31,11 @@ OBJCOPY 		=$(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		=$(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			=-mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS 			+=-fno-common -g -DENTROPY=0 -DNONSMP_HART=0
-CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR} -D_SIM_ONLY
+ifeq (${FULL_BOOT},1)
+	CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR}
+else 
+	CFLAGS  		+=-I $(ROOT_DIR)/include -I ${ROOT_DIR} -D_SIM_ONLY
+endif
 CFLAGS_RV64		=-mabi=lp64 -march=rv64ima
 CFLAGS_RV32		=-mabi=ilp32 -march=rv32ima
 LFLAGS 			=-static -nostdlib -T ${CEP_LDS_FILE}

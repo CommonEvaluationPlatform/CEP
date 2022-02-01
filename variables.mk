@@ -56,20 +56,20 @@ HELP_LINES = "" \
 SUB_PROJECT ?= chipyard
 
 # Common Evaluation Platform ASIC Build
+# Default BootROM is overriden
 ifeq ($(SUB_PROJECT),cep_asic)
-	SBT_PROJECT       			?= chipyard
-	MODEL             			?= TestHarness
-	VLOG_MODEL        			?= TestHarness
-	MODEL_PACKAGE     			?= $(SBT_PROJECT)
-	CONFIG            			?= CEPASICRocketConfig
-	CONFIG_PACKAGE    			?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE 			?= $(SBT_PROJECT)
-	TB                			?= TestDriver
-	TOP               			?= ChipTop
-	BOOTROM_SRC_DIR	  			:= $(base_dir)/sims/cep_cosim/bootrom
-	SORT_SCRIPT       			:= $(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         			:= $(base_dir)/cep_sort.f
-	EXTRA_GENERATOR_REQS 		+= $(BOOTROM_TARGETS)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+	CONFIG            ?= CEPASICRocketConfig
+	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+	TB                ?= TestDriver
+	TOP               ?= ChipTop
+	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
 endif
 
 # default chipyard build

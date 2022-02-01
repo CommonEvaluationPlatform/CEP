@@ -72,6 +72,8 @@ ifeq ($(SUB_PROJECT),arty-100)
 	TOP               ?= ChipTop
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
+	FULL_BOOT		  := 1
 endif
 
 ifeq ($(SUB_PROJECT),cep-arty-100)
@@ -196,4 +198,5 @@ endif
 #########################################################################################
 .PHONY: clean
 clean:
+	(cd ${BOOTROM_SRC_DIR}; make clean)
 	rm -rf $(gen_dir)
