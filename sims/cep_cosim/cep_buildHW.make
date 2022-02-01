@@ -93,7 +93,8 @@ COSIM_VLOG_ARGS				+= 	-sv \
 								+define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} \
 								+define+RESET_DELAY=${COSIM_TB_RESET_DELAY} \
 								+define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE} \
-								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
+								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE} \
+								+define+CHIPYARD_BLD_DIR="\"${CHIPYARD_BLD_DIR}\""
 
 # Defines inherited from Chipyard
 COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0"
