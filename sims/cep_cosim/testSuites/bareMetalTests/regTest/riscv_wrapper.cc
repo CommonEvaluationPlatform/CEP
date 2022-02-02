@@ -11,10 +11,10 @@
 
 // For bareMetal mode ONLY
 #ifdef BARE_MODE
-  #include "cep_adrMap.h"
   #include "cep_apis.h"
   #include "cepregression.h"
   #include "cepRegTest.h"
+  #include "CEP.h"
 
   #ifdef __cplusplus
   extern "C" {
@@ -26,6 +26,8 @@
     int testId[4] = {0x00, 0x11, 0x22, 0x33};
     int coreId    = read_csr(mhartid);
     int revCheck  = 1;
+    int verbose   = 0;
+    
     set_printf(0);
   
     // Set the current core's status to running
