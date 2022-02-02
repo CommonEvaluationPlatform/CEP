@@ -59,6 +59,7 @@ endif
 # Pass on the ASIC_MODE argument
 ifeq (${ASIC_MODE},1)
 COSIM_VLOG_ARGS				+= +define+ASIC_MODE
+COSIM_VLOG_ARGS          	+= +define+NO_SDTC
 endif
 
 # If the PLL is enabled
@@ -333,7 +334,7 @@ ifeq ($(IMC_IN_PATH),)
 endif
 
 # Default parameters
-COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE
+COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -notimingchecks -nospecify
 COSIM_VSIM_ARGS 				+= -64bit -R 
 
 # Enable coverage for Cadence
