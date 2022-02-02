@@ -208,6 +208,8 @@ module system_driver (
 
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
+      #1;
+
       // All backdoor memory access is 64-bit
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
@@ -216,6 +218,8 @@ module system_driver (
 
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
+      #1;
+      
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
@@ -238,6 +242,8 @@ module system_driver (
       force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
       @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
+
+      #1;
 
       data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
       release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
