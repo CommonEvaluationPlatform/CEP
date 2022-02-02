@@ -334,7 +334,7 @@ ifeq ($(IMC_IN_PATH),)
 endif
 
 # Default parameters
-COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -notimingchecks -nospecify
+COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -access +r -notimingchecks -nospecify
 COSIM_VSIM_ARGS 				+= -64bit -R 
 
 # Enable coverage for Cadence

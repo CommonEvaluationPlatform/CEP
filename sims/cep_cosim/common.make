@@ -303,8 +303,11 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*vstf
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/wlf*
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/imp.h
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/transcript
 	-rm -f ${COSIM_TOP_DIR}/drivers/vectors/*
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/xcelium.d
+	-rm -f ${COSIM_TOP_DIR}/*/*/*/.simvision
 	-rm -f ${V2C_H_FILE_LIST}
 
 # Use to force rebuilds for rules that include this dependency

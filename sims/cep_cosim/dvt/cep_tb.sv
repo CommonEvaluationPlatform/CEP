@@ -107,20 +107,9 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // UART Loopback Driver with noise insertion
+  // Simple UART Loopback
   //--------------------------------------------------------------------------------------
-  reg  noise = 0;
-   
-  always @(uart_txd) 
-  begin
-    for (int i = 0; i < 3; i++) begin
-      repeat (2) @(posedge sys_clk);
-      noise = 1;
-      repeat (2) @(posedge sys_clk);
-      noise = 0;
-    end
-  end
-  assign uart_rxd = uart_txd ^ noise;
+  assign uart_rxd = uart_txd;
   //--------------------------------------------------------------------------------------
   
   
