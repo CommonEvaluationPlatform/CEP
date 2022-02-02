@@ -13,9 +13,9 @@
 #ifdef BARE_MODE
   #include "cep_apis.h"
   #include "cepregression.h"
-  #include "cepRegTest.h"
   #include "CEP.h"
-
+  #include "cepRegTest.h"
+  
   #ifdef __cplusplus
   extern "C" {
   #endif

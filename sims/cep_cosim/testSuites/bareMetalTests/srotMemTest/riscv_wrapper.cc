@@ -13,8 +13,8 @@
 #ifdef BARE_MODE
   #include "cep_apis.h"
   #include "cepregression.h"
-  #include "cepMemTest.h"
   #include "CEP.h"
+  #include "cepMemTest.h"
 
   #ifdef __cplusplus
   extern "C" {

@@ -21,7 +21,7 @@ endif
 # The following flags / variables can be overridden by lower level makefiles or the command line
 MODELSIM        			?= 1
 CADENCE 					?= 0
-NOWAVE          			?= 0
+NOWAVE          			?= 1
 PROFILE         			?= 0
 COVERAGE        			?= 0
 USE_GDB       				?= 0
