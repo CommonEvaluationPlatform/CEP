@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
   int activeSlot          = 0;          // only 1 board 
   int maxHost             = MAX_CORES;  // number of cores/threads
   long unsigned int mask  = 0xf;        // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
+  int done                = 0;
   shPthread               thr;
 
   // Set the active mask for all threads  
@@ -61,10 +62,11 @@ int main(int argc, char *argv[])
   // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
   int verify        = 0;
-  int srcOffset     = 0x1000;
-  int destOffset    = 0;
+  int fileOffset    = 0x1000;
   int maxByteCnt    = cep_max_program_size;
-  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, srcOffset, destOffset, verify, maxByteCnt);
+  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, fileOffset, maxByteCnt);
+  
+  if (errCnt) goto cleanup;
   //--------------------------------------------------------------------------------------
 
 
@@ -72,7 +74,6 @@ int main(int argc, char *argv[])
   //--------------------------------------------------------------------------------------
   // Have the system thea wait until all threads are complete
   //--------------------------------------------------------------------------------------
-  int done = 0;
   while (!done) {
 
     // Check to see if all the threads are done
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
   //--------------------------------------------------------------------------------------
   // End of test checking and thread termination
   //--------------------------------------------------------------------------------------
-  errCnt += thr.GetErrorCount();
+  cleanup: errCnt += thr.GetErrorCount();
   if (errCnt != 0) {
     LOGE("======== TEST FAIL ========== %x\n",errCnt);
   } else {

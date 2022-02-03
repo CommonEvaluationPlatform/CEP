@@ -18,8 +18,6 @@
 #include "cep_apis.h"
 #include "simdiag_global.h"
 
-#include "cepRegTest.h"
-
 void *c_module(void *arg) {
 
   //--------------------------------------------------------------------------------------
@@ -51,7 +49,7 @@ void *c_module(void *arg) {
   // Test starts here
   //--------------------------------------------------------------------------------------
   // Wait until the program is loaded
-  errCnt += is_program_loaded(50);
+  errCnt += is_program_loaded(100);
 
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;
