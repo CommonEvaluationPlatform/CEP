@@ -1,56 +1,53 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      riscv_wrapper.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
-//
+//--------------------------------------------------------------------------------------
+
 // For bareMetal mode ONLY
-//
 #ifdef BARE_MODE
-#include "cep_adrMap.h"
-#include "cep_apis.h"
+  #include "cep_apis.h"
+  #include "cepregression.h"
+  #include "CEP.h"
+  #include "cepLockfreeAtomic.h"
 
-#include "cepRegTest.h"
-#include "cepLockfreeAtomic.h"
-#include "cepregression.h"
-
-
-//#define printf(...) { return 0; }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+  #ifdef __cplusplus
+  extern "C" {
+  #endif
   
-//int main(void)
-void thread_entry(int cid, int nc)
-{
-  //
-  int errCnt = 0;
-  int cpuId = read_csr(mhartid);
-  set_printf(0);  
-  //
-  set_cur_status(CEP_RUNNING_STATUS);  
-  //
-  uint64_t mem_base = 0x90000000;
-  uint64_t reg_base = (uint64_t)reg_base_addr;
-  errCnt += cepLockfreeAtomic_runTest(cpuId, mem_base, reg_base, 0,0);
-  //
-  // Done
-  //
-  set_status(errCnt,errCnt);
-  //
-  // Stuck here forever...
-  //
-  exit(errCnt);
-}
-
-#ifdef __cplusplus
-}
-#endif
+  void thread_entry(int cid, int nc) {
+    
+    int errCnt    = 0;
+    int testId[4] = {0x00, 0x11, 0x22, 0x33};
+    int coreId    = read_csr(mhartid);
+    int revCheck  = 1;
+    int verbose   = 0;
+    
+    set_printf(0);
   
-#endif
+    // Set the current core's status to running
+    set_cur_status(CEP_RUNNING_STATUS);
+
+    // these needs to be set to a real, but unused memory location
+    uint64_t mem_base = 0x800E0000;
+
+    uint64_t reg_base = (uint64_t)CEPREGS_BASE_ADDR;
+    errCnt += cepLockfreeAtomic_runTest(coreId, mem_base, reg_base, 0,0);
+  
+      // Set the core status
+    set_status(errCnt, testId[coreId]);
+
+    // Exit with the error count
+    exit(errCnt);
+  }
+
+  #ifdef __cplusplus
+  }
+  #endif
+  
+#endif // #ifdef BARE_MODE

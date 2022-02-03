@@ -215,9 +215,9 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 #
 # -g                    - Produce debugging information in the operating system’s native format
 # -lgcc                 - ?????
-RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -nostartfiles -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
+RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
 RISCV_BARE_LFILE		+= ${BARE_D}/cep_link.lds
-RISCV_BARE_LFLAGS 		+= -static -nostdlib -T ${RISCV_BARE_LFILE}
+RISCV_BARE_LFLAGS 		+= -static -nostdlib  -nostartfiles -lgcc -T ${RISCV_BARE_LFILE}
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \

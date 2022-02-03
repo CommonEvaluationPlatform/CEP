@@ -1,96 +1,78 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
+// SPDX short identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      riscv_wrapper.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
 //
-//************************************************************************
-//
+//--------------------------------------------------------------------------------------
+
 // For bareMetal mode ONLY
-//
 #ifdef BARE_MODE
-#include "cep_adrMap.h"
-#include "cep_apis.h"
-#include "cep_riscv.h"
-
-#include "cepRegTest.h"
-#include "cepregression.h"
-
-
-//#define printf(...) { return 0; }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-  uint64_t atomicOps_playUnit[4];
+  #include "cep_apis.h"
+  #include "cepregression.h"
+  #include "CEP.h"
+  #include "cep_riscv.h"
   
-//int main(void)
-void thread_entry(int cid, int nc)
-{
-  //
-  int errCnt = 0;
-  int coreId = read_csr(mhartid);
-  //
-  set_printf(0);
+  #ifdef __cplusplus
+  extern "C" {
+  #endif
+  
+  void thread_entry(int cid, int nc) {
+    
+    int errCnt    = 0;
+    int testId[4] = {0x00, 0x11, 0x22, 0x33};
+    int coreId    = read_csr(mhartid);
+    int revCheck  = 1;
+    int verbose   = 0;
+    
+    int l;
+    uint64_t *ptr;
+    uint64_t expVal;
+    uint64_t atomicOps_playUnit[4];
 
-  int l;
-  uint64_t *ptr;
-  uint64_t expVal;
-  //
-  //
-  set_cur_status(CEP_RUNNING_STATUS);
-  //
-  for (l=0;l<3;l++) {
-    switch (l) {
-    case 0 : 
-      // cbus via CLINT
-      ptr = (uint64_t *)(clint_base_addr + clint_mtimecmp_offset + (coreId*8));      
-      expVal = ~(clint_base_addr + clint_mtimecmp_offset * (coreId*8));
-      break;
+    set_printf(0);
 
-    case 1 : 
-      // mbus: cacheable memory
-      ptr = &atomicOps_playUnit[coreId];
-      expVal = (reg_base_addr + cep_scratch0_reg * (coreId*8));      
-      break;
+    // Set the current core's status to running
+    set_cur_status(CEP_RUNNING_STATUS);
+ 
+
+    for (l = 0; l < 3; l++) {
+      switch (l) {
+        case 0 : 
+          // cbus via CLINT
+          ptr = (uint64_t *)(clint_base_addr + clint_mtimecmp_offset + (coreId*8));      
+          expVal = ~(clint_base_addr + clint_mtimecmp_offset * (coreId*8));
+        break;
+
+        case 1 : 
+          // mbus: cacheable memory
+          ptr = &atomicOps_playUnit[coreId];
+          expVal = (CEPREGS_BASE_ADDR + cep_scratch0_reg * (coreId*8));      
+        break;
       
-    case 2 :  
-      // pbus
-      ptr = (uint64_t *)(reg_base_addr + cep_scratch0_reg + (coreId*8));      
-      expVal = ~(reg_base_addr + cep_scratch0_reg * (coreId*8));
-      break;
+        case 2 :  
+          // pbus
+          ptr = (uint64_t *)(CEPREGS_BASE_ADDR + cep_scratch0_reg + (coreId*8));      
+          expVal = ~(CEPREGS_BASE_ADDR + cep_scratch0_reg * (coreId*8));
+        break;
 
-    }
-    //
-    //
-    if (!errCnt) { errCnt = cep_runAtomicTest(ptr,expVal); }
-  }
-  //
-  //
-  // Done
-  //
-  set_status(errCnt,(l << 16) | errCnt);
-  /*
-  if (errCnt) {
-    set_pass();
-  } else {
-    set_fail();
+      } // end switch(l)
+      if (!errCnt) { errCnt = cep_runAtomicTest(ptr,expVal); }
+    } // end for  
+
+    // Set the core status
+    set_status(errCnt, (l << 16) | errCnt);
+
+    // Exit with the error count
+    exit(errCnt);
   }
 
-  uint64_t *ptr=0;
-  errCnt += (int)cep_atomic_op(ptr,1,ATOMIC_OP_ADD);
-  */
-  //
-  // Stuck here forever...
-  //
-  exit(errCnt);
-}
-
-#ifdef __cplusplus
-}
-#endif
+  #ifdef __cplusplus
+  }
+  #endif
   
-#endif
+#endif // #ifdef BARE_MODE
+

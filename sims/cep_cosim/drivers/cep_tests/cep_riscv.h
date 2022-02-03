@@ -12,6 +12,8 @@
 #ifndef CEP_RISCV_H
 #define CEP_RISCV_H
 
+#include <stddef.h>
+#include <stdlib.h>
 #include <stdint.h>
 
 #define ATOMIC_OP_EXCH  1
