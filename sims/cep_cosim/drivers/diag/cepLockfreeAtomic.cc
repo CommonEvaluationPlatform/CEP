@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cepLockfreeAtomic.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -23,7 +23,9 @@
 #include "simPio.h"
 #endif
 
-//#define ATOMIC_16_8_SUPPORTED
+//#define MAIN_MEMORY_ATOMIC_SUPPORT
+//#define ATOMIC_16_8_SUPPORTE0D
+
 //
 // =============================
 // The test itself
@@ -33,50 +35,49 @@ static int cepLockfreeAtomic_64(int cpuId, uint64_t *adr, int seed, int verbose)
 
   int i,errCnt = 0;
   uint64_t mask = (uint64_t)0xFFFF << (cpuId * 16); // each core get to play with 16-bit out of 64
-  uint64_t exp  = 0, act;
+  uint64_t exp  = 0;
+  uint64_t act;
   uint64_t add  = (uint64_t)1 << (cpuId * 16);
   uint64_t fullAdd = 0x0001000100010001;
   uint64_t expFull = 0;
   if (verbose) {
     LOGI("%s: adr=0x%016lx\n",__FUNCTION__,(uint64_t)adr);
   }
-  // first clear my bits with fetch_and
-  //(void)__atomic_thread_fence(__ATOMIC_SEQ_CST);
+  
   (void)__atomic_fetch_and(adr,~mask,__ATOMIC_SEQ_CST);
-  //
-  for (i=1;i<=8;i++) {
+ 
+  for (i = 1; i <= 8; i++) {
     act = __atomic_fetch_add(adr,add,__ATOMIC_SEQ_CST);
-    // check
+    
     if (((exp ^ act) & mask) != 0) {
-      LOGE("%s: ERROR cpuId=%d offset=0x%016lx exp=0x%016lx act=0x%016lx mask=0x%016lx\n",
-	   __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
+      LOGE("%s: ERROR cpuId=%d offset=0x%016lx exp=0x%016lx act=0x%016lx mask=0x%016lx\n",__FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
       errCnt = i;
       break;
     } else if (verbose) {
-      LOGI("%s: OK cpuId=%d offset=0x%016lx exp=0x%016lx act=0x%016lx mask=0x%016lx\n",
-	   __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
+      LOGI("%s: OK cpuId=%d offset=0x%016lx exp=0x%016lx act=0x%016lx mask=0x%016lx\n", __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
     }
+    
     exp += add;
     expFull += fullAdd;
-  }
-  //
-  // at the end read to make sure all 4 are OK
-  //
-  if (!errCnt) {
-    int tout = 2000;
-    do {
-      act = __atomic_load_n(adr,__ATOMIC_SEQ_CST);
-      if (expFull == act) {
-	break;
-      }
-      USEC_SLEEP(100);
-      tout--;
-      if (tout <= 0) { errCnt += 0x100; break; }
-    } while (tout > 0);
-  }
-  if (errCnt) {
-    LOGE("%s:errCnt=%d\n",__FUNCTION__,errCnt);
-  }
+  } // end for
+
+  // // at the end read to make sure all 4 are OK
+  // if (!errCnt) {
+  //   int tout = 2000;
+  //   do {
+  //     act = __atomic_load_n(adr,__ATOMIC_SEQ_CST);
+  //     if (expFull == act) { break; }
+      
+  //     USEC_SLEEP(100);
+  //     tout--;
+  //     if (tout <= 0) { errCnt += 0x100; break; }
+  //   } while (tout > 0);
+  // } // end if (!errCnt)
+  
+  // if (errCnt) {
+  //   LOGE("%s:errCnt=%d\n",__FUNCTION__,errCnt);
+  // }
+
   return errCnt;
 }
 
@@ -100,16 +101,17 @@ static int cepLockfreeAtomic_32(int cpuId, uint32_t *adr, int seed, int verbose)
     // check
     if (((exp ^ act) & mask) != 0) {
       LOGE("%s: ERROR cpuId=%d offset=0x%016lx exp=0x%08x act=0x%08x mask=0x%08x\n",
-	   __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
+     __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
       errCnt = i;
       break;
     } else if (verbose) {
       LOGI("%s: OK cpuId=%d offset=0x%016lx exp=0x%08x act=0x%08x mask=0x%08x\n",
-	   __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
+     __FUNCTION__,cpuId,(uint64_t)adr,exp,act,mask);
     }
     exp += add;
     expFull += fullAdd;
   }
+  
   //
   // at the end read to make sure all 4 are OK
   //
@@ -118,7 +120,7 @@ static int cepLockfreeAtomic_32(int cpuId, uint32_t *adr, int seed, int verbose)
     do {
       act = __atomic_load_n(adr,__ATOMIC_SEQ_CST);
       if (expFull == act) {
-	break;
+  break;
       }
       USEC_SLEEP(100);
       tout--;
@@ -128,6 +130,7 @@ static int cepLockfreeAtomic_32(int cpuId, uint32_t *adr, int seed, int verbose)
   if (errCnt) {
     LOGE("%s:errCnt=%d\n",__FUNCTION__,errCnt);
   }
+
   return errCnt;
 }
 
@@ -155,12 +158,12 @@ static int cepLockfreeAtomic_16(int cpuId, uint16_t *adr, int seed, int verbose)
     // check
     if (((exp ^ act) & mask) != 0) {
       LOGE("%s: ERROR cpuId=%d offset=0x%08x exp=0x%04x act=0x%04x mask=0x%04x\n",
-	   __FUNCTION__,cpuId,adr,exp,act,mask);
+     __FUNCTION__,cpuId,adr,exp,act,mask);
       errCnt = i;
       break;
     } else if (verbose) {
       LOGI("%s: OK cpuId=%d offset=0x%08x exp=0x%04x act=0x%04x mask=0x%04x\n",
-	   __FUNCTION__,cpuId,adr,exp,act,mask);
+     __FUNCTION__,cpuId,adr,exp,act,mask);
     }
     exp += add;
     expFull += fullAdd;
@@ -173,7 +176,7 @@ static int cepLockfreeAtomic_16(int cpuId, uint16_t *adr, int seed, int verbose)
     do {
       act = __atomic_load_n(adr,__ATOMIC_SEQ_CST);
       if (expFull == act) {
-	break;
+  break;
       }
       USEC_SLEEP(100);
       tout--;
@@ -204,12 +207,12 @@ static int cepLockfreeAtomic_8(int cpuId, uint8_t *adr, int seed, int verbose) {
     // check
     if (((exp ^ act) & mask) != 0) {
       LOGE("%s: ERROR cpuId=%d offset=0x%08x exp=0x%02x act=0x%02x mask=0x%02x\n",
-	   __FUNCTION__,cpuId,adr,exp,act,mask);
+     __FUNCTION__,cpuId,adr,exp,act,mask);
       errCnt = i;
       break;
     } else if (verbose) {
       LOGI("%s: OK cpuId=%d offset=0x%08x exp=0x%02x act=0x%02x mask=0x%02x\n",
-	   __FUNCTION__,cpuId,adr,exp,act,mask);
+     __FUNCTION__,cpuId,adr,exp,act,mask);
     }
     exp += add;
     expFull += fullAdd;
@@ -222,7 +225,7 @@ static int cepLockfreeAtomic_8(int cpuId, uint8_t *adr, int seed, int verbose) {
     do {
       act = __atomic_load_n(adr,__ATOMIC_SEQ_CST);
       if (expFull == act) {
-	break;
+  break;
       }
       USEC_SLEEP(100);
       tout--;
@@ -239,20 +242,24 @@ int cepLockfreeAtomic_runTest(int cpuId, uint64_t mem_base, uint64_t reg_base, i
   //
   uint64_t *ptr64;
   uint32_t *ptr32;
-  //  uint16_t *ptr16;
-  //uint8_t *ptr8;
-  //
-  //
-  //  Memory Space
-  //
+  uint16_t *ptr16;
+  uint8_t *ptr8;
+  
+
+// The ASCI version of the CEP main memory does not support atomic operations
+#ifdef MAIN_MEMORY_ATOMIC_SUPPORT
+  
+  // 64-bit atomic operations with main memory
   if (!errCnt) {
-    ptr64 = (uint64_t *)(mem_base + 0x000);
-    errCnt += cepLockfreeAtomic_64(cpuId,ptr64, seed, verbose);
+    ptr64 = (uint64_t *)(mem_base);
+    errCnt += cepLockfreeAtomic_64(cpuId, ptr64, seed, verbose);
   }
+
   if (!errCnt) {
     ptr32 = (uint32_t *)(mem_base + 0x100);
     errCnt += cepLockfreeAtomic_32(cpuId,ptr32, seed, verbose);
   }
+
 #ifdef ATOMIC_16_8_SUPPORTED
   if (!errCnt) {
     ptr16 = (uint16_t *)(mem_base + 0x200);
@@ -262,18 +269,14 @@ int cepLockfreeAtomic_runTest(int cpuId, uint64_t mem_base, uint64_t reg_base, i
     ptr8 = (uint8_t *)(mem_base + 0x300);
     errCnt += cepLockfreeAtomic_8(cpuId,ptr8, seed, verbose);
   }
-#endif
-  //
-  // 64 via reg space
-  //
-  //#ifdef SIM_ENV_ONLY
+#endif // ATOMIC_16_8_SUPPORTED
+#endif // MAIN_MEMORY_ATOMIC_SUPPORT
+
+  // 64-bit atomic operations with registers
   if (!errCnt) {
-    //ptr64 = (uint64_t *)(reg_base_addr + cep_scratch0_reg);
     ptr64 = (uint64_t *)(reg_base + cep_scratch0_reg);
-    errCnt += cepLockfreeAtomic_64(cpuId,ptr64, seed, verbose);
+    errCnt += cepLockfreeAtomic_64(cpuId, ptr64, seed, verbose);
   }
 
-
-  //
   return errCnt;
 }

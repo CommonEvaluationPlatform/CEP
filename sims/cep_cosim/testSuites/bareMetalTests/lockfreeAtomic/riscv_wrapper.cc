@@ -14,6 +14,7 @@
   #include "cep_apis.h"
   #include "cepregression.h"
   #include "CEP.h"
+  #include "cep_adrMap.h"
   #include "cepLockfreeAtomic.h"
 
   #ifdef __cplusplus
@@ -34,12 +35,13 @@
     set_cur_status(CEP_RUNNING_STATUS);
 
     // these needs to be set to a real, but unused memory location
-    uint64_t mem_base = 0x800E0000;
+    uint64_t mem_base = scratchpad_base_addr + 0x000E0000;
 
     uint64_t reg_base = (uint64_t)CEPREGS_BASE_ADDR;
-    errCnt += cepLockfreeAtomic_runTest(coreId, mem_base, reg_base, 0,0);
+    
+    errCnt += cepLockfreeAtomic_runTest(coreId, mem_base, reg_base, 0, 0);
   
-      // Set the core status
+    // Set the core status
     set_status(errCnt, testId[coreId]);
 
     // Exit with the error count
