@@ -12,6 +12,10 @@
 #ifndef cepAccessTest_H
 #define cepAccessTest_H
 
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdint.h>
+
 //
 // The test itself
 //

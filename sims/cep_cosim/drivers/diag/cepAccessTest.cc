@@ -163,14 +163,7 @@ int cepAccessTest_runTest(int cpuId, int seed, int verbose) {
   modeSupportMask = 0xFF;
   if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
 #endif
-  //
-  // DDR3
-  // 
-  adr = 0x90000000 + (cpuId*8);
-  pat = (uint64_t)0x1122334455667788LL;
-  modeSupportMask = 0xFF;
-  if (!errCnt) { errCnt += cepAccessTest_runSingle(cpuId, adr, pat, modeSupportMask, verbose); }
-  //
+
   //
   // Reg Space
   // 
