@@ -15,6 +15,7 @@
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "portable_io.h"
+#include "CEP.h"
 
 #include "cepRegTest.h"
 #include "cepregression.h"
@@ -50,7 +51,7 @@ void *extIntr(unsigned hartid, unsigned long long mcause, void *mepc, void *sp)
     //
     // save mcause to my sratch register for debug
     //
-    DUT_WRITE32_64(reg_base_addr + cep_scratch0_reg + (hartid * 8), mcause);
+    DUT_WRITE32_64(CEPREGS_BASE_ADDR + cep_scratch0_reg + (hartid * 8), mcause);
     //
     return mepc;
 }
