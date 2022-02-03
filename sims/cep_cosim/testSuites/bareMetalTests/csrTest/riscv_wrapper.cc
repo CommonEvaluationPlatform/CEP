@@ -1,4 +1,3 @@
-//--------------------------------------------------------------------------------------
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
@@ -11,11 +10,11 @@
 
 // For bareMetal mode ONLY
 #ifdef BARE_MODE
-  #include "cep_adrMap.h"
   #include "cep_apis.h"
   #include "cepregression.h"
+  #include "CEP.h"
   #include "cepCsrTest.h"
-
+  
   #ifdef __cplusplus
   extern "C" {
   #endif
@@ -26,12 +25,15 @@
     int testId[4] = {0x00, 0x11, 0x22, 0x33};
     int coreId    = read_csr(mhartid);
     int revCheck  = 1;
+    int verbose   = 0;
+    
     set_printf(0);
 
+    // Set the current core's status to running
     set_cur_status(CEP_RUNNING_STATUS);
   
     // Run the specified test
-    if (!errCnt) { errCnt = cepCsrTest_runTest(coreId, 64,revCheck, coreId*(0x100), 0); }
+    errCnt = cepCsrTest_runTest(coreId, 64,revCheck, coreId*(0x100), 0);
 
     // Set the core status
     set_status(errCnt, testId[coreId]);
