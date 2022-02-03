@@ -12,6 +12,7 @@
 // For bareMetal mode ONLY
 //
 #ifdef BARE_MODE
+#include "CEP.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "portable_io.h"
@@ -40,7 +41,7 @@ void *timerIntr(unsigned hartid, unsigned long long mcause, void *mepc, void *sp
     MTIMECMP[hartid] = (uint64_t)(-1); // clear
   }
   // save mcause to my sratch register
-  DUT_WRITE32_64(reg_base_addr + cep_scratch0_reg + (hartid * 8), mcause);
+  DUT_WRITE32_64(CEPREGS_BASE_ADDR + cep_scratch0_reg + (hartid * 8), mcause);
   //
   return mepc;
 }
@@ -57,7 +58,7 @@ void *swIntr(unsigned hartid, unsigned long long mcause, void *mepc, void *sp)
   //
   // save mcause to my sratch register
   //
-  DUT_WRITE32_64(reg_base_addr + cep_scratch0_reg + (hartid * 8), mcause);
+  DUT_WRITE32_64(CEPREGS_BASE_ADDR + cep_scratch0_reg + (hartid * 8), mcause);
   //
   // jump pass ecall!!!
   //
