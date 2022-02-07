@@ -60,7 +60,6 @@ public: //
   //
   // To support capturing for playback in BAREMetal mode and Unit-testbench
   //
-  void SetSrotFlag(int mode) { mSrotFlag = mode; } // no write to file
   void SetCaptureMode(int mode, const char *path, const char *testName);
   void cep_writeNcapture(uint32_t pAddress, uint64_t pData);
   void cep_writeNcapture(int coreIndex, uint32_t pAddress, uint64_t pData);
@@ -99,7 +98,6 @@ public: //
   // Flags and Variables associated with the Bare Metal and Unit Simulation Recordings
   //
   int mCapture;
-  int mSrotFlag;
   char mTestName[128];
   FILE *mFd;
   int mCount;

@@ -131,10 +131,6 @@
 `define DVTF_PASS_IS_TO_HOST                  107
 `define DVTF_TOGGLE_DMI_RESET_BIT             108
 
-// SRoT TL capture 
-`define DVTF_SROT_START_CAPTURE_BIT           111
-`define DVTF_SROT_STOP_CAPTURE_BIT            112
-
 // JTAG/OpenOcd
 `define DVTF_ENABLE_REMOTE_BITBANG_BIT        113
 `define DVTF_DISABLE_STUCKCHECKER             114

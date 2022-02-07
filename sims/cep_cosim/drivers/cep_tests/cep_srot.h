@@ -18,8 +18,6 @@
 // Include srot keys - must define invert modes first.
 #include "cep_srot_keys.h"
 
-
-
 #define MAX_LLKI_KEY_SIZE   256   // Maximize size of an LLKI Key in units
                                   // of 64-bit words
 

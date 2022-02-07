@@ -28,7 +28,6 @@ void cep_crypto::init(int coreIndex) {
 #endif
   mCoreIndex  = coreIndex;
   mCapture    = 0;
-  mSrotFlag   = 0;
   mErrCnt     = 0;
   mCount      = 0;
   mSingle     = 0;
@@ -168,7 +167,7 @@ void cep_crypto::SetCaptureMode(int mode, const char *path, const char *testName
       LOGI("%s: Opening file %s for sequence capturing\n",__FUNCTION__,fName);
       // print CopyRigth
       fprintf(mFd,"//************************************************************************\n");
-      fprintf(mFd,"// Copyright 2021 Massachusetts Institute of Technology\n");
+      fprintf(mFd,"// Copyright 2022 Massachusetts Institute of Technology\n");
       fprintf(mFd,"//\n");
       fprintf(mFd,"// This file is auto-generated for test: %s. Do not modify!!!\n", testName);
       fprintf(mFd,"//\n");      

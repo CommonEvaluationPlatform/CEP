@@ -222,6 +222,7 @@ RISCV_BARE_LFLAGS 		+= -static -nostdlib  -nostartfiles -lgcc -T ${RISCV_BARE_LF
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 							-DTL_CAPTURE=${TL_CAPTURE} \
+							-DVECTOR_D=\"${VECTOR_D}\" \
 							-g -std=gnu++11 \
 							-Wno-format -Wno-narrowing \
 							-DBIG_ENDIAN
