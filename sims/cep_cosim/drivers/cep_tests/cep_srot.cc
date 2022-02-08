@@ -37,7 +37,6 @@ cep_srot::cep_srot(int coreIndex, int statusIndex, int verbose) {
   
   init(coreIndex);
 
-
   mStatusIndex = statusIndex;
   
   // Default Timeout Parameter
@@ -237,6 +236,7 @@ int cep_srot::DisableLLKI (uint8_t KeyIndex)
   
   // Read and check the response
   status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
+
   CHECK_RESPONSE(status, LLKI_STATUS_GOOD, GetVerbose());
 
   // Return the error count
@@ -257,9 +257,7 @@ int cep_srot::LLKI_Setup(int cpuId) {
 
   int errCnt = 0;
     
-  //
   // pick the first LSB in cpuActiveMask as master
-  //
   int iAMmaster = 0;
   for (int i = 0; i < 4; i++) {
     if (((1 << i) & GetCpuActiveMask())) { // found the first LSB=1 bit
@@ -269,18 +267,15 @@ int cep_srot::LLKI_Setup(int cpuId) {
       break;
     }
   }
-    
+
   // Only one core can perform LLKI operations
   if (iAMmaster) {
-      
+     
     if (GetVerbose()) {
-      LOGI("%s: cpu#%d is the master. cpuActiveMask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
+      LOGI("%s: cpu#%d is the master. cpuActiveMask=0x%x\n",__FUNCTION__, cpuId, GetCpuActiveMask());
     }
   
-
-    //
     // Initialize the LLKI Key Index RAM to all zeroes (thus effectively deleting any existing keys)
-    //
     errCnt += InitKeyIndexRAM();
 
     if (errCnt) return errCnt;
@@ -309,25 +304,34 @@ int cep_srot::LLKI_Setup(int cpuId) {
                     key.highPointer,
                     key.keyData,
                     key.invertType);
-        if (errCnt) return errCnt;
+        if (errCnt) {
+          cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+          return errCnt;
+        }
         errCnt += DisableLLKI(coreIndex);
-        if (errCnt) return errCnt;
+        if (errCnt) {
+          cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+          return errCnt;
+        }
         errCnt += EnableLLKI(coreIndex);
-        if (errCnt) return errCnt;
+        if (errCnt) {
+          cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+          return errCnt;
+        }
 
       } // if (IS_ON(keyIndex) && core.enabled)
 
     } // for (int coreIndex = 0; coreIndex < CEP_LLKI_CORES; coreIndex ++) 
         
     // Write to the core0 status register indicating that the LLKI operations are complete
-    cep_writeNcapture(mStatusIndex, cep_core0_status, CEP_OK2RUN_SIGNATURE);
+    cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
       
   } else {  // else if (iAMMaster)
 
     if (GetVerbose()) {
       LOGI("%s: cpu#%d will be the slave. mask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
     }
-    errCnt += cep_readNspin(mStatusIndex, cep_core0_status, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
+    errCnt += cep_readNspin(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
     
   } // if (iAMmaster) {
 

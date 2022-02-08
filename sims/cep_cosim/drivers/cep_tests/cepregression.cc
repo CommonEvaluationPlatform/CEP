@@ -84,7 +84,7 @@ extern int printf(const char *format, ...);
 //************************************************************************
 typedef struct ipCoreData {
     char name[MAX_CONFIG_STRING_K];
-    size_t address;
+    uint32_t address;
     unsigned char *mem;
     int fd;
     size_t pagesize;
