@@ -25,9 +25,9 @@
 
   // Include the test vectors related to this test
   #include "AES_playback.h"
-  #include "SHA256_1_playback.h"
-  #include "IIR_playback.h"
-  #include "FIR_playback.h"
+  //#include "SHA256_1_playback.h"
+  //#include "IIR_playback.h"
+  //#include "FIR_playback.h"
 
   #ifdef __cplusplus
   extern "C" {
@@ -52,7 +52,7 @@
     // to the selected cores for this macroMix instance
 //  int coreMask = 0xFFFFCFFB; // all cores (minus CMU ones)
 //  int coreMask = 0xFFFFFFFF; // all cores
-//  int coreMask = 0x00000001;  // AES
+  int coreMask = 0x00000001;  // AES
 //  int coreMask = 0x00000002;  // MD5
 //  int coreMask = 0x00000004;  // SHA256.0 (CMU Core)
 //  int coreMask = 0x00000008;  // SHA256.1
@@ -69,7 +69,7 @@
 //  int coreMask = 0x00004000;  // GPS.2
 //  int coreMask = 0x00008000;  // GPS.3
 
-    int coreMask = 0x00000001 ^ 0x00000008 ^ 0x00000800 ^ 0x00000400;
+//    int coreMask = 0x00000001 ^ 0x00000008 ^ 0x00000800 ^ 0x00000400;
 
     // Initialize the cepregression ipCores datastructure (needed for various access methods in the cep_crypto class, from which cep_srot is derived)
     initConfig();
@@ -89,21 +89,21 @@
       lower = AES_adrBase;
       errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, AES_size, 0);    
     }
-    else if (coreId == 1) {
-      upper = SHA256_1_adrBase + SHA256_1_adrSize;
-      lower = SHA256_1_adrBase;
-      errCnt += cep_playback(SHA256_1_playback, upper, lower, SHA256_1_totalCommands, SHA256_1_size, 0);    
-    }
-    else if (coreId == 2) {
-      upper = IIR_adrBase + IIR_adrSize;
-      lower = IIR_adrBase;
-      errCnt += cep_playback(IIR_playback, upper, lower, IIR_totalCommands, IIR_size, 0);    
-    }
-    else if (coreId == 3) {
-      upper = FIR_adrBase + FIR_adrSize;
-      lower = FIR_adrBase;
-      errCnt += cep_playback(FIR_playback, upper, lower, FIR_totalCommands, FIR_size, 0);    
-    }  
+    // else if (coreId == 1) {
+    //   upper = SHA256_1_adrBase + SHA256_1_adrSize;
+    //   lower = SHA256_1_adrBase;
+    //   errCnt += cep_playback(SHA256_1_playback, upper, lower, SHA256_1_totalCommands, SHA256_1_size, 0);    
+    // }
+    // else if (coreId == 2) {
+    //   upper = IIR_adrBase + IIR_adrSize;
+    //   lower = IIR_adrBase;
+    //   errCnt += cep_playback(IIR_playback, upper, lower, IIR_totalCommands, IIR_size, 0);    
+    // }
+    // else if (coreId == 3) {
+    //   upper = FIR_adrBase + FIR_adrSize;
+    //   lower = FIR_adrBase;
+    //   errCnt += cep_playback(FIR_playback, upper, lower, FIR_totalCommands, FIR_size, 0);    
+    // }  
 
     // Set the core status
 cleanup:
