@@ -614,7 +614,7 @@ module cpu_driver
       dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]  = 0; // self-clear
     end
 
-    // Set Pass / Fail Statu
+    // Set Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_SET_PASS_FAIL_STATUS]) begin
       PassStatus = 0;
       FailStatus = 1;
@@ -727,5 +727,5 @@ module cpu_driver
     endgenerate
   `endif //  `ifdef RISCV_TESTS
   //--------------------------------------------------------------------------------------
-   
+
 endmodule // cpu_driver

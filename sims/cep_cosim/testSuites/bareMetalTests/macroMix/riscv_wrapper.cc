@@ -84,11 +84,11 @@
     if (errCnt) goto cleanup;
 
     // There is no Crypto++ support for RISC-V, so pre-recorded vectors will be used
-    if (coreId == 0) {
-      upper = AES_adrBase + AES_adrSize;
-      lower = AES_adrBase;
-      errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, AES_size, 0);    
-    }
+//    if (coreId == 0) {
+//      upper = AES_adrBase + AES_adrSize;
+//      lower = AES_adrBase;
+//      errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, AES_size, 0);    
+//    }
     // else if (coreId == 1) {
     //   upper = SHA256_1_adrBase + SHA256_1_adrSize;
     //   lower = SHA256_1_adrBase;
