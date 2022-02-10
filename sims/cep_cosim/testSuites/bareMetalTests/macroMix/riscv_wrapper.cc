@@ -25,9 +25,9 @@
   // Include the test vectors related to this test
   #include "SROT_playback.h"
   #include "AES_playback.h"
-  // #include "SHA256_1_playback.h"
-  // #include "IIR_playback.h"
-  // #include "FIR_playback.h"
+  #include "SHA256_1_playback.h"
+  #include "IIR_playback.h"
+   #include "FIR_playback.h"
 
   #ifdef __cplusplus
   extern "C" {
