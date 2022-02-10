@@ -56,7 +56,7 @@
     // all the CEP cores (index in array == core index)
     // cepMacroMix.cc implementation limits this to 32 total cores.
     const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
-        {"AES",         AES_CORE,         0x70000000, true, 0, 1 },     // 0 - AES
+        {"AES",         AES_CORE,         0x70000000, true, 0, 100 },     // 0 - AES
         {"MD5",         MD5_CORE,         0x70010000, true, 0,  32 },     // 1 - MD5
         {"SHA256_0",    SHA256_CORE,      0x70020000, true, 1,  32 },     // 2 - SHA256_0
         {"SHA256_1",    SHA256_CORE,      0x70021000, true, 1,  32 },     // 3 - SHA256_1

@@ -313,7 +313,7 @@ int cep_srot::LLKI_Setup(int cpuId) {
           cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
           return errCnt;
         }
-//        errCnt += EnableLLKI(coreIndex);
+        errCnt += EnableLLKI(coreIndex);
         if (errCnt) {
           cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
           return errCnt;

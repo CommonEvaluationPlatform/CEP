@@ -64,11 +64,9 @@ module tile_monitor (
   input [1:0]   e_bits_sink
 );
 
-  parameter MY_CPU_ID             = 4'h0;
-
   always @(posedge clock) begin
     if (a_valid && a_ready) begin
-      `logI("Tile #%0d A channel TL transaction - opcode=%d, param=%d, size=%d, source=%d, address=0x%x, mask=0x%x, data=0x%x",
+      `logI("Tile #%0d A channel TL transaction - opcode=%0d, param=%0d, size=%0d, source=%0d, address=0x%x, mask=0x%x, data=0x%x",
         auto_hartid_in, a_bits_opcode, a_bits_param, a_bits_size, a_bits_source, a_bits_address, a_bits_mask, a_bits_data);
     end // end if a_valid)
     if (b_valid && b_ready) begin
@@ -76,8 +74,12 @@ module tile_monitor (
     if (c_valid && c_ready) begin
     end // if (c_valid)
     if (d_valid && d_ready) begin
-      `logI("Tile #%0d D channel TL transaction - opcode=%d, param=%d, size=%d, source=0x%x, sink=0x%x, denied=%d, data=0x%x, corrupt=%d",
-        d_bits_opcode, d_bits_param, d_bits_size, d_bits_source, d_bits_sink, d_bits_denied, d_bits_data, d_bits_corrupt);
+      if (d_bits_denied && d_bits_corrupt)
+        `logE("Tile #%0d D channel TL transaction - opcode=%0d, param=%0d, size=%0d, source=%0d, sink=%0d, denied=%0d, data=0x%x, corrupt=%0d",
+          auto_hartid_in, d_bits_opcode, d_bits_param, d_bits_size, d_bits_source, d_bits_sink, d_bits_denied, d_bits_data, d_bits_corrupt);
+      else
+        `logI("Tile #%0d D channel TL transaction - opcode=%0d, param=%0d, size=%0d, source=%0d, sink=%0d, denied=%0d, data=0x%x, corrupt=%0d",
+          auto_hartid_in, d_bits_opcode, d_bits_param, d_bits_size, d_bits_source, d_bits_sink, d_bits_denied, d_bits_data, d_bits_corrupt);
     end // if (d_valid)
     if (e_valid && e_ready) begin
     end // if (e_valid)
