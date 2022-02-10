@@ -423,12 +423,6 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
               msg_id                    <= LLKI_MID_KLERRORRESP;
               status                    <= LLKI_STATUS_KL_LOSS_OF_SYNC;
               llkipp_current_state      <= ST_LLKIPP_RESPONSE;
-            // We have attempted to load a key whose length does not match the expected
-            // key length for this core.  Clear the core, and send an error response
-            end else if (llkid_key_complete) begin
-              msg_id                    <= LLKI_MID_KLERRORRESP;
-              status                    <= LLKI_STATUS_KL_BAD_KEY_LEN;
-              llkipp_current_state      <= ST_LLKIPP_CLEAR_KEY;
             // If a key word has been received and msg_len == 2, then this
             // is the LAST word of the load key request (understanding the
             // msg_len also includes the header and we are using it for
@@ -440,6 +434,12 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
               msg_id                    <= LLKI_MID_KLLOADKEYACK;
               status                    <= LLKI_STATUS_GOOD;
               llkipp_current_state      <= ST_SROT_KL_WAIT_FOR_COMPLETE;
+            // We have attempted to load a key whose length does not match the expected
+            // key length for this core.  Clear the core, and send an error response
+            end else if (llkid_key_complete) begin
+              msg_id                    <= LLKI_MID_KLERRORRESP;
+              status                    <= LLKI_STATUS_KL_BAD_KEY_LEN;
+              llkipp_current_state      <= ST_LLKIPP_CLEAR_KEY;
             // This is not the last word of the key load, load the key word
             // via the LLKI-Discrete and just wait for the next word
             end else begin
