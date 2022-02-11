@@ -35,13 +35,15 @@ public: //
   void Start(void);
   void BusReset(int assert);
   void BusReset(void);
-  int waitTilDone(int maxTO);
-  void ResetCA_code(void);
-  int GetCA_code(int svNum);
-  int ReadNCheck_CA_Code(int mask);
-  void GetP_Code(void);
-  int ReadNCheck_P_Code(void);
-  void Read_LCode(void);  
+  int  waitTilDone(int maxTO);
+  
+
+  void ResetCA_Code(void);
+  void GenCA_Code(int svNum);
+  int  ReadNCheckCA_Code(void);
+  void GenP_Code(void);
+  int  ReadNCheckP_Code(void);
+  void ReadL_Code(void);  
   int RunSingle(void);
   //
   int RunGpsTest(int maxLoop);
@@ -50,9 +52,9 @@ protected:
   //
   int   mStaticPCodeInit;
   int   mSvNum;
-  int   mExpCaCode;
-  int   mActCaCode; 
 
+  uint8_t   mExpCaCode[2];
+  uint8_t   mActCaCode[2];
   uint16_t  m_xn_cnt_speed;
   uint32_t  m_z_cnt_speed;
   uint16_t  m_x1a_initial;

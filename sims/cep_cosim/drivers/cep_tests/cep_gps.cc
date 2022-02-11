@@ -125,33 +125,13 @@ void cep_gps::BusReset(void) {
   //
 }
 
-
-int cep_gps::ReadNCheck_CA_Code(int mask)
-{
-  int errCnt = 0;
-  int expCACode= GetCA_code(GetSvNum());
-  int actCACode = cep_readNcapture(GPS_CA_BASE);
-  errCnt += ((expCACode ^ actCACode) & mask);
-  //
-  
-  if (errCnt) {
-    if (GetExpErr()==0) {
-      LOGE("ERROR: CA_Code mismatch svNum=%d exp=0x%04x act=0x%04x\n",GetSvNum(),expCACode,actCACode);
-    }
-  } else if (GetVerbose(2)) {
-    LOGI("CA_Code is OK svNum=%d exp=0x%04x act=0x%04x\n",GetSvNum(),expCACode,actCACode);
-  }
-  return errCnt;
-
-}
-
 int cep_gps::waitTilDone(int maxTO) {
   if (GetVerbose(2)) {  LOGI("%s\n",__FUNCTION__); }    
   return cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO);  
 }
 
 // Generate an expected P code value
-void cep_gps::GetP_Code(void) {
+void cep_gps::GenP_Code(void) {
 
   for (int j=0;j<8;j++) {
     mSwPt[j] = 0;
@@ -161,7 +141,7 @@ void cep_gps::GetP_Code(void) {
 
 // 16 bytes = 2 words
 // read P-code and use it as plainText for AES
-int cep_gps::ReadNCheck_P_Code(void) {
+int cep_gps::ReadNCheckP_Code(void) {
   
   int       errCnt    = 0;
   uint64_t  actPCode  = 0;
@@ -195,14 +175,14 @@ int cep_gps::ReadNCheck_P_Code(void) {
 
   // Perform the comparison
   for (int i = 0; i < mBlockSize; i++) {
-    errCnt += (mHwPt[i] ^ mSwPt[i]);
+//    errCnt += (mHwPt[i] ^ mSwPt[i]);
     if (errCnt) {break;}
   }
     
   return errCnt;
 }
 
-void cep_gps::Read_LCode(void) {
+void cep_gps::ReadL_Code(void) {
   uint64_t word;
 #ifdef BIG_ENDIAN
   for(int i = 0; i < mBlockSize/8; i++) { //  8-bytes/word
@@ -232,7 +212,7 @@ void cep_gps::Read_LCode(void) {
 }
 
 
-void cep_gps::ResetCA_code()
+void cep_gps::ResetCA_Code()
 {
   if (GetVerbose())
     LOGI("Reset CA Code\n");
@@ -245,13 +225,12 @@ void cep_gps::ResetCA_code()
 //
 // Compute C/A code (use HW code for now)
 //
-int cep_gps::GetCA_code(int svNum)
+void cep_gps::GenCA_Code(int svNum)
 {
-  int CACode = 0;
-  //
+  int CACode  = 0;
+  int chip    = 0;
 #if defined(BARE_MODE)
 #else
-  int chip=0;
   //
   if (GetVerbose(2)) {
     LOGI("G1=0x%04x G2=0x%04x\n",
@@ -366,9 +345,29 @@ int cep_gps::GetCA_code(int svNum)
     }
   }
 #endif
-  //
-  return CACode;
+  
+  mExpCaCode[0] = CACode & 0xFF;
+  mExpCaCode[1] = (CACode >> 16) & 0xFF;
+
 }
+
+int cep_gps::ReadNCheckCA_Code(void)
+{
+  int errCnt    = 0;
+  uint64_t word = 0;
+
+  // CA Code is only 13-bits
+  word            = cep_readNcapture(GPS_CA_BASE);
+  mActCaCode[0]   = word & 0xFF;
+  mActCaCode[1]   = (word >> 16) & 0x1F;
+
+  for (int i = 0; i < 2; i ++ ) {
+    errCnt += (mActCaCode[i] ^ mExpCaCode[i]);
+  }
+
+  return errCnt;
+}
+
 
 int cep_gps::RunSingle() {
   int outLen = mBlockSize;
@@ -380,24 +379,28 @@ int cep_gps::RunSingle() {
   // Wait until the GPS is done (L Code valid)  
   waitTilDone(500);
 
-  // Read and Check the CA Code output  
-  errCnt += ReadNCheck_CA_Code(0x1FFF);
+  // Read and Check the CA Code output
+  GenCA_Code(GetSvNum());
+  errCnt += ReadNCheckCA_Code();
 
   // Read the PCode ouput.
-  errCnt += ReadNCheck_P_Code();
+  GenP_Code();
+  errCnt += ReadNCheckP_Code();
 
   // Read and Check the expected P-Code output
-  Read_LCode();
+  ReadL_Code();
   errCnt += cryptopp_aes192_ecb_encryption (mHwPt, mSwCp, GetVerbose());
   errCnt += CheckCipherText();
 
   // Print
   if ((errCnt && !GetExpErr()) || GetVerbose(2)) {
-    PrintMe("Key        ", &(mKEY[0]), mKeySize);
-    PrintMe("Exp P-Code ", &(mSwPt[0]), mBlockSize);
-    PrintMe("Act P-code ", &(mHwPt[0]), mBlockSize);
-    PrintMe("Exp L-Code ", &(mSwCp[0]), mBlockSize);
-    PrintMe("Act L-Code ", &(mHwCp[0]), mBlockSize);
+    PrintMe("Exp CA-Code  ", &(mExpCaCode[0]), 2);
+    PrintMe("Act CA-Code  ", &(mActCaCode[0]), 2);
+    PrintMe("Exp P-Code   ", &(mSwPt[0]), mBlockSize);
+    PrintMe("Act P-code   ", &(mHwPt[0]), mBlockSize);
+    PrintMe("L-Code Key   ", &(mKEY[0]), mKeySize);
+    PrintMe("Exp L-Code   ", &(mSwCp[0]), mBlockSize);
+    PrintMe("Act L-Code   ", &(mHwCp[0]), mBlockSize);
   }
 
   return errCnt;
@@ -417,7 +420,7 @@ int cep_gps::RunGpsTest(int maxLoop) {
   
   LoadKey();
   SetSvNum(1);
-  ResetCA_code();
+  ResetCA_Code();
   mErrCnt += RunSingle();
 
   //Check first 128 bits of all SAT numbers
@@ -441,7 +444,7 @@ int cep_gps::RunGpsTest(int maxLoop) {
     }
 
     MarkSingle(i);
-    ResetCA_code();
+    ResetCA_Code();
     if (mErrCnt) break;
   }
 
@@ -457,7 +460,7 @@ int cep_gps::RunGpsTest(int maxLoop) {
       SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
     } // if (!mLegacyPCode)
 
-    ResetCA_code();
+    ResetCA_Code();
     SetSvNum(1);
     
     //Need to record a total of 3*24*10 = 720 bits total. This requires 6 loops.
