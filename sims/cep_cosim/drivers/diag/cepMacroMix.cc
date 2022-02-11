@@ -152,6 +152,13 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
           gps.freeMe();
           break;
         }
+        case GPS_STATIC_CORE: {
+          cep_gps gps(coreIndex,seed, 1, verbose);  // PCode initialization is static
+          gps.SetCaptureMode(captureOn,VECTOR_D, core.name);
+          errCnt += gps.RunGpsTest(core.maxLoop);
+          gps.freeMe();
+          break;
+        }
         case DFT_CORE: {
           cep_dft dft(coreIndex,seed,verbose);
           dft.SetCaptureMode(captureOn,VECTOR_D, core.name);

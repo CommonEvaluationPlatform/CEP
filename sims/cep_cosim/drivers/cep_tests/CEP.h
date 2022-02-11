@@ -35,6 +35,7 @@
         FIR_CORE,
         IIR_CORE,
         GPS_CORE,
+        GPS_STATIC_CORE,
         CEP_VERSION_CORE,
         SROT_CORE
     } core_type_t;
@@ -69,7 +70,7 @@
         {"FIR",         FIR_CORE,         0x70070000, true, 2,  10 },     // 10 - FIR
         {"IIR",         IIR_CORE,         0x70080000, true, 2,  10 },     // 11 - IIR
         {"GPS_0",       GPS_CORE,         0x70090000, true, 2,  38 },     // 12 - GPS_0 (CMU LBLL)
-        {"GPS_1",       GPS_CORE,         0x70091000, true, 2,  38 },     // 13 - GPS_1 (CMU Redaction)
+        {"GPS_1",       GPS_STATIC_CORE,  0x70091000, true, 2,  38 },     // 13 - GPS_1 (CMU Redaction)
         {"GPS_2",       GPS_CORE,         0x70092000, true, 2,  38 },     // 14 - GPS_2
         {"GPS_3",       GPS_CORE,         0x70093000, true, 2,  38 },     // 15 - GPS_3
         {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true, 0,   0 },     // 16 - CEP Version Register

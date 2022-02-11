@@ -24,10 +24,24 @@
 #include "random48.h"
 //
 //
-cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed,verbose) {
+cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed, verbose) {
   init(coreIndex);
+  mStaticPCodeInit = 0;
+
+  // Initial values taken from gps.scala
+  m_xn_cnt_speed  = 0x0001;
+  m_z_cnt_speed   = 0x000000001;
+  m_x1a_initial   = 0x0248;
+  m_x1b_initial   = 0x0554;
+  m_x2a_initial   = 0x0925;
+  m_x2b_initial   = 0x0554;
+
 }
 //
+cep_gps::cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose) : cep_aes(coreIndex, seed, verbose) {
+  init(coreIndex);
+  mStaticPCodeInit = staticPCodeInit;
+}
 
 void cep_gps::SetSvNum (int svNum) {
   if (svNum > MAX_SAT) {
@@ -40,14 +54,11 @@ void cep_gps::SetSvNum (int svNum) {
   //
 }
 
-
-
-
 //Default speed for normal operation is (1,1), higher speeds exist for validation purposes only.
 void cep_gps::SetPcodeSpeed (uint16_t xn_cnt_speed, uint32_t z_cnt_speed) {
-  xn_cnt_speed &= 0xfff;
-  z_cnt_speed &= 0x7ffff;
-  uint64_t pcode_speed = xn_cnt_speed | (z_cnt_speed << 12);
+  m_xn_cnt_speed  &= xn_cnt_speed & 0xfff;
+  m_z_cnt_speed   &= z_cnt_speed & 0x7ffff;
+  uint64_t pcode_speed = m_xn_cnt_speed | (m_z_cnt_speed << 12);
   cep_writeNcapture(GPS_PCODE_SPEED, pcode_speed);
 }
 
@@ -58,16 +69,16 @@ x2a = 0b100100100101
 x2b = 0b010101010100
 */
 void cep_gps::SetPcodeXnInit (uint16_t x1a_initial, uint16_t x1b_initial, uint16_t x2a_initial, uint16_t x2b_initial) {
-  x1a_initial &= 0xfff;
-  x1b_initial &= 0xfff;
-  x2a_initial &= 0xfff;
-  x2b_initial &= 0xfff;
+  m_x1a_initial &= x1a_initial & 0xfff;
+  m_x1b_initial &= x1b_initial & 0xfff;
+  m_x2a_initial &= x2a_initial & 0xfff;
+  m_x2b_initial &= x2b_initial & 0xfff;
 
   uint64_t pcode_xinitial = 0;
-  pcode_xinitial |= (uint64_t)x1a_initial << 0;
-  pcode_xinitial |= (uint64_t)x1b_initial << 12;
-  pcode_xinitial |= (uint64_t)x2a_initial << 24;
-  pcode_xinitial |= (uint64_t)x2b_initial << 36;
+  pcode_xinitial |= (uint64_t)m_x1a_initial << 0;
+  pcode_xinitial |= (uint64_t)m_x1b_initial << 12;
+  pcode_xinitial |= (uint64_t)m_x2a_initial << 24;
+  pcode_xinitial |= (uint64_t)m_x2b_initial << 36;
   cep_writeNcapture(GPS_PCODE_XINI, pcode_xinitial);
 }
 
@@ -135,32 +146,37 @@ int cep_gps::ReadNCheck_CA_Code(int mask)
 }
 
 int cep_gps::waitTilDone(int maxTO) {
-#if 1
   if (GetVerbose(2)) {  LOGI("%s\n",__FUNCTION__); }    
   return cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO);  
-#else
-  while (maxTO > 0) {
-    if (cep_readNcapture(GPS_GEN_DONE)) break;
-    maxTO--;
-  };
-  return (maxTO <= 0) ? 1 : 0;
-#endif
+}
+
+// Generate an expected P code value
+void cep_gps::GetP_Code(void) {
+
+  for (int j=0;j<8;j++) {
+    mSwPt[j] = 0;
+  }
+
 }
 
 // 16 bytes = 2 words
 // read P-code and use it as plainText for AES
-void cep_gps::Read_PCode(void) {
-  uint64_t word;
+int cep_gps::ReadNCheck_P_Code(void) {
+  
+  int       errCnt    = 0;
+  uint64_t  actPCode  = 0;
+
+  // Read the P Code output from the Hardware
 #ifdef BIG_ENDIAN
   for(int i = 0; i < mBlockSize/8; i++) { //  8-bytes/word
-    word = cep_readNcapture(GPS_P_BASE + i*8);
+    actPCode = cep_readNcapture(GPS_P_BASE + i*8);
     for (int j=0;j<8;j++) {
-      mHwPt[i*8 +j]= (word >> (8*(7-j)) ) & 0xff;
+      mHwPt[i*8 +j]= (actPCode >> (8*(7-j)) ) & 0xff;
     }
   }  
 #else
   for(int i = 0; i < mBlockSize/8; i++) { //  8-bytes/word
-    word = cep_readNcapture(GPS_P_BASE + (1-i)*8);
+    actPCode = cep_readNcapture(GPS_P_BASE + (1-i)*8);
     // As of 04/12/20: each 32 bits are swapped within 64-bit register (see gps.scala)
     for (int j=0;j<8;j++) {
       switch (j) {
@@ -171,11 +187,19 @@ void cep_gps::Read_PCode(void) {
       case 4 : mHwPt[i*8 +j]= (word >> (8*(7)) ) & 0xff; break;
       case 5 : mHwPt[i*8 +j]= (word >> (8*(6)) ) & 0xff; break;
       case 6 : mHwPt[i*8 +j]= (word >> (8*(5)) ) & 0xff; break;
-      case 7 : mHwPt[i*8 +j]= (word >> (8*(4)) ) & 0xff; break;		
+      case 7 : mHwPt[i*8 +j]= (word >> (8*(4)) ) & 0xff; break;   
       }
     }
   }
 #endif
+
+  // Perform the comparison
+  for (int i = 0; i < mBlockSize; i++) {
+    errCnt += (mHwPt[i] ^ mSwPt[i]);
+    if (errCnt) {break;}
+  }
+    
+  return errCnt;
 }
 
 void cep_gps::Read_LCode(void) {
@@ -200,7 +224,7 @@ void cep_gps::Read_LCode(void) {
       case 4 : mHwCp[i*8 +j]= (word >> (8*(7)) ) & 0xff; break;
       case 5 : mHwCp[i*8 +j]= (word >> (8*(6)) ) & 0xff; break;
       case 6 : mHwCp[i*8 +j]= (word >> (8*(5)) ) & 0xff; break;
-      case 7 : mHwCp[i*8 +j]= (word >> (8*(4)) ) & 0xff; break;		
+      case 7 : mHwCp[i*8 +j]= (word >> (8*(4)) ) & 0xff; break;   
       }
     }
   }
@@ -212,7 +236,7 @@ void cep_gps::ResetCA_code()
 {
   if (GetVerbose())
     LOGI("Reset CA Code\n");
-  for (int i=0;i<11;i++) {
+  for (int i = 0; i < 11; i++) {
     g1[i] = 1;
     g2[i] = 1;
   }
@@ -231,26 +255,26 @@ int cep_gps::GetCA_code(int svNum)
   //
   if (GetVerbose(2)) {
     LOGI("G1=0x%04x G2=0x%04x\n",
-	 (((g1[10] & 0x1) << 9) |
-	  ((g1[9] & 0x1) << 8) |	  
-	  ((g1[8] & 0x1) << 7) |	  
-	  ((g1[7] & 0x1) << 6) |	  
-	  ((g1[6] & 0x1) << 5) |	  
-	  ((g1[5] & 0x1) << 4) |	  
-	  ((g1[4] & 0x1) << 3) |	  
-	  ((g1[3] & 0x1) << 2) |	  
-	  ((g1[2] & 0x1) << 1) |	  
-	  ((g1[1] & 0x1) << 0)),
-	 (((g2[10] & 0x1) << 9) |
-	  ((g2[9] & 0x1) << 8) |	  
-	  ((g2[8] & 0x1) << 7) |	  
-	  ((g2[7] & 0x1) << 6) |	  
-	  ((g2[6] & 0x1) << 5) |	  
-	  ((g2[5] & 0x1) << 4) |	  
-	  ((g2[4] & 0x1) << 3) |	  
-	  ((g2[3] & 0x1) << 2) |	  
-	  ((g2[2] & 0x1) << 1) |	  
-	  ((g2[1] & 0x1) << 0)));
+   (((g1[10] & 0x1) << 9) |
+    ((g1[9] & 0x1) << 8) |    
+    ((g1[8] & 0x1) << 7) |    
+    ((g1[7] & 0x1) << 6) |    
+    ((g1[6] & 0x1) << 5) |    
+    ((g1[5] & 0x1) << 4) |    
+    ((g1[4] & 0x1) << 3) |    
+    ((g1[3] & 0x1) << 2) |    
+    ((g1[2] & 0x1) << 1) |    
+    ((g1[1] & 0x1) << 0)),
+   (((g2[10] & 0x1) << 9) |
+    ((g2[9] & 0x1) << 8) |    
+    ((g2[8] & 0x1) << 7) |    
+    ((g2[7] & 0x1) << 6) |    
+    ((g2[6] & 0x1) << 5) |    
+    ((g2[5] & 0x1) << 4) |    
+    ((g2[4] & 0x1) << 3) |    
+    ((g2[3] & 0x1) << 2) |    
+    ((g2[2] & 0x1) << 1) |    
+    ((g2[1] & 0x1) << 0)));
   }
   for (int i=0;i<13;i++) {
     chip = 0;
@@ -349,14 +373,18 @@ int cep_gps::GetCA_code(int svNum)
 int cep_gps::RunSingle() {
   int outLen = mBlockSize;
   int errCnt = 0;
+
+  // Start the code generators  
   Start();
+
+  // Wait until the GPS is done (L Code valid)  
   waitTilDone(500);
 
   // Read and Check the CA Code output  
   errCnt += ReadNCheck_CA_Code(0x1FFF);
 
-  // Read the PCode ouput.  This is *NOT* currently checked
-  Read_PCode();
+  // Read the PCode ouput.
+  errCnt += ReadNCheck_P_Code();
 
   // Read and Check the expected P-Code output
   Read_LCode();
@@ -366,7 +394,8 @@ int cep_gps::RunSingle() {
   // Print
   if ((errCnt && !GetExpErr()) || GetVerbose(2)) {
     PrintMe("Key        ", &(mKEY[0]), mKeySize);
-    PrintMe("P-code     ", &(mHwPt[0]), mBlockSize);
+    PrintMe("Exp P-Code ", &(mSwPt[0]), mBlockSize);
+    PrintMe("Act P-code ", &(mHwPt[0]), mBlockSize);
     PrintMe("Exp L-Code ", &(mSwCp[0]), mBlockSize);
     PrintMe("Act L-Code ", &(mHwCp[0]), mBlockSize);
   }
@@ -422,16 +451,19 @@ int cep_gps::RunGpsTest(int maxLoop) {
     RandomGen(mKEY, GetKeySize());
     LoadKey();
     
-    SetPcodeXnInit(120, 3666, 766, 1474); //_A loops over 10 values, _B loops over 9 values.
-    SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
-    //int(z_max/174763)=3, so "week" is now 3x X1 epochs. This value selected to allow all bits to flip twice per loop
+    // Static mode, the initialization vectors will NOT be changed
+    if (!mStaticPCodeInit) {
+      SetPcodeXnInit(120, 3666, 766, 1474); //_A loops over 10 values, _B loops over 9 values.
+      SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
+    } // if (!mLegacyPCode)
+
     ResetCA_code();
     SetSvNum(1);
     
     //Need to record a total of 3*24*10 = 720 bits total. This requires 6 loops.
     for (int i=0;i<=6;i++) {
       if (GetVerbose()) {
-	LOGI("%s: Coverage Loop %d\n",__FUNCTION__,i);
+  LOGI("%s: Coverage Loop %d\n",__FUNCTION__,i);
       }
       mErrCnt += RunSingle();
       //MarkSingle(i+maxLoop+1);

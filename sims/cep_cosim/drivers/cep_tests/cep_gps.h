@@ -24,6 +24,7 @@ public: //
   // constructors
   //
   cep_gps(int coreIndex, int seed, int verbose);  
+  cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose);
   ~cep_gps() {}; 
 
   int  GetSvNum ( ) { return mSvNum; }
@@ -35,10 +36,11 @@ public: //
   void BusReset(int assert);
   void BusReset(void);
   int waitTilDone(int maxTO);
-  void ResetCA_code();
+  void ResetCA_code(void);
   int GetCA_code(int svNum);
   int ReadNCheck_CA_Code(int mask);
-  void Read_PCode(void);
+  void GetP_Code(void);
+  int ReadNCheck_P_Code(void);
   void Read_LCode(void);  
   int RunSingle(void);
   //
@@ -46,12 +48,21 @@ public: //
 
 protected:
   //
-  int mSvNum;
-  int mExpCaCode;
-  int mActCaCode;  
-  // icode/pcode
-  int g1[11]; // [0] not used to match HW
-  int g2[11];
+  int   mStaticPCodeInit;
+  int   mSvNum;
+  int   mExpCaCode;
+  int   mActCaCode; 
+
+  uint16_t  m_xn_cnt_speed;
+  uint32_t  m_z_cnt_speed;
+  uint16_t  m_x1a_initial;
+  uint16_t  m_x1b_initial;
+  uint16_t  m_x2a_initial;
+  uint16_t  m_x2b_initial;
+
+
+  int   g1[11]; // [0] not used to match HW
+  int   g2[11];
 };
 
 //
