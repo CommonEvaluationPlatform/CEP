@@ -259,7 +259,8 @@ void cep_gps::GenCA_Code(int svNum)
     chip = 0;
     switch (svNum) {
     case 1 :
-      chip = g1[10] ^ g2[2] ^ g2[6]; break;
+      chip = g1[10] ^ g2[2] ^ g2[4]; break;
+//      chip = g1[10] ^ g2[2] ^ g2[6]; break;
     case 2 :
       chip = g1[10] ^ g2[3] ^ g2[7]; break;
     case 3 :
