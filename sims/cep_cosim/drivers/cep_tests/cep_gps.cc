@@ -347,58 +347,53 @@ int cep_gps::GetCA_code(int svNum)
 }
 
 int cep_gps::RunSingle() {
-  int outLen=mBlockSize;
+  int outLen = mBlockSize;
   int errCnt = 0;
   Start();
   waitTilDone(500);
+
+  // Read and Check the CA Code output  
   errCnt += ReadNCheck_CA_Code(0x1FFF);
-  //
+
+  // Read the PCode ouput.  This is *NOT* currently checked
   Read_PCode();
+
+  // Read and Check the expected P-Code output
   Read_LCode();
-  // get expected L-code
-  errCnt += cryptopp_aes192_ecb_encryption
-    (mHwPt, // uint8_t *input,           // input text packet
-      mSwCp, // uint8_t *output,          // output cipher packet
-      GetVerbose());
-  //
+  errCnt += cryptopp_aes192_ecb_encryption (mHwPt, mSwCp, GetVerbose());
   errCnt += CheckCipherText();
-  //
-  //
+
   // Print
-  //
   if ((errCnt && !GetExpErr()) || GetVerbose(2)) {
-    PrintMe("Key",       &(mKEY[0]),mKeySize);
-    PrintMe("P-code"    ,&(mHwPt[0]),mBlockSize);
-    PrintMe("Exp L-Code",&(mSwCp[0]),mBlockSize);
-    PrintMe("Act L-Code",&(mHwCp[0]),mBlockSize);
+    PrintMe("Key        ", &(mKEY[0]), mKeySize);
+    PrintMe("P-code     ", &(mHwPt[0]), mBlockSize);
+    PrintMe("Exp L-Code ", &(mSwCp[0]), mBlockSize);
+    PrintMe("Act L-Code ", &(mHwCp[0]), mBlockSize);
   }
+
   return errCnt;
 }
 
 int cep_gps::RunGpsTest(int maxLoop) {
 
-  //  int outLen=mBlockSize;
-  //
   // Need to take it out of reset to support unit sim due to LLKI!!!
-  //
   mErrCnt = 0;
   BusReset();
   SetSvNum(0);   // so GPS can detect a change
 
   //Initialize mKEY with 0xAAAA... for first iteration
-  for (int i=0;i<192/8;i++) {
+  for (int i = 0; i < 192 / 8 ; i++) {
     mKEY[i] = 0xAA;
   }
+  
   LoadKey();
   SetSvNum(1);
   ResetCA_code();
   mErrCnt += RunSingle();
-  //MarkSingle(0);
-  //
 
   //Check first 128 bits of all SAT numbers
   //Except sat=1, for that get 2nd 128 bits for a total of 256.
-  for (int i=1;i<=maxLoop;i++) {
+  for (int i=1 ; i <= maxLoop; i++) {
     if (GetVerbose()) {
       LOGI("%s: Loop %d\n",__FUNCTION__,i);
     }

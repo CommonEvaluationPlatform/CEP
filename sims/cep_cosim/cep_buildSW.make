@@ -178,7 +178,7 @@ endif
 COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
 # A common set of dependencies (for all test modes)
-COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK}
+COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} ${ALL_C_FILES}
 
 # Variables related to the RISCV Toolset (RISCV must already be defined)
 RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc

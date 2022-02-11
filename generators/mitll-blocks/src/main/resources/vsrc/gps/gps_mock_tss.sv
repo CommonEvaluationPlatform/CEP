@@ -12,7 +12,7 @@
 module gps_mock_tss import llki_pkg::*; (
 
     // Clock and Reset
-    input wire            sys_clk_50,
+    input wire            sys_clk,
     input wire            sync_rst_in,
     input wire            sync_rst_in_dut, // tony duong: from registers
     
@@ -50,7 +50,7 @@ module gps_mock_tss import llki_pkg::*; (
   mock_tss_fsm #(
     .KEY_WORDS            (KEY_WORDS)
   ) mock_tss_fsm_inst (
-    .clk                  (sys_clk_50),
+    .clk                  (sys_clk),
     .rst                  (sync_rst_in),
     .llkid_key_data       (llkid_key_data),
     .llkid_key_valid      (llkid_key_valid),
@@ -94,7 +94,7 @@ module gps_mock_tss import llki_pkg::*; (
   // Instantiate the original core
   //------------------------------------------------------------------
   gps gps_inst (
-    .sys_clk_50         (sys_clk_50),
+    .sys_clk            (sys_clk),
     .sync_rst_in        (sync_rst_in || sync_rst_in_dut),
     .sv_num             (sv_num),
     .aes_key            (aes_key),

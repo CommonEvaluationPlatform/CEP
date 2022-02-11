@@ -160,7 +160,7 @@ endif
 #
 # ${VSIM_CMD_LINE} is set in the ${BUILD_HW_MAKEFILE} makefile based on simulator type
 #--------------------------------------------------------------------------------------
-.vrun_flag: sim_info ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF}
+.vrun_flag: sim_info ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_ELF} ${COMMON_DEPENDENCIES}
 ifeq (${COVERAGE},1)
 	@if test ! -d ${COSIM_COVERAGE_PATH}; then	\
 		mkdir  ${COSIM_COVERAGE_PATH};		\
@@ -284,7 +284,7 @@ cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
+#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog

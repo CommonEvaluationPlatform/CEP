@@ -9,7 +9,7 @@
 //
 //************************************************************************
 module gps(
-           sys_clk_50,
+           sys_clk,
            sync_rst_in,
            sv_num,
            startRound,
@@ -21,7 +21,7 @@ module gps(
            l_code,
            l_code_valid
        );
-input  sys_clk_50;
+input  sys_clk;
 input  sync_rst_in;
 input [5:0] sv_num;
 input startRound;
@@ -185,8 +185,8 @@ always @(posedge gps_clk_fast)
 
 //
 // Todo : finish removing
-assign gps_clk_fast = sys_clk_50;
-assign gps_clk_slow = sys_clk_50;
+assign gps_clk_fast = sys_clk;
+assign gps_clk_slow = sys_clk;
 
 //
 // in order to remove the reset dependency, we need create a mask to mask out the out_valid from aes_192 module
