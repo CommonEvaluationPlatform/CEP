@@ -231,13 +231,13 @@ void cep_crypto::cep_writeNcapture(int coreIndex, uint32_t pAddress, uint64_t pD
 #ifndef BARE_MODE  
   if (mCapture) {
     if (mCount++ == 0) {
-      fprintf(mFd,"\t  WRITE__CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_adr(coreIndex,pAddress), pData, mCount);
+      fprintf(mFd,"\t  WRITE__CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_addr(coreIndex,pAddress), pData, mCount);
     } else {
-      fprintf(mFd,"\t, WRITE__CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_adr(coreIndex,pAddress), pData, mCount);      
+      fprintf(mFd,"\t, WRITE__CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_addr(coreIndex,pAddress), pData, mCount);      
     }
     // save this away
     if (mAdrBase == 0) {
-      mAdrBase = get_physical_adr(coreIndex,pAddress) & ~(mAdrSize-1);
+      mAdrBase = get_physical_addr(coreIndex,pAddress) & ~(mAdrSize-1);
     }    
     mWordCnt += 3;
   }
@@ -256,9 +256,9 @@ uint64_t cep_crypto::cep_readNcapture(int coreIndex, uint32_t pAddress) {
 #ifndef  BARE_MODE  
   if (mCapture) {
     if (mCount++ == 0) {
-      fprintf(mFd,"\t  RDnCMP_CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_adr(coreIndex,pAddress), pData, mCount);
+      fprintf(mFd,"\t  RDnCMP_CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_addr(coreIndex,pAddress), pData, mCount);
     } else {
-      fprintf(mFd,"\t, RDnCMP_CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_adr(coreIndex,pAddress), pData, mCount);      
+      fprintf(mFd,"\t, RDnCMP_CMD, 0x%08x, 0x%016lx // %d\n", (uint32_t)get_physical_addr(coreIndex,pAddress), pData, mCount);      
     }
     mWordCnt += 3;    
   }
@@ -280,10 +280,10 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
   if (mCapture) {
     if (mCount++ == 0) {
       fprintf(mFd,"\t  RDSPIN_CMD, 0x%08x, 0x%016lx, 0x%lx, 0x%x // %d\n",
-        (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);
+        (uint32_t)get_physical_addr(coreIndex,pAddress), pData,mask,timeOut, mCount);
     } else {
       fprintf(mFd,"\t, RDSPIN_CMD, 0x%08x, 0x%016lx, 0x%lx, 0x%x // %d\n",
-        (uint32_t)get_physical_adr(coreIndex,pAddress), pData,mask,timeOut, mCount);      
+        (uint32_t)get_physical_addr(coreIndex,pAddress), pData,mask,timeOut, mCount);      
     }
     mWordCnt += 5;    
   }
@@ -297,7 +297,7 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
     USEC_SLEEP(100);
     timeOut--;
   };
-  if (timeOut <= 0) { LOGE("%s: timeout reading from address = 0x%08x\n", __FUNCTION__, (uint32_t)get_physical_adr(coreIndex, pAddress)); }
+  if (timeOut <= 0) { LOGE("%s: timeout reading from address = 0x%08x\n", __FUNCTION__, (uint32_t)get_physical_addr(coreIndex, pAddress)); }
   if (GetVerbose(2)) {  LOGI("%s: expData=0x%016lx rdDat=0x%016lx\n",__FUNCTION__,pData,rdDat); }
   return (timeOut <= 0) ? 1 : 0;
 }

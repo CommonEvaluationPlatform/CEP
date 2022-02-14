@@ -134,7 +134,7 @@ uint64_t cep_read(int device, uint32_t pAddress) {
 #endif
 }
 
-uint64_t get_physical_adr(int device, uint32_t pAddress) {
+uint64_t get_physical_addr(int device, uint32_t pAddress) {
   return (ipCores[device].address + pAddress);
 }
 
