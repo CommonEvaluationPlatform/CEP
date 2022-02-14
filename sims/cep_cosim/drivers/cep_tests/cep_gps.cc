@@ -24,6 +24,8 @@
 #include "random48.h"
 //
 //
+
+
 cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed, verbose) {
   init(coreIndex);
   mStaticPCodeInit = 0;
@@ -37,10 +39,32 @@ cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed
   m_x2b_initial   = 0x0554;
 
 }
-//
-cep_gps::cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose) : cep_aes(coreIndex, seed, verbose) {
-  init(coreIndex);
+
+cep_gps::cep_gps(int coreIndex, int verifyCoreIndex, int seed, int verbose) : cep_aes(coreIndex, seed, verbose) {
+  init(coreIndex, verifyCoreIndex);
+  mStaticPCodeInit = 0;
+
+  // Initial values taken from gps.scala
+  m_xn_cnt_speed  = 0x0001;
+  m_z_cnt_speed   = 0x000000001;
+  m_x1a_initial   = 0x0248;
+  m_x1b_initial   = 0x0554;
+  m_x2a_initial   = 0x0925;
+  m_x2b_initial   = 0x0554;
+
+}
+
+cep_gps::cep_gps(int coreIndex, int verifyCoreIndex, int seed, int staticPCodeInit, int verbose) : cep_aes(coreIndex, verifyCoreIndex,  seed, verbose) {
+  init(coreIndex, verifyCoreIndex);
   mStaticPCodeInit = staticPCodeInit;
+
+  // Initial values taken from gps.scala
+  m_xn_cnt_speed  = 0x0001;
+  m_z_cnt_speed   = 0x000000001;
+  m_x1a_initial   = 0x0248;
+  m_x1b_initial   = 0x0554;
+  m_x2a_initial   = 0x0925;
+  m_x2b_initial   = 0x0554;
 }
 
 void cep_gps::SetSvNum (int svNum) {
@@ -108,8 +132,18 @@ void cep_gps::LoadKey(void) {
 
 void cep_gps::Start(void) {
   //
+
   cep_writeNcapture(GPS_GEN_NEXT, 0x1);
   cep_writeNcapture(GPS_GEN_NEXT, 0x0);
+
+  // If the object has been intiialized with a verifyCoreIndex, we'll use that
+  // GPS core to compare P-Code results
+  if (mVerifyCoreIndex >= 0) {
+    cep_writeNcapture(mVerifyCoreIndex, GPS_GEN_NEXT, 0x1);
+    cep_writeNcapture(mVerifyCoreIndex, GPS_GEN_NEXT, 0x0);
+  }
+
+
 }
 
 void cep_gps::BusReset(int assert) {
@@ -126,18 +160,55 @@ void cep_gps::BusReset(void) {
 }
 
 int cep_gps::waitTilDone(int maxTO) {
-  if (GetVerbose(2)) {  LOGI("%s\n",__FUNCTION__); }    
-  return cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO);  
+  if (GetVerbose(2)) {  LOGI("%s\n",__FUNCTION__); }
+
+  if (mVerifyCoreIndex >=0)
+    return (cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO) && cep_readNspin(mVerifyCoreIndex, GPS_GEN_DONE, 2, 2, maxTO));
+  else
+    return (cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO));
+  
 }
 
-// Generate an expected P code value
+// Generate an expected P code value only if the object has been initialized with a verifyCoreIndex
 void cep_gps::GenP_Code(void) {
 
-  for (int j=0;j<8;j++) {
-    mSwPt[j] = 0;
-  }
+  uint64_t  actPCode  = 0;
 
-}
+  if (mVerifyCoreIndex >= 0) {
+
+    // Read the EXPECTED P Code output from the Hardware
+    #ifdef BIG_ENDIAN
+      for(int i = 0; i < mBlockSize/8; i++) { //  8-bytes/word
+        actPCode = cep_readNcapture(mVerifyCoreIndex, GPS_P_BASE + i*8);
+        for (int j=0;j<8;j++) {
+          mHwPt[i*8 +j]= (actPCode >> (8*(7-j)) ) & 0xff;
+        }
+    }  
+    #else
+      for(int i = 0; i < mBlockSize/8; i++) { //  8-bytes/word
+        actPCode = cep_readNcapture(GPS_P_BASE + (1-i)*8);
+        // As of 04/12/20: each 32 bits are swapped within 64-bit register (see gps.scala)
+        for (int j=0;j<8;j++) {
+          switch (j) {
+            case 0 : mHwPt[i*8 +j]= (word >> (8*(3)) ) & 0xff; break;
+            case 1 : mHwPt[i*8 +j]= (word >> (8*(2)) ) & 0xff; break;
+            case 2 : mHwPt[i*8 +j]= (word >> (8*(1)) ) & 0xff; break;
+            case 3 : mHwPt[i*8 +j]= (word >> (8*(0)) ) & 0xff; break;
+            case 4 : mHwPt[i*8 +j]= (word >> (8*(7)) ) & 0xff; break;
+            case 5 : mHwPt[i*8 +j]= (word >> (8*(6)) ) & 0xff; break;
+            case 6 : mHwPt[i*8 +j]= (word >> (8*(5)) ) & 0xff; break;
+            case 7 : mHwPt[i*8 +j]= (word >> (8*(4)) ) & 0xff; break;   
+          }
+        }
+      }
+    #endif
+  // else if (mVerifyCoreIndex >= 0)
+  } else
+    for (int j=0;j<8;j++) {
+      mSwPt[j] = 0;
+    }
+
+} // void cep_gps::GenP_Code(void)
 
 // 16 bytes = 2 words
 // read P-code and use it as plainText for AES
@@ -173,11 +244,12 @@ int cep_gps::ReadNCheckP_Code(void) {
   }
 #endif
 
-  // Perform the comparison
-  for (int i = 0; i < mBlockSize; i++) {
-//    errCnt += (mHwPt[i] ^ mSwPt[i]);
-    if (errCnt) {break;}
-  }
+  // Perform the comparison if and only if the mVerifyCoreIndex has been defined
+  if (mVerifyCoreIndex >=0)
+    for (int i = 0; i < mBlockSize; i++) {
+      errCnt += (mHwPt[i] ^ mSwPt[i]);
+      if (errCnt) {break;}
+    } // for (int i = 0; i < mBlockSize; i++)
     
   return errCnt;
 }
@@ -259,8 +331,7 @@ void cep_gps::GenCA_Code(int svNum)
     chip = 0;
     switch (svNum) {
     case 1 :
-      chip = g1[10] ^ g2[2] ^ g2[4]; break;
-//      chip = g1[10] ^ g2[2] ^ g2[6]; break;
+      chip = g1[10] ^ g2[2] ^ g2[6]; break;
     case 2 :
       chip = g1[10] ^ g2[3] ^ g2[7]; break;
     case 3 :

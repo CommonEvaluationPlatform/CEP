@@ -22,6 +22,7 @@ public: //
   // constructors
   //
   cep_aes(int coreIndex, int seed, int verbose);  
+  cep_aes(int coreIndex, int verifyCoreIndex, int seed, int verbose);  
   ~cep_aes() {}; 
 
   int RunAes192Test(int maxLoop);

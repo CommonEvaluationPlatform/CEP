@@ -29,6 +29,15 @@
 //
 //
 
+cep_aes::cep_aes(int coreIndex, int verifyCoreIndex, int seed, int verbose) {
+  init(coreIndex, verifyCoreIndex);
+  //
+  SetKeySize(192/8);
+  SetBlockSize(128/8);
+  SetSeed(seed);
+  SetVerbose(verbose);
+}
+
 cep_aes::cep_aes(int coreIndex, int seed, int verbose) {
   init(coreIndex);
   //

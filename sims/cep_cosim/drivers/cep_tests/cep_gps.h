@@ -24,7 +24,8 @@ public: //
   // constructors
   //
   cep_gps(int coreIndex, int seed, int verbose);  
-  cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose);
+  cep_gps(int coreIndex, int verifyCoreIndex, int seed, int verbose);  
+  cep_gps(int coreIndex, int verifyCoreIndex, int seed, int staticPCodeInit, int verbose);
   ~cep_gps() {}; 
 
   int  GetSvNum ( ) { return mSvNum; }
@@ -62,9 +63,9 @@ protected:
   uint16_t  m_x2a_initial;
   uint16_t  m_x2b_initial;
 
-
-  int   g1[11]; // [0] not used to match HW
-  int   g2[11];
+  // CA Code SW implementation is a mirror of the hardware
+  uint8_t   g1[11]; // [0] not used to match HW
+  uint8_t   g2[11];
 };
 
 //
