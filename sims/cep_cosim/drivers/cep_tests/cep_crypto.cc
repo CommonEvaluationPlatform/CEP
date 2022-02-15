@@ -22,31 +22,11 @@
 #include "portable_io.h"
 #include "random48.h"
 
-void cep_crypto::init(int coreIndex, int verifyCoreIndex) {
-#ifndef  BARE_MODE        
-  mFd     = 0;
-#endif
-  mCoreIndex        = coreIndex;
-  mVerifyCoreIndex  = verifyCoreIndex;
-  mCapture          = 0;
-  mErrCnt           = 0;
-  mCount            = 0;
-  mSingle           = 0;
-  mWordCnt          = 0;
-  mAdrBase          = 0;
-  mAdrSize          = 0x10000;
-
-  LOGI("cep_crypto::init - coreIndex/verifyCoreIndex = %0d/%0d", coreIndex, verifyCoreIndex);
-
-  SetExpErr(0);
-}
-
 void cep_crypto::init(int coreIndex) {
 #ifndef  BARE_MODE        
   mFd     = 0;
 #endif
   mCoreIndex        = coreIndex;
-  mVerifyCoreIndex  = -1;
   mCapture          = 0;
   mErrCnt           = 0;
   mCount            = 0;

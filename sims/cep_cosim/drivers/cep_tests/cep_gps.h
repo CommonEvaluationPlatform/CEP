@@ -24,8 +24,7 @@ public: //
   // constructors
   //
   cep_gps(int coreIndex, int seed, int verbose);  
-  cep_gps(int coreIndex, int verifyCoreIndex, int seed, int verbose);  
-  cep_gps(int coreIndex, int verifyCoreIndex, int seed, int staticPCodeInit, int verbose);
+  cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose);
   ~cep_gps() {}; 
 
   int  GetSvNum ( ) { return mSvNum; }

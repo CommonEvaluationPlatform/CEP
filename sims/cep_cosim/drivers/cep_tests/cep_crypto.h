@@ -71,7 +71,6 @@ public: //
   
   void MarkSingle(int loop);
   //
-  void init(int coreIndex, int verifyCoreIndex);
   void init(int coreIndex);
   void freeMe(void);
   //
@@ -82,7 +81,6 @@ public: //
  protected:
 
   int mCoreIndex;
-  int mVerifyCoreIndex;
   int mSeed;
   int mVerbose;
   int mKeySize;
