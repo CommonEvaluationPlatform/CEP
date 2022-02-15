@@ -8,15 +8,17 @@
 // Notes:          
 //
 //--------------------------------------------------------------------------------------
+#include "c_module.h"
+#include "portable_io.h"
+
+#include "simdiag_global.h"
 #include "v2c_cmds.h"
 #include "simPio.h"
 #include "shMem.h"
-#include "c_module.h"
 #include <unistd.h>
 #include "random48.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
-#include "simdiag_global.h"
 
 #include "cepMacroMix.h"
 

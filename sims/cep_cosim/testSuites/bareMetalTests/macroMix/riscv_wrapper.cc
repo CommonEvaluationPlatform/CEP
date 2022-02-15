@@ -17,7 +17,7 @@
 //
 #ifdef BARE_MODE
   #include "cep_apis.h"
-  #include "cepregression.h"
+  #include "portable_io.h"
   #include "CEP.h"
   #include "cepRegTest.h"
   #include "portable_io.h"

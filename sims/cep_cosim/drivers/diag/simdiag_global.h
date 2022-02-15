@@ -17,7 +17,6 @@
 #include <sys/types.h>
 #endif
 
-//#include "supercon_io.h"
 #include "portable_io.h"
 
 #define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))

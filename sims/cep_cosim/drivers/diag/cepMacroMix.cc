@@ -18,7 +18,7 @@
 #include "cepMacroMix.h"
 #include "cep_apis.h"
 #include "portable_io.h"
-#include "cepregression.h"
+#include "portable_io.h"
 
 #include <math.h>
 
@@ -146,8 +146,9 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
           break;
         }
         case GPS_CORE: {
-          cep_gps gps(coreIndex,seed,verbose);
-          gps.SetCaptureMode(captureOn,VECTOR_D, core.name);
+//          cep_gps gps(coreIndex,seed,verbose);
+          cep_gps gps(coreIndex, coreIndex + 1, seed, 1, verbose);
+          gps.SetCaptureMode(captureOn, VECTOR_D, core.name);
           errCnt += gps.RunGpsTest(core.maxLoop);
           gps.freeMe();
           break;

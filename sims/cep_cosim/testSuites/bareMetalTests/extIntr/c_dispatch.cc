@@ -15,7 +15,7 @@
 #include "c_module.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
-#include "cepregression.h"
+#include "portable_io.h"
 #include "simPio.h"
 
 int main(int argc, char *argv[])
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   // Set the active mask for all threads  
   thr.SetActiveMask(mask);
   
-  // Initialize the core data structures (from cepgression.h)
+  // Initialize the core data structures (from portable_io.h)
   initConfig();
 
   // spawn threads for each core

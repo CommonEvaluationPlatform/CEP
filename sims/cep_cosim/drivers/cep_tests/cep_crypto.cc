@@ -19,7 +19,7 @@
 #include "simdiag_global.h"
 #include "portable_io.h"
 #include "CEP.h"
-#include "cepregression.h"
+#include "portable_io.h"
 #include "random48.h"
 
 void cep_crypto::init(int coreIndex, int verifyCoreIndex) {
@@ -35,6 +35,8 @@ void cep_crypto::init(int coreIndex, int verifyCoreIndex) {
   mWordCnt          = 0;
   mAdrBase          = 0;
   mAdrSize          = 0x10000;
+
+  LOGI("cep_crypto::init - coreIndex/verifyCoreIndex = %0d/%0d", coreIndex, verifyCoreIndex);
 
   SetExpErr(0);
 }
@@ -224,7 +226,7 @@ void cep_crypto::cep_writeNcapture(uint32_t pAddress, uint64_t pData)
 
 void cep_crypto::cep_writeNcapture(int coreIndex, uint32_t pAddress, uint64_t pData)
 {
-  cep_write(coreIndex, pAddress, pData);
+  cep_write64(coreIndex, pAddress, pData);
   //
   // save to file in captured mode (BFM only)
   //
@@ -249,7 +251,7 @@ uint64_t cep_crypto::cep_readNcapture(uint32_t pAddress) {
 }
 
 uint64_t cep_crypto::cep_readNcapture(int coreIndex, uint32_t pAddress) {
-  uint64_t pData = cep_read(coreIndex, pAddress);
+  uint64_t pData = cep_read64(coreIndex, pAddress);
   //
   // save to file in captured mode (BFM only)
   //
@@ -290,7 +292,7 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
 #endif
   //
   while (timeOut > 0) {
-    rdDat = cep_read(coreIndex, pAddress);
+    rdDat = cep_read64(coreIndex, pAddress);
     if (((rdDat ^ pData) & mask) == 0) {
       break;
     }

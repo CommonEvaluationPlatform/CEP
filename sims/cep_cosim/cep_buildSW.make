@@ -328,10 +328,6 @@ endif
 # -----------------------------------------------------------------------
 # Libray build targets
 # -----------------------------------------------------------------------
-V2C_LIB            		:= ${LIB_DIR}/v2c_lib.a
-VPP_LIB            		:= ${LIB_DIR}/libvpp.so
-RISCV_LIB          		:= ${LIB_DIR}/riscv_lib.a
-
 # v2c_lib.a : src/cep_tests/diag/share
 ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
 	$(AR) crv $@ \

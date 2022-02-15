@@ -15,7 +15,7 @@
 #include "cepSrotTest.h"
 #include "cep_srot.h"
 #include "CEP.h"
-#include "cepregression.h"
+#include "portable_io.h"
 #include "random48.h"
 
 #include "cep_apis.h"
@@ -42,18 +42,18 @@ uint8_t send_srot_message(int verbose, uint64_t message) {
   //
   // Send a message to the SRoT
   //
-  cep_write(SROT_INDEX, SROT_LLKIC2_SENDRECV_ADDR, message);
+  cep_write64(SROT_INDEX, SROT_LLKIC2_SENDRECV_ADDR, message);
 
   // Poll the response waiting bit
-  //do {;} while (!(cep_read(SROT_BASE_K, SROT_CTRLSTS_ADDR) & SROT_CTRLSTS_RESP_WAITING_MASK));
+  //do {;} while (!(cep_read64(SROT_BASE_K, SROT_CTRLSTS_ADDR) & SROT_CTRLSTS_RESP_WAITING_MASK));
   while (timeOut > 0) {
-    if (cep_read(SROT_INDEX, SROT_CTRLSTS_ADDR) & SROT_CTRLSTS_RESP_WAITING_MASK) break;
+    if (cep_read64(SROT_INDEX, SROT_CTRLSTS_ADDR) & SROT_CTRLSTS_RESP_WAITING_MASK) break;
     timeOut--;
     if (timeOut == 0) return 0xff; // bad!!
   }
   
   // Read the response
-  response_message = cep_read(SROT_INDEX, SROT_LLKIC2_SENDRECV_ADDR);
+  response_message = cep_read64(SROT_INDEX, SROT_LLKIC2_SENDRECV_ADDR);
 
   // Return the status
   return((uint8_t)llkic2_extract_status(response_message));
@@ -79,7 +79,7 @@ int cepSrotTest_maxKeyTest(int cpuId, int verbose) {
   LOGI("%s : Initializing Key RAM to all Ones\n",__FUNCTION__);
 
   for (int i = 0; i < MAX_LLKI_KEY_SIZE; i++) {
-    cep_write(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), (uint64_t)-1);
+    cep_write64(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), (uint64_t)-1);
   }
 
   //
@@ -109,7 +109,7 @@ int cepSrotTest_maxKeyTest(int cpuId, int verbose) {
           // BAD!!! Keys=0xFFFF...FFF...
           // -----------------------
           for (int i = 0; i < kSize; i++) {
-            cep_write(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), (uint64_t) - 1);
+            cep_write64(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), (uint64_t) - 1);
           }
           break;
         case 1:
@@ -117,7 +117,7 @@ int cepSrotTest_maxKeyTest(int cpuId, int verbose) {
           // Inverted Key
           // -----------------------
           for (int i = 0; i < kSize; i++) {
-            cep_write(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), ~kPtr[i]);
+            cep_write64(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), ~kPtr[i]);
           }
           break;
         case 2:
@@ -125,7 +125,7 @@ int cepSrotTest_maxKeyTest(int cpuId, int verbose) {
           //  BAD LEN : max len Key with the front end = expected key
           // -----------------------
           for (int i = 0; i < kSize; i++) {
-            cep_write(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), kPtr[i]);
+            cep_write64(SROT_INDEX, SROT_KEYRAM_ADDR + (i*8), kPtr[i]);
           }
           ks = maxKeySize - 1;
           break;
@@ -138,7 +138,7 @@ int cepSrotTest_maxKeyTest(int cpuId, int verbose) {
 
       // Load the Key Index (based on the currently selected core) in the Key Index RAM
       LOGI("%s : Loading the Key Index into the Key Index RAM\n",__FUNCTION__);
-      cep_write(SROT_INDEX, SROT_KEYINDEXRAM_ADDR + key_index * 8, key_index_pack( 0x0000,   // low pointer
+      cep_write64(SROT_INDEX, SROT_KEYINDEXRAM_ADDR + key_index * 8, key_index_pack( 0x0000,   // low pointer
                   ks,            // high pointer
                   core_index,    // core index
                   0x1));         // Valid

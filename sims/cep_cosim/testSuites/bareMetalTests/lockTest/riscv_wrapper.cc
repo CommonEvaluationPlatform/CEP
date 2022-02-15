@@ -13,7 +13,7 @@
 #ifdef BARE_MODE
   #include "cep_adrMap.h"
   #include "cep_apis.h"
-  #include "cepregression.h"
+  #include "portable_io.h"
   #include "cepLockTest.h"
 
   #ifdef __cplusplus

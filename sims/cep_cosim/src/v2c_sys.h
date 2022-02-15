@@ -16,14 +16,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-
-/* ================================= */
-/* For comunication stuffs           */
-/* ================================= */
-//#include "v2c_ipc.h"
-//#include <string.h>
-//#include <stdarg.h>
-
 extern char bStr[128];
 #define WAVE_START    0x1
 #define WAVE_STOP     0x2
@@ -34,7 +26,6 @@ extern char bStr[128];
 #define PARTIAL_MC    0x10
 #define FRONTDOOR_MC  0x20
 
-// =================================
 #ifndef DLL_SIM
 #include "v2c_cmds.h"
 
@@ -52,5 +43,4 @@ extern "C" {
 
 #endif
 
-/* ================================= */
 #endif

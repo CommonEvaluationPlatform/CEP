@@ -42,8 +42,6 @@ void sim_Write32_16(u_int32_t adr, u_int16_t data) { access axc; axc.Write32_16(
 void sim_Write32_8(u_int32_t adr, u_int8_t data) { access axc; axc.Write32_8(adr,data); }
 void sim_Write32_64(u_int32_t adr, u_int64_t data) { access axc; axc.Write32_64(adr,data); }
 void sim_Write64_64(u_int64_t adr, u_int64_t data) { access axc; axc.Write64_64(adr,data); }
-void sim_Framer_RdWr(u_int32_t adr, u_int32_t wrDat, u_int32_t *rdDat) { access axc; axc.Framer_RdWr(adr,wrDat,rdDat); }
-void sim_Sample_RdWr(u_int32_t adr, u_int64_t wrDat, u_int64_t *rdDat) { access axc; axc.Sample_RdWr(adr,wrDat,rdDat); }
 void sim_WriteDvtFlag(int msb, int lsb, int val) { access axc; axc.WriteDvtFlag(msb,lsb,val); }  
 u_int64_t  sim_ReadDvtFlag(int msb, int lsb) { access axc; return axc.ReadDvtFlag(msb,lsb); } 
 int  sim_SetInActiveStatus(void) { access axc; return axc.SetInActiveStatus(); }

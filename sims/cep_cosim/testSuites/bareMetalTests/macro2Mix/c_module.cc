@@ -19,7 +19,7 @@
 #include "cep_adrMap.h"
 #include "cep_apis.h"
 #include "simdiag_global.h"
-#include "cepregression.h"
+#include "portable_io.h"
 #include "simPio.h"
 
 //

@@ -12,9 +12,8 @@
 // For bareMetal mode ONLY
 #ifdef BARE_MODE
   #include "cep_apis.h"
-  #include "cepregression.h"
-  #include "CEP.h"
   #include "portable_io.h"
+  #include "CEP.h"
   #include "cep_riscv.h"
   
   #ifdef __cplusplus

@@ -22,106 +22,90 @@
 #include "stdTypes.h"
 #endif
 
+#ifdef SIM_ENV_ONLY
+  #include "shIpc.h"
+  #include "shLog.h"
+  #include "shMem.h"
+  #include "log.h"
+#endif
 //
 // this is where the overloads are happening depend on plaform setting
 //
-#include "portable_io.h"
-#include "simdiag_global.h"
+//#include "portable_io.h"
+//#include "simdiag_global.h"
 
 
-#ifdef SIM_ENV_ONLY
-  #include "v2c_cmds.h"
-  #include "v2c_sys.h"
-
-  #ifdef DLL_SIM
-    #include "log.h"
-  #else
-    #include "shMem.h"
-    #include "shLog.h"
-  #endif
-#endif
+//#ifdef SIM_ENV_ONLY
+//  #include "v2c_cmds.h"
+//  #include "v2c_sys.h"
+//
+//  #ifdef DLL_SIM
+//    #include "log.h"
+//  #else
+//    #include "shMem.h"
+//    #include "shLog.h"
+//  #endif
+//#endif
 
 //
 // Access  Class
 // 
 
-// define for GetPinValue
-#define CPU_INT_PIN     0
-
 extern int gActiveSlotId;
 extern int gActiveLocalId;
 
-// use this as baseclass
-//
 class access {
   // public stuffs
-public:
-  //
-  // constructors
-  //
-  access();
-  access(int slotId, int localId, int verbose=1);
-  ~access(); 
+  public:
+    access();
+    access(int slotId, int localId, int verbose=1);
+    ~access(); 
 
-  //
-  // Set/Get
-  //
-  void SetSemaId(int value) { mSlotId = value; }
-  int GetSetProgStatus(int semaId, int newStatus);
+    // Set/Get
+    void      SetSemaId(int value) { mSlotId = value; }
+    int       GetSetProgStatus(int semaId, int newStatus);
 
-  void SetSlotId(int value) { mSlotId = value; }
-  void SetLocalId(int value) { mLocalId = value; }
+    void      SetSlotId(int value) { mSlotId = value; }
+    void      SetLocalId(int value) { mLocalId = value; }
 
-  int GetVerbose() { return mLogLevelMask & mVerbose; }
-  void SetVerbose(int value) { mVerbose = value; }
+    int       GetVerbose() { return mLogLevelMask & mVerbose; }
+    void      SetVerbose(int value) { mVerbose = value; }
 
-  int GetSlotId() { return mSlotId; }
-  int GetLocalId() { return mLocalId; }
+    int       GetSlotId() { return mSlotId; }
+    int       GetLocalId() { return mLocalId; }
 
-  //
-  // Address is Byte Address
-  //
-  int  Atomic_Rdw64(u_int64_t address, int param, int mask, u_int64_t *data);
-  int  Write64_BURST(u_int64_t address, int wordCnt, u_int64_t *dat);
-  int  Read64_BURST (u_int64_t address, int wordCnt, u_int64_t *dat);
+    int       Atomic_Rdw64(u_int64_t address, int param, int mask, u_int64_t *data);
+    int       Write64_BURST(u_int64_t address, int wordCnt, u_int64_t *dat);
+    int       Read64_BURST (u_int64_t address, int wordCnt, u_int64_t *dat);
 
-  void Write32_64(u_int32_t address, u_int64_t dat);
-  void Write64_64(u_int64_t address, u_int64_t dat);  
-  void Write32_32(u_int32_t address, u_int32_t dat);
-  void Write32_16(u_int32_t address, u_int16_t dat);
-  void Write32_8(u_int32_t address, u_int8_t dat);
+    void      Write32_64(u_int32_t address, u_int64_t dat);
+    void      Write64_64(u_int64_t address, u_int64_t dat);  
+    void      Write32_32(u_int32_t address, u_int32_t dat);
+    void      Write32_32ite32_16(u_int32_t address, u_int16_t dat);
+    void      Write32_8(u_int32_t address, u_int8_t dat);
+    void      Write32_16(u_int32_t, u_int16_t);
 
+    unsigned  GetSimClk();
+    void      SimCheckPoint(char *saveFile);
+    u_int64_t Read32_64(u_int32_t address);
+    u_int32_t Read32_32(u_int32_t address);
+    u_int16_t Read32_16(u_int32_t address);
+    u_int8_t  Read32_8(u_int32_t address);
+    u_int64_t Read64_64(u_int64_t address);    
 
-  unsigned GetSimClk();
-  void SimCheckPoint(char *saveFile);
-  u_int64_t Read32_64(u_int32_t address);
-  u_int32_t Read32_32(u_int32_t address);
-  u_int16_t Read32_16(u_int32_t address);
-  u_int8_t Read32_8(u_int32_t address);
+    int       ReadNCompare(unsigned address, unsigned expDat, unsigned mask=0xFFFFFFFF);
+    void      RunClk(int numClk);
 
-  u_int64_t Read64_64(u_int64_t address);    
-
-  //
-  // to support showTime
-  //
-  int Framer_RdWr(u_int32_t address, u_int32_t wrDat, u_int32_t *rdDat);
-  int Sample_RdWr(u_int32_t address, u_int64_t wrDat, u_int64_t *rdDat);  
-  //
-  int ReadNCompare(unsigned address, unsigned expDat, unsigned mask=0xFFFFFFFF);
-
-  void RunClk(int numClk);
-
-  void SetUseShIpcFlag(int value) { mUseShIpc = value; }
-  int GetUseShIpcFlag() { return mUseShIpc; }
-  int EnableShIpc(int onOff);
-  void MaybeAThread();
-
-  int  SetInActiveStatus(void);
+    void      SetUseShIpcFlag(int value) { mUseShIpc = value; }
+    int       GetUseShIpcFlag() { return mUseShIpc; }
+    int       EnableShIpc(int onOff);
+    void      MaybeAThread();
+    int       SetInActiveStatus(void);
   
-  void WriteDvtFlag(int msb, int lsb, int value) ;
-  u_int64_t  ReadDvtFlag(int msb, int lsb) ;
-  int  ReadStatus(); // Flow control
-  int  ReadErrorCount(); // Flow control
+    void      WriteDvtFlag(int msb, int lsb, int value) ;
+    u_int64_t ReadDvtFlag(int msb, int lsb) ;
+    int       ReadStatus(); // Flow control
+    int       ReadErrorCount(); // Flow control
 
 #ifdef SIM_ENV_ONLY
   shIpc *ptr;
@@ -133,6 +117,7 @@ public:
   void Print(const char *fmt, ...);
 
 protected:
+  
   // members
   int mSlotId;
   int mLocalId;

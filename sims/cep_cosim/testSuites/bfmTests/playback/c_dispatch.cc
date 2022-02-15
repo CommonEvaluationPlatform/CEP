@@ -16,7 +16,7 @@
 #include "cep_apis.h"
 #include "cep_adrMap.h"
 #include "simPio.h"
-#include "cepregression.h"
+#include "portable_io.h"
 /*
  * main 
  */

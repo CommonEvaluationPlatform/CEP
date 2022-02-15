@@ -85,6 +85,7 @@ V2C_TAB_FILE				:= ${PLI_DIR}/v2c.tab
 BUILD_HW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildHW.make
 BUILD_SW_MAKEFILE			:= ${COSIM_TOP_DIR}/cep_buildSW.make
 CADENCE_MAKE_FILE 			:= ${COSIM_TOP_DIR}/cadence.make
+V2C_LIB            			:= ${LIB_DIR}/v2c_lib.a
 VPP_LIB 					:= ${LIB_DIR}/libvpp.so
 VPP_SV_LIB 					:= ${LIB_DIR}/libvpp
 RISCV_LIB 					:= ${LIB_DIR}/riscv_lib.a

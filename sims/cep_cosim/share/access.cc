@@ -9,9 +9,9 @@
 //
 //************************************************************************
 
+#include "access.h"
 #include "stdTypes.h"
 #include "random48.h"
-#include "access.h"
 
 // global
 int gActiveSlotId=0;
@@ -283,30 +283,6 @@ u_int64_t access::Read64_64(u_int64_t address) {
   }
 #endif
   return data;
-}
-
-int access::Framer_RdWr(u_int32_t address, u_int32_t wrDat, u_int32_t *rdDat) {
-  int errCnt=0;
-#ifdef SIM_ENV_ONLY
-  //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
-    ptr->Framer_RdWr(address,wrDat,rdDat);
-    if (0) { // GetVerbose()) {
-      LOGI("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
-    }
-#endif
-    return errCnt;
-}
-
-int access::Sample_RdWr(u_int32_t address, u_int64_t wrDat, u_int64_t *rdDat) {
-  int errCnt=0;
-#ifdef SIM_ENV_ONLY
-  //shIpc *ptr = GlobalShMemory.getIpcPtr(GetSlotId(),GetLocalId());
-    ptr->Sample_RdWr(address,wrDat,rdDat);
-    if (0) { // GetVerbose()) {
-      LOGI("access::Framer_RdWr mSlotId=%d mLocalId=%d address=%08x dat=%08x/%08x\n",mSlotId,mLocalId,address,wrDat,*rdDat);
-    }
-#endif
-    return errCnt;
 }
 
 //

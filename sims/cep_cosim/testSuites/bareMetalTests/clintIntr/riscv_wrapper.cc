@@ -18,7 +18,7 @@
 #include "portable_io.h"
 
 #include "cepRegTest.h"
-#include "cepregression.h"
+#include "portable_io.h"
 
 #include "riscv_wrapper.h"
 
