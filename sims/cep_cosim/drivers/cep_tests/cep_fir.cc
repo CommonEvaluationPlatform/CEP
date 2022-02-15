@@ -22,7 +22,6 @@ extern void *memcpy(void* dest, const void* src, int len);
 #include "simdiag_global.h"
 #include "portable_io.h"
 #include "CEP.h"
-#include "portable_io.h"
 #include "random48.h"
 //
 //

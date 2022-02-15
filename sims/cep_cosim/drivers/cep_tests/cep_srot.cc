@@ -24,9 +24,7 @@
 #include <string.h>
 #include "cep_srot.h"
 #include "simdiag_global.h"
-#include "portable_io.h"
 #include "CEP.h"
-#include "portable_io.h"
 #include "random48.h"
 #include "cep_adrMap.h"
 #include "portable_io.h"
@@ -191,8 +189,8 @@ int cep_srot::EnableLLKI (uint8_t KeyIndex)
                     KeyIndex,               // Key Index
                     0xDEADBE));             // rsvd1
   
-  // Poll the response waiting bit
-  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 1000);
+  // Poll the response waiting bit.. acknowledging that he timeout needs to accomodate the LONGEST key
+  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 2000);
   
   // Read and check the response
   status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));

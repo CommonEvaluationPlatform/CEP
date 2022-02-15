@@ -19,7 +19,6 @@
 #include "simdiag_global.h"
 #include "portable_io.h"
 #include "CEP.h"
-#include "portable_io.h"
 #include "random48.h"
 
 void cep_crypto::init(int coreIndex) {

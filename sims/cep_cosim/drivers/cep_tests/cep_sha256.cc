@@ -21,10 +21,7 @@
 #include "simdiag_global.h"
 #include "portable_io.h"
 #include "CEP.h"
-#include "portable_io.h"
 #include "random48.h"
-//
-//
 
 cep_sha256::cep_sha256(int coreIndex, int seed, int verbose) {
   init(coreIndex);

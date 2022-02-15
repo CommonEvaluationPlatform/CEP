@@ -20,11 +20,7 @@
 #include "simdiag_global.h"
 #include "portable_io.h"
 #include "CEP.h"
-#include "portable_io.h"
 #include "random48.h"
-//
-//
-
 
 cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed, verbose) {
   init(coreIndex);
