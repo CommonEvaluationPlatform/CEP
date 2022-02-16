@@ -18,9 +18,19 @@ ifndef RISCV
 $(error CEP_COSIM: RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
+# Set the default tool based on the OS Distro.  This can be override from the command line
+ifneq (, $(shell hostnamectl | grep "Ubuntu"))
+	MODELSIM        		?= 1
+	CADENCE 				?= 0
+else ifneq (, $(shell hostnamectl | grep "Red Hat"))
+	MODELSIM        		?= 0
+	CADENCE 				?= 1
+else
+	MODELSIM        		?= 1
+	CADENCE 				?= 0
+endif
+
 # The following flags / variables can be overridden by lower level makefiles or the command line
-MODELSIM        			?= 1
-CADENCE 					?= 0
 NOWAVE          			?= 1
 PROFILE         			?= 0
 COVERAGE        			?= 0
@@ -131,6 +141,7 @@ sim_info:
 	@echo "CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           "
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
 	@echo ""
+	@echo " CEP_COSIM:"$(shell hostnamectl | grep "Operating System")
 	@echo " CEP_COSIM: Running with the following variables:"
 	@echo " CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
