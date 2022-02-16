@@ -276,7 +276,7 @@ int cep_crypto::cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,ui
       break;
     }
     USEC_SLEEP(100);
-    if (GetVerbose(2) && timeOut % 100 == 0) { LOGI("%s: coreIndex = %0d, pAddress = 0x%08x\n, current timeOut count = %0d\n",__FUNCTION__,coreIndex, pAddress, timeOut); }
+    if (GetVerbose(2) && timeOut % 100 == 0) { LOGI("%s: coreIndex = %0d, pAddress = 0x%08x, current timeOut count = %0d\n",__FUNCTION__,coreIndex, pAddress, timeOut); }
     timeOut--;
   };
   
