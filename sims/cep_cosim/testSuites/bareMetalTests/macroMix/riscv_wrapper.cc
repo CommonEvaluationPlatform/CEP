@@ -35,7 +35,7 @@
   int cep_readNspin(int coreIndex, uint32_t pAddress,uint64_t pData,uint64_t mask, int timeOut) {
     uint64_t rdDat;
     while (timeOut > 0) {
-      rdDat = cep_read(coreIndex, pAddress);
+      rdDat = cep_read64(coreIndex, pAddress);
       if (((rdDat ^ pData) & mask) == 0) {
         break;
       }
@@ -66,7 +66,7 @@
       upper = SROT_adrBase + SROT_adrSize;
       lower = SROT_adrBase;
       errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, SROT_size, 0);
-      cep_write(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+      cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
       upper = AES_adrBase + AES_adrSize;
       lower = AES_adrBase;
       errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, AES_size, 0);    
