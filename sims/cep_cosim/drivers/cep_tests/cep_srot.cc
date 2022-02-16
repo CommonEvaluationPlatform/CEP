@@ -61,11 +61,7 @@ int cep_srot::InitKeyIndexRAM (void)
   int errCnt = 0;
 
   if (GetVerbose()) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Initializing the KEY Index RAM...                      \n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("\n");
+    LOGI("%s: Initializing the KEY Index RAM\n",__FUNCTION__);
   }
 
   // The cep_writeNcapture function uses an offset from the current "core's" base address
@@ -98,11 +94,7 @@ int cep_srot::LoadLLKIKey (uint8_t KeyIndex, uint8_t CoreIndex, uint16_t LowPoin
 
   // Load the Key material into the Key RAM
   if (GetVerbose(2)) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Loading a key into the Key RAM...                      \n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("\n");
+    LOGI("%s: Loading a key into the Key RAM\n",__FUNCTION__);
   }
   if (invertType == INVERT_ALTERNATE) {
     mInvertMask = 0x5555555555555555LLU;
@@ -116,11 +108,7 @@ int cep_srot::LoadLLKIKey (uint8_t KeyIndex, uint8_t CoreIndex, uint16_t LowPoin
   
   // Load a valid key index
   if (GetVerbose(2)) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Loading a valid key index...                        \n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("\n");
+    LOGI("%s: Loading a valid key index\n",__FUNCTION__);
   }
   cep_writeNcapture(SROT_KEYINDEXRAM_ADDR + KeyIndex*8, key_index_pack(
                       LowPointer,     // low pointer
@@ -147,11 +135,7 @@ int cep_srot::SetOperationalMode (void)
   int errCnt = 0;
 
   if (GetVerbose(2)) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Switching the LLKI from DEBUG to OPERATIONAL mode...\n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("\n");
+    LOGI("%s: Switching the LLKI from DEBUG to OPERATIONAL mode\n",__FUNCTION__);
   }
   cep_writeNcapture(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_MODEBIT0_MASK | SROT_CTRLSTS_MODEBIT1_MASK);
 
@@ -173,12 +157,7 @@ int cep_srot::EnableLLKI (uint8_t KeyIndex)
 
   //
   if (GetVerbose(2)) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Issuing a Load Key Request to the SRoT and waiting  \n",__FUNCTION__);
-    LOGI("%s: for the response...                                 \n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("\n");
+    LOGI("%s: Issuing a Load Key Request to the SRoT\n",__FUNCTION__);
   }
 
   // Write a word to the LLKI C2 Send FIFO
@@ -214,11 +193,7 @@ int cep_srot::DisableLLKI (uint8_t KeyIndex)
   uint8_t   status = 0;
 
   if (GetVerbose(2)) {
-    LOGI("\n");
-    LOGI("----------------------------------------------------------------------------\n");
-    LOGI("%s: Issuing a Clear Key Request to the SRoT and waiting  \n",__FUNCTION__);
-    LOGI("%s: for the response...                                  \n",__FUNCTION__);
-    LOGI("----------------------------------------------------------------------------\n");
+    LOGI("%s: Issuing a Clear Key Request to the SRoT\n",__FUNCTION__);
     LOGI("\n");
   }
   // Write a word to the LLKI C2 Send FIFO
