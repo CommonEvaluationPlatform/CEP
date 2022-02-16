@@ -20,7 +20,6 @@
   #include "portable_io.h"
   #include "CEP.h"
   #include "cepRegTest.h"
-  #include "portable_io.h"
 
   // Include the test vectors related to this test
   #include "SROT_playback.h"
@@ -59,9 +58,6 @@
     
     set_printf(0);
   
-    // Initialize the core data structures to allow for the use of I/O routines in cepregression
-    initConfig();
-
     // Set the current core's status to running
     set_cur_status(CEP_RUNNING_STATUS);
 

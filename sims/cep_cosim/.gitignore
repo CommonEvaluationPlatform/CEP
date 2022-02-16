@@ -22,6 +22,5 @@ vsim.do
 **/*.dump
 include/cep_adrMap.h
 include/v2c_cmds.h
-drivers/vectors/*
 generated-src/
 CHIPYARD_BUILD_INFO.make
