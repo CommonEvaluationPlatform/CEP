@@ -227,7 +227,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
 
     val io = IO(new Bundle {
       // Clock and Reset
-      val sys_clk_50          = Input(Clock())
+      val sys_clk             = Input(Clock())
       val sync_rst_in         = Input(Reset())
       val sync_rst_in_dut     = Input(Reset())
 
@@ -311,7 +311,7 @@ class gpsTLModuleImp(coreparams: COREParams, outer: gpsTLModule) extends LazyMod
   val l_code_valid                 = Wire(Bool())
 
   // Map the blackbox I/O 
-  gps_inst.io.sys_clk_50         := clock                                      // Implicit module clock
+  gps_inst.io.sys_clk            := clock                                      // Implicit module clock
   gps_inst.io.sync_rst_in        := reset
   gps_inst.io.sync_rst_in_dut    := (reset.asBool || gps_reset).asAsyncReset 
                                                                                         // Implicit module reset
