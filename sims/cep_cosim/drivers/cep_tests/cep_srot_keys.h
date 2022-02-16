@@ -719,6 +719,14 @@ const uint64_t  CMU_SHA256_TSS_KEY[]    = {
   0x00787981E0C00008
 };
 
+const uint64_t  CMU_GPS_LBLL_TSS_KEY[]    = {
+  0x22C3FA22862F0100,
+  0x2839C91417392A65,
+  0x14C02A684001C199,
+  0x381148149B0EF430
+};
+
+
 //Key info struct for unlocking LLKI cores.
 typedef struct cep_key_info_t {
     const char      *name;              //
@@ -741,22 +749,22 @@ typedef struct cep_key_info_t {
 // KeyLength = High Pointer - Low Pointer + 1
 //
 const cep_key_info_t KEY_DATA[CEP_LLKI_CORES] = {
-  {"AES",      AES_MOCK_TSS_KEY,      0,   1,   INVERT_ALL_BITS},
-  {"MD5",      MD5_MOCK_TSS_KEY,      2,   9,   INVERT_ALL_BITS},
-  {"SHA256.0", CMU_SHA256_TSS_KEY,   10,  517,  INVERT_ALL_BITS},
-  {"SHA256.1", SHA256_MOCK_TSS_KEY, 518,  525,  INVERT_ALL_BITS},
-  {"SHA256.2", SHA256_MOCK_TSS_KEY, 526,  533,  INVERT_ALL_BITS},
-  {"SHA256.3", SHA256_MOCK_TSS_KEY, 534,  541,  INVERT_ALL_BITS},
-  {"RSA",      RSA_MOCK_TSS_KEY,    542,  542,  INVERT_ALL_BITS},
-  {"DES3",     DES3_MOCK_TSS_KEY,   543,  543,  INVERT_ALL_BITS},
-  {"DFT",      DFT_MOCK_TSS_KEY,    544,  544,  INVERT_ALL_BITS},
-  {"IDFT",     IDFT_MOCK_TSS_KEY,   545,  545,  INVERT_ALL_BITS},
-  {"FIR",      FIR_MOCK_TSS_KEY,    546,  546,  INVERT_ALTERNATE},
-  {"IIR",      IIR_MOCK_TSS_KEY,    547,  547,  INVERT_ALTERNATE},
-  {"GPS.0",    GPS_MOCK_TSS_KEY,    548,  552,  INVERT_ALL_BITS},
-  {"GPS.1",    CMU_GPS_TSS_KEY,     553,  678,  INVERT_ALL_BITS},
-  {"GPS.2",    GPS_MOCK_TSS_KEY,    679,  683,  INVERT_ALL_BITS},
-  {"GPS.3",    GPS_MOCK_TSS_KEY,    684,  688,  INVERT_ALL_BITS}
+  {"AES",      AES_MOCK_TSS_KEY,        0,   1,   INVERT_ALL_BITS},
+  {"MD5",      MD5_MOCK_TSS_KEY,        2,   9,   INVERT_ALL_BITS},
+  {"SHA256.0", CMU_SHA256_TSS_KEY,     10,  517,  INVERT_ALL_BITS}, // CMU Core
+  {"SHA256.1", SHA256_MOCK_TSS_KEY,   518,  525,  INVERT_ALL_BITS},
+  {"SHA256.2", SHA256_MOCK_TSS_KEY,   526,  533,  INVERT_ALL_BITS},
+  {"SHA256.3", SHA256_MOCK_TSS_KEY,   534,  541,  INVERT_ALL_BITS},
+  {"RSA",      RSA_MOCK_TSS_KEY,      542,  542,  INVERT_ALL_BITS},
+  {"DES3",     DES3_MOCK_TSS_KEY,     543,  543,  INVERT_ALL_BITS},
+  {"DFT",      DFT_MOCK_TSS_KEY,      544,  544,  INVERT_ALL_BITS},
+  {"IDFT",     IDFT_MOCK_TSS_KEY,     545,  545,  INVERT_ALL_BITS},
+  {"FIR",      FIR_MOCK_TSS_KEY,      546,  546,  INVERT_ALTERNATE},
+  {"IIR",      IIR_MOCK_TSS_KEY,      547,  547,  INVERT_ALTERNATE},
+  {"GPS.0",    CMU_GPS_LBLL_TSS_KEY,  548,  551,  INVERT_ALL_BITS}, // CMU Core
+  {"GPS.1",    CMU_GPS_TSS_KEY,       552,  677,  INVERT_ALL_BITS},
+  {"GPS.2",    GPS_MOCK_TSS_KEY,      678,  682,  INVERT_ALL_BITS},
+  {"GPS.3",    GPS_MOCK_TSS_KEY,      683,  687,  INVERT_ALL_BITS}
 };
 
 #endif
