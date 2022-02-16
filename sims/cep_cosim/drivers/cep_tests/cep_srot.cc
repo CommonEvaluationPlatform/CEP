@@ -38,7 +38,7 @@ cep_srot::cep_srot(int coreIndex, int statusIndex, int verbose) {
   mStatusIndex = statusIndex;
   
   // Default Timeout Parameter
-  maxTO = 5000;
+  maxTO = 6000;
   
   // Set the verbosity
   SetVerbose(verbose);
@@ -169,7 +169,7 @@ int cep_srot::EnableLLKI (uint8_t KeyIndex)
                     0xDEADBE));             // rsvd1
   
   // Poll the response waiting bit.. acknowledging that he timeout needs to accomodate the LONGEST key
-  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 5000);
+  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
   
   // Read and check the response
   status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -205,7 +205,7 @@ int cep_srot::DisableLLKI (uint8_t KeyIndex)
                     0xDEADBE));             // rsvd1
   
   // Poll the response waiting bit
-  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 1000);
+  cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
   
   // Read and check the response
   status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -405,7 +405,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -428,7 +428,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -447,7 +447,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -466,7 +466,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -485,7 +485,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -504,7 +504,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -523,7 +523,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -542,7 +542,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
@@ -561,7 +561,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
                       0xDEADBE));             // rsvd1
   
     // Poll the response waiting bit
-    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, 100);
+    cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
