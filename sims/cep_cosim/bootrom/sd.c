@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------------
-// Copyright 2021 Massachusetts Institute of Technology
+// Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
 // File Name:      sd.c
@@ -240,7 +240,7 @@ void print_greeting()
     kputs("       .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                      "); 
     kputs("                                                                             ");
     kputs("                  Common Evaluation Platform v3.5Alpha1                      ");
-    kputs("         Copyright 2021 Massachusetts Institute of Technology                ");
+    kputs("         Copyright 2022 Massachusets Institute of Technology                ");
     kputs("                                                                             ");
     kputs("                                                                             ");
     kputs("");

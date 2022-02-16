@@ -1,5 +1,5 @@
 //************************************************************************
-// Copyright 2021 Massachusetts Institute of Technology
+// Copyright 2022 Massachusets Institute of Technology
 //
 // File Name:      srot_playback.h
 // Program:        Common Evaluation Platform (CEP)

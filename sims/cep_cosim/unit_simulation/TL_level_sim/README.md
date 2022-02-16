@@ -1,4 +1,4 @@
-[//]: # (Copyright 2021 Massachusetts Institute of Technology)
+[//]: # (Copyright 2022 Massachusets Institute of Technology)
 [//]: # (SPDX short identifier: BSD-2-Clause)
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)

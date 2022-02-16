@@ -1,5 +1,5 @@
 //************************************************************************
-// Copyright 2021 Massachusetts Institute of Technology
+// Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
 // File Name:      
@@ -100,7 +100,7 @@ void handle_fault_giga(uintptr_t addr, uintptr_t cause)
 
 #endif
 //************************************************************************
-// Copyright 2021 Massachusetts Institute of Technology
+// Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
 // File Name:      
