@@ -32,6 +32,8 @@ TEST_LIST 		= 		\
 	lockTest 			\
 	macroMix 			\
 	macro2Mix 			\
+	macro3Mix 			\
+	macro4Mix 			\
 	miscTests 			\
 	multiLock 			\
 	plicPrioIntr 		\
@@ -42,7 +44,7 @@ TEST_LIST 		= 		\
 # Tests yet to run/fix/debug
 #extIntr
 #lsrcOps
-#macro2Mix
+
 
 runAll: 
 	make cleanAll
