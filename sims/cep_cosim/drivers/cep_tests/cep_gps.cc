@@ -196,6 +196,11 @@ int cep_gps::ReadNCheckP_Code(void) {
   }
 #endif
 
+  for (int i = 0; i < 16; i ++ ) {
+    if (mHwPt[i] != mSwPt[i])
+      errCnt ++;
+  }
+
   return errCnt;
 
 }
@@ -380,12 +385,12 @@ int cep_gps::ReadNCheckCA_Code(void)
   mActCaCode[1]   = (word >> 16) & 0x1F;
 
   for (int i = 0; i < 2; i ++ ) {
-    errCnt += (mActCaCode[i] ^ mExpCaCode[i]);
+    if (mActCaCode[i] != mExpCaCode[i])
+      errCnt ++;
   }
 
   return errCnt;
 }
-
 
 int cep_gps::RunSingle() {
   int outLen = mBlockSize;
@@ -422,74 +427,6 @@ int cep_gps::RunSingle() {
   }
 
   return errCnt;
-}
-
-int cep_gps::RunGpsTest(int maxLoop) {
-
-  // Need to take it out of reset to support unit sim due to LLKI!!!
-  mErrCnt = 0;
-  BusReset();
-  SetSvNum(0);   // so GPS can detect a change
-
-  //Initialize mKEY with 0xAAAA... for first iteration
-  for (int i = 0; i < 192 / 8 ; i++) {
-    mKEY[i] = 0xAA;
-  }
-  
-  //Check first 128 bits of all SAT numbers
-  //Except sat=1, for that get 2nd 128 bits for a total of 256.
-  for (int i = 1 ; i <= maxLoop; i++) {
-    if (GetVerbose()) {
-      LOGI("%s: Loop %d\n",__FUNCTION__,i);
-    }
-
-    LoadKey();
-    ResetCA_Code();
-    SetSvNum(i);
-
-    mErrCnt += RunSingle();
-
-    if (i==1) { //Initialize mKEY with 0x555... for second iteration (to force coverage), randomize afterward
-      for (int i=0;i<192/8;i++) {
-        mKEY[i] = 0x55;
-      }
-    } else {
-      RandomGen(mKEY, GetKeySize()); //Pick a random encryption key for the next iteration of the run
-    }
-
-    MarkSingle(i);
-
-    if (mErrCnt) break;
-
-  } // for (int i=1 ; i <= maxLoop; i++)
-
-  if (!mErrCnt) {
-    //HW Coverage test:
-    SetSvNum(0);   // so GPS can detect a change
-    RandomGen(mKEY, GetKeySize());
-    LoadKey();
-    
-    // Static mode, the initialization vectors will NOT be changed
-    if (!mStaticPCodeInit) {
-      SetPcodeXnInit(120, 3666, 766, 1474); //_A loops over 10 values, _B loops over 9 values.
-      SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
-    } // if (!mLegacyPCode)
-
-    ResetCA_Code();
-    SetSvNum(1);
-    
-    //Need to record a total of 3*24*10 = 720 bits total. This requires 6 loops.
-    for (int i=0;i<=6;i++) {
-      if (GetVerbose()) {
-  LOGI("%s: Coverage Loop %d\n",__FUNCTION__,i);
-      }
-      mErrCnt += RunSingle();
-      //MarkSingle(i+maxLoop+1);
-      if (mErrCnt) break;
-    }
-  }
-  //
-  return mErrCnt;
 }
 
 int cep_gps::xor_bits(unsigned x) {
@@ -605,3 +542,72 @@ uint8_t cep_gps::pcode_lookup(uint8_t * x_buf, uint64_t index, uint8_t prn) {
 
     return p_x1 ^ p_x2;
 }
+
+int cep_gps::RunGpsTest(int maxLoop) {
+
+  // Need to take it out of reset to support unit sim due to LLKI!!!
+  mErrCnt = 0;
+  BusReset();
+  SetSvNum(0);   // so GPS can detect a change
+
+  //Initialize mKEY with 0xAAAA... for first iteration
+  for (int i = 0; i < 192 / 8 ; i++) {
+    mKEY[i] = 0xAA;
+  }
+  
+  //Check first 128 bits of all SAT numbers
+  //Except sat=1, for that get 2nd 128 bits for a total of 256.
+  for (int i = 1 ; i <= maxLoop; i++) {
+    if (GetVerbose()) {
+      LOGI("%s: Loop %d\n",__FUNCTION__,i);
+    }
+
+    LoadKey();
+    ResetCA_Code();
+    SetSvNum(i);
+
+    mErrCnt += RunSingle();
+
+    if (i==1) { //Initialize mKEY with 0x555... for second iteration (to force coverage), randomize afterward
+      for (int i=0;i<192/8;i++) {
+        mKEY[i] = 0x55;
+      }
+    } else {
+      RandomGen(mKEY, GetKeySize()); //Pick a random encryption key for the next iteration of the run
+    }
+
+    MarkSingle(i);
+
+    if (mErrCnt) break;
+
+  } // for (int i=1 ; i <= maxLoop; i++)
+
+  if (!mErrCnt) {
+    //HW Coverage test:
+    SetSvNum(0);   // so GPS can detect a change
+    RandomGen(mKEY, GetKeySize());
+    LoadKey();
+    
+    // Static mode, the initialization vectors will NOT be changed
+    if (!mStaticPCodeInit) {
+      SetPcodeXnInit(120, 3666, 766, 1474); //_A loops over 10 values, _B loops over 9 values.
+//      SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
+    } // if (!mLegacyPCode)
+
+    ResetCA_Code();
+    SetSvNum(1);
+    
+    //Need to record a total of 3*24*10 = 720 bits total. This requires 6 loops.
+    for (int i = 0; i <= 6; i++) {
+      if (GetVerbose()) {
+        LOGI("%s: Coverage Loop %d\n",__FUNCTION__,i);
+      }
+      mErrCnt += RunSingle();
+
+      if (mErrCnt) break;
+    }
+  }
+  //
+  return mErrCnt;
+}
+
