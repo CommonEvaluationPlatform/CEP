@@ -31,6 +31,7 @@ TEST_LIST 		= 		\
 	lockfreeAtomic 		\
 	lockTest 			\
 	macroMix 			\
+	macro2Mix 			\
 	miscTests 			\
 	multiLock 			\
 	plicPrioIntr 		\
