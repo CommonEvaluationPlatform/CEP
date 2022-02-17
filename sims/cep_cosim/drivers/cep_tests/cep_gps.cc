@@ -436,19 +436,15 @@ int cep_gps::RunGpsTest(int maxLoop) {
     mKEY[i] = 0xAA;
   }
   
-  LoadKey();
-  SetSvNum(1);
-  ResetCA_Code();
-  mErrCnt += RunSingle();
-
   //Check first 128 bits of all SAT numbers
   //Except sat=1, for that get 2nd 128 bits for a total of 256.
-  for (int i=1 ; i <= maxLoop; i++) {
+  for (int i = 1 ; i <= maxLoop; i++) {
     if (GetVerbose()) {
       LOGI("%s: Loop %d\n",__FUNCTION__,i);
     }
 
     LoadKey();
+    ResetCA_Code();
     SetSvNum(i);
 
     mErrCnt += RunSingle();
@@ -462,7 +458,6 @@ int cep_gps::RunGpsTest(int maxLoop) {
     }
 
     MarkSingle(i);
-    ResetCA_Code();
 
     if (mErrCnt) break;
 
