@@ -91,6 +91,7 @@ protected:
   uint16_t  m_x2a_initial;
   uint16_t  m_x2b_initial;
   uint8_t   m_x_buf[4096];
+  uint64_t  m_pcode_index;
 
   // CA Code SW implementation is a mirror of the hardware
   uint8_t   g1[11]; // [0] not used to match HW
