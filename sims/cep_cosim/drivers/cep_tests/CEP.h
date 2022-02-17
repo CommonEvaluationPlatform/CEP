@@ -71,7 +71,7 @@
         {"IIR",         IIR_CORE,         0x70080000, true, 2,  10 },     // 11 - IIR
         {"GPS_LBLL",    GPS_CORE,         0x70090000, true, 2,  38 },     // 12 - GPS_0 (CMU LBLL)
         {"GPS_REDACT",  GPS_STATIC_CORE,  0x70091000, true, 2,  38 },     // 13 - GPS_1 (CMU Redaction)
-        {"GPS_2",       GPS_CORE,         0x70092000, true, 2,  38 },     // 14 - GPS_2
+        {"GPS_2",       GPS_STATIC_CORE,  0x70092000, true, 2,  38 },     // 14 - GPS_2
         {"GPS_3",       GPS_CORE,         0x70093000, true, 2,  38 },     // 15 - GPS_3
         {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true, 0,   0 },     // 16 - CEP Version Register
         {"SROT",        SROT_CORE,        0x70200000, true, 0,   0 }};    // 17 - SRoT

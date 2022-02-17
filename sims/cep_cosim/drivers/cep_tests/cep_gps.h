@@ -15,6 +15,19 @@
 
 #define MIN_SAT 1
 #define MAX_SAT 37
+
+#define X1A_POLYNOMIAL  0b110010100000
+#define X1B_POLYNOMIAL  0b111110010011
+#define X2A_POLYNOMIAL  0b111111011101
+#define X2B_POLYNOMIAL  0b100110001110
+#define X1A_PERIOD      4092
+#define X1B_PERIOD      4093
+#define X2A_PERIOD      4092
+#define X2B_PERIOD      4093
+
+#define CHIP_RATE ((uint64_t)10230000)
+#define CODE_LENGTH (CHIP_RATE * 86400 * 7)
+
 //
 // CEP's GPS 
 //
@@ -53,6 +66,22 @@ protected:
   int   mStaticPCodeInit;
   int   mSvNum;
 
+  //X1, X2 Shift Registers:
+  typedef struct LFSR {
+    unsigned x: 12; // 12 bits
+  } LFSR;
+
+  int       xor_bits(unsigned x);
+  uint8_t   x1a_shift(LFSR* x);
+  uint8_t   x1b_shift(LFSR* x); 
+  uint8_t   x2a_shift(LFSR* x);
+  uint8_t   x2b_shift(LFSR* x);
+  void      x_prep(void);
+  uint8_t   x1_lookup(uint8_t * x_buf, uint64_t index);
+  uint8_t   x2_lookup(uint8_t * x_buf, uint64_t index);
+  uint8_t   x2_lookup_last(uint8_t * x_buf, uint64_t index);
+  uint8_t   pcode_lookup(uint8_t * x_buf, uint64_t index, uint8_t prn);
+
   uint8_t   mExpCaCode[2];
   uint8_t   mActCaCode[2];
   uint16_t  m_xn_cnt_speed;
@@ -61,6 +90,7 @@ protected:
   uint16_t  m_x1b_initial;
   uint16_t  m_x2a_initial;
   uint16_t  m_x2b_initial;
+  uint8_t   m_x_buf[4096];
 
   // CA Code SW implementation is a mirror of the hardware
   uint8_t   g1[11]; // [0] not used to match HW

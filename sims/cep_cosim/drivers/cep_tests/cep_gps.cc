@@ -10,7 +10,7 @@
 
 #if defined(BARE_MODE)
 #else
-
+#include <stdint.h>
 #include "simPio.h"
 
 #endif
@@ -50,10 +50,13 @@ cep_gps::cep_gps(int coreIndex, int seed, int staticPCodeInit, int verbose) : ce
 }
 
 void cep_gps::SetSvNum (int svNum) {
+
+  x_prep();
+
   if (svNum > MAX_SAT) {
-    mSvNum= MIN_SAT;
+    mSvNum = MIN_SAT;
   } else {
-    mSvNum= svNum;
+    mSvNum = svNum;
   }
   // Load SvNum
   cep_writeNcapture(GPS_SV_NUM, GetSvNum());
@@ -138,11 +141,24 @@ int cep_gps::waitTilDone(int maxTO) {
   return (cep_readNspin(GPS_GEN_DONE, 2, 2, maxTO)); 
 }
 
-// Generate an expected P code value
+// Generate an expected 128-bit P code value
 void cep_gps::GenP_Code(void) {
 
-  for (int j=0;j<8;j++)
-    mSwPt[j] = 0;
+  for (int i = 0; i < 128; i+=4) {
+    uint8_t code = 0;
+    code |= pcode_lookup(m_x_buf, i + 0, mSvNum) <<3;
+    code |= pcode_lookup(m_x_buf, i + 1, mSvNum) <<2;
+    code |= pcode_lookup(m_x_buf, i + 2, mSvNum) <<1;
+    code |= pcode_lookup(m_x_buf, i + 3, mSvNum) <<0;
+
+    // Lower nibble
+    if (i % 8 == 0)
+      mSwPt[i/8] = (code & 0x0F) << 4;
+    // Upper nibble
+    else
+      mSwPt[i/8] |= (code & 0x0F);
+
+  }
 
 } // void cep_gps::GenP_Code(void)
 
@@ -447,8 +463,10 @@ int cep_gps::RunGpsTest(int maxLoop) {
 
     MarkSingle(i);
     ResetCA_Code();
+
     if (mErrCnt) break;
-  }
+
+  } // for (int i=1 ; i <= maxLoop; i++)
 
   if (!mErrCnt) {
     //HW Coverage test:
@@ -477,4 +495,118 @@ int cep_gps::RunGpsTest(int maxLoop) {
   }
   //
   return mErrCnt;
+}
+
+int cep_gps::xor_bits(unsigned x) {
+    return __builtin_parity(x);
+}
+uint8_t cep_gps::x1a_shift(LFSR* x) {
+    uint8_t r = ((*x).x >> 11) & 1;
+    uint8_t lsb = xor_bits((*x).x & X1A_POLYNOMIAL);
+    (*x).x = ((*x).x<<1)+lsb;
+    return r;
+}
+uint8_t cep_gps::x1b_shift(LFSR* x) {
+    uint8_t r = ((*x).x >> 11) & 1;
+    uint8_t lsb = xor_bits((*x).x & X1B_POLYNOMIAL);
+    (*x).x = ((*x).x<<1)+lsb;
+    return r;
+}
+
+uint8_t cep_gps::x2a_shift(LFSR* x) {
+    uint8_t r = ((*x).x >> 11) & 1;
+    uint8_t lsb = xor_bits((*x).x & X2A_POLYNOMIAL);
+    (*x).x = ((*x).x<<1)+lsb;
+    return r;
+}
+
+uint8_t cep_gps::x2b_shift(LFSR* x) {
+    uint8_t r = ((*x).x >> 11) & 1;
+    uint8_t lsb = xor_bits((*x).x & X2B_POLYNOMIAL);
+    (*x).x = ((*x).x<<1)+lsb;
+    return r;
+}
+
+void cep_gps::x_prep(void) { 
+    // x_buf holds pre-calculated x[12][ab] values, 1 of each per byte.
+    LFSR x1a_reg = {.x = m_x1a_initial};
+    LFSR x1b_reg = {.x = m_x1b_initial};
+    LFSR x2a_reg = {.x = m_x2a_initial};
+    LFSR x2b_reg = {.x = m_x2b_initial};
+    for (int i = 0; i < 4096; i++) {
+        uint8_t bits;
+        bits  = x1a_shift(&x1a_reg) << 0;
+        bits |= x1b_shift(&x1b_reg) << 1;
+        bits |= x2a_shift(&x2a_reg) << 2;
+        bits |= x2b_shift(&x2b_reg) << 3;
+        m_x_buf[i] = bits;
+    }
+}
+
+uint8_t cep_gps::x1_lookup(uint8_t * x_buf, uint64_t index) {
+    index = index % 15345000;
+    uint8_t x1a = (x_buf[index%4092]>>0) &1;
+
+    if ( index >= 15345000-343 )
+        index = 4092; //Hold logic for x1b
+    
+    uint8_t x1b = (x_buf[index%4093]>>1) &1;
+
+    return x1a ^ x1b;
+}
+
+uint8_t cep_gps::x2_lookup(uint8_t * x_buf, uint64_t index) {
+    uint64_t index_x2a = index % 15345037;
+    uint64_t index_x2b = index_x2a;
+    uint64_t index_a   = index % 15345000;
+    uint64_t index_b   = index_a;
+
+    if (index_a>=(15345037-37))
+        index_x2a = 4091; //Hold logic for x2a
+
+    uint8_t x2a = (x_buf[index_x2a%4092]>>2) &1;
+
+    if ( index_b >= 15345037-37-343 )
+        index_x2b = 4092; //Hold logic for x2b
+    
+    uint8_t x2b = (x_buf[index_x2b%4093]>>3) &1;
+
+    return x2a ^ x2b;
+}
+
+uint8_t cep_gps::x2_lookup_last(uint8_t * x_buf, uint64_t index) {
+    uint64_t index_x2a = index % 15345037;
+    uint64_t index_x2b = index_x2a;
+    uint64_t index_a   = index % 15345000;
+    uint64_t index_b   = index_a;
+
+    if (index_a>=(15345000-1069))
+        index_x2a = 4091; //Hold logic for x2a
+
+    uint8_t x2a = (x_buf[index_x2a%4092]>>2) &1;
+
+    if ( index_b >= 15345000-965 )
+        index_x2b = 4092; //Hold logic for x2b
+    
+    uint8_t x2b = (x_buf[index_x2b%4093]>>3) &1;
+
+    return x2a ^ x2b;
+}
+
+uint8_t cep_gps::pcode_lookup(uint8_t * x_buf, uint64_t index, uint8_t prn) {
+    uint8_t day = (prn-1)/37;
+    prn = prn - 37*day;
+    index += CHIP_RATE*86400*day;
+    uint64_t index_x2 = (CODE_LENGTH + index - prn) % CODE_LENGTH; //pre add CODE_LENGTH, otherwise problems with index-prn being negative
+    index %= CODE_LENGTH;
+
+
+    uint8_t p_x1 = x1_lookup(x_buf, index);
+    uint8_t p_x2 = x2_lookup(x_buf, index_x2);
+
+    if (index_x2>=CODE_LENGTH-4092) {
+        p_x2 = x2_lookup_last(x_buf, index_x2);
+    }
+
+    return p_x1 ^ p_x2;
 }
