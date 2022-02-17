@@ -319,6 +319,8 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/transcript
 	-rm -rf ${COSIM_TOP_DIR}/*/*/*/xcelium.d
 	-rm -rf ${COSIM_TOP_DIR}/*/*/*/.simvision
+	-rm -rf ${COSIM_TOP_DIR}/*/*/testSuiteSimmary
+	-rm -rf ${COSIM_TOP_DIR}/*/*/.cadenceBuild
 	-rm -f ${V2C_H_FILE_LIST}
 
 # Use to force rebuilds for rules that include this dependency
