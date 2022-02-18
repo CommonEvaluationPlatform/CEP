@@ -306,28 +306,9 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog
 	-rm -f ${V2C_H_FILE_LIST}
 	-rm -rf ${LIB_DIR}/*
-	-rm -rf ${LIB_DIR}/.buildLibs
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.bo* ${COSIM_TOP_DIR}/*/*/*/*.o*
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/c_dispatch ${COSIM_TOP_DIR}/*/*/*/*.log
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.KEY ${COSIM_TOP_DIR}/*/*/*/testHistory.txt
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/status
-	-rm -f ${COSIM_TOP_DIR}/*/*/_info
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*.wlf
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*history
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*dump
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*elf
-#	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*vstf
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/wlf*
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/imp.h
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/transcript
-	-rm -rf ${COSIM_TOP_DIR}/*/*/*/xcelium.d
-	-rm -rf ${COSIM_TOP_DIR}/*/*/*/.simvision
 	-rm -rf ${COSIM_TOP_DIR}/*/*/testSuiteSimmary
 	-rm -f ${COSIM_TOP_DIR}/regressionSummary
-	-rm -rf ${COSIM_TOP_DIR}/*/*/.cadenceBuild
-	-rm -f ${V2C_H_FILE_LIST}
-
+	
 # Use to force rebuilds for rules that include this dependency
 .force:
 #--------------------------------------------------------------------------------------

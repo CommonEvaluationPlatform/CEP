@@ -266,6 +266,7 @@ module system_driver (
     int virtualMode = 0;
    
     always @(posedge dvtFlags[`DVTF_SET_VIRTUAL_MODE]) begin
+      virtualMode = 1;
       dvtFlags[`DVTF_SET_VIRTUAL_MODE] = 0;
     end
    
