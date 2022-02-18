@@ -1,24 +1,21 @@
-#//************************************************************************
-#// Copyright 2022 Massachusets Institute of Technology
-#//
-#// File Name:      
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    
-#// Notes:          
-#//
-#//************************************************************************
+#--------------------------------------------------------------------------------------
+# Copyright 2022 Massachusets Institute of Technology
 #
+# File Name:      common.make
+# Program:        Common Evaluation Platform (CEP)
+# Description:    common.make for isaTests test suite
+# Notes:          
+#
+#--------------------------------------------------------------------------------------
+
 # override anything here before calling the top 
-#
-# must have this one for auto-dependentcy detection
+override DUT_SIM_MODE			= BARE
 
-override  DUT_SIM_MODE	= BARE
 ifeq (${NO_BUILDIN_ELF_MODE},1)
+override ELF_MODE   			= LOCAL
 else
-override  ELF_MODE  = BUILTIN
+override ELF_MODE 	 			= BUILTIN
 endif
-override  DUT_XILINX_TOP_MODULE = cep_tb
-#
-include ${REPO_TOP_DIR}/${COSIM_DIR_NAME}/common.make
 
-
+# Call root cosimulation common.make
+include ${COSIM_TOP_DIR}/common.make

@@ -103,7 +103,7 @@ BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
 ISA_TEST_TEMPLATE 			:= ${TEST_SUITE_DIR}/testTemplate
 
 # Points to the root directory of the riscv-test repo
-RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/software/riscv-tests
+RISCV_TEST_DIR 				:= ${COSIM_TOP_DIR}/riscv-tests
 
 # Pointers to various binaries
 GCC     					= /usr/bin/g++
@@ -296,7 +296,6 @@ cleanAll:
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
 	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-#	-rm -f ${COSIM_TOP_DIR}/testSuites/*/*/*.do
 	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
 	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog
@@ -320,6 +319,7 @@ cleanAll:
 	-rm -rf ${COSIM_TOP_DIR}/*/*/*/xcelium.d
 	-rm -rf ${COSIM_TOP_DIR}/*/*/*/.simvision
 	-rm -rf ${COSIM_TOP_DIR}/*/*/testSuiteSimmary
+	-rm -f ${COSIM_TOP_DIR}/regressionSummary
 	-rm -rf ${COSIM_TOP_DIR}/*/*/.cadenceBuild
 	-rm -f ${V2C_H_FILE_LIST}
 

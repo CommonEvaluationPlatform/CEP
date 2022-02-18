@@ -2,7 +2,7 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX License Identifier: BSD-2-Clause
 //
-// File Name:      
+// File Name:      cep_riscv.h
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
 // Notes:          
@@ -29,12 +29,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+  
   /*
    * Function Prototypes (only when target is RISCV)
    */
   volatile char get_selfModCodeValue(void) ;
   int set_selfModCodeValue(char newByte, int verbose);
   int do_DIcache_SMC(uint64_t *smc_base, int blockCnt, int startVal, int verbose);
+
   // Atomic stuffs
   uint64_t cep_atomic_op(uint64_t *ptr, uint64_t val, int OP) ;
   int cep_runAtomicTest(uint64_t *ptr, uint64_t expVal);

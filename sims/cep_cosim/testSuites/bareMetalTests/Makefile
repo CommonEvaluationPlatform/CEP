@@ -1,15 +1,15 @@
-#//************************************************************************
-#// Copyright 2022 Massachusets Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
-#//
-#// File Name:      Makefile
-#// Program:        Common Evaluation Platform (CEP)
-#// Description:    Makefile for bareMetalTest test suite
-#// Notes:          
-#//
-#//************************************************************************
+#************************************************************************
+# Copyright 2022 Massachusets Institute of Technology
+# SPDX short identifier: BSD-2-Clause
+#
+# File Name:      Makefile
+# Program:        Common Evaluation Platform (CEP)
+# Description:    Makefile for bareMetalTest test suite
+# Notes:          
+#
+#************************************************************************
 
-all: runAll summary
+all: runAll
 
 COSIM_TOP_DIR   	= $(strip $(shell cd ../..; pwd))
 REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
@@ -55,7 +55,7 @@ runAll:
 summary:
 	@date > ${TEST_SUITE_DIR}/testSuiteSummary
 	@for i in ${TEST_LIST}; do				\
-		cat ${TEST_SUITE_DIR}/$${i}/status | tee -a testSuiteSummary;	\
+		cat ${TEST_SUITE_DIR}/$${i}/status | sort | tee -a testSuiteSummary;	\
 	done
 
 

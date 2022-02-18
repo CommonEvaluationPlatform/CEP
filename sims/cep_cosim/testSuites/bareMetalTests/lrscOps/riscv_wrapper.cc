@@ -31,10 +31,12 @@
     uint64_t mySig;
     uint64_t partSig;
     uint64_t incVal;
-    uint64_t fixSig[4] = {0x12345678ABCD0000ULL,
+    uint64_t fixSig[4] = {
+      0x12345678ABCD0000ULL,
       0x1122334455660000ULL,
       0x778899aabbcc0000ULL,
-      0xddeeff0011220000ULL};
+      0xddeeff0011220000ULL
+    };
     int loop = 16;
     
     set_printf(0);
@@ -48,7 +50,7 @@
     switch (coreId) {
       case 0:
         mySig   = fixSig[0] + 0x0;
-        partSig = fixSig[1] + 0x1; // next coreId
+        partSig = fixSig[1] + 0x1;  // next coreId
         DUT_WRITE32_64(ptr, mySig); // start for core 0
         break;
       case 1:
@@ -65,7 +67,7 @@
         break;
     }
   
-    errCnt = cep_exchAtomicTest(coreId,ptr, mySig, partSig, incVal, loop);
+    errCnt = cep_exchAtomicTest(coreId, ptr, mySig, partSig, incVal, loop);
 
     // Set the core status
     set_status(errCnt, testId[coreId]);

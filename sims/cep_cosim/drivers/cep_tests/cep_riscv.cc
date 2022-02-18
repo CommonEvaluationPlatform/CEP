@@ -19,15 +19,15 @@
 // This is from native Linux's objdump 
 // *************************
 volatile char get_selfModCodeValue(void) {
- 74:	55                   	push   %rbp
-    75:	48 89 e5             	mov    %rsp,%rbp
+ 74:  55                    push   %rbp
+    75: 48 89 e5              mov    %rsp,%rbp
    /home/aduong/CEP/CEP-master/software/freedom-u-sdk/buildroot/package/cep_diag/src/cep_riscv.cc:33
    return (volatile char)0x5A; // this value will be modified to test I-cache coherency
- 78:	b8 5a 00 00 00       	mov    $0x5a,%eax
+ 78:  b8 5a 00 00 00        mov    $0x5a,%eax
    /home/aduong/CEP/CEP-master/software/freedom-u-sdk/buildroot/package/cep_diag/src/cep_riscv.cc:34
    }
-7d:	5d                   	pop    %rbp
-7e:	c3                   	retq  
+7d: 5d                    pop    %rbp
+7e: c3                    retq  
 // *************************
 // This is from RISCV's objdump under Linux
 // *************************
@@ -37,24 +37,24 @@ get_selfModCodeValue():
 /home/aduong/CEP/CEP-master/software/freedom-u-sdk/buildroot/package/cep_diag/src/cep_exports.cc:321
 
 char get_selfModCodeValue(void) {
- 14a0:	1141                	addi	sp,sp,-16
-    14a2:	e422                	sd	s0,8(sp)
-    14a4:	0800                	addi	s0,sp,16
+ 14a0:  1141                  addi  sp,sp,-16
+    14a2: e422                  sd  s0,8(sp)
+    14a4: 0800                  addi  s0,sp,16
     
     00000000000014a6 <.L0 >:
   /home/aduong/CEP/CEP-master/software/freedom-u-sdk/buildroot/package/cep_diag/src/cep_exports.cc:322
     return (volatile char)0x5A; // this value will be modified to test I-cache coherency
- 14a6:	05a00793          	li	a5,90
+ 14a6:  05a00793            li  a5,90
     //
-    // *************************	
+    // *************************  
     // This is from RISCV's objdump under BARE mode
-    // *************************	
-    //	
+    // *************************  
+    //  
     volatile char get_selfModCodeValue(void) {
     return (volatile char)0x5A; // this value will be modified to test I-cache coherency
   }
- 80001a12:	05a00513          	li	a0,90
-    80001a16:	8082                	ret
+ 80001a12:  05a00513            li  a0,90
+    80001a16: 8082                  ret
 #endif
 */
 
@@ -104,13 +104,10 @@ uint64_t cep_atomic_op(uint64_t *ptr, uint64_t val,int OP) {
   }
   return -1;
 }
-//
-// Lock via atomic exchange (load-reserved/store-conditional ONLY on cached region, see Sifive Manual on Atominc Operation)
-//
+
+// Lock via atomic exchange (load-reserved/store-conditional ONLY on cached region, see RISC-V User-Level ISA on Atomic Operation)
 int cep_exchAtomicTest(int coreId, uint64_t *ptr, uint64_t mySig, uint64_t partSig, uint64_t incVal, int loop) {
-  //
-  //
-  //
+
   int errCnt = 0;
   int timeOut = 2000;
   int i=1;
@@ -120,26 +117,29 @@ int cep_exchAtomicTest(int coreId, uint64_t *ptr, uint64_t mySig, uint64_t partS
   while (i <= loop) {
     // strong compare
     //    if (__atomic_compare_exchange_n(ptr,&myCurSig,partSig,0,__ATOMIC_SEQ_CST,__ATOMIC_SEQ_CST)) { // next
-    if (__atomic_compare_exchange_n(ptr,&myCurSig,partSig,0,__ATOMIC_ACQ_REL,__ATOMIC_ACQ_REL)) { // next    
-      DUT_WRITE32_64(regAdr,mySig);
-      DUT_WRITE32_64(regAdr+8,partSig);
+    if (__atomic_compare_exchange_n(ptr, &myCurSig, partSig, 0, __ATOMIC_ACQ_REL, __ATOMIC_ACQ_REL)) { // next
+      DUT_WRITE32_64(regAdr     , mySig);
+      DUT_WRITE32_64(regAdr + 8 , partSig);
       timeOut = 2000;
       mySig   += incVal;
       partSig += incVal;
       i++;
       //
     } else {
-      DUT_WRITE32_64(regAdr,myCurSig); // what I got when false!!!
-      DUT_WRITE32_64(regAdr+8,(i << 16) | timeOut);
+      DUT_WRITE32_64(regAdr     , myCurSig);            // what I got when false!!!
+      DUT_WRITE32_64(regAdr + 8 , (i << 16) | timeOut);
       timeOut--;
       USEC_SLEEP(10);
       if (timeOut <= 0) {
-	errCnt = i;
-	return errCnt;
+        errCnt = i;
+        return errCnt;
       }
     }
+    
     myCurSig = mySig; // reset since myCurSig got exchange!!
-  }
+  
+  } // while (i <= loop)
+  
   return errCnt;
 }
 
@@ -258,7 +258,7 @@ static void SMC_change(uint64_t *ptr, char newB, int verbose) {
   adr = (uint64_t)ptr[0];      
   oldWord = ptr[0]; 
   newWord = ((oldWord & ~((uint64_t)0xFF << 40)) |
-	     ((uint64_t)(newB & 0xFF) << 40));
+       ((uint64_t)(newB & 0xFF) << 40));
   ptr[0] = newWord;
 #else
   // under BARE mode it is xxxx05a00513 (bit 27:20) of oldWord0
@@ -266,7 +266,7 @@ static void SMC_change(uint64_t *ptr, char newB, int verbose) {
   oldWord = ptr[0];
   adr = (uint64_t)ptr[0];
   newWord = ((oldWord & ~((uint64_t)0xFF << 20)) |
-	    ((uint64_t)(newB & 0xFF) << 20));
+      ((uint64_t)(newB & 0xFF) << 20));
   ptr[0] = newWord;  
   asm volatile ("fence w,r"); // tell other cores to flush
   asm volatile ("fence.i"); // tell myself to do the same  
@@ -275,7 +275,7 @@ static void SMC_change(uint64_t *ptr, char newB, int verbose) {
   oldWord = ptr[1];
   adr = (uint64_t)ptr[1];
   newWord = ((oldWord & ~((uint64_t)0xFF << 4)) |
-	     ((uint64_t)(newB & 0xFF) << 4));
+       ((uint64_t)(newB & 0xFF) << 4));
   ptr[1] = newWord;
   asm volatile ("fence w,r"); // tell other cores to flush
   asm volatile ("fence.i"); // tell myself to do the same  
@@ -297,7 +297,7 @@ static int cep_allow_SMC(int verbose) {
     //
     if (verbose) {
       LOGI("selfModCode Adress = 0x%016lx Data=0x%016lx_0x%016lx ValueReturn=0x%02x\n",
-	   selfModCodeAdr,((uint64_t *)selfModCodeAdr)[0], ((uint64_t *)selfModCodeAdr)[1], get_selfModCodeValue());
+     selfModCodeAdr,((uint64_t *)selfModCodeAdr)[0], ((uint64_t *)selfModCodeAdr)[1], get_selfModCodeValue());
     }
     // change my protection 4Kbytes page
     #ifndef BARE_MODE
@@ -345,7 +345,7 @@ int set_selfModCodeValue(char newByte, int verbose) {
      if (errCnt) { break; }
      if (verbose) {
        LOGI("smc_base=%016lx Dyn=0x%016lx Data=0x%016lx_0x%016lx\n",
-	    (uint64_t)smc_base,dyn_smc_ptr,((uint64_t *)dyn_smc_ptr)[0],((uint64_t *)dyn_smc_ptr)[1]);
+      (uint64_t)smc_base,dyn_smc_ptr,((uint64_t *)dyn_smc_ptr)[0],((uint64_t *)dyn_smc_ptr)[1]);
      }
      actVal = ((char (*)(void *))dyn_smc_ptr)(0);
      if ((actVal ^ expVal) & 0xff) { // error
