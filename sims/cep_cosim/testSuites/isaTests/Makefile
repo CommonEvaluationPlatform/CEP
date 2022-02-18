@@ -1,9 +1,9 @@
 #************************************************************************
 # Copyright 2022 Massachusets Institute of Technology
 #
-# File Name:      common.make
+# File Name:      Makefile
 # Program:        Common Evaluation Platform (CEP)
-# Description:    common.make for isaTests test suite
+# Description:    Makefile for isaTests test suite
 # Notes:          
 #
 #************************************************************************
@@ -183,13 +183,10 @@ ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	-rm -rf ${TEST_SUITE_DIR}/*_work ${TEST_SUITE_DIR}/.*work_dependList.make
-	-rm -rf ${TEST_SUITE_DIR}/.*_dependList* ${TEST_SUITE_DIR}/.is_checked
-	make buildSim
-	@for i in ${ISA_TEST_LIST}; do							\
+	@for i in ${ISA_1CORE_ONLY_LIST}; do													\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
-		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 					\
-		make NOWAVE=1 TEST_NAME=$${i});						\
+		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 											\
+		make TEST_NAME=$${i});																\
 	done
 
 summary:
@@ -197,6 +194,42 @@ summary:
 	@for i in ${ISA_TEST_LIST}; do				\
 		cat ${TEST_SUITE_DIR}/$${i}/status | tee -a regressionSummary;	\
 	done
+
+makeIsaTest: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+	@echo "Done"
+
+# Default parameter values, override at commandine ONLY!!!
+SINGLE_THREAD 		?= 0 
+VIRTUAL_MODE 		?= 0
+PASS_IS_TO_HOST 	?= 0
+
+${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
+	@if test ! -d ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
+		mkdir  ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; \
+	fi
+	@cp -f ${ISA_TEST_TEMPLATE}/Makefile        ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@cp -f ${ISA_TEST_TEMPLATE}/c_module.cc     ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+ifeq (${SINGLE_THREAD},1)
+	@echo "#define SINGLE_THREAD_ONLY" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+endif
+ifneq (${SINGLE_CORE_ONLY},)
+	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+endif
+ifeq (${VIRTUAL_MODE},1)
+	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define VIRTUAL_MODE"       >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+else
+	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+endif
+ifeq (${PASS_IS_TO_HOST},1)
+	@echo "#define PASS_IS_TO_HOST"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+endif
+	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc >>        ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
+	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
 
 createISATests: .force
 	@for i in ${ISA_VM_1CORE_ONLY_LIST}; do				\

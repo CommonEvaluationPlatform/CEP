@@ -398,6 +398,8 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 override VSIM_CMD_LINE = "${XRUN_CMD} ${COSIM_VSIM_ARGS} -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE}"
 
 endif	
+
+buildSim: ${TEST_SUITE_DIR}/_info
 #--------------------------------------------------------------------------------------
 
 

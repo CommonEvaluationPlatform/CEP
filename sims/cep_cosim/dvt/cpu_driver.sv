@@ -659,7 +659,7 @@ module cpu_driver
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin
               repeat (20) @(posedge clk);
-              force `TILE0_PATH.core.reset =1;
+              force `TILE0_PATH.core.reset = 1;
             end
           end
         end // end always
@@ -676,7 +676,7 @@ module cpu_driver
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);        
-              force `TILE1_PATH.core.reset =1;
+              force `TILE1_PATH.core.reset = 1;
             end
           end
         end // end always
@@ -693,7 +693,7 @@ module cpu_driver
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);
-              force `TILE2_PATH.core.reset =1;
+              force `TILE2_PATH.core.reset = 1;
             end
           end
         end // end always
@@ -703,14 +703,14 @@ module cpu_driver
         assign coreInReset = `CORE2_RESET;
 
       end else if (MY_CPU_ID == 3) begin
-        always @(posedge pcPass or posedge  pcFail) begin
+        always @(posedge pcPass or posedge pcFail) begin
           if (`TILE3_PATH.core.reset == 0) begin      
             `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);     
-              force `TILE3_PATH.core.reset =1;
+              force `TILE3_PATH.core.reset = 1;
             end
           end
         end // end always

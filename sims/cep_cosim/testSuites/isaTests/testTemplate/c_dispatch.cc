@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
   // Set the active mask for all threads  
   thr.SetActiveMask(mask);
   
-  // spawn threads for each core
+  // spawn threads for each core (MAX_TIMEOUT will be inserted when each test is defined)
   for (int i = 0; i < maxHost; i++) {
     if ((long unsigned int)(1 << i) & mask) {
-      thr.ForkAThread(activeSlot, i, verbose, seed * (1+i), c_module);
+      thr.ForkAThread(activeSlot, i, verbose, MAX_TIMEOUT, c_module);
     }
   }
   
