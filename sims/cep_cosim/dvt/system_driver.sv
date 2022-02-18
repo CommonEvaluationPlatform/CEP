@@ -292,17 +292,17 @@ module system_driver (
     // Force all cores into reset
     task ResetAllCores;
       begin
-        force `CPU0_PATH.reset = 1;
-        force `CPU1_PATH.reset = 1;
-        force `CPU2_PATH.reset = 1;
-        force `CPU3_PATH.reset = 1;
+        force `TILE0_PATH.reset = 1;
+        force `TILE1_PATH.reset = 1;
+        force `TILE2_PATH.reset = 1;
+        force `TILE3_PATH.reset = 1;
    
         repeat (2) @(posedge clk);
    
-        release `CPU0_PATH.reset;  
-        release `CPU1_PATH.reset;  
-        release `CPU2_PATH.reset;  
-        release `CPU3_PATH.reset;  
+        release `TILE0_PATH.reset;  
+        release `TILE1_PATH.reset;  
+        release `TILE2_PATH.reset;  
+        release `TILE3_PATH.reset;  
       end
     endtask // ResetAllCores
    
@@ -310,23 +310,23 @@ module system_driver (
     always @(posedge singleThread) begin
    
       // Put all the cores into reset
-      force `CPU0_PATH.reset =1; 
-      force `CPU1_PATH.reset =1;
-      force `CPU2_PATH.reset =1;
-      force `CPU3_PATH.reset =1;
+      force `TILE0_PATH.reset =1; 
+      force `TILE1_PATH.reset =1;
+      force `TILE2_PATH.reset =1;
+      force `TILE3_PATH.reset =1;
 
       // Ensure the program is loaded
-      @(posedge `COSIM_TB_TOP_MODULE.program_loaded);
+      @(posedge `PROGRAM_LOADED);
       
       // Allow caches to get out of reset but not the core!!!
-      release `CPU0_PATH.reset; 
-      release `CPU1_PATH.reset;
-      release `CPU2_PATH.reset;
-      release `CPU3_PATH.reset;
-      force `CPU0_PATH.core.reset = 1; 
-      force `CPU1_PATH.core.reset = 1;
-      force `CPU2_PATH.core.reset = 1;
-      force `CPU3_PATH.core.reset = 1;      
+      release `TILE0_PATH.reset; 
+      release `TILE1_PATH.reset;
+      release `TILE2_PATH.reset;
+      release `TILE3_PATH.reset;
+      force `TILE0_PATH.core.reset = 1; 
+      force `TILE1_PATH.core.reset = 1;
+      force `TILE2_PATH.core.reset = 1;
+      force `TILE3_PATH.core.reset = 1;      
       
       // Cycle through all the cores
       for (int c = 0; c < 4; c = c + 1) 
@@ -341,7 +341,7 @@ module system_driver (
             if (virtualMode) begin
               ResetAllCores();
             end
-            release `CPU0_PATH.core.reset; 
+            release `TILE0_PATH.core.reset; 
             @(posedge (`CPU0_DRIVER.PassStatus || `CPU0_DRIVER.FailStatus));
           end // Core 0 is active
 
@@ -351,7 +351,7 @@ module system_driver (
             if (virtualMode) begin
               ResetAllCores();
             end     
-            release `CPU1_PATH.core.reset;
+            release `TILE1_PATH.core.reset;
             @(posedge (`CPU1_DRIVER.PassStatus || `CPU1_DRIVER.FailStatus));
           end  // Core 1 is active
 
@@ -361,7 +361,7 @@ module system_driver (
             if (virtualMode) begin
               ResetAllCores();              
             end     
-            release `CPU2_PATH.core.reset;
+            release `TILE2_PATH.core.reset;
             @(posedge (`CPU2_DRIVER.PassStatus || `CPU2_DRIVER.FailStatus));
           end // Core 2 is active
         
@@ -371,7 +371,7 @@ module system_driver (
             if (virtualMode) begin
               ResetAllCores();
             end     
-            release `CPU3_PATH.core.reset;
+            release `TILE3_PATH.core.reset;
             @(posedge (`CPU3_DRIVER.PassStatus || `CPU3_DRIVER.FailStatus));
           end // Core 3 is active      
       

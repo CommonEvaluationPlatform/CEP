@@ -2,33 +2,24 @@
 #// Copyright 2022 Massachusets Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
 #//
-#// File Name:      
+#// File Name:      Makefile
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    
 #// Notes:          
 #//
 #//************************************************************************
-#
-#
-#
-COSIM_DIR_NAME  = $(shell cd ../..; basename `pwd`)
-REPO_TOP_DIR = $(shell cd ../../..; pwd )
-BLD_DIR     = $(shell cd ..; pwd )
-TEST_SUITE  = $(shell basename ${BLD_DIR})
-TEST_DIR    = $(shell cd .; pwd )
-TEST_NAME   = $(shell basename `pwd`)
-SIM_DIR     = ${REPO_TOP_DIR}/${COSIM_DIR_NAME}
-ELF_FILE    = ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 
-#
-# Top target!!!
-#
-all: .vrun_flag 
+COSIM_TOP_DIR   	= $(strip $(shell cd ../../..; pwd))
+COSIM_BIN_DIR       = $(COSIM_TOP_DIR)/bin
+REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
+TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))
+TEST_SUITE_NAME		= $(shell cd ..; basename `pwd`)
+TEST_DIR			= $(strip $(shell cd .; pwd))
+TEST_NAME			= $(shell cd .; basename `pwd`)
 
-#
+# default target
+all: .vrun_flag riscv_wrapper.elf
+
 # override anything here before calling the common file
-#
-include ${BLD_DIR}/common.make
-
-
+include ${TEST_SUITE_DIR}/common.make
 

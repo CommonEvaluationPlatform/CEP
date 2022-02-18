@@ -120,7 +120,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByte
     fd = fopen(imageF, "rb");
 
     if (fd == NULL) {
-      printf("Can't open file %s\n",imageF);
+      LOGE("Can't open file %s\n",imageF);
       return 1;
     }
 

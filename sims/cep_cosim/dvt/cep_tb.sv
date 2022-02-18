@@ -307,6 +307,7 @@ module `COSIM_TB_TOP_MODULE;
   // When operating in Bare Metal mode, instantiate the Rocket Tile Tilelink Monitors
   //--------------------------------------------------------------------------------------
   `ifdef BARE_MODE
+    `ifndef RISCV_TESTS
     tile_monitor tile0_monitor_inst (
       .clock                                        (`TILE0_PATH.clock                                    ),
       .reset                                        (`TILE0_PATH.reset                                    ),
@@ -498,7 +499,7 @@ module `COSIM_TB_TOP_MODULE;
       .e_valid                                      (`TILE3_PATH.auto_tl_other_masters_out_e_valid        ),
       .e_bits_sink                                  (`TILE3_PATH.auto_tl_other_masters_out_e_bits_sink    )
     );
-
+    `endif
   `endif
   //--------------------------------------------------------------------------------------
 
@@ -508,45 +509,45 @@ module `COSIM_TB_TOP_MODULE;
   //--------------------------------------------------------------------------------------
   `ifdef VIRTUAL_MODE
     ptw_monitor ptwC0R0 (
-      .clk                                  (`CORE0_PATH.ptw.clock                              ),
-      .trace_valid                          (`CORE0_PATH.core.csr_io_trace_0_valid              ),
-      .pc_valid                             (`CORE0_PATH.core.coreMonitorBundle_valid           ),
-      .pc                                   (`CORE0_PATH.core.coreMonitorBundle_pc              ),
-      .io_requestor_x_req_ready             (`CORE0_PATH.ptw.io_requestor_0_req_ready           ),
-      .io_requestor_x_req_valid             (`CORE0_PATH.ptw.io_requestor_0_req_valid           ),
-      .io_requestor_x_req_bits_bits_addr    (`CORE0_PATH.ptw.io_requestor_0_req_bits_bits_addr  ),
-      .io_requestor_x_resp_valid            (`CORE0_PATH.ptw.io_requestor_0_resp_valid          ),
-      .io_requestor_x_resp_bits_ae          (`CORE0_PATH.ptw.io_requestor_0_resp_bits_ae        ),
-      .io_requestor_x_resp_bits_pte_ppn     (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_ppn   ),
-      .io_requestor_x_resp_bits_pte_d       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_d     ),
-      .io_requestor_x_resp_bits_pte_a       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_a     ),
-      .io_requestor_x_resp_bits_pte_g       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_g     ),
-      .io_requestor_x_resp_bits_pte_u       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_u     ),
-      .io_requestor_x_resp_bits_pte_x       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_x     ),
-      .io_requestor_x_resp_bits_pte_w       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_w     ),
-      .io_requestor_x_resp_bits_pte_r       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_r     ),
-      .io_requestor_x_resp_bits_pte_v       (`CORE0_PATH.ptw.io_requestor_0_resp_bits_pte_v     )
+      .clk                                  (`TILE0_PATH.ptw.clock                              ),
+      .trace_valid                          (`TILE0_PATH.core.csr_io_trace_0_valid              ),
+      .pc_valid                             (`TILE0_PATH.core.coreMonitorBundle_valid           ),
+      .pc                                   (`TILE0_PATH.core.coreMonitorBundle_pc              ),
+      .io_requestor_x_req_ready             (`TILE0_PATH.ptw.io_requestor_0_req_ready           ),
+      .io_requestor_x_req_valid             (`TILE0_PATH.ptw.io_requestor_0_req_valid           ),
+      .io_requestor_x_req_bits_bits_addr    (`TILE0_PATH.ptw.io_requestor_0_req_bits_bits_addr  ),
+      .io_requestor_x_resp_valid            (`TILE0_PATH.ptw.io_requestor_0_resp_valid          ),
+      .io_requestor_x_resp_bits_ae          (`TILE0_PATH.ptw.io_requestor_0_resp_bits_ae        ),
+      .io_requestor_x_resp_bits_pte_ppn     (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_ppn   ),
+      .io_requestor_x_resp_bits_pte_d       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_d     ),
+      .io_requestor_x_resp_bits_pte_a       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_a     ),
+      .io_requestor_x_resp_bits_pte_g       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_g     ),
+      .io_requestor_x_resp_bits_pte_u       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_u     ),
+      .io_requestor_x_resp_bits_pte_x       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_x     ),
+      .io_requestor_x_resp_bits_pte_w       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_w     ),
+      .io_requestor_x_resp_bits_pte_r       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_r     ),
+      .io_requestor_x_resp_bits_pte_v       (`TILE0_PATH.ptw.io_requestor_0_resp_bits_pte_v     )
     );
 
     ptw_monitor ptwC0R1 (
-      .clk                                  (`CORE0_PATH.ptw.clock                              ),
+      .clk                                  (`TILE0_PATH.ptw.clock                              ),
       .trace_valid                          (1'b0                                               ),
       .pc_valid                             (1'b0                                               ),
       .pc                                   (64'h0                                              ),
-      .io_requestor_x_req_ready             (`CORE0_PATH.ptw.io_requestor_1_req_ready           ),
-      .io_requestor_x_req_valid             (`CORE0_PATH.ptw.io_requestor_1_req_valid           ),
-      .io_requestor_x_req_bits_bits_addr    (`CORE0_PATH.ptw.io_requestor_1_req_bits_bits_addr  ),
-      .io_requestor_x_resp_valid            (`CORE0_PATH.ptw.io_requestor_1_resp_valid          ),
-      .io_requestor_x_resp_bits_ae          (`CORE0_PATH.ptw.io_requestor_1_resp_bits_ae        ),
-      .io_requestor_x_resp_bits_pte_ppn     (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_ppn   ),
-      .io_requestor_x_resp_bits_pte_d       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_d     ),
-      .io_requestor_x_resp_bits_pte_a       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_a     ),l
-      .io_requestor_x_resp_bits_pte_g       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_g     ),
-      .io_requestor_x_resp_bits_pte_u       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_u     ),
-      .io_requestor_x_resp_bits_pte_x       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_x     ),
-      .io_requestor_x_resp_bits_pte_w       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_w     ),
-      .io_requestor_x_resp_bits_pte_r       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_r     ),
-      .io_requestor_x_resp_bits_pte_v       (`CORE0_PATH.ptw.io_requestor_1_resp_bits_pte_v     )
+      .io_requestor_x_req_ready             (`TILE0_PATH.ptw.io_requestor_1_req_ready           ),
+      .io_requestor_x_req_valid             (`TILE0_PATH.ptw.io_requestor_1_req_valid           ),
+      .io_requestor_x_req_bits_bits_addr    (`TILE0_PATH.ptw.io_requestor_1_req_bits_bits_addr  ),
+      .io_requestor_x_resp_valid            (`TILE0_PATH.ptw.io_requestor_1_resp_valid          ),
+      .io_requestor_x_resp_bits_ae          (`TILE0_PATH.ptw.io_requestor_1_resp_bits_ae        ),
+      .io_requestor_x_resp_bits_pte_ppn     (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_ppn   ),
+      .io_requestor_x_resp_bits_pte_d       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_d     ),
+      .io_requestor_x_resp_bits_pte_a       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_a     ),
+      .io_requestor_x_resp_bits_pte_g       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_g     ),
+      .io_requestor_x_resp_bits_pte_u       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_u     ),
+      .io_requestor_x_resp_bits_pte_x       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_x     ),
+      .io_requestor_x_resp_bits_pte_w       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_w     ),
+      .io_requestor_x_resp_bits_pte_r       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_r     ),
+      .io_requestor_x_resp_bits_pte_v       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_v     )
     );
   `endif
   //--------------------------------------------------------------------------------------

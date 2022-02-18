@@ -100,10 +100,10 @@ VPP_LIB 					:= ${LIB_DIR}/libvpp.so
 VPP_SV_LIB 					:= ${LIB_DIR}/libvpp
 RISCV_LIB 					:= ${LIB_DIR}/riscv_lib.a
 BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
-ISA_SUITE_DIR				:= ${COSIM_TOP_DIR}/testSuites/isaTests
-ISA_TEST_TEMPLATE 			:= ${ISA_SUIITE_DIR}/testTemplate
 
-# Points to the root directory of the riscv-test repo
+# Variables related to build the RISC-V ISA tests
+ISA_SUITE_DIR				:= ${COSIM_TOP_DIR}/testSuites/isaTests
+ISA_TEST_TEMPLATE 			:= ${ISA_SUITE_DIR}/testTemplate
 RISCV_TEST_DIR 				:= ${COSIM_TOP_DIR}/riscv-tests
 
 # Pointers to various binaries
@@ -188,11 +188,15 @@ endif
 
 
 #--------------------------------------------------------------------------------------
-# Targets to support automatic generate of the ISA Tests
+# Targets to support automatic generation of the ISA Tests
 #--------------------------------------------------------------------------------------
-makeIsaTests: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+makeIsaTest: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@echo "Done"
 
+# Default parameter values, override at commandine ONLY!!!
+SINGLE_THREAD 		= 0 
+VIRTUAL_MODE 		= 0
+PASS_IS_TO_HOST 	= 0
 
 ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 	@if test ! -d ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
@@ -312,7 +316,7 @@ cleanAll:
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*history
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*dump
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*elf
-	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
+#	-rm -f ${COSIM_TOP_DIR}/*/*/*/*hex
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/*vstf
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/wlf*
 	-rm -f ${COSIM_TOP_DIR}/*/*/*/imp.h

@@ -596,16 +596,15 @@ module cpu_driver
     int         stuckCnt=0;
     reg [63:0]  lastPc=0;
     wire [63:0] curPc;
-    wire        curValid;
+    wire        curPCValid;
     wire        coreInReset;
-    wire        pcValid;
     wire        pcStuck = !DisableStuckChecker && (stuckCnt >= 500);
 
     // Core 0 Only
     // 0 = pass, 1 = fail, 2 = finish
     initial begin
       $readmemh("PassFail.hex",passFail);
-      `logI("PassFail=%x %x %x %x %x",passFail[0],passFail[1],passFail[2],passFail[3],passFail[4]);
+      `logI("PassFail = %x %x %x %x %x", passFail[0], passFail[1], passFail[2], passFail[3], passFail[4]);
     end
    
     // Get Pass / Fail Status
@@ -629,12 +628,12 @@ module cpu_driver
     end   
  
     // To detect stuck loop
-    assign pcPass = curValid &&
+    assign pcPass = curPCValid &&
       ((curPc[29:0] === passFail[0][29:0]) ||
       ((curPc[29:0] == passFail[2][29:0]) && (passFail[2][29:0] != 0)) ||    
       ((curPc[29:0] == passFail[3][29:0]) && (passFail[3][29:0] != 0) && checkToHost));
     assign pcFail = (pcStuck ||
-      (curValid &&
+      (curPCValid &&
       (((curPc[29:0] == passFail[4][29:0]) && (passFail[4][29:0] != 0)) ||
       (curPc[29:0] === passFail[1][29:0]))));
    
@@ -643,7 +642,7 @@ module cpu_driver
     end
    
     always @(posedge clk) begin
-      if (pcValid) begin
+      if (curPCValid) begin
         lastPc <= curPc;
         if (curPc == lastPc) stuckCnt <= stuckCnt + 1;
         else stuckCnt <= 0;
@@ -654,75 +653,72 @@ module cpu_driver
     generate
       if (MY_CPU_ID == 0) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CPU0_PATH.core.reset == 0) begin
+          if (`TILE0_PATH.core.reset == 0) begin
             `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin
               repeat (20) @(posedge clk);
-              force `CPU0_PATH.core.reset =1;
+              force `TILE0_PATH.core.reset =1;
             end
           end
         end // end always
    
-        assign curPc       = `CPU0_PC;
-        assign curValid    = `CPU0_VALID;
-        assign coreInReset = `CPU0_PATH.core.reset;
-        assign pcValid     = `CPU0_PATH.core.csr_io_trace_0_valid && `CPU0_PATH.core._T_1481;   
-   
+        assign curPc       = `CORE0_PC;
+        assign curPCValid  = `CORE0_VALID;
+        assign coreInReset = `CORE0_RESET;
+
       end else if (MY_CPU_ID == 1) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CPU1_PATH.core.reset == 0) begin      
+          if (`TILE1_PATH.core.reset == 0) begin      
             `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);        
-              force `CPU1_PATH.core.reset =1;
+              force `TILE1_PATH.core.reset =1;
             end
           end
         end // end always
    
-        assign curPc       = `CPU1_PC;
-        assign curValid    = `CPU1_VALID;
-        assign coreInReset = `CPU1_PATH.core.reset;
-        assign pcValid     = `CPU1_PATH.core.csr_io_trace_0_valid && `CPU1_PATH.core._T_1481;     
-      
+        assign curPc       = `CORE1_PC;
+        assign curPCValid  = `CORE1_VALID;
+        assign coreInReset = `CORE1_RESET;
+
       end else if (MY_CPU_ID == 2) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CPU2_PATH.core.reset == 0) begin      
+          if (`TILE2_PATH.core.reset == 0) begin      
             `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);
-              force `CPU2_PATH.core.reset =1;
+              force `TILE2_PATH.core.reset =1;
             end
           end
         end // end always
    
-        assign curPc       = `CPU2_PC;
-        assign curValid    = `CPU2_VALID;
-        assign coreInReset = `CPU2_PATH.core.reset;
-        assign pcValid     = `CPU2_PATH.core.csr_io_trace_0_valid && `CPU2_PATH.core._T_1481;     
-    
+        assign curPc       = `CORE2_PC;
+        assign curPCValid  = `CORE2_VALID;
+        assign coreInReset = `CORE2_RESET;
+
       end else if (MY_CPU_ID == 3) begin
         always @(posedge pcPass or posedge  pcFail) begin
-          if (`CPU3_PATH.core.reset == 0) begin      
+          if (`TILE3_PATH.core.reset == 0) begin      
             `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
             PassStatus = pcPass;
             FailStatus = pcFail;
             if (!DisableStuckChecker) begin         
               repeat (20) @(posedge clk);     
-              force `CPU3_PATH.core.reset =1;
+              force `TILE3_PATH.core.reset =1;
             end
           end
         end // end always
     
-        assign curPc       = `CPU3_PC;
-        assign curValid    = `CPU3_VALID;
-        assign coreInReset = `CPU3_PATH.core.reset;
-        assign pcValid     = `CPU3_PATH.core.csr_io_trace_0_valid && `CPU3_PATH.core._T_1481;     
+        assign curPc       = `CORE3_PC;
+        assign curPCValid  = `CORE3_VALID;
+        assign coreInReset = `CORE3_RESET;
+
       end  // end if MY_CPU_ID
     endgenerate
   `endif //  `ifdef RISCV_TESTS
