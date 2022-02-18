@@ -100,7 +100,8 @@ VPP_LIB 					:= ${LIB_DIR}/libvpp.so
 VPP_SV_LIB 					:= ${LIB_DIR}/libvpp
 RISCV_LIB 					:= ${LIB_DIR}/riscv_lib.a
 BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
-ISA_TEST_TEMPLATE 			:= ${TEST_SUITE_DIR}/testTemplate
+ISA_SUITE_DIR				:= ${COSIM_TOP_DIR}/testSuites/isaTests
+ISA_TEST_TEMPLATE 			:= ${ISA_SUIITE_DIR}/testTemplate
 
 # Points to the root directory of the riscv-test repo
 RISCV_TEST_DIR 				:= ${COSIM_TOP_DIR}/riscv-tests
@@ -189,37 +190,37 @@ endif
 #--------------------------------------------------------------------------------------
 # Targets to support automatic generate of the ISA Tests
 #--------------------------------------------------------------------------------------
-makeIsaTest: ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+makeIsaTests: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@echo "Done"
 
 
-${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
-	@if test ! -d ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
-		mkdir  ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}; \
+${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
+	@if test ! -d ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
+		mkdir  ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; \
 	fi
-	@cp -f ${ISA_TEST_TEMPLATE}/Makefile        ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/.
-	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/.
-	@cp -f ${ISA_TEST_TEMPLATE}/c_module.cc     ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/.
-	@rm -f ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@cp -f ${ISA_TEST_TEMPLATE}/Makefile        ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@cp -f ${ISA_TEST_TEMPLATE}/c_module.cc     ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
+	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 ifeq (${SINGLE_THREAD},1)
-	@echo "#define SINGLE_THREAD_ONLY" >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define SINGLE_THREAD_ONLY" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifneq (${SINGLE_CORE_ONLY},)
-	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifeq (${VIRTUAL_MODE},1)
-	@echo "#define MAX_TIMEOUT 200"    >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-	@echo "#define VIRTUAL_MODE"       >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define VIRTUAL_MODE"       >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 else
-	@echo "#define MAX_TIMEOUT 200"    >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifeq (${PASS_IS_TO_HOST},1)
-	@echo "#define PASS_IS_TO_HOST"    >> ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define PASS_IS_TO_HOST"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
-	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc >>        ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
-	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
-	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${TEST_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
+	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc >>        ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
+	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
+	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
 #--------------------------------------------------------------------------------------
 
 
