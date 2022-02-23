@@ -634,6 +634,10 @@ module cpu_driver
         if (`RISCV_PASSFAILVALID) begin
           case (curPc[29:0])
             `RISCV_PASSFAIL[0][29:0] : pcPass = 1;
+            `RISCV_PASSFAIL[2][29:0] : pcPass = 1;
+            `RISCV_PASSFAIL[3][29:0] : if (checkToHost) pcPass = 1;
+            `RISCV_PASSFAIL[4][29:0] : pcFail = 1;
+            `RISCV_PASSFAIL[1][29:0] : pcFail = 1;
             default                       : ;
           endcase
         end else begin
