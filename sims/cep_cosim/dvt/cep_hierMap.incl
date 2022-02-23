@@ -27,6 +27,11 @@
 `define DUT_INST                  dut
 `define DUT_TOP_LEVEL             `COSIM_TB_TOP_MODULE.`DUT_INST
 
+`ifdef RISCV_TESTS
+  `define RISCV_PASSFAIL          `SYSTEM_DRIVER.passFail
+  `define RISCV_PASSFAILVALID     `SYSTEM_DRIVER.passFailValid
+`endif 
+
 // Paths to CEP-specific modules
 `define SROT_PATH                 `DUT_TOP_LEVEL.system.srotmodule
 `define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256module

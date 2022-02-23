@@ -40,10 +40,8 @@ public:
   ~shPthread() {};
   //
   void SetActiveMask(long unsigned int mask) ;
-  //int ForkAThread(int slotId, int cpuId, char *soFile, char *apiFunc2Run);
-  //int ForkAThread(int slotId, int cpuId, void * (*start_routine)(void *), int detachIt=1);
-  int ForkAThread(int slotId, int cpuId, int verbose, Int32U seed, void * (*start_routine)(void *), int detachIt=1);
-  int ForkAThread(pthread_parm_t *tParm, void * (*start_routine)(void *), int detachIt=1);
+  int ForkAThread(int slotId, int cpuId, int verbose, Int32U seed, void * (*start_routine)(void *), int detachIt = 1);
+  int ForkAThread(pthread_parm_t *tParm, void * (*start_routine)(void *), int detachIt = 1);
   
   int AddSysThread(int slotId, int cpuId) ;
   void JoinAllNonDetachables();

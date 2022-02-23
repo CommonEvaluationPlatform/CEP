@@ -30,11 +30,12 @@ int main(int argc, char *argv[])
   int activeSlot            = 0;          // only 1 board 
   int maxHost               = MAX_CORES;  // number of cores/threads
 
-  // Some ISA Tests only run on a single core
+  // Some ISA Tests only run on a single core and thus only a single core thread will be launched, depending on the
+  // value of the SINGLE_CORE_ONLY parameter
   #ifdef SINGLE_CORE_ONLY
     long unsigned int mask  = SINGLE_CORE_ONLY; // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
   #else
-    long unsigned int mask  = 0xf;              // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
+    long unsigned int mask  = 0xF;              // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
   #endif
 
   int done                = 0;
@@ -58,18 +59,23 @@ int main(int argc, char *argv[])
   // Initialize main memory to all zeroes
   DUT_WRITE_DVT(DVTF_PAT_LO, DVTF_PAT_LO, 0);
   DUT_WRITE_DVT(DVTF_SET_DEFAULTX_BIT, DVTF_SET_DEFAULTX_BIT, 1);  
-  //
-#ifdef SINGLE_THREAD_ONLY
-  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, mask);
-  DUT_WRITE_DVT(DVTF_FORCE_SINGLE_THREAD, DVTF_FORCE_SINGLE_THREAD, 1);
-#endif
-#ifdef VIRTUAL_MODE
-  DUT_WRITE_DVT(DVTF_SET_VIRTUAL_MODE, DVTF_SET_VIRTUAL_MODE,1);
-#endif  
+  
+
+  // Force a single thread
+  #ifdef SINGLE_THREAD_ONLY
+    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, mask);
+    DUT_WRITE_DVT(DVTF_FORCE_SINGLE_THREAD, DVTF_FORCE_SINGLE_THREAD, 1);
+  #endif
+
+  // Enable virtual mode
+  #ifdef VIRTUAL_MODE
+    DUT_WRITE_DVT(DVTF_SET_VIRTUAL_MODE, DVTF_SET_VIRTUAL_MODE,1);
+  #endif  
+
   // Some tests just go straight to there if not <fail>
-#ifdef PASS_IS_TO_HOST
-  DUT_WRITE_DVT(DVTF_PASS_IS_TO_HOST, DVTF_PASS_IS_TO_HOST, 1);
-#endif
+  #ifdef PASS_IS_TO_HOST
+    DUT_WRITE_DVT(DVTF_PASS_IS_TO_HOST, DVTF_PASS_IS_TO_HOST, 1);
+  #endif
 
   // Enable waveform capture, unless disabled
   int cycle2start   = 0;

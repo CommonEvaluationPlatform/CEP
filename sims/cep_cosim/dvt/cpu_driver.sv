@@ -588,10 +588,9 @@ module cpu_driver
   
   `ifdef RISCV_TESTS
    
-    wire        pcPass;
-    wire        pcFail;
-    reg         checkToHost=0;
-    reg [63:0]  passFail [0:4] = '{default:0};
+    reg         pcPass;
+    reg         pcFail;
+    reg         checkToHost = 0;
     reg         DisableStuckChecker = 0;
     int         stuckCnt=0;
     reg [63:0]  lastPc=0;
@@ -600,13 +599,6 @@ module cpu_driver
     wire        coreInReset;
     wire        pcStuck = !DisableStuckChecker && (stuckCnt >= 500);
 
-    // Core 0 Only
-    // 0 = pass, 1 = fail, 2 = finish
-    initial begin
-      $readmemh("PassFail.hex",passFail);
-      `logI("PassFail = %x %x %x %x %x", passFail[0], passFail[1], passFail[2], passFail[3], passFail[4]);
-    end
-   
     // Get Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]) begin
       dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = {FailStatus,PassStatus};
@@ -626,17 +618,42 @@ module cpu_driver
       DisableStuckChecker = 1;
       dvtFlags[`DVTF_DISABLE_STUCKCHECKER] = 0; // self-clear
     end   
- 
-    // To detect stuck loop
-    assign pcPass = curPCValid &&
-      ((curPc[29:0] === passFail[0][29:0]) ||
-      ((curPc[29:0] == passFail[2][29:0]) && (passFail[2][29:0] != 0)) ||    
-      ((curPc[29:0] == passFail[3][29:0]) && (passFail[3][29:0] != 0) && checkToHost));
-    assign pcFail = (pcStuck ||
-      (curPCValid &&
-      (((curPc[29:0] == passFail[4][29:0]) && (passFail[4][29:0] != 0)) ||
-      (curPc[29:0] === passFail[1][29:0]))));
-   
+
+    // Pass / Fail based on program counting reaching a particular location in the test 
+    // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost> (if enabled)
+    // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
+    always @(*) begin
+      pcPass = 0;
+      pcFail = 0;
+
+      // A PC Stuck condition has been detected
+      if (pcStuck)
+        pcFail = 1;
+      else if (curPCValid) begin
+        // Did the PassFail.hex load correctly?
+        if (`RISCV_PASSFAILVALID) begin
+          case (curPc[29:0])
+            `RISCV_PASSFAIL[0][29:0] : pcPass = 1;
+            default                       : ;
+          endcase
+        end else begin
+          pcFail = 1;
+        end // if (`RISCV_PASSFAILVALID)
+      end // if (curPCValid)
+    end   // end always @(*)
+
+    // Detect a pass condition
+    // assign pcPass =  curPCValid &&
+    //   ((curPc[29:0] == `RISCV_PASSFAIL[0][29:0]) && (`RISCV_PASSFAIL[0][29:0] != 0)) || 
+    //   ((curPc[29:0] == `RISCV_PASSFAIL[2][29:0]) && (`RISCV_PASSFAIL[2][29:0] != 0)) ||    
+    //   ((curPc[29:0] == `RISCV_PASSFAIL[3][29:0]) && (`RISCV_PASSFAIL[3][29:0] != 0) && checkToHost);
+    
+    // // Detect a fail condition
+    // assign pcFail =  pcStuck || (curPCValid &&
+    //   ((curPc[29:0] == `RISCV_PASSFAIL[4][29:0]) && (`RISCV_PASSFAIL[4][29:0] != 0)) ||
+    //   ((curPc[29:0] == `RISCV_PASSFAIL[1][29:0]) && (`RISCV_PASSFAIL[1][29:0] != 0)));
+
+      // A stuck loop has been detected
     always @(posedge pcStuck) begin
       `logE("PC seems to be stuck!!!! Terminating...");
     end

@@ -259,8 +259,22 @@ module system_driver (
   //--------------------------------------------------------------------------------------
   // This is to handle single threading core: one core active at a time
   `ifdef RISCV_TESTS
+    reg [63:0]  passFail [0:4]      = '{default:0};
+    reg         passFailValid       = 0;
+    int         file;
     initial begin
       `logI("==== ISA RISCV_TESTS is active ===");      
+
+      // Perform a simple file I/O test to ensure file is there
+      file = $fopen("PassFail.hex", "r");
+      if (file) begin
+        $fclose(file);
+        passFailValid = 1;
+        $readmemh("PassFail.hex", passFail);
+        `logI("Reading from PassFail.hex: pass = 0x%0x, fail = 0x%0x, finish = 0x%0x, write_tohost = 0x%0x, hangme = 0x%0x",
+          passFail[0], passFail[1], passFail[2], passFail[3], passFail[4]);
+      end
+
     end
    
     int virtualMode = 0;

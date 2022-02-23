@@ -4,7 +4,16 @@
 # File Name:      Makefile
 # Program:        Common Evaluation Platform (CEP)
 # Description:    Makefile for isaTests test suite
-# Notes:          
+# Notes:          Depending on the test category, the following
+#                 defines are added to a particular tests c_dispatch.cc:
+#					MAX_TIMEOUT 		- Passes the timeout parameter
+#                     to the thread via the seed parameter.  Used both
+#                     in checking if the program is loaded and if it has
+#                     completed execution.
+#                   SINGLE_CORE_ONLY	- 
+#					SINGLE_THREAD_ONLY	-
+#					PASS_IS_TO_HOST		-
+#					VIRTUAL_MODE		- 
 #
 #************************************************************************
 
@@ -51,6 +60,7 @@ ISA_1CORE_ONLY_LIST = 			\
 # single thread
 ISA_SINGETHR_LIST = 			\
 	rv64ua-p-amoand_d 			\
+	rv64ua-p-amoand_w 			\
 	rv64ua-p-amoor_d 			\
 	rv64ua-p-amoor_w 			\
 	rv64ua-p-amoswap_d 			\
@@ -59,7 +69,6 @@ ISA_SINGETHR_LIST = 			\
 	rv64ua-p-amoxor_w 			\
 	rv64ua-p-amoadd_d 			\
 	rv64ua-p-amoadd_w 			\
-	rv64ua-p-amoand_w 			\
 	rv64ua-p-amomax_d 			\
 	rv64ua-p-amomaxu_d 			\
 	rv64ua-p-amomaxu_w 			\
@@ -183,7 +192,7 @@ ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	@for i in ${ISA_1CORE_ONLY_LIST}; do													\
+	@for i in ${ISA_TEST_LIST}; do															\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
 		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 											\
 		make TEST_NAME=$${i});																\

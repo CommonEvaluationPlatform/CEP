@@ -28,7 +28,7 @@ void *c_module(void *arg) {
   int slotId = tParm->slotId;
   int cpuId = tParm->cpuId;
   int verbose = tParm->verbose;
-  Int32U seed = tParm->seed;
+  Int32U seed = tParm->seed;    // Used as a timeout parameter
   int restart = tParm->restart;
   int offset = GET_OFFSET(slotId,cpuId);
   GlobalShMemory.getSlotCpuId(offset,&slotId,&cpuId);
@@ -49,7 +49,7 @@ void *c_module(void *arg) {
   // Test starts here
   //--------------------------------------------------------------------------------------
   // Wait until the program is loaded
-  errCnt += is_program_loaded(100);
+  errCnt += is_program_loaded(seed);
 
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;
