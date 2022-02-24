@@ -583,21 +583,20 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Support functions for the RISC-V ISA Tests (which WILL require BARE_MODE)
   //--------------------------------------------------------------------------------------
-  reg         PassStatus=0;
-  reg         FailStatus=0;
-  
   `ifdef RISCV_TESTS
-   
-    reg         pcPass;
-    reg         pcFail;
-    reg         checkToHost = 0;
-    reg         DisableStuckChecker = 0;
-    int         stuckCnt=0;
-    reg [63:0]  lastPc=0;
-    wire [63:0] curPc;
-    wire        curPCValid;
-    wire        coreInReset;
-    wire        pcStuck = !DisableStuckChecker && (stuckCnt >= 500);
+
+    reg           PassStatus          = 0;
+    reg           FailStatus          = 0;
+    wire [63:0]   curPC;
+    wire          curPCValid;
+    wire          curPCReset;
+    reg           pcPass              = 0;
+    reg           pcFail              = 0;
+    reg           checkToHost         = 0;
+    reg           DisableStuckChecker = 0;
+    int           stuckCnt            = 0;
+    reg [63:0]    lastPc              = 0;
+    wire          pcStuck             = (stuckCnt >= 500);
 
     // Get Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]) begin
@@ -619,6 +618,50 @@ module cpu_driver
       dvtFlags[`DVTF_DISABLE_STUCKCHECKER] = 0; // self-clear
     end   
 
+    // Generate per-CPU items
+    generate
+      case (MY_CPU_ID)
+        0: begin
+          assign curPC          = `CORE0_PC;
+          assign curPCValid     = `CORE0_VALID;
+          assign curPCReset     = `CORE0_RESET;
+        end
+        1: begin
+          assign curPC          = `CORE1_PC;
+          assign curPCValid     = `CORE1_VALID;
+          assign curPCReset     = `CORE1_RESET;
+        end
+        2: begin
+          assign curPC          = `CORE2_PC;
+          assign curPCValid     = `CORE2_VALID;
+          assign curPCReset     = `CORE2_RESET;
+        end
+        default: begin
+          assign curPC          = `CORE3_PC;
+          assign curPCValid     = `CORE3_VALID;
+          assign curPCReset     = `CORE3_RESET;
+        end
+      endcase
+    endgenerate
+
+    // Take some action when a pass or failure is detected
+    always @(posedge pcPass or posedge pcFail) begin
+      if (~curPCReset) begin
+        `logI("C%0d Pass/fail Detected!!!.. Put it to sleep", MY_CPU_ID);
+        PassStatus = pcPass;
+        FailStatus = pcFail;
+        if (!DisableStuckChecker) begin
+          repeat (20) @(posedge clk);
+          case (MY_CPU_ID)
+            0       : force `CORE0_RESET = 1;
+            1       : force `CORE1_RESET = 1;
+            2       : force `CORE2_RESET = 1;
+            default : force `CORE3_RESET = 1;
+          endcase          
+        end
+      end
+    end // end always
+   
     // Pass / Fail based on program counting reaching a particular location in the test 
     // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost> (if enabled)
     // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
@@ -627,18 +670,19 @@ module cpu_driver
       pcFail = 0;
 
       // A PC Stuck condition has been detected
-      if (pcStuck)
+      if (pcStuck && ~DisableStuckChecker) begin
+        `logE("PC seems to be stuck!!!! Terminating...");
         pcFail = 1;
-      else if (curPCValid) begin
+      end else if (curPCValid) begin
         // Did the PassFail.hex load correctly?
         if (`RISCV_PASSFAILVALID) begin
-          case (curPc[29:0])
-            `RISCV_PASSFAIL[0][29:0] : pcPass = 1;
-            `RISCV_PASSFAIL[2][29:0] : pcPass = 1;
-            `RISCV_PASSFAIL[3][29:0] : if (checkToHost) pcPass = 1;
-            `RISCV_PASSFAIL[4][29:0] : pcFail = 1;
-            `RISCV_PASSFAIL[1][29:0] : pcFail = 1;
-            default                       : ;
+          case (curPC)
+            `RISCV_PASSFAIL[0]  : pcPass = 1;
+            `RISCV_PASSFAIL[2]  : pcPass = 1;
+            `RISCV_PASSFAIL[3]  : if (checkToHost) pcPass = 1;
+            `RISCV_PASSFAIL[4]  : pcFail = 1;
+            `RISCV_PASSFAIL[1]  : pcFail = 1;
+            default                  : ;
           endcase
         end else begin
           pcFail = 1;
@@ -646,102 +690,17 @@ module cpu_driver
       end // if (curPCValid)
     end   // end always @(*)
 
-    // Detect a pass condition
-    // assign pcPass =  curPCValid &&
-    //   ((curPc[29:0] == `RISCV_PASSFAIL[0][29:0]) && (`RISCV_PASSFAIL[0][29:0] != 0)) || 
-    //   ((curPc[29:0] == `RISCV_PASSFAIL[2][29:0]) && (`RISCV_PASSFAIL[2][29:0] != 0)) ||    
-    //   ((curPc[29:0] == `RISCV_PASSFAIL[3][29:0]) && (`RISCV_PASSFAIL[3][29:0] != 0) && checkToHost);
-    
-    // // Detect a fail condition
-    // assign pcFail =  pcStuck || (curPCValid &&
-    //   ((curPc[29:0] == `RISCV_PASSFAIL[4][29:0]) && (`RISCV_PASSFAIL[4][29:0] != 0)) ||
-    //   ((curPc[29:0] == `RISCV_PASSFAIL[1][29:0]) && (`RISCV_PASSFAIL[1][29:0] != 0)));
-
-      // A stuck loop has been detected
-    always @(posedge pcStuck) begin
-      `logE("PC seems to be stuck!!!! Terminating...");
-    end
-   
     always @(posedge clk) begin
       if (curPCValid) begin
-        lastPc <= curPc;
-        if (curPc == lastPc) stuckCnt <= stuckCnt + 1;
-        else stuckCnt <= 0;
+        lastPc <= curPC;
+        if (curPC == lastPc) 
+          stuckCnt <= stuckCnt + 1;
+        else 
+          stuckCnt <= 0;
       end
     end // end always
-   
-    // Generate per-CPU items
-    generate
-      if (MY_CPU_ID == 0) begin
-        always @(posedge pcPass or posedge  pcFail) begin
-          if (`TILE0_PATH.core.reset == 0) begin
-            `logI("C0 Pass/fail Detected!!!.. Put it to sleep");
-            PassStatus = pcPass;
-            FailStatus = pcFail;
-            if (!DisableStuckChecker) begin
-              repeat (20) @(posedge clk);
-              force `TILE0_PATH.core.reset = 1;
-            end
-          end
-        end // end always
-   
-        assign curPc       = `CORE0_PC;
-        assign curPCValid  = `CORE0_VALID;
-        assign coreInReset = `CORE0_RESET;
+  
 
-      end else if (MY_CPU_ID == 1) begin
-        always @(posedge pcPass or posedge  pcFail) begin
-          if (`TILE1_PATH.core.reset == 0) begin      
-            `logI("C1 Pass/fail Detected!!!.. Put it to sleep");
-            PassStatus = pcPass;
-            FailStatus = pcFail;
-            if (!DisableStuckChecker) begin         
-              repeat (20) @(posedge clk);        
-              force `TILE1_PATH.core.reset = 1;
-            end
-          end
-        end // end always
-   
-        assign curPc       = `CORE1_PC;
-        assign curPCValid  = `CORE1_VALID;
-        assign coreInReset = `CORE1_RESET;
-
-      end else if (MY_CPU_ID == 2) begin
-        always @(posedge pcPass or posedge  pcFail) begin
-          if (`TILE2_PATH.core.reset == 0) begin      
-            `logI("C2 Pass/fail Detected!!!.. Put it to sleep");
-            PassStatus = pcPass;
-            FailStatus = pcFail;
-            if (!DisableStuckChecker) begin         
-              repeat (20) @(posedge clk);
-              force `TILE2_PATH.core.reset = 1;
-            end
-          end
-        end // end always
-   
-        assign curPc       = `CORE2_PC;
-        assign curPCValid  = `CORE2_VALID;
-        assign coreInReset = `CORE2_RESET;
-
-      end else if (MY_CPU_ID == 3) begin
-        always @(posedge pcPass or posedge pcFail) begin
-          if (`TILE3_PATH.core.reset == 0) begin      
-            `logI("C3 Pass/fail Detected!!!.. Put it to sleep");
-            PassStatus = pcPass;
-            FailStatus = pcFail;
-            if (!DisableStuckChecker) begin         
-              repeat (20) @(posedge clk);     
-              force `TILE3_PATH.core.reset = 1;
-            end
-          end
-        end // end always
-    
-        assign curPc       = `CORE3_PC;
-        assign curPCValid  = `CORE3_VALID;
-        assign coreInReset = `CORE3_RESET;
-
-      end  // end if MY_CPU_ID
-    endgenerate
   `endif //  `ifdef RISCV_TESTS
   //--------------------------------------------------------------------------------------
 
