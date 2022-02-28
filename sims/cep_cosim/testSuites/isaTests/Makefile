@@ -12,10 +12,13 @@
 #                     completed execution.
 #                   SINGLE_CORE_ONLY	- 
 #					SINGLE_THREAD_ONLY	-
-#					PASS_IS_TO_HOST		-
+#					PASS_WRITETOHOST		-
 #					VIRTUAL_MODE		- 
 #
 #************************************************************************
+
+# Causes a cleaning prior to running the test suite
+STAND_ALONE 		?= 1
 
 all: runAll
 
@@ -210,7 +213,9 @@ makeIsaTest: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 # Default parameter values, override at commandine ONLY!!!
 SINGLE_THREAD 		?= 0 
 VIRTUAL_MODE 		?= 0
-PASS_IS_TO_HOST 	?= 0
+PASS_WRITETOHOST 	?= 0
+MAX_TIMEOUT 		?= 200
+SINGLE_CORE_ONLY	?= 0
 
 ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 	@if test ! -d ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
@@ -220,22 +225,24 @@ ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/
 	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
 	@cp -f ${ISA_TEST_TEMPLATE}/c_module.cc     ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
 	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+
+
 ifeq (${SINGLE_THREAD},1)
-	@echo "#define SINGLE_THREAD_ONLY" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define SINGLE_THREAD_ONLY" 						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifneq (${SINGLE_CORE_ONLY},)
-	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" 	>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifeq (${VIRTUAL_MODE},1)
-	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-	@echo "#define VIRTUAL_MODE"       >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define VIRTUAL_MODE"       						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 else
-	@echo "#define MAX_TIMEOUT 200"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
-ifeq (${PASS_IS_TO_HOST},1)
-	@echo "#define PASS_IS_TO_HOST"    >> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+ifeq (${PASS_WRITETOHOST},1)
+	@echo "#define PASS_WRITETOHOST"    					>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
-	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc >>        ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc 				>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
@@ -266,7 +273,7 @@ createISATests: .force
 	done
 	@for i in ${ISA_SPECIAL_TESTS}; do				\
 		echo "== Generating SPECIAL TESTs directory for $${i}";		\
-		make TEST_NAME=$${i} PASS_IS_TO_HOST=1 makeIsaTest; \
+		make TEST_NAME=$${i} PASS_WRITETOHOST=1 makeIsaTest; \
 	done
 	touch ${TEST_SUITE_DIR}/.ISACreated
 

@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 #endif  
   //
   // SOme test just go straigth to there if not <fail>
-#ifdef PASS_IS_TO_HOST
-  DUT_WRITE_DVT(DVTF_PASS_IS_TO_HOST, DVTF_PASS_IS_TO_HOST, 1);
+#ifdef PASS_WRITETOHOST
+  DUT_WRITE_DVT(DVTF_PASS_WRITETOHOST, DVTF_PASS_WRITETOHOST, 1);
 #endif
 
   

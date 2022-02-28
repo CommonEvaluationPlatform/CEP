@@ -128,7 +128,7 @@
 `define DVTF_SET_PASS_FAIL_STATUS             104
 `define DVTF_FORCE_SINGLE_THREAD              105
 `define DVTF_SET_VIRTUAL_MODE                 106
-`define DVTF_PASS_IS_TO_HOST                  107
+`define DVTF_PASS_WRITETOHOST                 107
 `define DVTF_TOGGLE_DMI_RESET_BIT             108
 
 // JTAG/OpenOcd

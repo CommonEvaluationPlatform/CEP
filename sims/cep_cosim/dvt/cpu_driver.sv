@@ -592,7 +592,7 @@ module cpu_driver
     wire          curPCReset;
     reg           pcPass              = 0;
     reg           pcFail              = 0;
-    reg           checkToHost         = 0;
+    reg           passWriteToHost     = 0;
     reg           DisableStuckChecker = 0;
     int           stuckCnt            = 0;
     reg [63:0]    lastPc              = 0;
@@ -647,7 +647,7 @@ module cpu_driver
     // Take some action when a pass or failure is detected
     always @(posedge pcPass or posedge pcFail) begin
       if (~curPCReset) begin
-        `logI("C%0d Pass/fail Detected!!!.. Put it to sleep", MY_CPU_ID);
+        `logI("C%0d Pass/Fail Detected!!!... Put it to sleep", MY_CPU_ID);
         PassStatus = pcPass;
         FailStatus = pcFail;
         if (!DisableStuckChecker) begin
@@ -679,10 +679,10 @@ module cpu_driver
           case (curPC)
             `RISCV_PASSFAIL[0]  : pcPass = 1;
             `RISCV_PASSFAIL[2]  : pcPass = 1;
-            `RISCV_PASSFAIL[3]  : if (checkToHost) pcPass = 1;
+            `RISCV_PASSFAIL[3]  : if (passWriteToHost) pcPass = 1;
             `RISCV_PASSFAIL[4]  : pcFail = 1;
             `RISCV_PASSFAIL[1]  : pcFail = 1;
-            default                  : ;
+            default             : ;
           endcase
         end else begin
           pcFail = 1;
@@ -690,6 +690,7 @@ module cpu_driver
       end // if (curPCValid)
     end   // end always @(*)
 
+    // A running counter to indicate how many times the current PC has been "stuck" at the same value
     always @(posedge clk) begin
       if (curPCValid) begin
         lastPc <= curPC;
@@ -700,7 +701,6 @@ module cpu_driver
       end
     end // end always
   
-
   `endif //  `ifdef RISCV_TESTS
   //--------------------------------------------------------------------------------------
 

@@ -46,6 +46,11 @@ else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 COSIM_VLOG_ARGS         	+= +define+BARE_MODE
 endif
 
+# RISC-V Tests
+ifeq (${RISCV_TESTS},1)
+COSIM_VLOG_ARGS         	+= +define+RISCV_TESTS
+endif
+
 # Virtual Mode
 ifeq (${VIRTUAL_MODE},1)
 COSIM_VLOG_ARGS 			+= +define+VIRTUAL_MODE

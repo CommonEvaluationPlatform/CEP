@@ -1,21 +1,10 @@
-//************************************************************************
+//--------------------------------------------------------------------------------------
 // Copyright 2022 Massachusets Institute of Technology
 //
-// File Name:      config.v
+// File Name:      suite_config.v
 // Program:        Common Evaluation Platform (CEP)
-// Description:    Testbench Defines for vBareTest category
+// Description:    Testbench Defines for the Virtual Bare Metal Suite
 // Notes:          
 //
-//************************************************************************
-`define TB_NAME cep_tb
-
-//`define RANDOMIZE_REG_INIT
-//`define RANDOMIZE_GARBAGE_ASSIGN
-//`define RANDOMIZE_INVALID_ASSIGN
-//`define RANDOMIZE_MEM_INIT
-//`define RANDOMIZE
-
-`define RISCV_TESTS
-`define VIRTUAL_MODE
-
+//--------------------------------------------------------------------------------------
 `timescale 1ns/100ps

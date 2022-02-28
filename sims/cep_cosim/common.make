@@ -72,12 +72,11 @@ include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 # Makefiles as needed.
 
 # Set some default flag values
-SINGLE_THREAD 				= 0
-VIRTUAL_MODE				= 0
-RANDOMIZE     				= 1
-UPDATE_INFO   				= 1
-PASS_IS_TO_HOST				= 0;
-TEST_INFO     				= testHistory.txt
+RISCV_TESTS 				?= 0
+VIRTUAL_MODE				?= 0
+RANDOMIZE     				?= 1
+UPDATE_INFO   				?= 1
+TEST_INFO     				?= testHistory.txt
 
 # Misc. variable definitions
 WORK_DIR        			:= ${TEST_SUITE_DIR}/${TEST_SUITE_NAME}_work

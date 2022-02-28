@@ -8,10 +8,9 @@
 #// Notes:          
 #//
 #//************************************************************************
-#
-# Can be override
-#
-STAND_ALONE = 1
+
+# Causes a cleaning prior to running the test suite
+STAND_ALONE 	?= 1
 
 all: runAll
 

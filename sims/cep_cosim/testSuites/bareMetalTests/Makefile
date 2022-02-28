@@ -9,6 +9,9 @@
 #
 #************************************************************************
 
+# Causes a cleaning prior to running the test suite
+STAND_ALONE 	?= 1
+
 all: runAll
 
 COSIM_TOP_DIR   	= $(strip $(shell cd ../..; pwd))
@@ -47,7 +50,10 @@ TEST_LIST 		= 		\
 
 
 runAll: 
+ifeq (${STAND_ALONE},1)
 	make cleanAll
+	make buildLibs
+endif
 	@for i in ${TEST_LIST}; do 					\
 		(cd ${TEST_SUITE_DIR}/$${i}; make);		\
 	done

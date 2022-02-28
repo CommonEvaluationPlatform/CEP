@@ -8,10 +8,3 @@
 //
 //--------------------------------------------------------------------------------------
 `timescale 1ns/100ps
-
-//`define RANDOMIZE_REG_INIT
-//`define RANDOMIZE_MEM_INIT
-//`define RANDOMIZE_GARBAGE_ASSIGN
-//`define RANDOMIZE_INVALID_ASSIGN
-//`define RANDOMIZE
-

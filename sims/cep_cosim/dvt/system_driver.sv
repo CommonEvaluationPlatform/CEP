@@ -296,12 +296,12 @@ module system_driver (
       dvtFlags[`DVTF_FORCE_SINGLE_THREAD] = 0;
     end
    
-    always @(posedge dvtFlags[`DVTF_PASS_IS_TO_HOST]) begin
-      `CPU0_DRIVER.checkToHost = 1;
-      `CPU1_DRIVER.checkToHost = 1;
-      `CPU2_DRIVER.checkToHost = 1;
-      `CPU3_DRIVER.checkToHost = 1;
-      dvtFlags[`DVTF_PASS_IS_TO_HOST] = 0; // self-clear
+    always @(posedge dvtFlags[`DVTF_PASS_WRITETOHOST]) begin
+      `CPU0_DRIVER.passWriteToHost = 1;
+      `CPU1_DRIVER.passWriteToHost = 1;
+      `CPU2_DRIVER.passWriteToHost = 1;
+      `CPU3_DRIVER.passWriteToHost = 1;
+      dvtFlags[`DVTF_PASS_WRITETOHOST] = 0; // self-clear
     end   
    
     // Force all cores into reset
