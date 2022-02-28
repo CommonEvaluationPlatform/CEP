@@ -35,9 +35,6 @@ int main(int argc, char *argv[])
   // Set the active mask for all threads  
   thr.SetActiveMask(mask);
   
-  // Initialize the core data structures (from portable_io.h)
-  initConfig();
-
   // spawn threads for each core
   for (int i = 0; i < maxHost; i++) {
     if ((long unsigned int)(1 << i) & mask) {
