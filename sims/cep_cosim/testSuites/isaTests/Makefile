@@ -12,8 +12,9 @@
 #                     completed execution.
 #                   SINGLE_CORE_ONLY	- 
 #					SINGLE_THREAD_ONLY	-
-#					PASS_WRITETOHOST		-
-#					VIRTUAL_MODE		- 
+#					PASS_WRITETOHOST	-
+#					VIRTUAL_MODE		- Affects both comiplation and
+#					  runtime behavior.
 #
 #************************************************************************
 
@@ -195,7 +196,7 @@ ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	@for i in ${ISA_TEST_LIST}; do															\
+	@for i in ${ISA_PARALLEL_TEST_LIST}; do															\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
 		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 											\
 		make TEST_NAME=$${i});																\
@@ -215,7 +216,6 @@ SINGLE_THREAD 		?= 0
 VIRTUAL_MODE 		?= 0
 PASS_WRITETOHOST 	?= 0
 MAX_TIMEOUT 		?= 200
-SINGLE_CORE_ONLY	?= 0
 
 ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 	@if test ! -d ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}; then	\
@@ -226,7 +226,7 @@ ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/
 	@cp -f ${ISA_TEST_TEMPLATE}/c_module.cc     ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
 	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 
-
+	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 ifeq (${SINGLE_THREAD},1)
 	@echo "#define SINGLE_THREAD_ONLY" 						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
@@ -234,10 +234,7 @@ ifneq (${SINGLE_CORE_ONLY},)
 	@echo "#define SINGLE_CORE_ONLY ${SINGLE_CORE_ONLY}" 	>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifeq (${VIRTUAL_MODE},1)
-	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 	@echo "#define VIRTUAL_MODE"       						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-else
-	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 endif
 ifeq (${PASS_WRITETOHOST},1)
 	@echo "#define PASS_WRITETOHOST"    					>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
@@ -247,7 +244,9 @@ endif
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
 
-createISATests: .force
+# Recursively calls make to build the test directories for ALL of the tests in the lists specified above.
+# Given differing test requirements, they are called with different arguments.
+createISATests: .force 
 	@for i in ${ISA_VM_1CORE_ONLY_LIST}; do				\
 		echo "== Generating VM 1CORE test directory for $${i}";		\
 		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=1 SFX=0 makeIsaTest; \
@@ -277,16 +276,12 @@ createISATests: .force
 	done
 	touch ${TEST_SUITE_DIR}/.ISACreated
 
-removeISATests: .force cleanAll
+# Cleans 
+removeISATests: .force
 	@rm -rf rv64*
 	@rm -f ${TEST_SUITE_DIR}/.ISACreated
 
 
-isaTests: removeISATests createISATests
-	@echo "done"
-
-${BLD_DIR}/.ISACreated:
-	@echo "*****************************************************"
-	@echo "--- Please run 'make createISATests' to continue ----"
-	@echo "*****************************************************"
+${TEST_SUITE_DIR}/.ISACreated:
+	@echo "CEP_COSIM: Please run 'make createISATests' to continue"
 	@exit 1

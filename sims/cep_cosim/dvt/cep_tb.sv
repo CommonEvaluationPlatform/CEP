@@ -225,7 +225,7 @@ module `COSIM_TB_TOP_MODULE;
         .MY_SLOT_ID   (0),
         .MY_CPU_ID    (c)
       ) driver (
-        .clk          (sys_clk        ),  
+        .clk          (sys_clk        ),
         .enableMe     (enableMask[c]  )
       );
 
@@ -305,12 +305,13 @@ module `COSIM_TB_TOP_MODULE;
 
   //--------------------------------------------------------------------------------------
   // When operating in Bare Metal mode, instantiate the Rocket Tile Tilelink Monitors
+  // They can be individually enabled from softwware and are disabled by default
   //--------------------------------------------------------------------------------------
   `ifdef BARE_MODE
-    `ifndef RISCV_TESTS
     tile_monitor tile0_monitor_inst (
       .clock                                        (`TILE0_PATH.clock                                    ),
       .reset                                        (`TILE0_PATH.reset                                    ),
+      .enable                                       (`CPU0_DRIVER.tl_monitor_enable                       ),
       .auto_wfi_out_0                               (`TILE0_PATH.auto_wfi_out_0                           ),
       .auto_int_local_in_3_0                        (`TILE0_PATH.auto_int_local_in_3_0                    ),
       .auto_int_local_in_2_0                        (`TILE0_PATH.auto_int_local_in_2_0                    ),
@@ -359,6 +360,7 @@ module `COSIM_TB_TOP_MODULE;
     tile_monitor tile1_monitor_inst (
       .clock                                        (`TILE1_PATH.clock                                    ),
       .reset                                        (`TILE1_PATH.reset                                    ),
+      .enable                                       (`CPU1_DRIVER.tl_monitor_enable                       ),
       .auto_wfi_out_0                               (`TILE1_PATH.auto_wfi_out_0                           ),
       .auto_int_local_in_3_0                        (`TILE1_PATH.auto_int_local_in_3_0                    ),
       .auto_int_local_in_2_0                        (`TILE1_PATH.auto_int_local_in_2_0                    ),
@@ -407,6 +409,7 @@ module `COSIM_TB_TOP_MODULE;
     tile_monitor tile2_monitor_inst (
       .clock                                        (`TILE2_PATH.clock                                    ),
       .reset                                        (`TILE2_PATH.reset                                    ),
+      .enable                                       (`CPU2_DRIVER.tl_monitor_enable                       ),
       .auto_wfi_out_0                               (`TILE2_PATH.auto_wfi_out_0                           ),
       .auto_int_local_in_3_0                        (`TILE2_PATH.auto_int_local_in_3_0                    ),
       .auto_int_local_in_2_0                        (`TILE2_PATH.auto_int_local_in_2_0                    ),
@@ -455,6 +458,7 @@ module `COSIM_TB_TOP_MODULE;
     tile_monitor tile3_monitor_inst (
       .clock                                        (`TILE3_PATH.clock                                    ),
       .reset                                        (`TILE3_PATH.reset                                    ),
+      .enable                                       (`CPU3_DRIVER.tl_monitor_enable                       ),
       .auto_wfi_out_0                               (`TILE3_PATH.auto_wfi_out_0                           ),
       .auto_int_local_in_3_0                        (`TILE3_PATH.auto_int_local_in_3_0                    ),
       .auto_int_local_in_2_0                        (`TILE3_PATH.auto_int_local_in_2_0                    ),
@@ -499,7 +503,6 @@ module `COSIM_TB_TOP_MODULE;
       .e_valid                                      (`TILE3_PATH.auto_tl_other_masters_out_e_valid        ),
       .e_bits_sink                                  (`TILE3_PATH.auto_tl_other_masters_out_e_bits_sink    )
     );
-    `endif
   `endif
   //--------------------------------------------------------------------------------------
 

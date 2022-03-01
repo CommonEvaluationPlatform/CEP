@@ -400,6 +400,8 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Core reset only makes sense in Bare Metal Mode
   `ifdef BARE_MODE
+    reg tl_monitor_enable = 0;
+
     always @(posedge dvtFlags[`DVTF_FORCE_CORE_RESET]) begin
       if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
         force_core_reset();
@@ -412,6 +414,14 @@ module cpu_driver
         release_core_reset();
       end
       dvtFlags[`DVTF_RELEASE_CORE_RESET] = 0;  
+    end // end always
+
+    // Enable the Tilelink monitor for the specified core
+    always @(posedge dvtFlags[`DVTF_ENABLE_TL_MONITORS]) begin
+      if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin
+        tl_monitor_enable = 1;
+      end
+      dvtFlags[`DVTF_ENABLE_TL_MONITORS] = 0;
     end // end always
 
     always @(posedge dvtFlags[`DVTF_GET_CORE_RESET_STATUS]) begin
@@ -583,10 +593,11 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Support functions for the RISC-V ISA Tests (which WILL require BARE_MODE)
   //--------------------------------------------------------------------------------------
+  reg           PassStatus          = 0;
+  reg           FailStatus          = 0;
+
   `ifdef RISCV_TESTS
 
-    reg           PassStatus          = 0;
-    reg           FailStatus          = 0;
     wire [63:0]   curPC;
     wire          curPCValid;
     wire          curPCReset;

@@ -19,6 +19,7 @@
 module tile_monitor (
   input         clock,
   input         reset,
+  input         enable,
   input         auto_wfi_out_0,
   input         auto_int_local_in_3_0,
   input         auto_int_local_in_2_0,
@@ -64,7 +65,7 @@ module tile_monitor (
   input [1:0]   e_bits_sink
 );
 
-  always @(posedge clock) begin
+  always @(posedge clock && enable) begin
     if (a_valid && a_ready) begin
       `logI("Tile #%0d A channel TL transaction - opcode=%0d, param=%0d, size=%0d, source=%0d, address=0x%x, mask=0x%x, data=0x%x",
         auto_hartid_in, a_bits_opcode, a_bits_param, a_bits_size, a_bits_source, a_bits_address, a_bits_mask, a_bits_data);
@@ -83,6 +84,6 @@ module tile_monitor (
     end // if (d_valid)
     if (e_valid && e_ready) begin
     end // if (e_valid)
-  end // always @(posedge clock)
+  end // always @(posedge clock && enable)
 
 endmodule // tile_monitor

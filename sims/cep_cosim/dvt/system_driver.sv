@@ -276,14 +276,7 @@ module system_driver (
       end
 
     end
-   
-    int virtualMode = 0;
-   
-    always @(posedge dvtFlags[`DVTF_SET_VIRTUAL_MODE]) begin
-      virtualMode = 1;
-      dvtFlags[`DVTF_SET_VIRTUAL_MODE] = 0;
-    end
-   
+
     int         curCore         = 0;
     reg         singleThread    = 0;
     reg [3:0]   coreActiveMask  = 0;
@@ -353,9 +346,9 @@ module system_driver (
           // Core 0 is active
           0: begin
             `logI("Releasing CPU0 Reset....");
-            if (virtualMode) begin
+            `ifdef VIRTUAL_MODE begin
               ResetAllCores();
-            end
+            `endif
             release `TILE0_PATH.core.reset; 
             @(posedge (`CPU0_DRIVER.PassStatus || `CPU0_DRIVER.FailStatus));
           end // Core 0 is active
@@ -363,9 +356,9 @@ module system_driver (
           // Core 1 is active
           1: begin
             `logI("Releasing CPU1 Reset....");  
-            if (virtualMode) begin
+            `ifdef VIRTUAL_MODE begin
               ResetAllCores();
-            end     
+            `endif
             release `TILE1_PATH.core.reset;
             @(posedge (`CPU1_DRIVER.PassStatus || `CPU1_DRIVER.FailStatus));
           end  // Core 1 is active
@@ -373,9 +366,9 @@ module system_driver (
           // Core 2 is active
           2: begin
             `logI("Releasing CPU2 Reset....");  
-            if (virtualMode) begin
-              ResetAllCores();              
-            end     
+            `ifdef VIRTUAL_MODE begin
+              ResetAllCores();
+            `endif
             release `TILE2_PATH.core.reset;
             @(posedge (`CPU2_DRIVER.PassStatus || `CPU2_DRIVER.FailStatus));
           end // Core 2 is active
@@ -383,9 +376,9 @@ module system_driver (
           // Core 3 is active
           3: begin
             `logI("Releasing CPU3 Reset....");  
-            if (virtualMode) begin
+            `ifdef VIRTUAL_MODE begin
               ResetAllCores();
-            end     
+            `endif
             release `TILE3_PATH.core.reset;
             @(posedge (`CPU3_DRIVER.PassStatus || `CPU3_DRIVER.FailStatus));
           end // Core 3 is active      

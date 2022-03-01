@@ -116,7 +116,7 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 #--------------------------------------------------------------------------------------
 # To detect if any important flag has changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${VIRTUAL_MODE}_${RISCV_TESTS}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
@@ -153,13 +153,13 @@ endif
 	@echo " CEP_COSIM:   MODELSIM               = $(MODELSIM)"
 	@echo " CEP_COSIM:   CADENCE                = $(CADENCE)"
 	@echo " CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
+	@echo " CEP_COSIM:   RISCV_TESTS            = ${RISCV_TESTS}"
 	@echo " CEP_COSIM:   NOWAVE                 = ${NOWAVE}"
 	@echo " CEP_COSIM:   PROFILE                = ${PROFILE}"
 	@echo " CEP_COSIM:   COVERAGE               = ${COVERAGE}"
 	@echo " CEP_COSIM:   USE_GDB                = ${USE_GDB}"
 	@echo " CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
 	@echo " CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
-	@echo " CEP_COSIM:   SINGLE_THREAD          = ${SINGLE_THREAD}"
 	@echo " CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo " CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo ""

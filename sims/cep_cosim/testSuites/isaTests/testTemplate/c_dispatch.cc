@@ -67,11 +67,6 @@ int main(int argc, char *argv[])
     DUT_WRITE_DVT(DVTF_FORCE_SINGLE_THREAD, DVTF_FORCE_SINGLE_THREAD, 1);
   #endif
 
-  // Enable virtual mode
-  #ifdef VIRTUAL_MODE
-    DUT_WRITE_DVT(DVTF_SET_VIRTUAL_MODE, DVTF_SET_VIRTUAL_MODE,1);
-  #endif  
-
   // Some tests just go straight to there if not <fail>
   #ifdef PASS_WRITETOHOST
     DUT_WRITE_DVT(DVTF_PASS_WRITETOHOST, DVTF_PASS_WRITETOHOST, 1);
