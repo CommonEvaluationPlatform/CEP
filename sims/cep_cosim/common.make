@@ -218,9 +218,9 @@ endif
 #--------------------------------------------------------------------------------------
 # Misc build targets
 #--------------------------------------------------------------------------------------
-clean: cleanLocal
+clean: cleanTest
 
-cleanLocal:
+cleanTest:
 	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj
 	-rm -f ${TEST_DIR}/*.wlf
 	-rm -f ${TEST_DIR}/*history
@@ -236,7 +236,7 @@ cleanLocal:
 	-rm -f ${TEST_DIR}/status
 	-rm -f ${TEST_DIR}/*.vstf
 	
-cleanLocalDo:
+cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do
 
 cleanSuite:
@@ -244,6 +244,7 @@ cleanSuite:
 	-rm -rf ${TEST_SUITE_DIR}/*_work
 	-rm -f ${TEST_SUITE_DIR}/.PERSUITE*
 	-rm -f ${TEST_SUITE_DIR}/.buildVlog
+	-rm -f ${TEST_SUITE_DIR}/_info
 
 cleanLib:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
@@ -253,17 +254,7 @@ cleanLib:
 	-rm -rf ${LIB_DIR}/*
 	-rm -rf ${LIB_DIR}/.buildLibs
 	
-cleanAll:
-	-rm -f ${CHIPYARD_TOP_FILE_bfm}
-	-rm -f ${CHIPYARD_TOP_FILE_bare}
-	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.cosim_build_list
-	-rm -rf ${COSIM_TOP_DIR}/testSuites/*/*_work
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.PERSUITE*
-	-rm -f ${COSIM_TOP_DIR}/testSuites/*/.buildVlog
-	-rm -f ${V2C_H_FILE_LIST}
-	-rm -rf ${LIB_DIR}/*
-	-rm -rf ${COSIM_TOP_DIR}/*/*/testSuiteSimmary
+cleanAll: cleanLib cleanSuite cleanTest
 	-rm -f ${COSIM_TOP_DIR}/regressionSummary
 	
 # Use to force rebuilds for rules that include this dependency

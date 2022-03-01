@@ -12,8 +12,9 @@
 #                     completed execution.
 #                   SINGLE_CORE_ONLY	- 
 #					SINGLE_THREAD_ONLY	-
-#					PASS_WRITETOHOST	-
-#					VIRTUAL_MODE		- Affects both comiplation and
+#					PASS_WRITETOHOST	- Somes tests are considered
+#                     passed when they reach the write_tohost function
+#					VIRTUAL_MODE		- Affects both compilation and
 #					  runtime behavior.
 #
 #************************************************************************
