@@ -14,88 +14,46 @@ STAND_ALONE 	?= 1
 
 all: runAll
 
-# Variable needed by common.make
-COSIM_DIR_NAME  = $(shell cd ..; basename `pwd`)
-REPO_TOP_DIR 	= $(shell cd ../..; pwd | ./${COSIM_DIR_NAME}/bin/strip_net.pl )
-BLD_DIR     	= $(shell cd .; pwd | ../bin/strip_net.pl )
-TEST_SUITE  	= $(shell basename ${BLD_DIR})
-SIM_DIR     	= ${REPO_TOP_DIR}/${COSIM_DIR_NAME}
+COSIM_TOP_DIR   	= $(strip $(shell cd ../..; pwd))
+REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
+TEST_SUITE_DIR		= $(strip $(shell cd .; pwd))
+TEST_SUITE_NAME		= $(shell cd .; basename `pwd`)
 
-#
-# Top target!!!
-#
+# Include current test suite common.make
+include ./common.make
 
-#
-# Either run one at a time or batch the wholething if supported
-#
-
-
-#
-# override anything here before calling the common file
-#
-
-include ${COSIM_DIR_NAME}/common.make
-
-#
-# List of test under this directory
-#
-
-BFM_TEST_LIST = \
-	regTest		\
-	macroMix	\
-	playback	\
-	multiLock	\
-	memPreload	\
-	miscTests	\
-	accessTest	\
-	clintTest	\
-	plicTest	\
-	srotBadKeys	\
-	srotMemTest	\
-	srotKeyTest	\
-	scratchpadTest	\
-	srotErrorTest	\
-	multiThread	\
+TEST_LIST = 		\
+	accessTest		\
+	clintTest		\
+	lockTest		\
+	macroMix		\
+	miscTests		\
+	multiLock		\
+	multiThread		\
 	plicPrioIntr	\
+	plicTest		\
+	regTest			\
+	scratchpadTest	\
+	srotMemTest
 
+# Tests yet to run/fix/debug
+#	srotBadKeys
+#	srotKeyTest
+#	srotErrorTest
 
-
-TESTINFO_LIST := $(sort $(foreach t,${TALUS_TEST_LIST},${BLD_DIR}/${t}/testInfo.txt))
-
-#
-# talus tests use lot of memory => need big machines
-#
 
 runAll: 
 ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	-rm -rf ${BLD_DIR}/*_work ${BLD_DIR}/.*work_dependList.make
-	-rm -f ${BLD_DIR}/*/*.elf
-	-rm -rf ${BLD_DIR}/.*_dependList* ${BLD_DIR}/.is_checked
-	make buildSim
-	@for i in ${BFM_TEST_LIST}; do							\
-		echo "    PEND : ${BLD_DIR}/$${i}"  > ${BLD_DIR}/$${i}/status;		\
-		(cd ${BLD_DIR}/$${i}; rm -f *.o*; 					\
-		make NOWAVE=1 TL_CAPTURE=${TL_CAPTURE} C2C_CAPTURE=${C2C_CAPTURE} TEST_NAME=$${i});			\
+	@for i in ${TEST_LIST}; do 					\
+		(cd ${TEST_SUITE_DIR}/$${i}; make);		\
 	done
 
 summary:
-	@date > regressionSummary
-	@for i in ${BFM_TEST_LIST}; do					\
-		cat ${BLD_DIR}/$${i}/status | tee -a regressionSummary;	\
+	@date > ${TEST_SUITE_DIR}/testSuiteSummary
+	@for i in ${TEST_LIST}; do				\
+		cat ${TEST_SUITE_DIR}/$${i}/status | sort | tee -a testSuiteSummary;	\
 	done
-
-FPGA_INST_NAME     ?= /cep_tb/fpga
-
-
-
-# fixme !!! These need to be in a do file
-cov_report:
-	coverage open ../coverage/des3.ucdb
-	coverage report -html -output covhtmlreport -details -assert -directive -cvg -code bcefst -threshL 50 -threshH 90
-
-
-
 
