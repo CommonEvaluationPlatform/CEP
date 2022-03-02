@@ -15,6 +15,7 @@
 #include "c_module.h"
 #include "cep_adrMap.h"
 #include "cep_apis.h"
+#include "portable_io.h"
 #include "simPio.h"
 /*
  * main 
