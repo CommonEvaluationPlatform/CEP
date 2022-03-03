@@ -247,7 +247,8 @@ cleanSuite:
 	-rm -f ${TEST_SUITE_DIR}/.PERSUITE*
 	-rm -f ${TEST_SUITE_DIR}/.buildVlog
 	-rm -f ${TEST_SUITE_DIR}/_info
-
+	-rm -rf ${TEST_SUITE_DIR}/xcelium.d
+	
 cleanLib:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
