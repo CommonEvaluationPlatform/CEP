@@ -235,6 +235,8 @@ cleanTest:
 	-rm -f ${TEST_DIR}/transcript
 	-rm -f ${TEST_DIR}/status
 	-rm -f ${TEST_DIR}/*.vstf
+	-rm -f ${TEST_DIR}/xrun.key 
+	-rm -f ${TEST_DIR}/imp.h 
 	
 cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do

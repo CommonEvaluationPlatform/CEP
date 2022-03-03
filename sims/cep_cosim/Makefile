@@ -21,8 +21,8 @@ ELF_MODE   			= LOCAL
 
 # Tests to run as part of the default build target
 TEST_SUITES  =  	bareMetalTests	\
-#					bfmTests		\
-#					isaTests		\
+					bfmTests		\
+					isaTests
 #					vBareTest
 
 # Run tests for all members of the test group
