@@ -96,7 +96,6 @@ class CEPASICRocketConfig extends Config(
   //new chipyard.config.WithRSA ++
   new chipyard.config.WithRSAASIC ++
 
-
   // Instantiation of the Surrogate Root of Trust (with or w/o the ARM compiled memories)
   // new chipyard.config.WithSROT ++
   new chipyard.config.WithSROTASIC ++

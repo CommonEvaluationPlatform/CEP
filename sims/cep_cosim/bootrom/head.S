@@ -22,9 +22,13 @@ _prog_start:
 
   // Disable UART and SD initialization when in simulation mode
 #ifndef _SIM_ONLY
+  #ifndef SINGLE_CORE
   smp_pause(s1, s2)
+  #endif
   call main
+  #ifndef SINGLE_CORE
   smp_resume(s1, s2)
+  #endif
 #endif
 
   csrr a0, mhartid // hartid for next level bootloader

@@ -239,8 +239,8 @@ void print_greeting()
     kputs("       ./+++++++++++oo+++:  +oo++o++++o+o+oo+oo.- `s+++s`-                   "); 
     kputs("       .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                      "); 
     kputs("                                                                             ");
-    kputs("                  Common Evaluation Platform v3.5Alpha1                      ");
-    kputs("         Copyright 2022 Massachusets Institute of Technology                ");
+    kputs("                  Common Evaluation Platform v3.5ABeta3                      ");
+    kputs("         Copyright 2022 Massachusets Institute of Technology                 ");
     kputs("                                                                             ");
     kputs("                                                                             ");
     kputs("");
@@ -255,20 +255,21 @@ int main(void)
   REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
 
   print_greeting();
-  kputs("INIT");
-  
-  sd_poweron();
-  if (sd_cmd0() ||
-      sd_cmd8() ||
-      sd_acmd41() ||
-      sd_cmd58() ||
-      sd_cmd16() ||
-      copy()) {
-        kputs("ERROR");
-    return 1;
-  }
 
-  kputs("BOOT");
+  // kputs("INIT");
+  
+  // sd_poweron();
+  // if (sd_cmd0() ||
+  //     sd_cmd8() ||
+  //     sd_acmd41() ||
+  //     sd_cmd58() ||
+  //     sd_cmd16() ||
+  //     copy()) {
+  //       kputs("ERROR");
+  //   return 1;
+  // }
+
+  // kputs("BOOT");
 
   // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");

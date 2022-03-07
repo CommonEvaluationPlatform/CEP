@@ -95,7 +95,7 @@ $(build_dir):
 	mkdir -p $@
 
 $(BOOTROM_SOURCES):
-	(cd ${BOOTROM_SRC_DIR}; make FULL_BOOT=$(FULL_BOOT))
+	(cd ${BOOTROM_SRC_DIR}; make FULL_BOOT=$(FULL_BOOT) PBUS_CLK=${PBUS_CLK} SINGLE_CORE=${SINGLE_CORE})
 
 $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 	cp -f $(BOOTROM_SOURCES) $(build_dir)

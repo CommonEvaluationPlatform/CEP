@@ -14,8 +14,10 @@ ifndef RISCV
 $(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
-# By default, FULL_BOOT is NOT enabled
+# Default parameters
 FULL_BOOT		?= 0
+SINGLE_CORE		?= 0
+PBUS_CLK 		?= 200000000
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
@@ -33,21 +35,43 @@ OBJCOPY 		= $(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		= $(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS 			+= -fno-common -g -DENTROPY=0 -DNONSMP_HART=0
-ifeq (${FULL_BOOT},1)
-	CFLAGS  		+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
-else 
-	CFLAGS  		+= -I $(ROOT_DIR)/include -I ${ROOT_DIR} -D_SIM_ONLY
+CFLAGS 			+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
+ifneq (${FULL_BOOT},1)
+	CFLAGS  	+= -D_SIM_ONLY
 endif
+
+ifeq (${SINGLE_CORE},1)
+	CFLAGS 		+= -DSINGLE_CORE
+endif
+
 CFLAGS_RV64		= -mabi=lp64 -march=rv64ima
 CFLAGS_RV32		= -mabi=ilp32 -march=rv32ima
 LFLAGS 			= -static -nostdlib -T ${CEP_LDS_FILE}
 
-# default to 1MHz but really should be overridden
-PBUS_CLK 		?= 200000000
 
-default: img dump elf rcf
+default: bootrom_info img dump elf rcf
 
-img: $(BOOTROM_IMG)
+#--------------------------------------------------------------------------------------
+# To detect if any important flags has changed since last run
+#--------------------------------------------------------------------------------------
+BOOTROM_CHECK = ${ROOT_DIR}/.BOOTROM_${PBUS_CLK}_${FULL_BOOT}_${SINGLE_CORE}
+
+${BOOTROM_CHECK}: .force
+	@if test ! -f ${BOOTROM_CHECK}; then rm -f ${ROOT_DIR}/.BOOTROM_*; touch ${BOOTROM_CHECK}; fi
+#--------------------------------------------------------------------------------------
+
+bootrom_info:
+	@echo ""
+	@echo "CEP_BOOTROM: ----------------------------------------------------------------------"
+	@echo "CEP_BOOTROM: Building CEP Bootrom w/the following variables:"
+	@echo "CEP_BOOTROM:   ROOT_DIR    = ${ROOT_DIR}"
+	@echo "CEP_BOOTROM:   PBUS_CLK    = ${PBUS_CLK}"
+	@echo "CEP_BOOTROM:   FULL_BOOT   = ${FULL_BOOT}"
+	@echo "CEP_BOOTROM:   SINGLE_CORE = ${SINGLE_CORE}"
+	@echo "CEP_BOOTROM: ----------------------------------------------------------------------"
+	@echo ""
+
+img: $(BOOTROM_IMG) 
 
 dump: $(BOOTROM_DUMP)
 
@@ -62,12 +86,15 @@ rcf: img
 %.dump: %.elf
 	$(OBJDUMP) -d $< > $@
 
-bootrom.rv32.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE}
+bootrom.rv32.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE} ${BOOTROM_CHECK}
 	$(CC) $(CFLAGS) $(CFLAGS_RV32) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
 
-bootrom.rv64.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE}
+bootrom.rv64.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE} ${BOOTROM_CHECK}
 	$(CC) $(CFLAGS) $(CFLAGS_RV64) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
 
+# Use to force rebuilds for rules that include this dependency
+.force:
+
 clean:
-	rm -f *.elf *.img *.dump *.hex *.rcf
+	rm -f *.elf *.img *.dump *.hex *.rcf .BOOTROM_*
 

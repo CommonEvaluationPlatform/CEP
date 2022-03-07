@@ -14,7 +14,9 @@ sim_name := none
 #########################################################################################
 # include shared variables
 #########################################################################################
-SUB_PROJECT ?= vcu118
+ifndef SUB_PROJECT
+$(error SUB_PROJECT must be set)
+endif
 
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
@@ -28,9 +30,7 @@ ifeq ($(SUB_PROJECT),vcu118)
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),bringup)
+else ifeq ($(SUB_PROJECT),bringup)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= BringupVCU118FPGATestHarness
 	VLOG_MODEL        ?= BringupVCU118FPGATestHarness
@@ -42,9 +42,7 @@ ifeq ($(SUB_PROJECT),bringup)
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),arty-35)
+else ifeq ($(SUB_PROJECT),arty-35)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
@@ -57,9 +55,7 @@ ifeq ($(SUB_PROJECT),arty-35)
 	TOP               ?= ChipTop
 	BOARD             ?= arty
 	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),arty-100)
+else ifeq ($(SUB_PROJECT),arty-100)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
@@ -74,21 +70,8 @@ ifeq ($(SUB_PROJECT),arty-100)
 	FPGA_BRAND        ?= xilinx
 	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
 	FULL_BOOT		  := 1
-endif
-
-ifeq ($(SUB_PROJECT),cep-arty-100)
-	# TODO: Fix with Arty
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty
-	CONFIG            ?= TinyCEPRocketArtyConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty
-	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
-	TOP               ?= ChipTop
-	BOARD             ?= arty_a7_100
-	FPGA_BRAND        ?= xilinx
+else
+$(error SUB_PROJECT is invalid)
 endif
 
 include $(base_dir)/variables.mk

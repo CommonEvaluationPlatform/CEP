@@ -71,6 +71,7 @@ ifeq ($(SUB_PROJECT),cep_asic)
 	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
 	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_FILES	  := bootrom.rv64.img bootrom.rv64.rcf
+	PBUS_CLK 		  := 200000000
 endif
 
 # default chipyard build
