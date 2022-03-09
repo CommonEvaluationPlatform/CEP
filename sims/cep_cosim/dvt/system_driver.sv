@@ -184,6 +184,15 @@ module system_driver (
     enableRdTrace = 1;            
     `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
   end
+
+  reg uart_loopback_enabled = 1;
+  always @(posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
+  begin
+    uart_loopback_enabled = `DVT_FLAG[`DVTF_PAT_LO];
+    `logI("DVTF_CONTROL_UART_LOOPBACK - %0d", uart_loopback_enabled);
+    `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK] = 0;
+  end //posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
+
   //--------------------------------------------------------------------------------------
 
 

@@ -127,9 +127,10 @@
 `define DVTF_GET_PASS_FAIL_STATUS             103
 `define DVTF_SET_PASS_FAIL_STATUS             104
 `define DVTF_FORCE_SINGLE_THREAD              105
-`define DVTF_ENABLE_TL_MONITORS				  			106
+`define DVTF_ENABLE_TL_MONITORS				  106
 `define DVTF_PASS_WRITETOHOST                 107
 `define DVTF_TOGGLE_DMI_RESET_BIT             108
+`define DVTF_CONTROL_UART_LOOPBACK            109
 
 // JTAG/OpenOcd
 `define DVTF_ENABLE_REMOTE_BITBANG_BIT        113

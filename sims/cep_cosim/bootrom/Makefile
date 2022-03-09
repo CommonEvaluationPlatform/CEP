@@ -15,7 +15,8 @@ $(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the C
 endif
 
 # Default parameters
-FULL_BOOT		?= 0
+ENABLE_MAIN		?= 0
+ENABLE_SD 		?= 0
 SINGLE_CORE		?= 0
 PBUS_CLK 		?= 200000000
 
@@ -36,12 +37,17 @@ OBJDUMP 		= $(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS 			+= -fno-common -g -DENTROPY=0 -DNONSMP_HART=0
 CFLAGS 			+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
-ifneq (${FULL_BOOT},1)
-	CFLAGS  	+= -D_SIM_ONLY
+
+ifeq (${ENABLE_MAIN},1)
+	CFLAGS  	+= -DENABLE_MAIN
 endif
 
 ifeq (${SINGLE_CORE},1)
 	CFLAGS 		+= -DSINGLE_CORE
+endif
+
+ifeq (${ENABLE_SD},1)
+	CFLAGS 		+= -DENABLE_SD
 endif
 
 CFLAGS_RV64		= -mabi=lp64 -march=rv64ima
@@ -54,7 +60,7 @@ default: bootrom_info img dump elf rcf
 #--------------------------------------------------------------------------------------
 # To detect if any important flags has changed since last run
 #--------------------------------------------------------------------------------------
-BOOTROM_CHECK = ${ROOT_DIR}/.BOOTROM_${PBUS_CLK}_${FULL_BOOT}_${SINGLE_CORE}
+BOOTROM_CHECK = ${ROOT_DIR}/.BOOTROM_${PBUS_CLK}_${ENABLE_MAIN}_${ENABLE_SD}_${SINGLE_CORE}
 
 ${BOOTROM_CHECK}: .force
 	@if test ! -f ${BOOTROM_CHECK}; then rm -f ${ROOT_DIR}/.BOOTROM_*; touch ${BOOTROM_CHECK}; fi
@@ -64,10 +70,11 @@ bootrom_info:
 	@echo ""
 	@echo "CEP_BOOTROM: ----------------------------------------------------------------------"
 	@echo "CEP_BOOTROM: Building CEP Bootrom w/the following variables:"
-	@echo "CEP_BOOTROM:   ROOT_DIR    = ${ROOT_DIR}"
-	@echo "CEP_BOOTROM:   PBUS_CLK    = ${PBUS_CLK}"
-	@echo "CEP_BOOTROM:   FULL_BOOT   = ${FULL_BOOT}"
-	@echo "CEP_BOOTROM:   SINGLE_CORE = ${SINGLE_CORE}"
+	@echo "CEP_BOOTROM:   ROOT_DIR      = ${ROOT_DIR}"
+	@echo "CEP_BOOTROM:   PBUS_CLK      = ${PBUS_CLK}"
+	@echo "CEP_BOOTROM:   ENABLE_MAIN   = ${ENABLE_MAIN}"
+	@echo "CEP_BOOTROM:   ENABLE_SD     = ${ENABLE_SD}"
+	@echo "CEP_BOOTROM:   SINGLE_CORE   = ${SINGLE_CORE}"
 	@echo "CEP_BOOTROM: ----------------------------------------------------------------------"
 	@echo ""
 

@@ -21,7 +21,7 @@ _prog_start:
   li sp, (scratchpad_base_addr + scratchpad_sp_offset)
 
   // Disable UART and SD initialization when in simulation mode
-#ifndef _SIM_ONLY
+#ifdef ENABLE_MAIN
   #ifndef SINGLE_CORE
   smp_pause(s1, s2)
   #endif

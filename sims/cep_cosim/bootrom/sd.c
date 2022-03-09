@@ -256,20 +256,24 @@ int main(void)
 
   print_greeting();
 
-  // kputs("INIT");
-  
-  // sd_poweron();
-  // if (sd_cmd0() ||
-  //     sd_cmd8() ||
-  //     sd_acmd41() ||
-  //     sd_cmd58() ||
-  //     sd_cmd16() ||
-  //     copy()) {
-  //       kputs("ERROR");
-  //   return 1;
-  // }
+#ifdef ENABLE_SD
 
-  // kputs("BOOT");
+  kputs("INIT");
+  
+  sd_poweron();
+  if (sd_cmd0() ||
+      sd_cmd8() ||
+      sd_acmd41() ||
+      sd_cmd58() ||
+      sd_cmd16() ||
+      copy()) {
+        kputs("ERROR");
+    return 1;
+  }
+
+  kputs("BOOT");
+  
+#endif // #ifdef ENABLE_SD
 
   // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");

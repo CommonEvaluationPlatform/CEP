@@ -49,6 +49,15 @@ int is_program_loaded(int maxTimeOut) {
   return errCnt;
 }
 
+void set_uart_loopback(int loopback)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, loopback);
+  DUT_WRITE_DVT(DVTF_CONTROL_UART_LOOPBACK, DVTF_CONTROL_UART_LOOPBACK, 1);
+#endif
+}
+
+
 void release_tile_reset(int cpuId)
 {
 #ifdef SIM_ENV_ONLY

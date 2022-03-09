@@ -34,6 +34,7 @@ extern "C" {
   /*
    * Function Prototypes
    */
+  void set_uart_loopback(int loopback);
   void release_tile_reset(int cpuId);
   void release_core_reset(int cpuId);
   void dump_wave(int cycle2start, int cycle2capture, int enable);

@@ -53,7 +53,7 @@ module `COSIM_TB_TOP_MODULE;
   wire                jtag_TRSTn; pullup (weak1) (jtag_TRSTn);
   wire                jtag_TDO;   
 
-  wire                uart_rxd; pullup (weak1) (uart_rxd);
+  wire                 uart_rxd; pullup (weak1) (uart_rxd);
   wire                uart_txd; 
 
   wire                gpio_0_0; pullup (weak1) (gpio_0_0);
@@ -107,9 +107,9 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // Simple UART Loopback
-  //--------------------------------------------------------------------------------------
-  assign uart_rxd = uart_txd;
+  // Simple UART Loopback (if enabled)
+  //--------------------------------------------------------------------------------------  
+  assign uart_rxd = (`UART_LOOPBACK_ENABLED) ? uart_txd : 1'b1;
   //--------------------------------------------------------------------------------------
   
   
