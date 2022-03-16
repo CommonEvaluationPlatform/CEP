@@ -237,9 +237,9 @@ void print_greeting()
     kputs("       -o+++-:.....:/::::/  +oo+o :`````````````  `s+++s`-                   "); 
     kputs("       -++++-::::::/++/++:  ++++o//////////////:- `o+++o`-                   "); 
     kputs("       ./+++++++++++oo+++:  +oo++o++++o+o+oo+oo.- `s+++s`-                   "); 
-    kputs("       .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                      "); 
+    kputs("         .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                    "); 
     kputs("                                                                             ");
-    kputs("                  Common Evaluation Platform v3.5ABeta3                      ");
+    kputs("                     Common Evaluation Platform v3.7                         ");
     kputs("         Copyright 2022 Massachusets Institute of Technology                 ");
     kputs("                                                                             ");
     kputs("                                                                             ");
@@ -252,7 +252,8 @@ void print_greeting()
 int main(void)
 {
 
-  REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
+  REG32(uart, UART_REG_DIV)     = 0x10;
+  REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
   print_greeting();
 

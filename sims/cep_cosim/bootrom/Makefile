@@ -11,19 +11,19 @@
 
 # RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
 ifndef RISCV
-$(error CEP_COSIM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
+$(error CEP_BOOTROM: RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
 # Default parameters
-ENABLE_MAIN		?= 0
+ENABLE_MAIN		?= 1
 ENABLE_SD 		?= 0
 SINGLE_CORE		?= 0
 PBUS_CLK 		?= 200000000
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
-COSIM_DIR 		:= $(strip $(shell cd ..; pwd))
-CONVERT_BOOTROM	:= ${COSIM_DIR}/bin/convert-bootrom.py
+COSIM_TOP_DIR 	:= $(strip $(shell cd ..; pwd))
+CONVERT_BOOTROM	:= ${COSIM_TOP_DIR}/bin/convert-bootrom.py
 
 BOOTROM_IMG 	= bootrom.rv64.img bootrom.rv32.img
 BOOTROM_DUMP	= bootrom.rv64.dump bootrom.rv32.dump

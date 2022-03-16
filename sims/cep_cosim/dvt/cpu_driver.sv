@@ -401,6 +401,14 @@ module cpu_driver
   // Core reset only makes sense in Bare Metal Mode
   `ifdef BARE_MODE
     reg tl_monitor_enable = 0;
+    wire uart_busy;
+
+    assign uart_busy      = `DUT_UART_BUSY;
+
+    always @(posedge dvtFlags[`DVTF_UART_BUSY]) begin
+      dvtFlags[`DVTF_PAT_LO]          = uart_busy;
+      dvtFlags[`DVTF_UART_BUSY]       = 0; // self-clear
+    end // end always
 
     always @(posedge dvtFlags[`DVTF_FORCE_CORE_RESET]) begin
       if (dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] == MY_CPU_ID) begin

@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
   // Disable UART Loopback for this test
   set_uart_loopback(0);
 
-
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
   // Ignoring the first 4096 bytes (stripping the ELF header?)

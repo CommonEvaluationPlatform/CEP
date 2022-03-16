@@ -53,8 +53,10 @@ module `COSIM_TB_TOP_MODULE;
   wire                jtag_TRSTn; pullup (weak1) (jtag_TRSTn);
   wire                jtag_TDO;   
 
-  wire                 uart_rxd; pullup (weak1) (uart_rxd);
+  wire                uart_rxd; pullup (weak1) (uart_rxd);
+  wire                uart_tb_rxd; pullup (weak1) (uart_tb_rxd);
   wire                uart_txd; 
+  wire                uart_model_en;
 
   wire                gpio_0_0; pullup (weak1) (gpio_0_0);
   wire                gpio_0_1; pullup (weak1) (gpio_0_1);
@@ -107,12 +109,27 @@ module `COSIM_TB_TOP_MODULE;
 
 
   //--------------------------------------------------------------------------------------
-  // Simple UART Loopback (if enabled)
+  // Either the UART is in loopback mode OR it is fed to a testbench UART receiver
   //--------------------------------------------------------------------------------------  
-  assign uart_rxd = (`UART_LOOPBACK_ENABLED) ? uart_txd : 1'b1;
+  assign uart_rxd       = (`UART_LOOPBACK_ENABLED) ? uart_txd : 1'b1;
+  assign uart_model_en  = ~`UART_LOOPBACK_ENABLED;
+
+  // Testbench UART receiver
+  uart_model #(
+//    .BIT_RATE(12_500_000), // CEP UART DIV = 16, internal clock = 200MHz
+    .BIT_RATE(10_416_666), // CEP UART Div = 16, internal clock = 166.66MHz
+    .CLK_HZ(100_000_000),
+    .PAYLOAD_BITS(8),
+    .STOP_BITS(2)
+  ) uart_model_inst (
+    .clk              (sys_clk),
+    .resetn           (sys_rst_n),
+    .uart_rxd         (uart_txd),
+    .uart_rx_en       (~`UART_LOOPBACK_ENABLED)
+  );  
   //--------------------------------------------------------------------------------------
   
-  
+
   
   //--------------------------------------------------------------------------------------
   // SPI loopback instantiation

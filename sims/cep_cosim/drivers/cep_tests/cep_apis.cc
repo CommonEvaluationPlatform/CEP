@@ -261,8 +261,9 @@ int check_bare_status(int cpuId, int maxTimeOut) {
     uint64_t  offS;
     uint32_t  d32;
     uint32_t  testId;
-    int       i       = 0;
-    int       done    = 0;
+    int       i         = 0;
+    int       done      = 0;
+    int       uart_busy = 0;
   
     LOGI("%s: cpuId = %0d, maxTimeOut = %0d\n", __FUNCTION__, cpuId, maxTimeOut);  
   
@@ -301,7 +302,17 @@ int check_bare_status(int cpuId, int maxTimeOut) {
       LOGI("%s: TIMEOUT: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
       errCnt++;    
   }
-  
+
+  // Check to see if the UART is busy before putting the core in reset.  If it
+  // is busy, wait a few clocks and check again
+  do {
+    DUT_WRITE_DVT(DVTF_UART_BUSY, DVTF_UART_BUSY, 1);
+    uart_busy = DUT_READ_DVT(DVTF_PAT_LO, DVTF_PAT_LO);
+    if (uart_busy) {
+      DUT_RUNCLK(1000);
+    }
+  } while (uart_busy);
+
   // Put the core, not the tile into reset to stop the program counter
   // If the tile is reset, then it MIGHT lock up the tilelink bus... and thus
   // prevent other cores from completing their work
