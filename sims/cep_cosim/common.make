@@ -241,6 +241,7 @@ cleanTest:
 	-rm -f ${TEST_DIR}/*.dsn 
 	-rm -f ${TEST_DIR}/*.err
 	-rm -rf ${TEST_DIR}/.simvision
+	-rm -rf ${TEST_DIR}/.bpad
 	
 cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do
