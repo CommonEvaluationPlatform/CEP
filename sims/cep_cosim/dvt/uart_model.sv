@@ -55,7 +55,8 @@ module uart_model #(
       line_buffer = {line_buffer, string'(uart_rx_data)};
 
       if (uart_rx_data == 8'h0a) begin
-        `logI({"TB_UART :",line_buffer});
+        line_buffer = {"TB_UART :", line_buffer};
+        `logI("%s", line_buffer);
         line_buffer = "";
       end
 
