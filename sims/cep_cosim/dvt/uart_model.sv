@@ -28,8 +28,8 @@ module uart_model #(
 );
 
   localparam LINE_BUFFER_MAX_LENGTH     = 132;
-  string                                line_buffer;
   reg[LINE_BUFFER_MAX_LENGTH*8 - 1:0]   line_buffer_reg = 0;
+  integer                               line_buffer_index = 0;
   wire                                  uart_rx_valid;
   wire                                  uart_rx_break;
   wire [7:0]                            uart_rx_data;
@@ -54,12 +54,11 @@ module uart_model #(
   always @(posedge clk)
   begin
     if (uart_rx_valid) begin
-      line_buffer   = {line_buffer, string'{uart_rx_data}};
+      line_buffer_reg = {line_buffer_reg[LINE_BUFFER_MAX_LENGTH*8 - 9:0], uart_rx_data};
 
       if (uart_rx_data == 8'h0a) begin
-        $sformat(line_buffer_reg, "%0s", line_buffer);
         `logI("TB_UART: %0s", line_buffer_reg);
-        line_buffer = "";
+        line_buffer_reg = 0;
       end
 
     end // end if (uart_rx_valid)
