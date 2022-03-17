@@ -237,6 +237,10 @@ cleanTest:
 	-rm -f ${TEST_DIR}/*.vstf
 	-rm -f ${TEST_DIR}/xrun.key 
 	-rm -f ${TEST_DIR}/imp.h 
+	-rm -f ${TEST_DIR}/*.trn
+	-rm -f ${TEST_DIR}/*.dsn 
+	-rm -f ${TEST_DIR}/*.err
+	-rm -rf ${TEST_DIR}/.simvision
 	
 cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do

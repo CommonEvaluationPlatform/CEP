@@ -71,10 +71,10 @@ endif
 ifeq (${BYPASS_PLL},1)
 COSIM_VLOG_ARGS				+= +define+BYPASS_PLL
 endif
+
 # These need to be included even if the pll_bypass is asserted
 COSIM_VSIM_ARGS				+= +PLLLIB_M55
 COSIM_VSIM_ARGS				+= +PLLLIB_SHORT_LOCK
-
 
 # Defines for used within the Chisel Generated Verilog
 COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
