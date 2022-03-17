@@ -28,6 +28,7 @@ module uart_model #(
 );
 
   string              line_buffer;
+  reg[132*8:0]        line_buffer_reg;
   wire                uart_rx_valid;
   wire                uart_rx_break;
   wire [7:0]          uart_rx_data;
@@ -55,8 +56,8 @@ module uart_model #(
       line_buffer = {line_buffer, string'(uart_rx_data)};
 
       if (uart_rx_data == 8'h0a) begin
-        line_buffer = {"TB_UART :", line_buffer};
-        $display("%s", line_buffer);
+        $sformat(line_buffer_reg, "%0s", line_buffer);
+        `logI("TB_UART: %s", line_buffer_reg);
         line_buffer = "";
       end
 
