@@ -54,7 +54,7 @@ module uart_model #(
   always @(posedge clk)
   begin
     if (uart_rx_valid) begin
-      line_buffer   = {line_buffer, string'{uart_rx_data}};
+      line_buffer   = string'{line_buffer, string'{uart_rx_data}};
 
       if (uart_rx_data == 8'h0a) begin
         $sformat(line_buffer_reg, "%0s", line_buffer);
