@@ -59,7 +59,7 @@ module uart_model #(
         line_buffer_reg[line_buffer_index * 8 +: 8] = uart_rx_data;
         line_buffer_index++;
       end else begin
-        line_bufferreg_[line_buffer_index * 8 +: 8] = uart_rx_data;
+        line_buffer_reg[line_buffer_index * 8 +: 8] = uart_rx_data;
         line_buffer_index = 0;
       end
 
