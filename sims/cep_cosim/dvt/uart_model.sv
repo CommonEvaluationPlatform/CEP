@@ -57,12 +57,12 @@ module uart_model #(
 
       if (line_buffer_index < LINE_BUFFER_MAX_LENGTH - 1) begin
         line_buffer_reg[line_buffer_index * 8 +: 8] = uart_rx_data;
-        line_buffer_index++
+        line_buffer_index++;
       end else begin
         line_bufferreg_[line_buffer_index * 8 +: 8] = uart_rx_data;
         line_buffer_index = 0;
       end
-      
+
       if (uart_rx_data == 8'h0a) begin
         `logI("TB_UART: %s", line_buffer_reg);
         line_buffer_index = 0;
