@@ -12,6 +12,7 @@
 # If operating in Bare Metal mode, pass the RISCV wrapper name to the compiler
 ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 RISCV_WRAPPER           = ./riscv_wrapper.elf
+RISCV_WRAPPER_IMG       = ./riscv_wrapper.img
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
 endif
 
@@ -178,11 +179,12 @@ endif
 COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
 # A common set of dependencies (for all test modes)
-COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} ${ALL_C_FILES}
+COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} ${ALL_C_FILES} ${OBJECT_DIR_LIST}
 
 # Variables related to the RISCV Toolset (RISCV must already be defined)
 RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
 RISCV_OBJDUMP     		:= ${RISCV}/bin/riscv64-unknown-elf-objdump
+RISCV_OBJCOPY 			:= ${RISCV}/bin/riscv64-unknown-elf-objcopy
 RISCV_HEXDUMP     		= /usr/bin/hexdump
 RISCV_AR          		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ar
 RISCV_RANLIB      		:= ${RISCV}/bin/riscv64-unknown-elf-gcc-ranlib
@@ -302,6 +304,7 @@ ifeq "$(findstring BUILTIN,${ELF_MODE})" "BUILTIN"
 RISCV_WRAPPER_ELF = 
 else
 RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
+RISCV_WRAPPER_IMG = 
 
 # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
 # so build with -g for dump file only
@@ -313,14 +316,18 @@ ${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMO
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${RISCV_LIB} ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE}
+${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE} ${RISCV_LIB} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o $@
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
 endif
 
+riscv_wrapper_img: ${RISCV_WRAPPER_ELF}
+	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 $< $@
+
 endif
+
 # -----------------------------------------------------------------------
 
 
@@ -354,8 +361,9 @@ ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
 	$(RISCV_RANLIB) $@
 
 # Library build target
-${LIB_DIR}/.buildLibs: ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB}
+${LIB_DIR}/.buildLibs: ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB} | ${OBJECT_DIR_LIST}
 	touch $@
+
 
 buildLibs: ${LIB_DIR}/.buildLibs
 # -----------------------------------------------------------------------

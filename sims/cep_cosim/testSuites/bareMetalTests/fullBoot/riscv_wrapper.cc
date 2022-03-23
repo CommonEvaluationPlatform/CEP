@@ -16,6 +16,11 @@
   #include "CEP.h"
   #include "cepRegTest.h"
   
+  #include <stdint.h>
+  #include <platform.h>
+  #define DEBUG
+  #include "kprintf.h"
+  
   #ifdef __cplusplus
   extern "C" {
   #endif
@@ -31,10 +36,12 @@
     set_printf(0);
   
     // Set the current core's status to running
-    set_cur_status(CEP_RUNNING_STATUS);
+//    set_cur_status(CEP_RUNNING_STATUS);
+
+    kputs("Hello World");
   
     // Set the core status
-    set_status(errCnt, testId[coreId]);
+//    set_status(errCnt, testId[coreId]);
 
     // Exit with the error count
     exit(errCnt);

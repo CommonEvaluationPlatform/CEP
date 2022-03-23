@@ -34,8 +34,8 @@ CEP_LDS_FILE    = ${ROOT_DIR}/cep_boot.lds
 CC 				= $(RISCV)/bin/riscv64-unknown-elf-gcc
 OBJCOPY 		= $(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		= $(RISCV)/bin/riscv64-unknown-elf-objdump
-CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
-CFLAGS 			+= -fno-common -g -DENTROPY=0 -DNONSMP_HART=0
+CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -fno-common -g
+CFLAGS 			+= -DENTROPY=0 -DNONSMP_HART=0
 CFLAGS 			+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
 
 ifeq (${ENABLE_MAIN},1)
@@ -52,7 +52,7 @@ endif
 
 CFLAGS_RV64		= -mabi=lp64 -march=rv64ima
 CFLAGS_RV32		= -mabi=ilp32 -march=rv32ima
-LFLAGS 			= -static -nostdlib -T ${CEP_LDS_FILE}
+LFLAGS 			= -static -nostdlib -nostartfiles -T ${CEP_LDS_FILE}
 
 
 default: bootrom_info img dump elf rcf

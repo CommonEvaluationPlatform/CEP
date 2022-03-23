@@ -58,7 +58,7 @@ module uart_model #(
       line_buffer_reg = {line_buffer_reg[LINE_BUFFER_MAX_LENGTH*8 - 9:0], uart_rx_data};
 
       if (uart_rx_data == 8'h0a) begin
-        `logI("TB_UART: %0s", line_buffer_reg);
+        `logI("TB_UART_LINE: %0s", line_buffer_reg);
         line_buffer_reg = 0;
       end
 

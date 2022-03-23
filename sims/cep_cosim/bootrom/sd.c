@@ -255,10 +255,7 @@ int main(void)
   REG32(uart, UART_REG_DIV)     = 0x10;
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
-  kputs("DEADBEEF");
-  kputs("CHEESE");
-  
-  //print_greeting();
+  print_greeting();
 
 #ifdef ENABLE_SD
 
