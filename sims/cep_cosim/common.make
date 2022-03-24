@@ -97,7 +97,7 @@ CADENCE_MAKE_FILE 			:= ${COSIM_TOP_DIR}/cadence.make
 V2C_LIB            			:= ${LIB_DIR}/v2c_lib.a
 VPP_LIB 					:= ${LIB_DIR}/libvpp.so
 VPP_SV_LIB 					:= ${LIB_DIR}/libvpp
-RISCV_LIB 					:= ${LIB_DIR}/riscv_lib.a
+RISCV_LIB 					:= ${LIB_DIR}/libriscv.a
 BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
 
 # Variables related to build the RISC-V ISA tests
@@ -240,6 +240,7 @@ cleanTest:
 	-rm -f ${TEST_DIR}/*.trn
 	-rm -f ${TEST_DIR}/*.dsn 
 	-rm -f ${TEST_DIR}/*.err
+	-rm -f ${TEST_DIR}/*.o
 	-rm -rf ${TEST_DIR}/.simvision
 	-rm -rf ${TEST_DIR}/.bpad
 	

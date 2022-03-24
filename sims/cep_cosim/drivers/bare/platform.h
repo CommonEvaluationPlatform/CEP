@@ -43,7 +43,7 @@
 // to avoid a circular 
 #define scratchpad_sp_offset	0x00070000
 #define scratchpad_base_addr    0x80000000
-#define scratchpad_base_size    0x00080000
+#define scratchpad_base_size    0x00100000
 
 // Memory map
 #define CLINT_CTRL_ADDR _AC(0x2000000,UL)

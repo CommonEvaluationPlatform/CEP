@@ -11,6 +11,7 @@
 
 # If operating in Bare Metal mode, pass the RISCV wrapper name to the compiler
 ifeq "${DUT_SIM_MODE}" "BARE_MODE"
+RISCV_WRAPPER_OBJ  		= ./riscv_wrapper.bobj
 RISCV_WRAPPER           = ./riscv_wrapper.elf
 RISCV_WRAPPER_IMG       = ./riscv_wrapper.img
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
@@ -183,6 +184,7 @@ COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} $
 
 # Variables related to the RISCV Toolset (RISCV must already be defined)
 RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
+RISCV_LD 				:= ${RISCV}/bin/riscv64-unknown-elf-ld
 RISCV_OBJDUMP     		:= ${RISCV}/bin/riscv64-unknown-elf-objdump
 RISCV_OBJCOPY 			:= ${RISCV}/bin/riscv64-unknown-elf-objcopy
 RISCV_HEXDUMP     		= /usr/bin/hexdump
@@ -205,6 +207,7 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 # -Wall                 - Enable all warnings
 # -nostartfiles         - Do not use the standard system startup files when linking
 # -fno-builtin-printf   - Disable the builtin printf function (cep has a custom printf mechanism for bare metal simulation)
+# -fno-common           - Specifies that the compiler places uninitialized global variables in the BSS section of the object file
 # -march=rv64ima        - Specify supported instruction set
 #                         RV64I - Base Integer Instruction Set v2.0
 #                         M     - Standard Extension for Multiplication and Division v2.0
@@ -216,10 +219,16 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 # -T                    - Specify linker script
 #
 # -g                    - Produce debugging information in the operating system’s native format
+# -c                    - Compile, but don't link files
 # -lgcc                 - ?????
-RISCV_BARE_CFLAGS  		+= -DBARE_MODE -DRISCV_CPU -mcmodel=medany -O2 -Wall -fno-builtin-printf -mabi=lp64 -march=rv64ima -I ${BARE_D} -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
+RISCV_BARE_CFLAGS  		+= -mcmodel=medany -O2 -Wall -fno-common -fno-builtin-printf 
+RISCV_BARE_CFLAGS 		+= -I ${BARE_D} -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
+RISCV_BARE_CFLAGS 		+= -mabi=lp64 -march=rv64ima
+RISCV_BARE_CFLAGS 		+= -DBARE_MODE -DRISCV_CPU
 RISCV_BARE_LFILE		+= ${BARE_D}/cep_link.lds
-RISCV_BARE_LFLAGS 		+= -static -nostdlib  -nostartfiles -lgcc -T ${RISCV_BARE_LFILE}
+#RISCV_BARE_LFLAGS 		+= -static -nostdlib  -nostartfiles -lgcc -T ${RISCV_BARE_LFILE}
+#RISCV_BARE_LFLAGS 		+= -L${LIB_DIR} -lriscv
+RISCV_BARE_LFLAGS 		+= -static -nostdlib -nostartfiles -T ${RISCV_BARE_LFILE}
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
@@ -234,7 +243,7 @@ COMMON_LDFLAGS        	=
 SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_HW_ENV
 SIM_SW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_SW_ENV 
 
-# Switches to indicate what libraries are being used
+# Switches to indicate what libraries are being used (not applicable to bare metal)
 LIBRARY_SWITCHES  		= -lpthread -lcryptopp
 #-------------------------------------------------------------------------------------
 
@@ -317,7 +326,7 @@ ${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMO
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
 ${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE} ${RISCV_LIB} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o $@
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
@@ -354,10 +363,10 @@ ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
 
 # riscv_lib.a: bare/apis/diag
 ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
-	$(RISCV_AR) crv $@ \
+	$(RISCV_AR) rcsv $@ \
+	$(shell ls ${BARE_LIB_DIR}/*.bobj) \
 	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
-	$(shell ls ${DIAG_LIB_DIR}/*.bobj) \
-	$(shell ls ${BARE_LIB_DIR}/*.bobj) 
+	$(shell ls ${DIAG_LIB_DIR}/*.bobj)	 
 	$(RISCV_RANLIB) $@
 
 # Library build target
