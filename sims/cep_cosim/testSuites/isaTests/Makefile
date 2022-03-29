@@ -275,7 +275,7 @@ createISATests: .force
 	touch ${TEST_SUITE_DIR}/.ISACreated
 
 # Cleans 
-removeISATests: .force
+removeISATests:
 	@rm -rf rv64*
 	@rm -f ${TEST_SUITE_DIR}/.ISACreated
 

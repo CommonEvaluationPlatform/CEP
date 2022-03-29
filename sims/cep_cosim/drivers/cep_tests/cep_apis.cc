@@ -103,8 +103,8 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 #endif
 }
 
-// Load a file into Main Memory (must be called from the system thread)
-int load_mainMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) {
+// Load a file into Main Memory or the SD Flash Model (must be called from the system thread)
+int loadMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
@@ -186,7 +186,7 @@ int load_mainMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByte
   #endif // #ifdef SIM_ENV_ONLY
 
   return errCnt;
-} // load_mainMemory
+} // loadMemory
 
 // Check PassFail
 int check_PassFail_status(int cpuId, int maxTimeOut) {

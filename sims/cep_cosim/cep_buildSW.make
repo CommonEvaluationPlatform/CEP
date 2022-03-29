@@ -331,15 +331,15 @@ ${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE
 
 endif
 
-.PHONE: risc_wrapper_img vc707_sd_write
-
 riscv_wrapper_img: sim_info ${RISCV_WRAPPER_ELF}
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 ${RISCV_WRAPPER_ELF} ${RISCV_WRAPPER_IMG}
 
-.PHONY: vc707-sd-write
-riscv_wrapper_sd_write: ${RISCV_WRAPPER_IMG}
-	sudo dd if=$< of=$(DISK) bs=4096 conv=fsync
-
+riscv_wrapper_sd_write: ${RISCV_WRAPPER_ELF}
+ifneq (,$(wildcard ${DISK}))
+	sudo dd if=$< of=$(DISK) skip=1 bs=4096 conv=fsync
+else
+	$(error CEP_COSIM: Invalid DISK specified for SD write)
+endif
 
 endif
 

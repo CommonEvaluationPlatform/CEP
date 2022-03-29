@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
   int verify = 0;
   int srcOffset = 0x1000;
   int destOffset = 0;
-  errCnt += load_mainMemory((char *)"./riscv_wrapper.elf", ddr3_base_adr,srcOffset, destOffset, backdoor_on, verify);
+  errCnt += loadMemory((char *)"./riscv_wrapper.elf", ddr3_base_adr,srcOffset, destOffset, backdoor_on, verify);
   #endif
   DUT_WRITE_DVT(DVTF_DISABLE_MAIN_MEM_LOGGING, DVTF_DISABLE_MAIN_MEM_LOGGING, 1);
   //

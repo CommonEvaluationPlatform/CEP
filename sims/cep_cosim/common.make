@@ -246,6 +246,7 @@ cleanTest:
 	-rm -f ${TEST_DIR}/*.o
 	-rm -rf ${TEST_DIR}/.simvision
 	-rm -rf ${TEST_DIR}/.bpad
+	-rm -f ${TEST_DIR}/*.img
 	
 cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do
@@ -283,6 +284,9 @@ else
 	-rm -f ${COSIM_TOP_DIR}/regressionSummary
 	@make cleanLib
 endif
+
+.force:
+
 #--------------------------------------------------------------------------------------
 
 
