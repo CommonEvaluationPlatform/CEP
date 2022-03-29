@@ -57,6 +57,13 @@ void set_uart_loopback(int loopback)
 #endif
 }
 
+void set_spi_loopback(int loopback)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, loopback);
+  DUT_WRITE_DVT(DVTF_CONTROL_SPI_LOOPBACK, DVTF_CONTROL_SPI_LOOPBACK, 1);
+#endif
+}
 
 void release_tile_reset(int cpuId)
 {
@@ -94,22 +101,6 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
     DUT_WRITE_DVT(DVTF_WAVE_ON , DVTF_WAVE_ON, enable);
   }
 #endif
-}
-
-// Load the image into main memory
-int read_binFile(char *imageF, uint64_t *buf, int wordCnt) {
-#ifdef SIM_ENV_ONLY  
-  FILE *fd=NULL;
-  int i = 0;
-  fd=fopen(imageF,"rb");
-  while (!feof(fd) && (i < wordCnt)) {
-    fread(&(buf[i]),sizeof(uint64_t),1,fd);
-    LOGI("fread i=%d 0x%016lx\n",i,buf[i]);
-    i++;
-  }
-  fclose(fd);
-#endif
-  return 0;
 }
 
 // Load a file into Main Memory (must be called from the system thread)

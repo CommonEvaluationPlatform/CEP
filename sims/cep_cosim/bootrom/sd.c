@@ -255,7 +255,9 @@ int main(void)
   REG32(uart, UART_REG_DIV)     = 0x10;
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
-  print_greeting();
+//  print_greeting();
+
+  kputs("Bootrom Hello World");
 
 #ifdef ENABLE_SD
 

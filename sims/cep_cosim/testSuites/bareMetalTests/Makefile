@@ -19,9 +19,6 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd .; pwd))
 TEST_SUITE_NAME		= $(shell cd .; basename `pwd`)
 
-# Include current test suite common.make
-include ./common.make
-
 # List of tests to run
 TEST_LIST 		= 		\
 	accessTest 			\
@@ -64,6 +61,7 @@ summary:
 		cat ${TEST_SUITE_DIR}/$${i}/status | sort | tee -a testSuiteSummary;	\
 	done
 
-
+# Include current test suite common.make
+include ./common.make
 
 

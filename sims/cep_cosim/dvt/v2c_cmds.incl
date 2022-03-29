@@ -121,6 +121,7 @@
 `define DVTF_SET_PROGRAM_LOADED               88
 `define DVTF_GET_PROGRAM_LOADED               89
 `define DVTF_PRINTF_CMD                       90
+`define DVTF_SET_BACKDOOR_SELECT 		      91
 
 `define DVTF_TOGGLE_CHIP_RESET_BIT            101
 `define DVTF_GET_CORE_RESET_STATUS            102
@@ -132,6 +133,7 @@
 `define DVTF_TOGGLE_DMI_RESET_BIT             108
 `define DVTF_CONTROL_UART_LOOPBACK            109
 `define DVTF_UART_BUSY                        110
+`define DVTF_CONTROL_SPI_LOOPBACK 		      111
 
 // JTAG/OpenOcd
 `define DVTF_ENABLE_REMOTE_BITBANG_BIT        113

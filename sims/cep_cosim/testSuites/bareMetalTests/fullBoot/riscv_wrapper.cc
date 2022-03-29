@@ -16,6 +16,7 @@
   #include "CEP.h"
   #include "cepRegTest.h"
   
+  #include <platform.h>
   #include "kprintf.h"
   
   #ifdef __cplusplus
@@ -30,13 +31,14 @@
     int revCheck  = 1;
     int verbose   = 0;
     
-    set_printf(0);
+    // set_printf(0);
   
     // Set the current core's status to running
     set_cur_status(CEP_RUNNING_STATUS);
-
-    // Print a hello to the console (UART)
-    kputs("Hello World");
+    
+    // Print a hello to the console (UART) - Core0 only
+    if (coreId == 0)
+    	lkputs("Baremetal Hello World");
     
     // Set the core status
     set_status(errCnt, testId[coreId]);

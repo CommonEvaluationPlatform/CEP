@@ -54,8 +54,11 @@ int main(int argc, char *argv[])
     dump_wave(cycle2start, cycle2capture, wave_enable);
   #endif
 
-  // Disable UART Loopback for this test
+  // Disable UART Loopback for this test 
   set_uart_loopback(0);
+
+  // Disable SPI loopback for this test
+  set_spi_loopback(0);
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
@@ -64,7 +67,7 @@ int main(int argc, char *argv[])
   int verify        = 0;
   int fileOffset    = 0x1000;
   int maxByteCnt    = cep_max_program_size;
-  errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, fileOffset, maxByteCnt);
+  //errCnt += load_mainMemory(RISCV_WRAPPER, scratchpad_base_addr, fileOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;
   //--------------------------------------------------------------------------------------

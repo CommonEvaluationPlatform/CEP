@@ -29,9 +29,6 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd .; pwd))
 TEST_SUITE_NAME		= $(shell cd .; basename `pwd`)
 
-# Include current test suite common.make
-include ./common.make
-
 # Virtual-Mode test (single thread ONLY)
 # Dont need to use all of them.. Just the pne has more page faults
 ISA_VM_1CORE_ONLY_LIST	= 		\
@@ -179,18 +176,18 @@ ISA_PARALLEL_TEST_LIST = 		\
 	rv64um-p-remw
 
 # Create a list of all the isa tests
-ISA_TEST_LIST = 				\
+TEST_LIST = 				\
 	${ISA_SPECIAL_TESTS}		\
 	${ISA_VM_LIST}				\
 	${ISA_1CORE_ONLY_LIST} 		\
 	${ISA_SINGETHR_LIST} 		\
 	${ISA_PARALLEL_TEST_LIST}
 
-# Special Debug Module test
-OPENOCD_CHECK := $(filter Debugger, $(shell openocd --version 2>&1 | grep Debugger))
-ifeq "$(OPENOCD_CHECK)" "Debugger"
-	ISA_TEST_LIST += dtmTest
-endif
+# Special Debug Module test (temporarily removed)
+#OPENOCD_CHECK := $(filter Debugger, $(shell openocd --version 2>&1 | grep Debugger))
+#ifeq "$(OPENOCD_CHECK)" "Debugger"
+#	TEST_LIST += dtmTest
+#endif
 
 runAll: ${TEST_SUITE_DIR}/.ISACreated
 ifeq (${STAND_ALONE},1)
@@ -205,7 +202,7 @@ endif
 
 summary:
 	@date > regressionSummary
-	@for i in ${ISA_TEST_LIST}; do				\
+	@for i in ${TEST_LIST}; do				\
 		cat ${TEST_SUITE_DIR}/$${i}/status | tee -a regressionSummary;	\
 	done
 
@@ -286,3 +283,6 @@ removeISATests: .force
 ${TEST_SUITE_DIR}/.ISACreated:
 	@echo "CEP_COSIM: Please run 'make createISATests' to continue"
 	@exit 1
+
+# Include current test suite common.make
+include ./common.make

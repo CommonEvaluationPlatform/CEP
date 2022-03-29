@@ -35,13 +35,13 @@ extern "C" {
    * Function Prototypes
    */
   void set_uart_loopback(int loopback);
+  void set_spi_loopback(int loopback);
   void release_tile_reset(int cpuId);
   void release_core_reset(int cpuId);
   void dump_wave(int cycle2start, int cycle2capture, int enable);
   int is_program_loaded(int maxTimeOut);  
   int check_bare_status(int cpuId, int maxTimeOut);  
   int load_mainMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt);
-  int read_binFile(char *imageF, uint64_t *buf, int wordCnt);
   int set_status(int errCnt, int testId);
   void set_pass(void);
   void set_fail(void);

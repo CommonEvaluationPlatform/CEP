@@ -21,6 +21,7 @@ module spi_loopback
    initial MISO = 1'b1;
    always @(posedge  SCK) begin
       if (!CS_n) MISO <= MOSI;
+      else MISO <= 1'bz;
    end
    
 endmodule // spi_loopback

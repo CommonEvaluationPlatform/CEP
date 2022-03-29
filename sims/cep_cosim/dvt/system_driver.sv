@@ -34,6 +34,13 @@ module system_driver (
   string              str;
   reg                 program_loaded  = 0;
 
+  // The following bit, which can be controlled via a V2C commands, determines
+  // where a DUT_WRITE32_64/DUT_READ32_64 will be sent
+  //
+  // 0 - Main Memory
+  // 1 - SD FLash Memory
+  //
+  reg                 backdoor_select = 0;
   //--------------------------------------------------------------------------------------
   // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl
   //--------------------------------------------------------------------------------------    
@@ -45,7 +52,10 @@ module system_driver (
       d[63:32] = inBox.mPar[0];
       d[31:0]  = inBox.mPar[1];
 
-      write_mainmem_backdoor(inBox.mAdr, d);
+      if (backdoor_select)
+        write_sdflash_backdoor(inBox.mAdr, d);
+      else
+        write_mainmem_backdoor(inBox.mAdr, d);
     end
   endtask // WRITE32_64_DPI
 
@@ -54,7 +64,10 @@ module system_driver (
   task READ32_64_DPI;
     reg [63:0] d;
     begin
-      read_mainmem_backdoor(inBox.mAdr, d);      
+      if (backdoor_select)
+        read_sdflash_backdoor(inBox.mAdr, d);
+      else
+        read_mainmem_backdoor(inBox.mAdr, d);
       
       inBox.mPar[0] = d[63:32];
       inBox.mPar[1] = d[31:0];      
@@ -124,6 +137,12 @@ module system_driver (
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing
   //--------------------------------------------------------------------------------------
+  always @(posedge `DVT_FLAG[`DVTF_SET_BACKDOOR_SELECT]) begin
+    backdoor_select = `DVT_FLAG[`DVTF_PAT_LO];
+    `logI("Setting Backdoor Select to %d", backdoor_select);
+    `DVT_FLAG[`DVTF_SET_BACKDOOR_SELECT] = 0;
+  end // always @(posedge `DVT_FLAG[`DVTF_SET_BACKDOOR_SELECT])
+
   always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
     `logI("Program is now loaded");
     program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
@@ -193,6 +212,13 @@ module system_driver (
     `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK] = 0;
   end //posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
 
+  reg spi_loopback_enabled = 1;
+  always @(posedge `DVT_FLAG[`DVTF_CONTROL_SPI_LOOPBACK]) 
+  begin
+    spi_loopback_enabled = `DVT_FLAG[`DVTF_PAT_LO];
+    `logI("DVTF_CONTROL_SPI_LOOPBACK - %0d", spi_loopback_enabled);
+    `DVT_FLAG[`DVTF_CONTROL_SPI_LOOPBACK] = 0;
+  end //posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
   //--------------------------------------------------------------------------------------
 
 
@@ -264,6 +290,53 @@ module system_driver (
 
 
   //--------------------------------------------------------------------------------------
+  // Task to support "backdoor" read/write access from/to SD Flash Memory
+  //
+  // Note: SDFlash is 8-bits wide, so byte ordering will be important (Little Endian)
+  //--------------------------------------------------------------------------------------
+  task write_sdflash_backdoor;
+    input [31:0] addr;
+    input [63:0] data;
+
+    begin
+
+      // If the memory is in reset, wait for it to be released
+      if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
+
+      for (int i = 0; i < 8; i++) begin
+        `SDCARD_PATH.flash_mem[addr + i] = data[i*8 +: 8];
+      end
+
+      // Advance a clock for good measure
+      @(posedge `SDCARD_PATH.clk);
+
+    end
+  endtask // write_sdflash_backdopor
+
+
+  task read_sdflash_backdoor;
+    input   [31:0] addr;
+    output  [63:0] data;
+
+    begin
+
+      // If the memory is in reset, wait for it to be released
+      if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
+
+      for (int i = 0; i < 8; i++) begin
+        data[i*8 +: 8] = `SDCARD_PATH.flash_mem[addr + i];
+      end
+
+      // Advance a clock for good measure
+      @(posedge `SDCARD_PATH.clk);
+
+    end
+  endtask // write_sdflash_backdopor
+  //--------------------------------------------------------------------------------------
+
+
+
+    //--------------------------------------------------------------------------------------
   // System Driver support tasks when running the RISCV_TESTS
   //--------------------------------------------------------------------------------------
   // This is to handle single threading core: one core active at a time

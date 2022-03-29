@@ -74,6 +74,17 @@ module `COSIM_TB_TOP_MODULE;
   wire                spi_0_dq_2; pullup (weak1) (spi_0_dq_2);
   wire                spi_0_dq_3; pullup (weak1) (spi_0_dq_3);
 
+  wire                spi_loopback_SCK;
+  wire                spi_loopback_CS_n;
+  wire                spi_loopback_MOSI;
+  wire                spi_loopback_MISO;
+
+  wire                spi_sd_model_rstn;
+  wire                spi_sd_model_ncs;
+  wire                spi_sd_model_sclk;
+  wire                spi_sd_model_mosi;
+  wire                spi_sd_model_miso;
+
   reg                 pll_bypass;
   wire                pll_bypass_pad;
   wire                pll_observe;
@@ -134,19 +145,40 @@ module `COSIM_TB_TOP_MODULE;
   //--------------------------------------------------------------------------------------
   
 
+  //--------------------------------------------------------------------------------------
+  // The SPI either operates in loopback mode OR connects to the SPI SD Model
+  //--------------------------------------------------------------------------------------
   
-  //--------------------------------------------------------------------------------------
-  // SPI loopback instantiation
-  //--------------------------------------------------------------------------------------
-  spi_loopback spi_loopback_inst (
-    .SCK    (spi_0_sck   ),
-    .CS_n   (spi_0_cs_0  ),
-    .MOSI   (spi_0_dq_0  ),
-    .MISO   (spi_0_dq_1  )
-  );
-  //--------------------------------------------------------------------------------------
+  assign spi_loopback_SCK   = spi_0_sck; 
+  assign spi_loopback_CS_n  = `SPI_LOOPBACK_ENABLED ? spi_0_cs_0  : 1'b1;
+  assign spi_loopback_MOSI  = spi_0_dq_0;
+  assign spi_0_dq_1         = spi_loopback_MISO;
+  assign spi_0_dq_1         = spi_sd_model_miso;
 
-   
+  assign spi_sd_model_rstn  = sys_rst_n;
+  assign spi_sd_model_sclk  = spi_0_sck;
+  assign spi_sd_model_ncs   = `SPI_LOOPBACK_ENABLED ? 1'b1        : spi_0_cs_0;
+  assign spi_sd_model_mosi  = spi_0_dq_0;
+
+  // SPI loopback instantiation
+  spi_loopback spi_loopback_inst (
+    .SCK    (spi_loopback_SCK   ),
+    .CS_n   (spi_loopback_CS_n  ),
+    .MOSI   (spi_loopback_MOSI  ),
+    .MISO   (spi_loopback_MISO  )
+  );
+  
+  // SPI / SD Model Instiation
+  spi_sd_model spi_sd_model_inst (
+    .rstn   (spi_sd_model_rstn  ),
+    .ncs    (spi_sd_model_ncs   ),
+    .sclk   (spi_sd_model_sclk  ),
+    .mosi   (spi_sd_model_mosi  ),
+    .miso   (spi_sd_model_miso  )
+  ); 
+  //--------------------------------------------------------------------------------------   
+
+
  
   //--------------------------------------------------------------------------------------
   // Device Under Test

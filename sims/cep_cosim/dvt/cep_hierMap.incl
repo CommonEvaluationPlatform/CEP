@@ -23,6 +23,7 @@
 `define PROGRAM_LOADED            `SYSTEM_DRIVER.program_loaded
 `define SYSTEM_SIM_TIME           `SYSTEM_DRIVER.__simTime
 `define UART_LOOPBACK_ENABLED     `SYSTEM_DRIVER.uart_loopback_enabled
+`define SPI_LOOPBACK_ENABLED      `SYSTEM_DRIVER.spi_loopback_enabled
 
 `define DVT_FLAG                  `SYSTEM_DRIVER.dvtFlags
 `define DUT_INST                  dut
@@ -55,6 +56,7 @@
   `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_wrapper_inst
 `endif 
 `define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
+`define SDCARD_PATH               `DUT_TOP_LEVEL.spi_sd_model_inst
 
 `define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
 `define TILE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile

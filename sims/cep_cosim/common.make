@@ -125,14 +125,6 @@ ${PERSUITE_CHECK}: .force
 
 
 #--------------------------------------------------------------------------------------
-# Include additional makefiles as needed (Cadence support has been moved to ${BUILD_HW_MAKEFILE}
-#--------------------------------------------------------------------------------------
-include ${BUILD_HW_MAKEFILE}
-include ${BUILD_SW_MAKEFILE}
-#--------------------------------------------------------------------------------------
-
-
-#--------------------------------------------------------------------------------------
 # Provide some status of the user contronable parameters
 #--------------------------------------------------------------------------------------
 sim_info:
@@ -163,6 +155,15 @@ endif
 	@echo " CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo " CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo ""
+#--------------------------------------------------------------------------------------
+
+
+
+#--------------------------------------------------------------------------------------
+# Include additional makefiles as needed (Cadence support has been moved to ${BUILD_HW_MAKEFILE}
+#--------------------------------------------------------------------------------------
+include ${BUILD_HW_MAKEFILE}
+include ${BUILD_SW_MAKEFILE}
 #--------------------------------------------------------------------------------------
 
 
@@ -218,6 +219,8 @@ endif
 #--------------------------------------------------------------------------------------
 # Misc build targets
 #--------------------------------------------------------------------------------------
+.PHONY: clean cleanTest cleanTestDo cleanSuite cleanLib cleanComplete cleanAll
+
 clean: cleanTest
 
 cleanTest:
@@ -254,7 +257,12 @@ cleanSuite:
 	-rm -f ${TEST_SUITE_DIR}/.buildVlog
 	-rm -f ${TEST_SUITE_DIR}/_info
 	-rm -rf ${TEST_SUITE_DIR}/xcelium.d
-	
+ifneq (${TEST_LIST},)
+	@for i in ${TEST_LIST}; do 							\
+		(cd ${TEST_SUITE_DIR}/$${i}; make cleanTest); 	\
+	done
+endif
+
 cleanLib:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
 	-rm -f ${CHIPYARD_TOP_FILE_bare}
@@ -263,11 +271,18 @@ cleanLib:
 	-rm -rf ${LIB_DIR}/*
 	-rm -rf ${LIB_DIR}/.buildLibs
 	
-cleanAll: cleanLib cleanSuite cleanTest
+# cleanAll needs to be run from COSIM_TOP_DIR, so the makefile
+# will change there if necessary
+cleanAll:
+ifneq ($(strip $(shell pwd)), ${COSIM_TOP_DIR})
+	(cd ${COSIM_TOP_DIR}; make cleanAll)
+else
+	@for i in ${TEST_SUITES}; do 									\
+		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make cleanSuite); 	\
+	done
 	-rm -f ${COSIM_TOP_DIR}/regressionSummary
-	
-# Use to force rebuilds for rules that include this dependency
-.force:
+	@make cleanLib
+endif
 #--------------------------------------------------------------------------------------
 
 
