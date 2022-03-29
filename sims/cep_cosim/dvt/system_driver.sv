@@ -143,6 +143,11 @@ module system_driver (
     `DVT_FLAG[`DVTF_SET_BACKDOOR_SELECT] = 0;
   end // always @(posedge `DVT_FLAG[`DVTF_SET_BACKDOOR_SELECT])
 
+  always @(posedge `DVT_FLAG[`DVTF_GET_BACKDOOR_SELECT]) begin
+      dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = backdoor_select;
+      dvtFlags[`DVTF_GET_BACKDOOR_SELECT]  = 0; // self-clear
+  end // always @(posedge `DVT_FLAG[`DVTF_GET_BACKDOOR_SELECT])
+
   always @(posedge `DVT_FLAG[`DVTF_SET_PROGRAM_LOADED]) begin
     `logI("Program is now loaded");
     program_loaded = `DVT_FLAG[`DVTF_PAT_LO];
@@ -241,23 +246,19 @@ module system_driver (
       // If the memory is in reset, wait for it to be released
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
-      #1;
+      @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
       // All backdoor memory access is 64-bit
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
-      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i        = addr;
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i       = data;
 
-      @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
-
-      #1;
-      
+      @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
+     
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i;
-      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
       release `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i;
 
     end
@@ -274,14 +275,14 @@ module system_driver (
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
       // Reads are registered, need to be synchronized to the clock
-      force `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address   = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
       @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
 
       #1;
 
       data = `SCRATCHPAD_WRAPPER_PATH.scratchpad_rdata_o;
-      release `SCRATCHPAD_WRAPPER_PATH.slave_tl_h2d_o.a_address;
+      release `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i;
 
     end
   endtask // read_mainmem_backdoor
@@ -304,11 +305,11 @@ module system_driver (
       if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
 
       for (int i = 0; i < 8; i++) begin
-        `SDCARD_PATH.flash_mem[addr + i] = data[i*8 +: 8];
+        `SDCARD_PATH.flash_mem[addr * 8 + i] = data[i*8 +: 8];
       end
 
       // Advance a clock for good measure
-      @(posedge `SDCARD_PATH.clk);
+      @(posedge `SDCARD_PATH.sclk);
 
     end
   endtask // write_sdflash_backdopor
@@ -324,11 +325,11 @@ module system_driver (
       if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
 
       for (int i = 0; i < 8; i++) begin
-        data[i*8 +: 8] = `SDCARD_PATH.flash_mem[addr + i];
+        data[i*8 +: 8] = `SDCARD_PATH.flash_mem[addr * 8 + i];
       end
 
       // Advance a clock for good measure
-      @(posedge `SDCARD_PATH.clk);
+      @(posedge `SDCARD_PATH.sclk);
 
     end
   endtask // write_sdflash_backdopor

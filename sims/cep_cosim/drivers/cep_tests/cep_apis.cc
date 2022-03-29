@@ -104,7 +104,8 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 }
 
 // Load a file into Main Memory or the SD Flash Model (must be called from the system thread)
-int loadMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) {
+// mem_base is no longer used and it is assumed to be the start of the selected memory
+int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
@@ -141,7 +142,14 @@ int loadMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) 
       return 1;
     }
 
-    LOGI("%s: Loading file %s to memory base 0x%08x with maxByteCnt of %0dB\n",__FUNCTION__, imageF, mem_base, maxByteCnt);
+    // Which memory are we loading?
+    DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
+    if (DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO) == 1) {
+      LOGI("%s: Loading file %s to SD Flash with maxByteCnt of %0dB and fileOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset);  
+    } else {
+      LOGI("%s: Loading file %s to SCRATCHPAD RAM with maxByteCnt of %0dB and fileOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset);  
+    }
+
 
     // Read from the file and load into the memory (via backdoor if enabled)
     while (!feof(fd)) {
@@ -151,7 +159,7 @@ int loadMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) 
 
       // If we have reached the file offset, then write the value to memory
       if ((f * 8) >= fileOffset) {
-        DUT_WRITE32_64(mem_base + d * 8, d64);
+        DUT_WRITE32_64(d, d64);
         d++;
       }
 
@@ -168,7 +176,7 @@ int loadMemory(char *imageF, uint32_t mem_base, int fileOffset, int maxByteCnt) 
       d64 = 0xDEADDEADDEADDEADLL;      
       LOGI("%s: flushing cache line\n",__FUNCTION__);
       while ((d & 0x7) != 0) {
-        DUT_WRITE32_64(mem_base + d*8,d64);
+        DUT_WRITE32_64(d, d64);
         d++;
       }
     }

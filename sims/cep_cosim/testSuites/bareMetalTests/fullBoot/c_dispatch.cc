@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   set_uart_loopback(0);
 
   // Disable SPI loopback for this test
-  set_spi_loopback(0);
+  //set_spi_loopback(0);
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   int verify        = 0;
   int fileOffset    = 0x1000;
   int maxByteCnt    = cep_max_program_size;
-  //errCnt += loadMemory(RISCV_WRAPPER, scratchpad_base_addr, fileOffset, maxByteCnt);
+  errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;
   //--------------------------------------------------------------------------------------

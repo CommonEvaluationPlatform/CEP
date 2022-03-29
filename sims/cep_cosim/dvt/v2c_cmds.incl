@@ -122,6 +122,7 @@
 `define DVTF_GET_PROGRAM_LOADED               89
 `define DVTF_PRINTF_CMD                       90
 `define DVTF_SET_BACKDOOR_SELECT 		      91
+`define DVTF_GET_BACKDOOR_SELECT 		      92
 
 `define DVTF_TOGGLE_CHIP_RESET_BIT            101
 `define DVTF_GET_CORE_RESET_STATUS            102
