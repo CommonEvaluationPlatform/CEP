@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
   enable_bootrom_uart();
 
   // Disable SPI loopback for this test
-  //set_spi_loopback(0);
-  //enable_bootrom_sdboot();
+  set_backdoor_select(1);
+  set_spi_loopback(0);
+  enable_bootrom_sdboot();
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
   //--------------------------------------------------------------------------------------
   int verify        = 0;
   int fileOffset    = 0x1000;
-  int maxByteCnt    = cep_max_program_size;
+  int maxByteCnt    = cep_max_program_size / 2;
   errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;

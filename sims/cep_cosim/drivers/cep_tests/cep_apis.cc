@@ -49,6 +49,12 @@ int is_program_loaded(int maxTimeOut) {
   return errCnt;
 }
 
+void set_backdoor_select(int backdoor) {
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, backdoor);
+  DUT_WRITE_DVT(DVTF_SET_BACKDOOR_SELECT, DVTF_SET_BACKDOOR_SELECT, 1);
+#endif 
+}
 
 void enable_bootrom_uart (void)
 {
@@ -158,7 +164,7 @@ int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
     }
 
     // Which memory are we loading?
-    DUT_WRITE_DVT(DVTF_GET_CORE_STATUS, DVTF_GET_CORE_STATUS, 1);
+    DUT_WRITE_DVT(DVTF_GET_BACKDOOR_SELECT, DVTF_GET_BACKDOOR_SELECT, 1);
     if (DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO) == 1) {
       LOGI("%s: Loading file %s to SD Flash with maxByteCnt of %0dB and fileOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset);  
     } else {

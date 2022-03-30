@@ -34,7 +34,7 @@ module system_driver (
   string              str;
   reg                 program_loaded  = 0;
 
-  // The following bit, which can be controlled via a V2C commands, determines
+  // The following bit, which can be controlled via a V2C command, determines
   // where a DUT_WRITE32_64/DUT_READ32_64 will be sent
   //
   // 0 - Main Memory
@@ -344,15 +344,14 @@ module system_driver (
 
     begin
 
+      `logI("Write 0x%x to address 0x%x", data, addr);
+
       // If the memory is in reset, wait for it to be released
       if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
 
       for (int i = 0; i < 8; i++) begin
-        `SDCARD_PATH.flash_mem[addr * 8 + i] = data[i*8 +: 8];
+        `SDCARD_PATH.write_flash_byte(addr + i, data[i*8 +: 8]);
       end
-
-      // Advance a clock for good measure
-      @(posedge `SDCARD_PATH.sclk);
 
     end
   endtask // write_sdflash_backdopor
@@ -368,7 +367,7 @@ module system_driver (
       if (`SDCARD_PATH.rstn == 0) @(posedge `SDCARD_PATH.rstn);
 
       for (int i = 0; i < 8; i++) begin
-        data[i*8 +: 8] = `SDCARD_PATH.flash_mem[addr * 8 + i];
+        data[i*8 +: 8] = `SDCARD_PATH.flash_mem[addr + i];
       end
 
       // Advance a clock for good measure

@@ -34,6 +34,7 @@ extern "C" {
   /*
    * Function Prototypes
    */
+  void set_backdoor_select(int backdoor);
   void enable_bootrom_uart (void);
   void enable_bootrom_sdboot (void);
   void set_uart_loopback(int loopback);

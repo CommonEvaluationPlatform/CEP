@@ -41,6 +41,8 @@
 // 9. SDHC address              : not verified 
 
 `include "suite_config.v"
+`include "v2c_top.incl"
+
 `define UD 1 
 module spi_sd_model ( rstn , ncs, sclk, miso, mosi);
 input rstn; 
@@ -232,6 +234,16 @@ wire  SD_SPEC3 = 1'b1 ; // Ver3.0
 wire  [13:0]  CMD_SUPPORT = 14'b0 ; //  
 
 wire [63:0] SCR = {SCR_STRUCTURE, SD_SPEC, DATA_STAT_AFTER_ERASE, SD_SECURITY, SD_BUS_WIDTHS, SD_SPEC3 , 13'b0, CMD_SUPPORT, 32'b0}; 
+
+
+task write_flash_byte (input[31:0] addr, input [7:0] data); begin
+  `logI("Write %02x to address %x", data, addr);
+  flash_mem[addr] = data;
+
+  #1;
+end
+endtask
+
 // 
 task R1; input [7:0] data ; begin 
   //$display(" SD R1: 0x%2h at %0t ns ",data , $realtime); 
@@ -738,6 +750,7 @@ initial begin
   serial_in1    = 46'h0; 
   multi_st      = 0; 
   block_len     = 512; 
+  
   for (i = 0; i < MEM_SIZE - 1; i=i+1) begin 
     flash_mem[i] = 0; 
   end 
