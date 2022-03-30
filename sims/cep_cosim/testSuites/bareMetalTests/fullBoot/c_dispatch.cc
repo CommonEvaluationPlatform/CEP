@@ -54,11 +54,13 @@ int main(int argc, char *argv[])
     dump_wave(cycle2start, cycle2capture, wave_enable);
   #endif
 
-  // Disable UART Loopback for this test 
+  // Disable UART Loopback for this test and enable the UART in the BootROM 
   set_uart_loopback(0);
+  enable_bootrom_uart();
 
   // Disable SPI loopback for this test
   //set_spi_loopback(0);
+  //enable_bootrom_sdboot();
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)

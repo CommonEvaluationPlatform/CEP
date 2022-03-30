@@ -237,7 +237,7 @@ int main(void)
   // - Print Welcome message out the UART
   // - Enable SD Boot
   //
-  // If bits 1 and 0 are set, the welcome message will be disabled
+  // If bits 1 and 0 are set, the UART Welcome message will be disabled
   // If bits 2 and 3 are set, SD Boot will be disabled
   //
   uint64_t scratch_reg = 0;
@@ -258,7 +258,7 @@ int main(void)
   if ((scratch_reg & 0x3) != 0x3) {
     kprintf("---    Common Evaluation Platform v%x.%x    ---\n", major_version, minor_version);
     kputs("--- Copyright 2022 Massachusets Institute of Technology ---");
-    kprintf("--- BootRom Image built on %s %s         ---\n",__DATE__,__TIME__);
+    kprintf("---    BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set

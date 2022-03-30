@@ -49,6 +49,21 @@ int is_program_loaded(int maxTimeOut) {
   return errCnt;
 }
 
+
+void enable_bootrom_uart (void)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_BOOTROM_ENABLE_UART, DVTF_BOOTROM_ENABLE_UART, 1);
+#endif
+}
+
+void enable_bootrom_sdboot (void)
+{
+#ifdef SIM_ENV_ONLY
+  DUT_WRITE_DVT(DVTF_BOOTROM_ENABLE_SDBOOT, DVTF_BOOTROM_ENABLE_SDBOOT, 1);
+#endif
+}
+
 void set_uart_loopback(int loopback)
 {
 #ifdef SIM_ENV_ONLY

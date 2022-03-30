@@ -132,6 +132,8 @@ module system_driver (
   `undef      SHIPC_XACTOR_ID      
   //--------------------------------------------------------------------------------------
 
+
+
   //--------------------------------------------------------------------------------------
   // The following functionality allows for selective control of the UART and SD during
   // the booting process.  By default (given that scratch_word0 resets to zero), UART
@@ -141,14 +143,39 @@ module system_driver (
   // When booting bare metal in the CEP CoSim, the default behavior is to bypass
   // SD boot and the UART.... and thus the scratch_word0 will be forced to the appropriate
   // value UNTIL core0 indicates a running status.
+  //
+  // If bits 1 and 0 are set, the UART Welcome message will be disabled
+  // If bits 2 and 3 are set, SD Boot will be disabled
+  //
+  // This is only applicable in bare metal mode.  The RISC-V ISA tests don't use
+  // the CEP Registers, so no changes should be needed there.
   //--------------------------------------------------------------------------------------
-  initial begin
-    force `CEPREGS_PATH.scratch_word0[3:0] = 4'hF;
-  end
+  `ifdef BARE_MODE
 
+    initial begin
+      force `CEPREGS_PATH.scratch_word0[3:0] = 4'hF;
+    end
 
-//`define DVTF_BOOTROM_ENABLE_UART        93
-//`define DVTF_BOOTROM_ENABLE_SDBOOT        94
+    // Automatically release the register when the core indicates it is running
+    always @(`CEPREGS_PATH.core0_status) begin
+      if (`CEPREGS_PATH.core0_status == `CEP_RUNNING_STATUS) 
+        release `CEPREGS_PATH.scratch_word0[3:0];
+    end
+
+    always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART]) begin
+      release `CEPREGS_PATH.scratch_word0[1:0];
+      `logI("BOOTROM: Enabling the UART");
+      `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART] = 0;
+    end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART])
+
+    always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT]) begin
+      release `CEPREGS_PATH.scratch_word0[1:0];
+      `logI("BOOTROM: Enabling the SD Boot");
+      `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT] = 0;
+    end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT])
+  
+  `endif
+  //--------------------------------------------------------------------------------------
 
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing

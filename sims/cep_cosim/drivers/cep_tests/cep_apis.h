@@ -34,6 +34,8 @@ extern "C" {
   /*
    * Function Prototypes
    */
+  void enable_bootrom_uart (void);
+  void enable_bootrom_sdboot (void);
   void set_uart_loopback(int loopback);
   void set_spi_loopback(int loopback);
   void release_tile_reset(int cpuId);
