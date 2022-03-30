@@ -17,7 +17,7 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
+#define PAYLOAD_SIZE_B (1 << 20) // default: 30MiB
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
 // Payload size in # of sectors
@@ -32,7 +32,10 @@
 
 #define F_CLK TL_CLK
 
+#define REG64(p, i) ((p)[(i) >> 3])
+
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
+static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
 
 static inline uint8_t spi_xfer(uint8_t d)
 {
@@ -224,60 +227,58 @@ static int copy(void)
   return rc;
 }
 
-void print_greeting()
-{
-    kputs("                                                                             ");
-    kputs("         ::::::::::::::/+   `....-----------:/-     ....-:::::::/+           ");
-    kputs("       ...o+++++++++++++o:  :/--:-/++o+++o+++/-`   ..  `..++++++++:          ");
-    kputs("       -o++o++///////++++o:  +o++o`/...........    +:::/. .:::::o++:         "); 
-    kputs("       -++++--       :+++o: `oo++o`/.........:/   `o+++o`:    -+++o:         "); 
-    kputs("       -++++--       -:::/. +o+++o`/++o+++o+o-:   `o+++/.-....++o:-          "); 
-    kputs("       -++++--              +oo++o.://///////-`   `o+o+o+++o++o+o:.          "); 
-    kputs("       -++++--      `.....  +oooo-/               `o+ooo//:/::::/-           "); 
-    kputs("       -o+++-:.....:/::::/  +oo+o :`````````````  `s+++s`-                   "); 
-    kputs("       -++++-::::::/++/++:  ++++o//////////////:- `o+++o`-                   "); 
-    kputs("       ./+++++++++++oo+++:  +oo++o++++o+o+oo+oo.- `s+++s`-                   "); 
-    kputs("         .--:---:-:-::-::`  -::::::::::::::::::.   :::::.                    "); 
-    kputs("                                                                             ");
-    kputs("                     Common Evaluation Platform v3.7                         ");
-    kputs("         Copyright 2022 Massachusets Institute of Technology                 ");
-    kputs("                                                                             ");
-    kputs("                                                                             ");
-    kputs("");
-    kprintf("BootRom Image built on %s %s\n",__DATE__,__TIME__);
-    kputs("");
-}
-
 // Main Function
 int main(void)
 {
 
+  // The default Chipyard VCU118/Arty100t bootrom has been modified
+  // to read the CEP W0 Scratch Register to alter functionality.  By default,
+  // the following is enabled:
+  // - Print Welcome message out the UART
+  // - Enable SD Boot
+  //
+  // If bits 1 and 0 are set, the welcome message will be disabled
+  // If bits 2 and 3 are set, SD Boot will be disabled
+  //
+  uint64_t scratch_reg = 0;
+  uint64_t version_reg = 0;
+  uint8_t  major_version = 0;
+  uint8_t  minor_version = 0;
+
+  scratch_reg = REG64(cepregs, CEPREGS_SCRATCH_W0);
+  version_reg = REG64(cepregs, CEPREGS_VERSION);
+  major_version = (version_reg >> 48) & 0xFF;
+  minor_version = (version_reg >> 56) & 0xFF;
+
+  // Enable the UART
   REG32(uart, UART_REG_DIV)     = 0x10;
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
-//  print_greeting();
+  // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
+  if ((scratch_reg & 0x3) != 0x3) {
+    kprintf("---    Common Evaluation Platform v%x.%x    ---\n", major_version, minor_version);
+    kputs("--- Copyright 2022 Massachusets Institute of Technology ---");
+    kprintf("--- BootRom Image built on %s %s         ---\n",__DATE__,__TIME__);
+  } // if ((scratch_reg & 0x3) != 0x3)
 
-  kputs("Bootrom Hello World");
-
-#ifdef ENABLE_SD
-
-  kputs("INIT");
+  // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set
+  if ((scratch_reg & 0xC) != 0xC) {
+    kputs("INIT");
   
-  sd_poweron();
-  if (sd_cmd0() ||
-      sd_cmd8() ||
-      sd_acmd41() ||
-      sd_cmd58() ||
-      sd_cmd16() ||
-      copy()) {
-        kputs("ERROR");
-    return 1;
-  }
+    sd_poweron();
+      if (sd_cmd0() ||
+        sd_cmd8() ||
+        sd_acmd41() ||
+        sd_cmd58() ||
+        sd_cmd16() ||
+        copy()) {
+          kputs("ERROR");
+      return 1;
+    }
 
-  kputs("BOOT");
+    kputs("BOOT");
+  } // if ((scratch_reg & 0xC) != 0xC)
   
-#endif // #ifdef ENABLE_SD
-
   // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");
 

@@ -18,6 +18,7 @@
 #include "devices/plic.h"
 #include "devices/spi.h"
 #include "devices/uart.h"
+#include "devices/cepregs.h"
 
  // Some things missing from the official encoding.h
 #if __riscv_xlen == 32
@@ -73,6 +74,7 @@
 #define UART1_CTRL_SIZE _AC(0x1000,UL)
 #define I2C_CTRL_ADDR _AC(0x64005000,UL)
 #define I2C_CTRL_SIZE _AC(0x1000,UL)
+#define CEPREGS_ADDR _AC(0x700F0000,UL)
 
 // IOF masks
 
@@ -89,6 +91,7 @@
 #define _REG64(p, i) (*(volatile uint64_t *)((p) + (i)))
 #define _REG32(p, i) (*(volatile uint32_t *)((p) + (i)))
 #define _REG16(p, i) (*(volatile uint16_t *)((p) + (i)))
+
 // Bulk set bits in `reg` to either 0 or 1.
 // E.g. SET_BITS(MY_REG, 0x00000007, 0) would generate MY_REG &= ~0x7
 // E.g. SET_BITS(MY_REG, 0x00000007, 1) would generate MY_REG |= 0x7
@@ -120,6 +123,5 @@
 #define I2C_REG64(offset) _REG64(I2C_CTRL_ADDR, offset)
 
 // Misc
-
 
 #endif /* _CHIPYARD_PLATFORM_H */

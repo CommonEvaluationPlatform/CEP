@@ -132,7 +132,23 @@ module system_driver (
   `undef      SHIPC_XACTOR_ID      
   //--------------------------------------------------------------------------------------
 
+  //--------------------------------------------------------------------------------------
+  // The following functionality allows for selective control of the UART and SD during
+  // the booting process.  By default (given that scratch_word0 resets to zero), UART
+  // and SD Boot are enabled in the bootrom.  This needs to be the default behavior
+  // for tapeout.
+  //
+  // When booting bare metal in the CEP CoSim, the default behavior is to bypass
+  // SD boot and the UART.... and thus the scratch_word0 will be forced to the appropriate
+  // value UNTIL core0 indicates a running status.
+  //--------------------------------------------------------------------------------------
+  initial begin
+    force `CEPREGS_PATH.scratch_word0[3:0] = 4'hF;
+  end
 
+
+//`define DVTF_BOOTROM_ENABLE_UART        93
+//`define DVTF_BOOTROM_ENABLE_SDBOOT        94
 
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing
@@ -251,7 +267,7 @@ module system_driver (
       // All backdoor memory access is 64-bit
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_mask_i        = '1;
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_write_i       = 1;
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i        = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i        = addr >> 3;
       force `SCRATCHPAD_WRAPPER_PATH.scratchpad_wdata_i       = data;
 
       @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
@@ -275,7 +291,7 @@ module system_driver (
       if (`SCRATCHPAD_WRAPPER_PATH.rst == 1) @(negedge `SCRATCHPAD_WRAPPER_PATH.rst);
 
       // Reads are registered, need to be synchronized to the clock
-      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr;
+      force `SCRATCHPAD_WRAPPER_PATH.scratchpad_addr_i    = addr >> 3;
       @(posedge `SCRATCHPAD_WRAPPER_PATH.clk);
       @(negedge `SCRATCHPAD_WRAPPER_PATH.clk);
 

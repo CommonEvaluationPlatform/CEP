@@ -221,7 +221,7 @@ endif
 #--------------------------------------------------------------------------------------
 .PHONY: clean cleanTest cleanTestDo cleanSuite cleanLib cleanComplete cleanAll
 
-clean: cleanTest
+clean: cleanTest cleanSuite cleanLib
 
 cleanTest:
 	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj

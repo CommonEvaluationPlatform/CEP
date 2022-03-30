@@ -20,16 +20,10 @@ _prog_start:
   // Initialize the stack pointer
   li sp, (scratchpad_base_addr + scratchpad_sp_offset)
 
-  // Disable UART and SD initialization when in simulation mode
-#ifdef ENABLE_MAIN
-  #ifndef SINGLE_CORE
+  // Call the main function witha single core
   smp_pause(s1, s2)
-  #endif
   call main
-  #ifndef SINGLE_CORE
   smp_resume(s1, s2)
-  #endif
-#endif
 
   csrr a0, mhartid // hartid for next level bootloader
   la a1, dtb // dtb address for next level bootloader

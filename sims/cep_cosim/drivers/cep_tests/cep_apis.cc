@@ -159,7 +159,7 @@ int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
 
       // If we have reached the file offset, then write the value to memory
       if ((f * 8) >= fileOffset) {
-        DUT_WRITE32_64(d, d64);
+        DUT_WRITE32_64((d * 8), d64);
         d++;
       }
 
@@ -176,7 +176,7 @@ int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
       d64 = 0xDEADDEADDEADDEADLL;      
       LOGI("%s: flushing cache line\n",__FUNCTION__);
       while ((d & 0x7) != 0) {
-        DUT_WRITE32_64(d, d64);
+        DUT_WRITE32_64((d * 8), d64);
         d++;
       }
     }
