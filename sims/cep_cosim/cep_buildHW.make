@@ -61,6 +61,7 @@ ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
+
 # Pass on the ASIC_MODE argument
 ifeq (${ASIC_MODE},1)
 COSIM_VLOG_ARGS				+= +define+ASIC_MODE
@@ -77,8 +78,14 @@ COSIM_VSIM_ARGS				+= +PLLLIB_M55
 COSIM_VSIM_ARGS				+= +PLLLIB_SHORT_LOCK
 
 # Defines for used within the Chisel Generated Verilog
-#COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
-#COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
+ifeq (${DISABLE_BARE_TRACE},1)
+	COSIM_VLOG_ARGS			+= +define+PRINTF_COND=0
+else
+	COSIM_VLOG_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
+endif
+COSIM_VLOG_ARGS				+= +define+STOP_COND=\`SYSTEM_RESET
+COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT
+COSIM_VLOG_ARGS				+= +define+RANDOM="1'b0"
 #--------------------------------------------------------------------------------------
 
 
@@ -101,9 +108,6 @@ COSIM_VLOG_ARGS				+= 	-sv \
 								+define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE} \
 								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE} \
 								+define+CHIPYARD_BLD_DIR="\"${CHIPYARD_BLD_DIR}\""
-
-# Defines inherited from Chipyard
-COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT+RANDOMIZE_REG_INIT+RANDOM="1'b0"
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \

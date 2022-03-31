@@ -114,10 +114,10 @@ static int sd_cmd8(void)
   int rc;
   kputs("CMD8");
   rc = (sd_cmd(0x48, 0x000001AA, 0x87) != 0x01);
-  sd_dummy(); /* command version; reserved */
-  sd_dummy(); /* reserved */
-  rc |= ((sd_dummy() & 0xF) != 0x1); /* voltage */
-  rc |= (sd_dummy() != 0xAA); /* check pattern */
+  sd_dummy();                         /* command version; reserved */
+  sd_dummy();                         /* reserved */
+  rc |= ((sd_dummy() & 0xF) != 0x1);  /* voltage */
+  rc |= (sd_dummy() != 0xAA);         /* check pattern */
   sd_cmd_end();
   return rc;
 }
