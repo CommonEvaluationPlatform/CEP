@@ -260,7 +260,7 @@ cleanSuite:
 	-rm -rf ${TEST_SUITE_DIR}/xcelium.d
 ifneq (${TEST_LIST},)
 	@for i in ${TEST_LIST}; do 							\
-		(cd ${TEST_SUITE_DIR}/$${i}; make cleanTest); 	\
+		(if [ -d ${TEST_SUITE_DIR}/$${i} ]; then cd ${TEST_SUITE_DIR}/$${i}; make cleanTest; fi)	\
 	done
 endif
 

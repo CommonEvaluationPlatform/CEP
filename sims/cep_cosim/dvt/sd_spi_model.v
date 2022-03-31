@@ -9,7 +9,7 @@
 //                SD/MMC Controller IP Using UVM" (2018). Thesis. Rochester Institute
 //                of Technology"
 //
-// Notes:          
+// Notes:         Added ACMD41 support as required by specification
 //
 //--------------------------------------------------------------------------------------
 
@@ -24,7 +24,8 @@
 // CMD24, CMD25, CMD27, CMD55, CMD51, CMD58, ACMD13, ACMD51 
 //
 // Not parsed command: ( still responses based on spec) 
-// CMD1, CMD6, CMD9, CMD10, CMD30, CMD32, CMD33, CMD42, CMD56, // CMD59, ACMD22, ACMD23, ACMD41, ACMD42 
+// CMD1, CMD6, CMD9, CMD10, CMD30, CMD32, CMD33, CMD42, CMD56, 
+// CMD59, ACMD22, ACMD23, ACMD41, ACMD42 
 
 // Memory size of this model should be 2GB, however only 2MB is implemented to reduce system memory required during simulation
 // The initial value of all internal memory is word_address + 3. 
@@ -42,6 +43,7 @@
 
 `include "suite_config.v"
 `include "v2c_top.incl"
+`include "cep_hierMap.incl"
 
 `define UD 1 
 module spi_sd_model ( rstn , ncs, sclk, miso, mosi);
@@ -237,7 +239,7 @@ wire [63:0] SCR = {SCR_STRUCTURE, SD_SPEC, DATA_STAT_AFTER_ERASE, SD_SECURITY, S
 
 
 task write_flash_byte (input[31:0] addr, input [7:0] data); begin
-  `logI("Write %02x to address %x", data, addr);
+  `logI("SD_MODEL: Backdoor Write 0x%02x to address 0x%08x", data, addr);
   flash_mem[addr] = data;
 
   #1;
@@ -246,7 +248,7 @@ endtask
 
 // 
 task R1; input [7:0] data ; begin 
-  //$display(" SD R1: 0x%2h at %0t ns ",data , $realtime); 
+  `logI("SD_MODEL: SD R1: 0x%2h at %0d ns ",data , `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
@@ -255,7 +257,7 @@ end
 endtask 
 
 task R1b; input [7:0] data ; begin 
-  //$display(" SD R1B: 0x%2h at %0t ns" ,data , $realtime); 
+  `logI("SD_MODEL: SD R1B: 0x%2h at %0d ns" ,data , `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
@@ -264,7 +266,7 @@ end
 endtask 
 
 task R2; input [15:0] data ; begin 
-  //$display(" SD R2: 0x%2h at %0t ns",data , $realtime); 
+  `logI("SD_MODEL: SD R2: 0x%2h at %0d ns",data , `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 16) begin 
     @(negedge sclk) miso = data[15 - k]; k = k + 1; 
@@ -273,7 +275,7 @@ end
 endtask
 
 task R3; input [39:0] data ; begin 
-  //$display(" SD R3: 0x%10h at %0t ns",data , $realtime); 
+  `logI("SD_MODEL: SD R3: 0x%10h at %0d ns",data , `SYSTEM_SIM_TIME); 
   for (k = 0; k < 40; k = k + 1) begin 
     @(negedge sclk ) ; miso = data[39 - k]; 
   end 
@@ -281,7 +283,7 @@ end
 endtask 
 
 task R7; input [39:0] data ; begin 
-  //$display(" SD R7: 0x%10h at %0t ns",data ,$realtime); 
+  `logI("SD_MODEL: SD R7: 0x%10h at %0d ns",data ,`SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 40) begin 
     @(negedge sclk) miso = data[39 - k]; k = k + 1; 
@@ -290,9 +292,8 @@ end
 endtask 
 
 task DataOut; input [7:0] data ; begin 
-  //$display(" SD DataOut 0x%2H at %0t ns",data , $realtime); 
-  k = 0; 
-  while (k < 8) begin 
+  `logI("SD_MODEL:  SD DataOut 0x%2h at %0d ns",data , `SYSTEM_SIM_TIME); 
+  k = 0;   while (k < 8) begin 
     @(negedge sclk ) miso = data[7 - k]; k = k + 1; 
   end 
 end 
@@ -300,10 +301,10 @@ endtask
 
 task DataIn ; begin 
   for (k = 7; k >= 0; k = k - 1) begin 
-    //$display(" capture_data = %d" , capture_data); 
+    `logI("SD_MODEL: capture_data = %d" , capture_data); 
     @(posedge sclk) capture_data[k] = mosi; 
   end 
-  // $display (" SD DataIn : %2h at %0t ns", capture_data , $realtime ) ; 
+  `logI("SD_MODEL: SD DataIn : %2h at %0d ns", capture_data , `SYSTEM_SIM_TIME ) ; 
 end 
 endtask 
 
@@ -312,7 +313,7 @@ always @(*) begin
 end 
 
 task CRCOut; input [15:0] data ; begin 
-  //$display(" SD CRC Out 0x%4H at %0t ns" ,data , $realtime); 
+  `logI("SD_MODEL:  SD CRC Out 0x%4H at %0d ns" ,data , `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 16) begin @(negedge sclk) 
     miso = data [15 - k]; k=k+ 1; 
@@ -321,7 +322,7 @@ end
 endtask 
 
 task TokenOut; input [7:0] data ; begin 
-  // $display(" SD TokenOut 0x%2H at %0t ns" ,data , $realtime) ; 
+  `logI("SD_MODEL:  SD TokenOut 0x%2H at %0d ns" ,data , `SYSTEM_SIM_TIME) ; 
   k = 0; 
   while (k < 8) begin @(negedge sclk) 
     miso = data[7 - k]; k=k+ 1; 
@@ -376,48 +377,48 @@ end
 
 always @(*) begin 
   if ( ist == 0 && cmd_index == 0) begin 
-    $display("iCMD0 at %0t ns" ,$realtime); 
+    `logI("SD_MODEL: iCMD0 at %0d ns" ,`SYSTEM_SIM_TIME); 
     ist <= 1; 
   end 
 
   // if ( ist == 1 && cmd_index == 8) begin 
   if ( ist == 1) begin 
-    //$display("iCMD8 at %0t ns",$realtime); 
+    `logI("SD_MODEL: iCMD8 at %0d ns",`SYSTEM_SIM_TIME); 
     ist <= 2; 
   end 
 
   if ( ist == 2 && cmd_index == 0) begin 
-    $display(" .. "); 
+    `logI("SD_MODEL:  .. "); 
   end 
 
   // if ( ist == 2 && cmd_index == 58) begin 
   if ( ist == 2) begin 
-    //$display("iCMD58 at %0t ns",$realtime); 
+    `logI("SD_MODEL: iCMD58 at %0d ns",`SYSTEM_SIM_TIME); 
     ist <= 3; 
   end 
 
   // if ( ist == 3 && cmd_index == 55) begin 
   if ( ist == 3) begin 
-    //$display("iCMD55 at %0t ns",$realtime); 
+    `logI("SD_MODEL: iCMD55 at %0d ns",`SYSTEM_SIM_TIME); 
     ist <= 4; 
   end 
 
   if ( ist == 4 && cmd_index == 1) begin 
-    $display("iCMD1 at %0t ns" ,$realtime); 
+    `logI("SD_MODEL: iCMD1 at %0d ns" ,`SYSTEM_SIM_TIME); 
     ist <= 5; 
   end 
 
   if ( ist == 5 && cmd_index == 58 && CSD_VER == 1) begin 
-    $display("iCMD58 at %0t ns" ,$realtime); 
+    `logI("SD_MODEL: iCMD58 at %0d ns" ,`SYSTEM_SIM_TIME); 
     ist <= 6; 
   end else if ( ist == 5 && CSD_VER == 0) ist <= 6; 
 
   if ( ist == 6 && st == IDLE) begin 
-    $display(" Init Done at %0t ns" ,$realtime); 
+    `logI("SD_MODEL:  Init Done at %0d ns" ,`SYSTEM_SIM_TIME); 
 
-    if (v2sdhc) $display("Ver 2, SDHC detected"); 
-    else if (v2sdsc) $display("Ver 2, SDSC detected"); 
-    else if (v1sdsc) $display("Ver 1, SDSC detected"); 
+    if (v2sdhc) `logI("SD_MODEL: Ver 2, SDHC detected"); 
+    else if (v2sdsc) `logI("SD_MODEL: Ver 2, SDSC detected"); 
+    else if (v1sdsc) `logI("SD_MODEL: Ver 1, SDSC detected"); 
 
     init_done = 1; 
     ist <= 7; 
@@ -426,7 +427,7 @@ end
 
 always @(*) begin 
   if (st == ReadCycle) begin 
-    // $display (" readcycle ") ; 
+    // `logI (" readcycle ") ; 
     case ( multi_st ) 
       0: begin  
         @( posedge sclk ) if (~ncs && ~mosi) multi_st  =  1; else multi_st = 0;  
@@ -447,7 +448,6 @@ always @(*) begin
 end  
 
 always @(*) begin 
-  //$monitor("cmd_in = %d" , cmd_in[45:40]); 
   case (st) 
     PowerOff : begin 
       @( posedge rstn) st <= PowerOn; 
@@ -478,17 +478,17 @@ always @(*) begin
       end 
       cmd_in = serial_in; 
 
-      //$monitor(" cmd_in = %d" , serial_in [45:40]); 
       repeat (tNCR * 8) @( posedge sclk ); 
       
       st <= CardResponse; 
     end 
 
+
     CardResponse : begin // CardResponse -> delay 
       if (~app_cmd) begin 
         case (cmd_index) 
           6'd0    : R1(8'b0000_0001); 
-          6'd41   : R1(8'b0); 
+          6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
           6'd17, 
           6'd1, 
           6'd6, 
@@ -511,10 +511,10 @@ always @(*) begin
           6'd29,  
           6'd38   : R1b(8'b0011_1010);  
           6'd8    : if (VHS_match) begin  
-                      $display ("VHS match");
+                      `logI ("VHS match");
                       R7({8'h01 | (VHS_match ? 8'h04 : 8'h00), 20'h00000, VHS, check_pattern });  
                     end else begin  
-                      $display ("VHS not match");  
+                      `logI ("VHS not match");  
                       R7({8'h01 | (VHS_match ? 8'h04 : 8'h00), 20'h00000, 4'b0, check_pattern }) ;  
                     end  
           6'd13   : R2({1'b0, OUT_OF_RANGE, ADDRESS_ERROR, ERASE_SEQ_ERROR, COM_CRC_ERROR, 
@@ -527,10 +527,10 @@ always @(*) begin
         endcase 
       end else 
         if (~read_multi) begin 
-          case (cmd_index) 
+          case (cmd_index)
+            6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
             6'd22, 
             5'd23, 
-            6'd41, 
             6'd42, 
             6'd51   : R1(8'b0000_0000); 
             6'd13   : R2({1'b0, OUT_OF_RANGE, ADDRESS_ERROR, ERASE_SEQ_ERROR, COM_CRC_ERROR, ILLEGAL_COMMAND, ERASE_RESET, 
@@ -542,9 +542,9 @@ always @(*) begin
 
         @(posedge sclk); 
 
-        //$display("read_cmd = %b ", read_cmd); 
+        `logI("SD_MODEL: read_cmd = %b ", read_cmd); 
         if (read_cmd && init_done /*&& ~stop_transmission*/) begin 
-          //$display("just after"); 
+          `logI("SD_MODEL: just after"); 
           miso = 1; 
           repeat (tNAC * 8) @(posedge sclk); 
           st <= ReadCycle; 
@@ -635,7 +635,7 @@ always @(*) begin
           CRCOut(16'haaaa) ; 
           if (stop_transmission) begin //check stop_tx at end of each data block? 
             repeat (tNEC*8) @( posedge sclk ) ; 
-            $display("STOP transmission"); 
+            `logI("SD_MODEL: STOP transmission"); 
             @( posedge sclk ) begin 
               R1(8'b0000_0000) ; 
               repeat (tNEC*8) @( posedge sclk ) ; 
@@ -656,12 +656,12 @@ always @(*) begin
         i = i + 1; 
       end 
 
-      if (token == 8'hfe && write_single) $display("Single Write Start Token OK"); 
-      else if (token != 8'hfe && write_single) $display(" Single Write Start Token NG"); 
-      if (token == 8'hfc && write_multi) $display("Multiblock Write Start Token OK"); 
-      else if ((token != 8'hfc && token != 8'hfd) && write_multi) $display("Multiblock Write Start Token NG"); 
+      if (token == 8'hfe && write_single) `logI("SD_MODEL: Single Write Start Token OK"); 
+      else if (token != 8'hfe && write_single) `logI("SD_MODEL:  Single Write Start Token NG"); 
+      if (token == 8'hfc && write_multi) `logI("SD_MODEL: Multiblock Write Start Token OK"); 
+      else if ((token != 8'hfc && token != 8'hfd) && write_multi) `logI("SD_MODEL: Multiblock Write Start Token NG"); 
       if (token == 8'hfd && write_multi) begin 
-        $display("Multiblock Write Stop Token"); 
+        `logI("SD_MODEL: Multiblock Write Stop Token"); 
         st <= WriteStop; 
       end 
       i = 0; 

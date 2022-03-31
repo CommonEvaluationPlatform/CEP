@@ -169,7 +169,7 @@ module system_driver (
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART])
 
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT]) begin
-      release `CEPREGS_PATH.scratch_word0[1:0];
+      release `CEPREGS_PATH.scratch_word0[3:2];
       `logI("BOOTROM: Enabling the SD Boot");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT] = 0;
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT])

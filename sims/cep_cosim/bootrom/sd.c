@@ -103,7 +103,7 @@ static void sd_poweron(void)
 static int sd_cmd0(void)
 {
   int rc;
-  dputs("CMD0");
+  kputs("CMD0");
   rc = (sd_cmd(0x40, 0, 0x95) != 0x01);
   sd_cmd_end();
   return rc;
@@ -112,7 +112,7 @@ static int sd_cmd0(void)
 static int sd_cmd8(void)
 {
   int rc;
-  dputs("CMD8");
+  kputs("CMD8");
   rc = (sd_cmd(0x48, 0x000001AA, 0x87) != 0x01);
   sd_dummy(); /* command version; reserved */
   sd_dummy(); /* reserved */
@@ -124,6 +124,7 @@ static int sd_cmd8(void)
 
 static void sd_cmd55(void)
 {
+  kputs("CMD55");
   sd_cmd(0x77, 0, 0x65);
   sd_cmd_end();
 }
@@ -131,7 +132,7 @@ static void sd_cmd55(void)
 static int sd_acmd41(void)
 {
   uint8_t r;
-  dputs("ACMD41");
+  kputs("ACMD41");
   do {
     sd_cmd55();
     r = sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1 */
@@ -142,7 +143,7 @@ static int sd_acmd41(void)
 static int sd_cmd58(void)
 {
   int rc;
-  dputs("CMD58");
+  kputs("CMD58");
   rc = (sd_cmd(0x7A, 0, 0xFD) != 0x00);
   rc |= ((sd_dummy() & 0x80) != 0x80); /* Power up status */
   sd_dummy();
@@ -155,7 +156,7 @@ static int sd_cmd58(void)
 static int sd_cmd16(void)
 {
   int rc;
-  dputs("CMD16");
+  kputs("CMD16");
   rc = (sd_cmd(0x50, 0x200, 0x15) != 0x00);
   sd_cmd_end();
   return rc;
@@ -176,19 +177,19 @@ static uint16_t crc16_round(uint16_t crc, uint8_t data) {
 
 static const char spinner[] = { '-', '/', '|', '\\' };
 
-static int copy(void)
+static int sd_copy(void)
 {
   volatile uint8_t *p = (void *)(MEMORY_MEM_ADDR);
   long i = PAYLOAD_SIZE;
   int rc = 0;
 
-  dputs("CMD18");
+  kputs("CMD18");
 
   kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
   kprintf("LOADING  ");
 
   // TODO: Speed up SPI freq. (breaks between these two values)
-  //REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
+  // REG32 (spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
   if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
@@ -258,9 +259,9 @@ int main(void)
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
   if ((scratch_reg & 0x3) != 0x3) {
-    kprintf("---    Common Evaluation Platform v%x.%x    ---\n", major_version, minor_version);
-    kputs("--- Copyright 2022 Massachusets Institute of Technology ---");
-    kprintf("---    BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
+    kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
+    kputs("--- Copyright 2022 Massachusetts Institute of Technology ---");
+    kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set
@@ -268,14 +269,35 @@ int main(void)
     kputs("INIT");
   
     sd_poweron();
-      if (sd_cmd0() ||
-        sd_cmd8() ||
-        sd_acmd41() ||
-        sd_cmd58() ||
-        sd_cmd16() ||
-        copy()) {
-          kputs("ERROR");
-      return 1;
+
+    if (sd_cmd0()) {
+      kputs("CMD0 ERROR");
+      return 1;     
+    }
+
+    if (sd_cmd8()) {
+      kputs("CMD8 ERROR");
+      return 1;     
+    }
+
+    if (sd_acmd41()) {
+      kputs("ACMD41 ERROR");
+      return 1;     
+    }
+
+    if (sd_cmd58()) {
+      kputs("CMD58 ERROR");
+      return 1;     
+    }
+
+    if (sd_cmd16()) {
+      kputs("CMD16 ERROR");
+      return 1;     
+    }
+
+    if (sd_copy()) {
+      kputs("SDCOPY ERROR");
+      return 1;     
     }
 
     kputs("BOOT");

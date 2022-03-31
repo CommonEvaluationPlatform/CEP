@@ -77,8 +77,8 @@ COSIM_VSIM_ARGS				+= +PLLLIB_M55
 COSIM_VSIM_ARGS				+= +PLLLIB_SHORT_LOCK
 
 # Defines for used within the Chisel Generated Verilog
-COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
-COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
+#COSIM_VLOGS_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
+#COSIM_VLOGS_ARGS			+= +define+STOP_COND=\`SYSTEM_RESET
 #--------------------------------------------------------------------------------------
 
 
