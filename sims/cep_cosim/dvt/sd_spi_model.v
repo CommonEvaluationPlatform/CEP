@@ -4,46 +4,33 @@
 //
 // File Name:     cep_tb.v
 // Program:       Common Evaluation Platform (CEP)
-// Description:   SD Card Model originally released by tsuhuai.chan@gmail.com and
+// Description:   SD SPI Simulation Model originally released by tsuhuai.chan@gmail.com and
 //                subsequented extracted from "Warke, Tejas Pravin, "Verification of 
 //                SD/MMC Controller IP Using UVM" (2018). Thesis. Rochester Institute
 //                of Technology"
 //
 // Notes:         Specification referenced is:
 //                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
-//                Added ACMD41 support as required by specification
-//                CARD_VHS changed to 4'b0001 (indicating support for 2.7-3.6V)
-//                CMD8 R7 response updated to be compliant with specification.  As we are operating in SPI
+//
+//                - CARD_VHS changed to 4'b0001 (indicating support for 2.7-3.6V)
+//                - CMD8 R7 response updated to be compliant with specification.  As we are operating in SPI
 //                  mode, the R7 response is taken from Section 7.3.2.6 of the specification
+//                - Changed CSD_VER to v2.0 (2'b01) given the bootrom assumes v2.0 or later
+//                - Modified ist (initialization logic) to be compatible with Figure 7-2 in the specification
+//                - Modified ACMD41 response per specification
+//                - All commands that have not been EXPLICITLY verified have been removed
+//                - Restored processing/setting of the block len (was commented out)
+//
 //--------------------------------------------------------------------------------------
 
-// SD Card , SPI mode, Verilog simulation model 
-// 
-// Version history : 
+// Version history :
 // 1.0 2016.06.13 1st released by tsuhuai.chan@gmail.com 
+//
 // Most of the Card information is referenced from Toshiba 2G and 256MB SD card 
 // 
-// parsed commands: 
-// CMD0, CMD8, CMD9, CMD10, CMD12, CMD13, CMD16, CMD17, CMD18, 
-// CMD24, CMD25, CMD27, CMD55, CMD51, CMD58, ACMD13, ACMD51 
-//
-// Not parsed command: ( still responses based on spec) 
-// CMD1, CMD6, CMD9, CMD10, CMD30, CMD32, CMD33, CMD42, CMD56, 
-// CMD59, ACMD22, ACMD23, ACMD41, ACMD42 
-
 // Memory size of this model should be 2GB, however only 2MB is implemented to reduce system memory required during simulation
 // The initial value of all internal memory is word_address + 3. 
-
-// Detail command status 
-// 1. card response of ACMD51   : not sure 
-// 2. lock / unlock             : not implemented 
-// 3. erase                     : not implemented 
-// 4. read multiple block       : seems verify OK 
-// 5. write single block        : seems verify OK 
-// 6. write multiple block      : not verified 
-// 7. partial access            : not implemented 
-// 8. misalign                  : no check 
-// 9. SDHC address              : not verified 
+//
 
 `include "suite_config.v"
 `include "v2c_top.incl"
@@ -135,6 +122,8 @@ wire stop_transmission = (cmd_in1 == 12); //for CMD25
 
 //Do not change the positions of these include files 
 // Also, ocr .v must be included before csd.v 
+wire CARD_UHSII = 1'b0;
+wire CARD_S18A  = 1'b0;
 wire CCS = 1'b0; 
 wire [31:0] OCR = {init_done , CCS, 5'b0, 1'b0, 6'b111111, 3'b000, 12'h000}; //3.0~3.6V, no S18A 
 wire [1:0] DAT_BUS_WIDTH = 2'b00; //1bit 
@@ -160,7 +149,7 @@ wire [31:0] PSN = 32'h6543a238;
 wire [11:0] MDT = {4'd15, 8'h12}; 
 wire [6:0] CID_CRC = 7'b1100001; //dummy 
 wire [127:0] CID = {MID, OID, PNM, PRV, PSN, 4'b0, MDT, CID_CRC ,1'b1}; 
-wire [1:0] CSD_VER = 2'b00; //Ver1.0 
+wire [1:0] CSD_VER = 2'b01; // Ver 2.0 
 wire [7:0] TAAC = {1'b0, 4'd7, 3'd2}; //3.0*100ns 
 wire [7:0] NSAC = 8'd101; 
 wire [7:0] TRAN_SPEED = 8'h32; 
@@ -279,7 +268,7 @@ end
 endtask
 
 task R3; input [39:0] data ; begin 
-  `logI("SD_MODEL: SD R3: 0x%10h at %0d ns",data , `SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R3: 0x%10h at %0d ns", data, `SYSTEM_SIM_TIME); 
   for (k = 0; k < 40; k = k + 1) begin 
     @(negedge sclk ) ; miso = data[39 - k]; 
   end 
@@ -288,9 +277,8 @@ endtask
 
 task R7; input [39:0] data ; begin 
   `logI("SD_MODEL: SD R7: 0x%10h at %0d ns", data,`SYSTEM_SIM_TIME); 
-  k = 0; 
-  while (k < 40) begin 
-    @(negedge sclk) miso = data[39 - k]; k = k + 1; 
+  for (k = 0; k < 40; k = k + 1) begin 
+    @(negedge sclk ) ; miso = data[39 - k]; 
   end 
 end
 endtask 
@@ -365,67 +353,51 @@ always @(*) begin
     start_addr = argument * block_len; 
 end 
 
-/*
 always @(*) begin 
   if (v2sdhc) 
     block_len = 512; 
   else if (sdsc && cmd_index == 0) block_len = (READ_BL_LEN == 9) ? 512 : (READ_BL_LEN == 10) ? 1024 : 2048; 
   else if (sdsc && cmd_index == 16) block_len = argument [31:0]; 
 end 
-*/ 
 
 always @(*) begin 
   if (cmd_index == 8) VHS = argument[11:8]; 
   if (cmd_index == 8) check_pattern = argument[7:0]; 
 end 
 
+
+// Logic for controlling the "initialization" of the SD Card model
 always @(*) begin 
-  if ( ist == 0 && cmd_index == 0) begin 
-    `logI("SD_MODEL: iCMD0 at %0d ns" ,`SYSTEM_SIM_TIME); 
-    ist <= 1; 
+  if (ist == 0 && cmd_index == 0) begin 
+    ist = 1;
+    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
-  // if ( ist == 1 && cmd_index == 8) begin 
-  if ( ist == 1) begin 
-    `logI("SD_MODEL: iCMD8 at %0d ns",`SYSTEM_SIM_TIME); 
-    ist <= 2; 
+  if (ist == 1 && cmd_index == 8) begin 
+    ist = 2;
+    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
-  if ( ist == 2 && cmd_index == 0) begin 
-    `logI("SD_MODEL:  .. "); 
+  if (ist == 2 && cmd_index == 41) begin 
+    ist = 3;
+    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
-  // if ( ist == 2 && cmd_index == 58) begin 
-  if ( ist == 2) begin 
-    `logI("SD_MODEL: iCMD58 at %0d ns",`SYSTEM_SIM_TIME); 
-    ist <= 3; 
-  end 
+  if ( ist == 3 && cmd_index == 58 && CSD_VER == 1) begin 
+    ist = 4; 
+  end else if ( ist == 3 && CSD_VER == 0) begin
+    ist = 4; 
+  end
 
-  // if ( ist == 3 && cmd_index == 55) begin 
-  if ( ist == 3) begin 
-    `logI("SD_MODEL: iCMD55 at %0d ns",`SYSTEM_SIM_TIME); 
-    ist <= 4; 
-  end 
+  if ( ist == 4 && st == IDLE) begin 
+    ist = 5; 
+    `logI("SD_MODEL: Init Done at %0d ns" ,`SYSTEM_SIM_TIME); 
 
-  if ( ist == 4 && cmd_index == 1) begin 
-    `logI("SD_MODEL: iCMD1 at %0d ns" ,`SYSTEM_SIM_TIME); 
-    ist <= 5; 
-  end 
-
-  if ( ist == 5 && cmd_index == 58 && CSD_VER == 1) begin 
-    `logI("SD_MODEL: iCMD58 at %0d ns" ,`SYSTEM_SIM_TIME); 
-    ist <= 6; 
-  end else if ( ist == 5 && CSD_VER == 0) ist <= 6; 
-
-  if ( ist == 6 && st == IDLE) begin 
-    `logI("SD_MODEL:  Init Done at %0d ns" ,`SYSTEM_SIM_TIME); 
-
-    if (v2sdhc) `logI("SD_MODEL: Ver 2, SDHC detected"); 
-    else if (v2sdsc) `logI("SD_MODEL: Ver 2, SDSC detected"); 
-    else if (v1sdsc) `logI("SD_MODEL: Ver 1, SDSC detected"); 
+    if (v2sdhc) `logI("SD_MODEL: Init Done at %0d ns, Ver 2, SDHC detected" ,`SYSTEM_SIM_TIME);
+    else if (v2sdsc) `logI("SD_MODEL: Init Done at %0d ns, Ver 2, SDSC detected" ,`SYSTEM_SIM_TIME);
+    else if (v1sdsc) `logI("SD_MODEL: Init Done at %0d ns, Ver 1, SDSC detected" ,`SYSTEM_SIM_TIME);
 
     init_done = 1; 
-    ist <= 7; 
   end 
 end 
 
@@ -489,31 +461,13 @@ always @(*) begin
 
     CardResponse : begin // CardResponse -> delay 
       `logI("SD_MODEL: Card Response app_cmd/read_multi/cmd_index = %0d/%0d/%0d", app_cmd, read_multi, cmd_index);
+      // Not an application specific command
       if (~app_cmd) begin 
         case (cmd_index) 
-          6'd0    : R1(8'b0000_0001); 
-          6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
-          6'd17, 
-          6'd1, 
-          6'd6, 
-          6'd16, 
-          6'd18, 
-          6'd24, 
-          6'd25, 
-          6'd27, 
-          6'd30, 
-          6'd32, 
-          6'd33, 
-          6'd42,  
-          6'd55,  
-          6'd56,  
-          6'd59   : R1(8'b0110_1010);  
-          6'd9,  
-          6'd10   : if(init_done) R1(8'b1010_0001); else R1(8'b0000_0100);  
-          6'd12,  
-          6'd28,  
-          6'd29,  
-          6'd38   : R1b(8'b0011_1010);  
+          6'd0    : R1(8'b0000_0001);
+          6'd16,
+          6'd18,
+          6'd55   : R1({7'b000_0000, init_done ? 1'b0 : 1'b1});         
           6'd8    : begin
                       if (VHS_match)
                         `logI ("SD_MODEL: VHS match");
@@ -523,34 +477,21 @@ always @(*) begin
                       // R1 response is "in idle state: the card is in the idle state and running the initializing process)
                       R7({init_done ? 8'h00 : 8'h01, 20'h00000, VHS_match ? VHS : 4'b0, check_pattern});
                     end
-          6'd13   : R2({1'b0, OUT_OF_RANGE, ADDRESS_ERROR, ERASE_SEQ_ERROR, COM_CRC_ERROR, 
-                        ILLEGAL_COMMAND, ERASE_RESET, IN_IDLE_ST, OUT_OF_RANGE | CSD_OVERWRITE, 
-                        ERASE_PARAM, WP_VIOLATION, CARD_ECC_FAILED, CC_ERROR, ERROR, 
-                        WP_ERASE_SKIP | LOCK_UNLOCK_FAILED, CARD_IS_LOCKED}) ; 
-
           6'd58   : R3({8'b0000_0000, OCR}); 
           default : R1(8'b0000_0100); //illegal command 
         endcase 
-      end else 
+      // Application specific commands
+      end else // if (~app_cmd)
         if (~read_multi) begin
           case (cmd_index)
-            6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
-            6'd22, 
-            5'd23, 
-            6'd42, 
-            6'd51   : R1(8'b0000_0000); 
-            6'd13   : R2({1'b0, OUT_OF_RANGE, ADDRESS_ERROR, ERASE_SEQ_ERROR, COM_CRC_ERROR, ILLEGAL_COMMAND, ERASE_RESET, 
-                       IN_IDLE_ST, OUT_OF_RANGE | CSD_OVERWRITE, ERASE_PARAM, WP_VIOLATION, CARD_ECC_FAILED, CC_ERROR, ERROR, 
-                       WP_ERASE_SKIP | LOCK_UNLOCK_FAILED, CARD_IS_LOCKED}); 
+            6'd41   : R3({1'b0, 1'b0, 6'b111111, init_done, CARD_UHSII, 4'b0000, CARD_S18A, OCR[23:8], 8'h00});
             default : R1(8'b0000_0100); //illegal command 
           endcase 
         end // if (~read_multi)
 
         @(posedge sclk); 
 
-        `logI("SD_MODEL: read_cmd = %b ", read_cmd); 
         if (read_cmd && init_done /*&& ~stop_transmission*/) begin 
-          `logI("SD_MODEL: just after"); 
           miso = 1; 
           repeat (tNAC * 8) @(posedge sclk); 
           st <= ReadCycle; 

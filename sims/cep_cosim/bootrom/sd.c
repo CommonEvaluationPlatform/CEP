@@ -2,12 +2,13 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      sd.c
-// Program:        Common Evaluation Platform (CEP)
-// Description:    SPI and UART initialization code for the CEP Bootrom
-// Notes:          Specification referenced is:
+// File Name:     sd.c
+// Program:       Common Evaluation Platform (CEP)
+// Description:   SPI and UART initialization code for the CEP Bootrom
+// Notes:         Specification referenced is:
 //                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
 //
+//                Updated ACMD41 processing to read all five bytes of the R3 response
 //--------------------------------------------------------------------------------------
 
 // See LICENSE.Sifive for license details.
@@ -74,7 +75,7 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
   do {
     r = sd_dummy();
     if (!(r & 0x80)) {
-      kprintf("sd:cmd: %hx\r\n", r);
+      kprintf("sd:cmd/resp: %x/%x\r\n", (cmd & 0x3F), r);
       goto done;
     }
   } while (--n > 0);
@@ -117,13 +118,10 @@ static int sd_cmd8(void)
   // Per section 7.3.2.6 of the specification, the card should be in the IDLE state and
   // running the initialization process
   rc = (sd_cmd(0x48, 0x000001AA, 0x87) != 0x01);
-  kprintf("CMD8 rc1 = %x\n", rc);
   sd_dummy();                         /* command version; reserved  */
   sd_dummy();                         /* reserved                   */
   rc |= ((sd_dummy() & 0xF) != 0x1);  /* voltage                    */
-  kprintf("CMD8 rc2 = %x\n", rc);
   rc |= (sd_dummy() != 0xAA);         /* check pattern              */
-  kprintf("CMD8 rc3 = %x\n", rc);
   sd_cmd_end();
   return rc;
 }
@@ -138,10 +136,14 @@ static void sd_cmd55(void)
 static int sd_acmd41(void)
 {
   uint8_t r;
-  kputs("ACMD41");
   do {
     sd_cmd55();
+    kputs("ACMD41");
     r = sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1 */
+    sd_dummy();
+    sd_dummy();
+    sd_dummy();
+    sd_dummy();
   } while (r == 0x01);
   return (r != 0x00);
 }
@@ -151,7 +153,9 @@ static int sd_cmd58(void)
   int rc;
   kputs("CMD58");
   rc = (sd_cmd(0x7A, 0, 0xFD) != 0x00);
+  kprintf("CMD58 rc1 = %x\n", rc);
   rc |= ((sd_dummy() & 0x80) != 0x80); /* Power up status */
+  kprintf("CMD58 rc2 = %x\n", rc);
   sd_dummy();
   sd_dummy();
   sd_dummy();
@@ -159,6 +163,7 @@ static int sd_cmd58(void)
   return rc;
 }
 
+// Set block length set to 512 bytes
 static int sd_cmd16(void)
 {
   int rc;
