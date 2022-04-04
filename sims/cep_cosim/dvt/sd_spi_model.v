@@ -9,8 +9,12 @@
 //                SD/MMC Controller IP Using UVM" (2018). Thesis. Rochester Institute
 //                of Technology"
 //
-// Notes:         Added ACMD41 support as required by specification
-//
+// Notes:         Specification referenced is:
+//                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
+//                Added ACMD41 support as required by specification
+//                CARD_VHS changed to 4'b0001 (indicating support for 2.7-3.6V)
+//                CMD8 R7 response updated to be compliant with specification.  As we are operating in SPI
+//                  mode, the R7 response is taken from Section 7.3.2.6 of the specification
 //--------------------------------------------------------------------------------------
 
 // SD Card , SPI mode, Verilog simulation model 
@@ -121,7 +125,7 @@ reg [31:0] block_len;
 reg [7:0] capture_data; // for debugging 
 reg [3:0] VHS; // Input VHS through MOSI 
 reg [7:0] check_pattern = 0; // for CMD8
-wire [3:0] CARD_VHS     = 4'b0000; // SD card accept voltage range
+wire [3:0] CARD_VHS     = 4'b0001; // SD card accept voltage range
 
 wire VHS_match = (VHS == CARD_VHS);
 reg [1:0] multi_st ; // for CMD25 
@@ -283,7 +287,7 @@ end
 endtask 
 
 task R7; input [39:0] data ; begin 
-  `logI("SD_MODEL: SD R7: 0x%10h at %0d ns",data ,`SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R7: 0x%10h at %0d ns", data,`SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 40) begin 
     @(negedge sclk) miso = data[39 - k]; k = k + 1; 
@@ -483,8 +487,8 @@ always @(*) begin
       st <= CardResponse; 
     end 
 
-
     CardResponse : begin // CardResponse -> delay 
+      `logI("SD_MODEL: Card Response app_cmd/read_multi/cmd_index = %0d/%0d/%0d", app_cmd, read_multi, cmd_index);
       if (~app_cmd) begin 
         case (cmd_index) 
           6'd0    : R1(8'b0000_0001); 
@@ -510,13 +514,15 @@ always @(*) begin
           6'd28,  
           6'd29,  
           6'd38   : R1b(8'b0011_1010);  
-          6'd8    : if (VHS_match) begin  
-                      `logI ("VHS match");
-                      R7({8'h01 | (VHS_match ? 8'h04 : 8'h00), 20'h00000, VHS, check_pattern });  
-                    end else begin  
-                      `logI ("VHS not match");  
-                      R7({8'h01 | (VHS_match ? 8'h04 : 8'h00), 20'h00000, 4'b0, check_pattern }) ;  
-                    end  
+          6'd8    : begin
+                      if (VHS_match)
+                        `logI ("SD_MODEL: VHS match");
+                      else
+                        `logI ("SD_MODEL: VHS not match");
+                      // Per spec Section 7.3.2.1: bit 40 of the R7 response (which is bit 0 of the embedded
+                      // R1 response is "in idle state: the card is in the idle state and running the initializing process)
+                      R7({init_done ? 8'h00 : 8'h01, 20'h00000, VHS_match ? VHS : 4'b0, check_pattern});
+                    end
           6'd13   : R2({1'b0, OUT_OF_RANGE, ADDRESS_ERROR, ERASE_SEQ_ERROR, COM_CRC_ERROR, 
                         ILLEGAL_COMMAND, ERASE_RESET, IN_IDLE_ST, OUT_OF_RANGE | CSD_OVERWRITE, 
                         ERASE_PARAM, WP_VIOLATION, CARD_ECC_FAILED, CC_ERROR, ERROR, 
@@ -526,7 +532,7 @@ always @(*) begin
           default : R1(8'b0000_0100); //illegal command 
         endcase 
       end else 
-        if (~read_multi) begin 
+        if (~read_multi) begin
           case (cmd_index)
             6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
             6'd22, 
@@ -538,7 +544,7 @@ always @(*) begin
                        WP_ERASE_SKIP | LOCK_UNLOCK_FAILED, CARD_IS_LOCKED}); 
             default : R1(8'b0000_0100); //illegal command 
           endcase 
-        end 
+        end // if (~read_multi)
 
         @(posedge sclk); 
 

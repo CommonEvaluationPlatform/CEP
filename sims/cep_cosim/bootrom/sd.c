@@ -4,8 +4,9 @@
 //
 // File Name:      sd.c
 // Program:        Common Evaluation Platform (CEP)
-// Description:    
-// Notes:          
+// Description:    SPI and UART initialization code for the CEP Bootrom
+// Notes:          Specification referenced is:
+//                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
 //
 //--------------------------------------------------------------------------------------
 
@@ -73,7 +74,7 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
   do {
     r = sd_dummy();
     if (!(r & 0x80)) {
-//      dprintf("sd:cmd: %hx\r\n", r);
+      kprintf("sd:cmd: %hx\r\n", r);
       goto done;
     }
   } while (--n > 0);
@@ -113,11 +114,16 @@ static int sd_cmd8(void)
 {
   int rc;
   kputs("CMD8");
+  // Per section 7.3.2.6 of the specification, the card should be in the IDLE state and
+  // running the initialization process
   rc = (sd_cmd(0x48, 0x000001AA, 0x87) != 0x01);
-  sd_dummy();                         /* command version; reserved */
-  sd_dummy();                         /* reserved */
-  rc |= ((sd_dummy() & 0xF) != 0x1);  /* voltage */
-  rc |= (sd_dummy() != 0xAA);         /* check pattern */
+  kprintf("CMD8 rc1 = %x\n", rc);
+  sd_dummy();                         /* command version; reserved  */
+  sd_dummy();                         /* reserved                   */
+  rc |= ((sd_dummy() & 0xF) != 0x1);  /* voltage                    */
+  kprintf("CMD8 rc2 = %x\n", rc);
+  rc |= (sd_dummy() != 0xAA);         /* check pattern              */
+  kprintf("CMD8 rc3 = %x\n", rc);
   sd_cmd_end();
   return rc;
 }
