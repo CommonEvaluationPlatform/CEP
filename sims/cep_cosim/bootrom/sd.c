@@ -273,9 +273,9 @@ int main(void)
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
   if ((scratch_reg & 0x3) != 0x3) {
-    kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
-    kputs("--- Copyright 2022 Massachusetts Institute of Technology ---");
-    kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
+//    kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
+//    kputs("--- Copyright 2022 Massachusetts Institute of Technology ---");
+//    kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set

@@ -232,7 +232,7 @@ wire [63:0] SCR = {SCR_STRUCTURE, SD_SPEC, DATA_STAT_AFTER_ERASE, SD_SECURITY, S
 
 
 task write_flash_byte (input[31:0] addr, input [7:0] data); begin
-  `logI("SD_MODEL: Backdoor Write 0x%02x to address 0x%08x", data, addr);
+//  `logI("SD_MODEL: Backdoor Write 0x%02x to address 0x%08x", data, addr);
   flash_mem[addr] = data;
 
   #1;
@@ -425,13 +425,12 @@ always @(*) begin
     end 
 
     PowerOn : begin 
-      if ( sck_cnt < 73) begin 
-        @( posedge sclk) sck_cnt = sck_cnt + 1; 
-      end 
-      if ( sck_cnt == 73) 
-        st <= IDLE; 
-      else 
-        st <= PowerOn; 
+      for (i = 0; i < 73; i++) begin
+        @ ( posedge sclk);
+        sck_cnt = sck_cnt + 1;
+      end
+
+      st <= IDLE; 
     end 
 
     IDLE : begin 
@@ -652,7 +651,9 @@ always @(*) begin
       st <= IDLE; 
     end 
 
-    default : st <= IDLE; 
+    default : begin
+      `logE("SD_MODEL: trap state");
+    end
   endcase 
 end 
 
