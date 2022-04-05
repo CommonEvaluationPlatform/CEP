@@ -8,7 +8,8 @@
 // Notes:         Specification referenced is:
 //                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
 //
-//                Updated ACMD41 processing to read all five bytes of the R3 response
+//                Updated ACMD41 processing to read all five bytes of the R3 response and check
+//                the busy bit in the response per specification Figure 4-4 (Response bit 39)
 //--------------------------------------------------------------------------------------
 
 // See LICENSE.Sifive for license details.
@@ -75,7 +76,7 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
   do {
     r = sd_dummy();
     if (!(r & 0x80)) {
-      kprintf("sd:cmd/resp: %x/%x\r\n", (cmd & 0x3F), r);
+      kprintf("sd_cmd/resp: %x/%x\r\n", (cmd & 0x3F), r);
       goto done;
     }
   } while (--n > 0);
@@ -139,12 +140,14 @@ static int sd_acmd41(void)
   do {
     sd_cmd55();
     kputs("ACMD41");
-    r = sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1 */
+    sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1          */
+    r = sd_dummy();                 /* Check busy bit   */
+    kprintf("AMCD41 r2 = %x\n", r);
     sd_dummy();
     sd_dummy();
     sd_dummy();
-    sd_dummy();
-  } while (r == 0x01);
+    sd_cmd_end();
+  } while ((r & 0x80) == 0x00);     /* Is initialization complete?  */
   return (r != 0x00);
 }
 

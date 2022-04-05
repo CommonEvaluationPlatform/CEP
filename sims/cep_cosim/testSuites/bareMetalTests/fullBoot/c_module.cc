@@ -49,7 +49,7 @@ void *c_module(void *arg) {
   // Test starts here
   //--------------------------------------------------------------------------------------
   // Wait until the program is loaded
-  errCnt += is_program_loaded(100);
+  errCnt += is_program_loaded(250);
 
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;

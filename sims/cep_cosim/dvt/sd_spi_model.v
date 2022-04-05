@@ -124,8 +124,8 @@ wire stop_transmission = (cmd_in1 == 12); //for CMD25
 // Also, ocr .v must be included before csd.v 
 wire CARD_UHSII = 1'b0;
 wire CARD_S18A  = 1'b0;
-wire CCS = 1'b0; 
-wire [31:0] OCR = {init_done , CCS, 5'b0, 1'b0, 6'b111111, 3'b000, 12'h000}; //3.0~3.6V, no S18A 
+wire CCS        = 1'b0; 
+wire [31:0] OCR = {init_done , CCS, CARD_UHSII, 4'b0, CARD_S18A, 6'b111111, 3'b000, 12'h000}; //3.0~3.6V, no S18A 
 wire [1:0] DAT_BUS_WIDTH = 2'b00; //1bit 
 wire SECURE_MODE = 1'b0; // not in secure mode 
 wire [15:0] SD_CARD_TYPE = 16'h0000; // regular SD 
@@ -241,7 +241,7 @@ endtask
 
 // 
 task R1; input [7:0] data ; begin 
-  `logI("SD_MODEL: SD R1: 0x%2h at %0d ns ",data , `SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R1: 0x%2h at %0d ns ", data, `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
@@ -250,7 +250,7 @@ end
 endtask 
 
 task R1b; input [7:0] data ; begin 
-  `logI("SD_MODEL: SD R1B: 0x%2h at %0d ns" ,data , `SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R1B: 0x%2h at %0d ns", data, `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
@@ -259,7 +259,7 @@ end
 endtask 
 
 task R2; input [15:0] data ; begin 
-  `logI("SD_MODEL: SD R2: 0x%2h at %0d ns",data , `SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R2: 0x%4h at %0d ns", data, `SYSTEM_SIM_TIME); 
   k = 0; 
   while (k < 16) begin 
     @(negedge sclk) miso = data[15 - k]; k = k + 1; 
@@ -284,8 +284,9 @@ end
 endtask 
 
 task DataOut; input [7:0] data ; begin 
-  `logI("SD_MODEL:  SD DataOut 0x%2h at %0d ns",data , `SYSTEM_SIM_TIME); 
-  k = 0;   while (k < 8) begin 
+  `logI("SD_MODEL:  SD DataOut 0x%2h at %0d ns", data , `SYSTEM_SIM_TIME); 
+  k = 0;   
+  while (k < 8) begin 
     @(negedge sclk ) miso = data[7 - k]; k = k + 1; 
   end 
 end 
@@ -370,27 +371,21 @@ end
 always @(*) begin 
   if (ist == 0 && cmd_index == 0) begin 
     ist = 1;
-    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
+    `logI("SD_MODEL: Moving to InitStage %d/3 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
   if (ist == 1 && cmd_index == 8) begin 
     ist = 2;
-    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
+    `logI("SD_MODEL: Moving to InitStage %d/3 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
   if (ist == 2 && cmd_index == 41) begin 
     ist = 3;
-    `logI("SD_MODEL: Moving to InitStage %d/4 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
+    `logI("SD_MODEL: Moving to InitStage %d/3 at %0d ns" , ist, `SYSTEM_SIM_TIME); 
   end 
 
-  if ( ist == 3 && cmd_index == 58 && CSD_VER == 1) begin 
+  if ( ist == 3 && st == IDLE) begin 
     ist = 4; 
-  end else if ( ist == 3 && CSD_VER == 0) begin
-    ist = 4; 
-  end
-
-  if ( ist == 4 && st == IDLE) begin 
-    ist = 5; 
     `logI("SD_MODEL: Init Done at %0d ns" ,`SYSTEM_SIM_TIME); 
 
     if (v2sdhc) `logI("SD_MODEL: Init Done at %0d ns, Ver 2, SDHC detected" ,`SYSTEM_SIM_TIME);
@@ -484,7 +479,7 @@ always @(*) begin
       end else // if (~app_cmd)
         if (~read_multi) begin
           case (cmd_index)
-            6'd41   : R3({1'b0, 1'b0, 6'b111111, init_done, CARD_UHSII, 4'b0000, CARD_S18A, OCR[23:8], 8'h00});
+            6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
             default : R1(8'b0000_0100); //illegal command 
           endcase 
         end // if (~read_multi)
