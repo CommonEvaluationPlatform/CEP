@@ -20,7 +20,8 @@
 //                - Modified ACMD41 response per specification
 //                - All commands that have not been EXPLICITLY verified have been removed
 //                - Restored processing/setting of the block len (was commented out)
-//
+//                - OCR bit-width/mapping corrected per spec
+//                - STM coding updated to properly sequence through the PowerOff -> PowerOn -> Idle states
 //--------------------------------------------------------------------------------------
 
 // Version history :
@@ -122,10 +123,10 @@ wire stop_transmission = (cmd_in1 == 12); //for CMD25
 
 //Do not change the positions of these include files 
 // Also, ocr .v must be included before csd.v 
+wire CCS        = 1'b0;
 wire CARD_UHSII = 1'b0;
 wire CARD_S18A  = 1'b0;
-wire CCS        = 1'b0; 
-wire [31:0] OCR = {init_done , CCS, CARD_UHSII, 4'b0, CARD_S18A, 6'b111111, 3'b000, 12'h000}; //3.0~3.6V, no S18A 
+wire [31:0] OCR = {init_done , CCS, CARD_UHSII, 4'b0000, CARD_S18A, 6'b111111, 18'd0}; //3.0~3.6V, no S18A 
 wire [1:0] DAT_BUS_WIDTH = 2'b00; //1bit 
 wire SECURE_MODE = 1'b0; // not in secure mode 
 wire [15:0] SD_CARD_TYPE = 16'h0000; // regular SD 
@@ -246,6 +247,7 @@ task R1; input [7:0] data ; begin
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -255,6 +257,7 @@ task R1b; input [7:0] data ; begin
   while (k < 8) begin 
     @(negedge sclk) miso = data[7 - k]; k = k + 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -264,6 +267,7 @@ task R2; input [15:0] data ; begin
   while (k < 16) begin 
     @(negedge sclk) miso = data[15 - k]; k = k + 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask
 
@@ -272,6 +276,7 @@ task R3; input [39:0] data ; begin
   for (k = 0; k < 40; k = k + 1) begin 
     @(negedge sclk ) ; miso = data[39 - k]; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -280,6 +285,7 @@ task R7; input [39:0] data ; begin
   for (k = 0; k < 40; k = k + 1) begin 
     @(negedge sclk ) ; miso = data[39 - k]; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end
 endtask 
 
@@ -289,6 +295,7 @@ task DataOut; input [7:0] data ; begin
   while (k < 8) begin 
     @(negedge sclk ) miso = data[7 - k]; k = k + 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -311,6 +318,7 @@ task CRCOut; input [15:0] data ; begin
   while (k < 16) begin @(negedge sclk) 
     miso = data [15 - k]; k=k+ 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -320,6 +328,7 @@ task TokenOut; input [7:0] data ; begin
   while (k < 8) begin @(negedge sclk) 
     miso = data[7 - k]; k=k+ 1; 
   end 
+  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -425,7 +434,7 @@ always @(*) begin
     end 
 
     PowerOn : begin 
-      for (i = 0; i < 73; i++) begin
+      for (i = 0; i < 75; i++) begin
         @ ( posedge sclk);
         sck_cnt = sck_cnt + 1;
       end
@@ -475,36 +484,35 @@ always @(*) begin
           default : R1(8'b0000_0100); //illegal command 
         endcase 
       // Application specific commands
-      end else // if (~app_cmd)
-        if (~read_multi) begin
-          case (cmd_index)
-            6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
-            default : R1(8'b0000_0100); //illegal command 
-          endcase 
-        end // if (~read_multi)
+      end else if (~read_multi) begin
+        case (cmd_index)
+          6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
+          default : R1(8'b0000_0100); //illegal command 
+        endcase 
+      end // if (~read_multi)
 
-        @(posedge sclk); 
+      @(posedge sclk); 
 
-        if (read_cmd && init_done /*&& ~stop_transmission*/) begin 
-          miso = 1; 
-          repeat (tNAC * 8) @(posedge sclk); 
-          st <= ReadCycle; 
-        end else if (read_cmd && init_done && stop_transmission) begin 
-          miso = 1; 
-          repeat (tNEC * 8) @(posedge sclk ); 
-          st <= IDLE; 
-        end else if ((send_csd || send_cid || send_scr) && init_done) begin 
-          miso = 1; 
-          repeat (tNCX * 8) @(posedge sclk ); st <= CsdCidScr;
-        end else if (write_cmd && init_done) begin 
-          miso = 1; 
-          repeat (tNWR*8) @( posedge sclk ); 
-          st <= WriteCycle ; 
-        end else begin 
-          repeat (tNEC*8) @(posedge sclk ); 
-          st <= IDLE; 
-        end 
+      if (read_cmd && init_done /*&& ~stop_transmission*/) begin 
+        miso = 1; 
+        repeat (tNAC * 8) @(posedge sclk); 
+        st <= ReadCycle; 
+      end else if (read_cmd && init_done && stop_transmission) begin 
+        miso = 1; 
+        repeat (tNEC * 8) @(posedge sclk ); 
+        st <= IDLE; 
+      end else if ((send_csd || send_cid || send_scr) && init_done) begin 
+        miso = 1; 
+        repeat (tNCX * 8) @(posedge sclk ); st <= CsdCidScr;
+      end else if (write_cmd && init_done) begin 
+        miso = 1; 
+        repeat (tNWR*8) @( posedge sclk ); 
+        st <= WriteCycle ; 
+      end else begin 
+        repeat (tNEC*8) @(posedge sclk ); 
+        st <= IDLE; 
       end 
+    end // CardResponse
     CsdCidScr : begin
       if (send_csd) begin 
         DataOut(CSD[127:120]); 

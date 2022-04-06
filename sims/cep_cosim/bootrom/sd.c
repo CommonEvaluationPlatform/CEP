@@ -137,18 +137,19 @@ static void sd_cmd55(void)
 static int sd_acmd41(void)
 {
   uint8_t r;
+  int rc;
   do {
     sd_cmd55();
     kputs("ACMD41");
-    sd_cmd(0x69, 0x40000000, 0x77); /* HCS = 1          */
+    rc = (sd_cmd(0x69, 0x40000000, 0x77) != 0x03F);  /* HCS = 1          */
     r = sd_dummy();                 /* Check busy bit   */
-    kprintf("AMCD41 r2 = %x\n", r);
     sd_dummy();
     sd_dummy();
-    sd_dummy();
+    rc |= (sd_dummy() != 0x00);     /* Reserved field   */
     sd_cmd_end();
-  } while ((r & 0x80) == 0x00);     /* Is initialization complete?  */
-  return (r != 0x00);
+  } while (((r & 0x80) == 0x00) && (rc == 0));  /* Is initialization complete?   */
+                                              /* And an error has not occured   */
+  return (rc);
 }
 
 static int sd_cmd58(void)
