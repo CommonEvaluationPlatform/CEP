@@ -8,8 +8,9 @@
 // Notes:         Specification referenced is:
 //                "SD Specifications Part 1 Physical Layer Simplified Specification 8.00, September 23, 2020"
 //
-//                Updated ACMD41 processing to read all five bytes of the R3 response and check
-//                the busy bit in the response per specification Figure 4-4 (Response bit 39)
+//                - Updated ACMD41 processing to read all five bytes of the R3 response and check
+//                  the busy bit in the response per specification Figure 4-4 (Response bit 39)
+//                - Removed 34-byte BBL offset in sd_copy (now set to 0)
 //--------------------------------------------------------------------------------------
 
 // See LICENSE.Sifive for license details.
@@ -76,7 +77,6 @@ static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc)
   do {
     r = sd_dummy();
     if (!(r & 0x80)) {
-      kprintf("sd_cmd/resp: %x/%x\r\n", (cmd & 0x3F), r);
       goto done;
     }
   } while (--n > 0);
@@ -157,9 +157,7 @@ static int sd_cmd58(void)
   int rc;
   kputs("CMD58");
   rc = (sd_cmd(0x7A, 0, 0xFD) != 0x00);
-  kprintf("CMD58 rc1 = %x\n", rc);
   rc |= ((sd_dummy() & 0x80) != 0x80); /* Power up status */
-  kprintf("CMD58 rc2 = %x\n", rc);
   sd_dummy();
   sd_dummy();
   sd_dummy();
@@ -192,6 +190,7 @@ static uint16_t crc16_round(uint16_t crc, uint8_t data) {
 
 static const char spinner[] = { '-', '/', '|', '\\' };
 
+// Copy SD contents to main memory
 static int sd_copy(void)
 {
   volatile uint8_t *p = (void *)(MEMORY_MEM_ADDR);
@@ -203,10 +202,9 @@ static int sd_copy(void)
   kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
   kprintf("LOADING  ");
 
-  // TODO: Speed up SPI freq. (breaks between these two values)
-  // REG32 (spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
+  // Begin a multi-cycle read
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
-  if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
+  if (sd_cmd(0x52, 0, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;
   }
@@ -214,9 +212,13 @@ static int sd_copy(void)
     uint16_t crc, crc_exp;
     long n;
 
-    crc = 0;
-    n = SECTOR_SIZE_B;
+    crc   = 0;
+    n     = SECTOR_SIZE_B;
+
+    // Wait for the start token
     while (sd_dummy() != 0xFE);
+
+    // Copy a block/sector of data
     do {
       uint8_t x = sd_dummy();
       *p++ = x;

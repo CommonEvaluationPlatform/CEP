@@ -22,6 +22,8 @@
 //                - Restored processing/setting of the block len (was commented out)
 //                - OCR bit-width/mapping corrected per spec
 //                - STM coding updated to properly sequence through the PowerOff -> PowerOn -> Idle states
+//                - @(posedge sclk) removed from CardResponse state given that it caused a bit alignment
+//                  issue when reading data
 //--------------------------------------------------------------------------------------
 
 // Version history :
@@ -59,19 +61,19 @@ parameter MEM_SIZE = 2048*1024; //2M
 
 
 // State Machine state definitions
-parameter PowerOff = 0; 
-parameter PowerOn = 1; 
-parameter IDLE = 2; 
-parameter CmdBit47 = 3; 
-parameter CmdBit46 = 4; 
-parameter CommandIn = 5; 
-parameter CardResponse = 6; 
-parameter ReadCycle = 7; 
-parameter WriteCycle = 8; 
-parameter DataResponse = 9; 
-parameter CsdCidScr = 10; 
-parameter WriteStop = 11; 
-parameter WriteCRC = 12; 
+parameter PowerOff      = 0; 
+parameter PowerOn       = 1; 
+parameter IDLE          = 2; 
+parameter CmdBit47      = 3; 
+parameter CmdBit46      = 4; 
+parameter CommandIn     = 5; 
+parameter CardResponse  = 6; 
+parameter ReadCycle     = 7; 
+parameter WriteCycle    = 8; 
+parameter DataResponse  = 9; 
+parameter CsdCidScr     = 10; 
+parameter WriteStop     = 11; 
+parameter WriteCRC      = 12; 
 
 integer i = 0; // counter index 
 integer j = 0; // counter index 
@@ -233,78 +235,66 @@ wire [63:0] SCR = {SCR_STRUCTURE, SD_SPEC, DATA_STAT_AFTER_ERASE, SD_SECURITY, S
 
 
 task write_flash_byte (input[31:0] addr, input [7:0] data); begin
-//  `logI("SD_MODEL: Backdoor Write 0x%02x to address 0x%08x", data, addr);
+  `logI("SD_MODEL: Backdoor Write 0x%02x to address 0x%08x", data, addr);
   flash_mem[addr] = data;
 
   #1;
 end
 endtask
 
-// 
 task R1; input [7:0] data ; begin 
-  `logI("SD_MODEL: SD R1: 0x%2h at %0d ns ", data, `SYSTEM_SIM_TIME); 
-  k = 0; 
-  while (k < 8) begin 
-    @(negedge sclk) miso = data[7 - k]; k = k + 1; 
+  `logI("SD_MODEL: SD R1: 0x%02x at %0d ns ", data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 8; k = k + 1) begin 
+    @(negedge sclk); miso = data[7 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
 task R1b; input [7:0] data ; begin 
-  `logI("SD_MODEL: SD R1B: 0x%2h at %0d ns", data, `SYSTEM_SIM_TIME); 
-  k = 0; 
-  while (k < 8) begin 
-    @(negedge sclk) miso = data[7 - k]; k = k + 1; 
+  `logI("SD_MODEL: SD R1B: 0x%02x at %0d ns", data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 8; k = k + 1) begin 
+    @(negedge sclk); miso = data[7 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
 task R2; input [15:0] data ; begin 
-  `logI("SD_MODEL: SD R2: 0x%4h at %0d ns", data, `SYSTEM_SIM_TIME); 
-  k = 0; 
-  while (k < 16) begin 
-    @(negedge sclk) miso = data[15 - k]; k = k + 1; 
+  `logI("SD_MODEL: SD R2: 0x%04x at %0d ns", data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 16; k = k + 1) begin 
+    @(negedge sclk); miso = data[15 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask
 
 task R3; input [39:0] data ; begin 
-  `logI("SD_MODEL: SD R3: 0x%10h at %0d ns", data, `SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R3: 0x%10x at %0d ns", data, `SYSTEM_SIM_TIME); 
   for (k = 0; k < 40; k = k + 1) begin 
-    @(negedge sclk ) ; miso = data[39 - k]; 
+    @(negedge sclk); miso = data[39 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
 task R7; input [39:0] data ; begin 
-  `logI("SD_MODEL: SD R7: 0x%10h at %0d ns", data,`SYSTEM_SIM_TIME); 
+  `logI("SD_MODEL: SD R7: 0x%10x at %0d ns", data,`SYSTEM_SIM_TIME); 
   for (k = 0; k < 40; k = k + 1) begin 
-    @(negedge sclk ) ; miso = data[39 - k]; 
+    @(negedge sclk); miso = data[39 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end
 endtask 
 
 task DataOut; input [7:0] data ; begin 
-  `logI("SD_MODEL:  SD DataOut 0x%2h at %0d ns", data , `SYSTEM_SIM_TIME); 
-  k = 0;   
-  while (k < 8) begin 
-    @(negedge sclk ) miso = data[7 - k]; k = k + 1; 
+  `logI("SD_MODEL:  SD DataOut 0x%02x at %0d ns", data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 8; k = k + 1) begin 
+    @(negedge sclk); miso = data[7 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
 task DataIn ; begin 
   for (k = 7; k >= 0; k = k - 1) begin 
-    `logI("SD_MODEL: capture_data = %d" , capture_data); 
     @(posedge sclk) capture_data[k] = mosi; 
   end 
-  `logI("SD_MODEL: SD DataIn : %2h at %0d ns", capture_data , `SYSTEM_SIM_TIME ) ; 
+  `logI("SD_MODEL: SD DataIn : %2h at %0d ns", capture_data, `SYSTEM_SIM_TIME ) ; 
 end 
 endtask 
 
@@ -313,22 +303,18 @@ always @(*) begin
 end 
 
 task CRCOut; input [15:0] data ; begin 
-  `logI("SD_MODEL:  SD CRC Out 0x%4H at %0d ns" ,data , `SYSTEM_SIM_TIME); 
-  k = 0; 
-  while (k < 16) begin @(negedge sclk) 
-    miso = data [15 - k]; k=k+ 1; 
+  `logI("SD_MODEL:  SD CRC Out 0x%04x at %0d ns" ,data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 16; k = k + 1) begin 
+    @(negedge sclk); miso = data[15 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
 task TokenOut; input [7:0] data ; begin 
-  `logI("SD_MODEL:  SD TokenOut 0x%2H at %0d ns" ,data , `SYSTEM_SIM_TIME) ; 
-  k = 0; 
-  while (k < 8) begin @(negedge sclk) 
-    miso = data[7 - k]; k=k+ 1; 
+  `logI("SD_MODEL:  SD TokenOut 0x%02x at %0d ns" ,data, `SYSTEM_SIM_TIME); 
+  for (k = 0; k < 8; k = k + 1) begin 
+    @(negedge sclk); miso = data[7 - k]; 
   end 
-  @(negedge sclk) miso = 1'b1;
 end 
 endtask 
 
@@ -363,6 +349,7 @@ always @(*) begin
     start_addr = argument * block_len; 
 end 
 
+// Set the Block Length
 always @(*) begin 
   if (v2sdhc) 
     block_len = 512; 
@@ -463,7 +450,7 @@ always @(*) begin
     end 
 
     CardResponse : begin // CardResponse -> delay 
-      `logI("SD_MODEL: Card Response app_cmd/read_multi/cmd_index = %0d/%0d/%0d", app_cmd, read_multi, cmd_index);
+      `logI("SD_MODEL: Card Response app_cmd/read_multi/cmd_index/read_cmd = %0d/%0d/%0d/%0d", app_cmd, read_multi, cmd_index, read_cmd);
       // Not an application specific command
       if (~app_cmd) begin 
         case (cmd_index) 
@@ -491,21 +478,19 @@ always @(*) begin
         endcase 
       end // if (~read_multi)
 
-      @(posedge sclk); 
+      // Deassert miso after any response is sent, but it should only transition on the negedge of sclk
+      @(negedge sclk);
+      miso = 1;
 
       if (read_cmd && init_done /*&& ~stop_transmission*/) begin 
-        miso = 1; 
         repeat (tNAC * 8) @(posedge sclk); 
         st <= ReadCycle; 
       end else if (read_cmd && init_done && stop_transmission) begin 
-        miso = 1; 
         repeat (tNEC * 8) @(posedge sclk ); 
         st <= IDLE; 
       end else if ((send_csd || send_cid || send_scr) && init_done) begin 
-        miso = 1; 
         repeat (tNCX * 8) @(posedge sclk ); st <= CsdCidScr;
       end else if (write_cmd && init_done) begin 
-        miso = 1; 
         repeat (tNWR*8) @( posedge sclk ); 
         st <= WriteCycle ; 
       end else begin 
@@ -565,38 +550,69 @@ always @(*) begin
     end 
 
     ReadCycle: begin //Start Token -> Data -> CRC(stucked at 16'hAAAA) -> NEC( or NAC) 
+
+      // Perform a single block read
       if ( read_single ) begin 
-        TokenOut(8'hFE); //Start Token 
-        for (i = 0; i < 512; i = i + 1) begin 
+      
+        // Read Token
+        TokenOut(8'hFE);
+
+        // Read from main memory
+        for (i = 0; i < block_len; i = i + 1) begin 
           DataOut(flash_mem[start_addr + i]); 
         end 
-        CRCOut(16'haaaa); //CRC[15:0] 
-          
-        @(posedge sclk); repeat (tNEC*8) @(negedge sclk); 
-        st <= IDLE; 
-      end else if (read_multi) begin: loop_1 
-        for(j = 0; j > 0; j = j + 1) begin 
-          TokenOut(8'hFE); //Start Token 
-          i = 0; 
-          while ( i < block_len ) begin 
-            DataOut(flash_mem[start_addr+i+block_len*j]); i=i+ 1; 
-          end 
-          CRCOut(16'haaaa) ; 
-          if (stop_transmission) begin //check stop_tx at end of each data block? 
+
+        // Send CRC
+        CRCOut(16'haaaa);
+
+        @(posedge sclk); 
+
+        // Wait some cycles, return to IDLE
+        repeat (tNEC*8) @(negedge sclk); 
+        st <= IDLE;
+
+      // Perform a multiple block read
+      end else if (read_multi) begin
+
+        // Initialize block index
+        j = 0;
+
+        do begin
+
+          // Start Token
+          TokenOut(8'hFE);
+
+          // Write out data
+          for (i = 0; i < block_len; i++) begin
+            DataOut(flash_mem[start_addr + block_len * j + i]);
+          end
+
+          // Transmit CRC
+          CRCOut(16'haaaa); 
+
+          // Check stop tranmission after every block
+          if (stop_transmission) begin
+            
             repeat (tNEC*8) @( posedge sclk ) ; 
             `logI("SD_MODEL: STOP transmission"); 
-            @( posedge sclk ) begin 
-              R1(8'b0000_0000) ; 
-              repeat (tNEC*8) @( posedge sclk ) ; 
-              st <= IDLE; 
-              disable loop_1; 
-            end 
-          end else repeat (tNAC*8) @( negedge sclk ) ; 
-        end 
+            
+            @(posedge sclk);
+
+            // Tranmit stop acknowledgemtn           
+            R1(8'b0000_0000) ; 
+
+            // Break from the do loop
+          end else 
+            repeat (tNAC*8) @( negedge sclk ) ; 
+
+        end while (1); // end do
+
+        // Wait some cycles, return to IDLE
         repeat (tNEC*8) @( posedge sclk ) ; 
         st <= IDLE; 
-      end 
-    end 
+
+      end // if (read_multi)
+    end // ReadCycle 
 
     WriteCycle: begin // Start Token -> Data 
       i = 0; 
@@ -681,8 +697,8 @@ always @(st) begin
     WriteStop     : ascii_command_state = "WriteStop";  
     WriteCRC      : ascii_command_state = "WriteCRC";  
     default       : ascii_command_state = "ERROR";  
-  endcase  
-end  
+  endcase
+end
 
 initial begin 
   sck_cnt       = 0; 
