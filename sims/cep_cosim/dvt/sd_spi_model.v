@@ -82,9 +82,11 @@ integer m = 0; // for MOSI ( bit count during CMD12)
 
 reg miso; 
 reg [7:0] flash_mem [0:MEM_SIZE - 1]; 
+reg [7:0] read_data;
 reg [7:0] token; //captured token during CMD24, CMD25 
 reg  [15:0] crc16_in;  
-reg  [6:0]  crc7_in;  
+reg  [6:0]  crc7_in;
+reg [15:0]  crc16_out;
 reg  [7:0]  sck_cnt; // 74 sclk after power on
 reg  [31:0] csd_reg = 0;  
 reg  init_done; // must  be  defined  before  ocr .v  
@@ -316,7 +318,17 @@ task TokenOut; input [7:0] data ; begin
     @(negedge sclk); miso = data[7 - k]; 
   end 
 end 
-endtask 
+endtask
+
+function [15:0] crc16_round(input [15:0] crc, [7:0] data); begin
+  crc = (crc >> 8) | (crc << 8);
+  crc ^= data;
+  crc ^= (crc >> 4) & 4'hF;
+  crc ^= crc << 12;
+  crc ^= (crc & 8'hFF) << 5;
+  crc16_round = crc;
+end
+endfunction
 
 always @(*) begin 
   if (~pgm_csd) begin 
@@ -557,13 +569,18 @@ always @(*) begin
         // Read Token
         TokenOut(8'hFE);
 
+        // Reset the CRC
+        crc16_out = 0;
+
         // Read from main memory
-        for (i = 0; i < block_len; i = i + 1) begin 
-          DataOut(flash_mem[start_addr + i]); 
+        for (i = 0; i < block_len; i = i + 1) begin
+          read_data = flash_mem[start_addr + i];
+          DataOut(read_data);
+          crc16_out = crc16_round(crc16_out, read_data);
         end 
 
         // Send CRC
-        CRCOut(16'haaaa);
+        CRCOut(crc16_out);
 
         @(posedge sclk); 
 
@@ -582,13 +599,18 @@ always @(*) begin
           // Start Token
           TokenOut(8'hFE);
 
-          // Write out data
-          for (i = 0; i < block_len; i++) begin
-            DataOut(flash_mem[start_addr + block_len * j + i]);
-          end
+          // Reset the CRC
+          crc16_out = 0;
 
-          // Transmit CRC
-          CRCOut(16'haaaa); 
+          // Read from main memory
+          for (i = 0; i < block_len; i = i + 1) begin
+            read_data = flash_mem[start_addr + block_len * j + i];
+            DataOut(read_data);
+            crc16_out = crc16_round(crc16_out, read_data);
+          end 
+
+          // Send CRC
+          CRCOut(crc16_out);
 
           // Check stop tranmission after every block
           if (stop_transmission) begin
@@ -604,6 +626,9 @@ always @(*) begin
             // Break from the do loop
           end else 
             repeat (tNAC*8) @( negedge sclk ) ; 
+
+          // increment the block index
+          j++;
 
         end while (1); // end do
 
@@ -701,11 +726,12 @@ always @(st) begin
 end
 
 initial begin 
-  sck_cnt       = 0; 
+  sck_cnt       = 0;   
   cmd_in        = 46'h3fffffffffff; 
   serial_in     = 46'h0; 
   crc16_in      = 16'h0; 
   crc7_in       = 7'h0;
+  crc16_out     = 16'h0;
   token         = 8'h0;
   st            <= PowerOff; 
   miso          = 1'b1; 
@@ -718,6 +744,7 @@ initial begin
   multi_st      = 0; 
   block_len     = 512; 
   
+  read_data     = 0;
   for (i = 0; i < MEM_SIZE - 1; i=i+1) begin 
     flash_mem[i] = 0; 
   end 

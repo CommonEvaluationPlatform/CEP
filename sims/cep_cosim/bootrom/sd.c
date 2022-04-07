@@ -229,7 +229,7 @@ static int sd_copy(void)
     crc_exp |= sd_dummy();
 
     if (crc != crc_exp) {
-      kputs("\b- CRC mismatch ");
+      kputs("CRC mismatch");
       rc = 1;
       break;
     }
