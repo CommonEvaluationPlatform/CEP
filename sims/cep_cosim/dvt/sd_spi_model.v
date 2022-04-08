@@ -612,6 +612,8 @@ always @(*) begin
           // Send CRC
           CRCOut(crc16_out);
 
+          `logI("SD_MODEL: Multi-block read, block count = %d", j + 1);
+
           // Check stop tranmission after every block
           if (stop_transmission) begin
             

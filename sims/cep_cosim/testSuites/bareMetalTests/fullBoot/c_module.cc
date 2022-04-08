@@ -57,8 +57,8 @@ void *c_module(void *arg) {
   // Release the tile reset
   release_tile_reset(cpuId);
 
-  // Check the status of the bare metal program (timeout is greater to allow load via SD)
-  errCnt += check_bare_status(cpuId, 1500);
+  // Check the status of the bare metal program (timeout is much greater to allow load via SD)
+  errCnt += check_bare_status(cpuId, 5000);
 
   pio.RunClk(100);
   //--------------------------------------------------------------------------------------

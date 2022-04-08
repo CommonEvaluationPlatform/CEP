@@ -54,13 +54,19 @@ int main(int argc, char *argv[])
     dump_wave(cycle2start, cycle2capture, wave_enable);
   #endif
 
-  // Disable UART Loopback for this test and enable the UART in the BootROM 
+  // Disable UART Loopback
   set_uart_loopback(0);
+
+  // Enable the UART in the BootROM
   enable_bootrom_uart();
 
-  // Disable SPI loopback for this test
+  // Set the "backdoor" select in system_driver.sv to write to the SD Flash model
   set_backdoor_select(1);
+
+  // Disable SPI loopback for this test
   set_spi_loopback(0);
+
+  // Enable SD boot in the BootROM
   enable_bootrom_sdboot();
 
   //--------------------------------------------------------------------------------------
