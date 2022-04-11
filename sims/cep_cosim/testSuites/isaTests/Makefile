@@ -176,7 +176,7 @@ ISA_PARALLEL_TEST_LIST = 		\
 	rv64um-p-remw
 
 # Create a list of all the isa tests
-TEST_LIST = 				\
+TEST_LIST = 					\
 	${ISA_SPECIAL_TESTS}		\
 	${ISA_VM_LIST}				\
 	${ISA_1CORE_ONLY_LIST} 		\

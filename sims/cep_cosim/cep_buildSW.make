@@ -11,9 +11,7 @@
 
 # If operating in Bare Metal mode, pass the RISCV wrapper name to the compiler
 ifeq "${DUT_SIM_MODE}" "BARE_MODE"
-RISCV_WRAPPER_OBJ  		= ./riscv_wrapper.bobj
-RISCV_WRAPPER           = ./riscv_wrapper.elf
-RISCV_WRAPPER_IMG       = ./riscv_wrapper.img
+RISCV_WRAPPER           = ./riscv_wrapper.img
 COMMON_CFLAGS	        += -DRISCV_WRAPPER=\"${RISCV_WRAPPER}\"
 endif
 
@@ -310,33 +308,32 @@ ${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES}
 # (applicable for the ISA Tests)
 # -----------------------------------------------------------------------
 ifeq "$(findstring BUILTIN,${ELF_MODE})" "BUILTIN"
-RISCV_WRAPPER_ELF = 
+RISCV_WRAPPER_IMG = 
 else
-RISCV_WRAPPER_ELF = ${RISCV_WRAPPER}
+RISCV_WRAPPER_IMG = ${RISCV_WRAPPER}
 
 # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
 # so build with -g for dump file only
 ifeq (${VIRTUAL_MODE},1)
-${RISCV_WRAPPER_ELF}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES}
+${RISCV_WRAPPER_IMG}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES}
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
+	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-${RISCV_WRAPPER_ELF}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE} ${RISCV_LIB} 
+${RISCV_WRAPPER_IMG}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE} ${RISCV_LIB} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
+	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
 endif
 
-riscv_wrapper_img: sim_info ${RISCV_WRAPPER_ELF}
-	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 ${RISCV_WRAPPER_ELF} ${RISCV_WRAPPER_IMG}
-
-riscv_wrapper_sd_write: ${RISCV_WRAPPER_ELF}
+riscv_wrapper_sd_write: ${RISCV_WRAPPER_IMG}
 ifneq (,$(wildcard ${DISK}))
-	sudo dd if=$< of=$(DISK) skip=1 bs=4096 conv=fsync
+	sudo dd if=$< of=$(DISK) bs=4096 conv=fsync
 else
 	$(error CEP_COSIM: Invalid DISK specified for SD write)
 endif
@@ -378,7 +375,6 @@ ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
 # Library build target
 ${LIB_DIR}/.buildLibs: ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB} | ${OBJECT_DIR_LIST}
 	touch $@
-
 
 buildLibs: ${LIB_DIR}/.buildLibs
 # -----------------------------------------------------------------------

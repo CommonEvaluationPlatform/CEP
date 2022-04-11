@@ -61,20 +61,21 @@ int main(int argc, char *argv[])
   enable_bootrom_uart();
 
   // Set the "backdoor" select in system_driver.sv to write to the SD Flash model
-  set_backdoor_select(1);
+//  set_backdoor_select(1);
 
   // Disable SPI loopback for this test
-  set_spi_loopback(0);
+//  set_spi_loopback(0);
 
   // Enable SD boot in the BootROM
-  enable_bootrom_sdboot();
+//enable_bootrom_sdboot();
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
   // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
   int verify        = 0;
-  int fileOffset    = 0x1000;
+//  int fileOffset    = 0x1000;
+  int fileOffset    = 0;
   int maxByteCnt    = cep_max_program_size / 2;
   errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
   
