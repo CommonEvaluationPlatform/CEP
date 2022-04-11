@@ -41,7 +41,10 @@
 #define REG64(p, i) ((p)[(i) >> 3])
 
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
+
+#ifdef ENABLE_CEPREG
 static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
+#endif
 
 static inline uint8_t spi_xfer(uint8_t d)
 {
@@ -197,6 +200,12 @@ static int sd_copy(void)
   long i = PAYLOAD_SIZE;
   int rc = 0;
 
+// The following logic allows for a simulation overwrite of the number of blocks to be loaded
+#ifdef ENABLE_CEPREG
+  REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
+  i = REG64(cepregs, CEPREGS_SCRATCH_W7);
+#endif
+
   kputs("CMD18");
 
   kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
@@ -265,10 +274,12 @@ int main(void)
   uint8_t  major_version = 0;
   uint8_t  minor_version = 0;
 
+#ifdef ENABLE_CEPREG
   scratch_reg = REG64(cepregs, CEPREGS_SCRATCH_W0);
   version_reg = REG64(cepregs, CEPREGS_VERSION);
   major_version = (version_reg >> 48) & 0xFF;
   minor_version = (version_reg >> 56) & 0xFF;
+#endif
 
   // Enable the UART
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
@@ -281,7 +292,9 @@ int main(void)
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set
+#ifdef ENABLE_CEPREG
   if ((scratch_reg & 0xC) != 0xC) {
+#endif
     kputs("INIT");
   
     sd_poweron();
@@ -317,8 +330,10 @@ int main(void)
     }
 
     kputs("BOOT");
+#ifdef ENABLE_CEPREG
   } // if ((scratch_reg & 0xC) != 0xC)
-  
+#endif
+
   // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");
 

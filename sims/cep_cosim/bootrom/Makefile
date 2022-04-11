@@ -16,6 +16,7 @@ endif
 
 # Default parameters
 PBUS_CLK 		?= 200000000
+ENABLE_CEPREG	?= 1
 
 # RISCV environment variable must be set
 ROOT_DIR		:= $(strip $(shell cd .; pwd))
@@ -33,6 +34,10 @@ OBJCOPY 		= $(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		= $(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			= -mcmodel=medany -O2 -std=gnu11 -Wall -fno-common -g
 CFLAGS 			+= -DENTROPY=0 -DNONSMP_HART=0
+ifeq (${ENABLE_CEPREG},1)
+	CFLAGS 		+= -DENABLE_CEPREG
+endif
+
 CFLAGS 			+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
 CFLAGS_RV64		= -mabi=lp64 -march=rv64ima
 CFLAGS_RV32		= -mabi=ilp32 -march=rv32ima

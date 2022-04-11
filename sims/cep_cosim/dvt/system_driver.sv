@@ -176,12 +176,21 @@ module system_driver (
     // The SPI interface has been enabled in the bootrom, release the
     // appropriate bits of the scratchpad register AND force the divder to
     // a FAST speed for the remainder of the simulation
+    //
+    // Additional, the payload size in bootrom will be forced to a
+    // managable size.
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT]) begin
       release `CEPREGS_PATH.scratch_word0[3:2];
       `logI("BOOTROM: Enabling the SD Boot");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT] = 0;
 
+      // Force divider to a manageable size
       force `DUT_SPI_SCKDIV = 12'h010;
+
+      // Force one of the scratch registers to a payload size that
+      // will override the bootrom default (the fullboot test executable
+      // is loaded is <16k bytes or 32 512-byte blocks)
+      force `CEPREGS_PATH.scratch_word7 = 64'h0000_0000_0000_0020;
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT])
   
   `endif
