@@ -73,10 +73,13 @@ int main(int argc, char *argv[])
   // Load the bare executable into scratchpad memory (from the system thread)
   // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
-  int verify        = 0;
-//  int fileOffset    = 0x1000;
   int fileOffset    = 0;
-  int maxByteCnt    = cep_max_program_size / 2;
+  
+  // When booting from SD in simulation, the bootrom payload size is 16kB to make
+  // simulation time more reasonable
+  int maxByteCnt    = 0x4000;
+
+  // Load memory
   errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;
