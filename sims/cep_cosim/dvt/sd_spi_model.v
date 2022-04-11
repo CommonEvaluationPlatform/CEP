@@ -17,7 +17,7 @@
 //                  mode, the R7 response is taken from Section 7.3.2.6 of the specification
 //                - Changed CSD_VER to v2.0 (2'b01) given the bootrom assumes v2.0 or later
 //                - Modified ist (initialization logic) to be compatible with Figure 7-2 in the specification
-//                - Modified ACMD41 response per specification
+//                - Modified ACMD41 response per specification (in SPI mode it generates a R1 response, not R3)
 //                - All commands that have not been EXPLICITLY verified have been removed
 //                - Restored processing/setting of the block len (was commented out)
 //                - OCR bit-width/mapping corrected per spec
