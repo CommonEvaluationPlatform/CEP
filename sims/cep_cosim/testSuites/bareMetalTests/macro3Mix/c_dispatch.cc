@@ -56,10 +56,9 @@ int main(int argc, char *argv[])
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
-  // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
   int verify        = 0;
-  int fileOffset    = 0x1000;
+  int fileOffset    = 0;
   int maxByteCnt    = cep_max_program_size;
   errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
   

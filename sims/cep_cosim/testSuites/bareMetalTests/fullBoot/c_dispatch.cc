@@ -71,7 +71,6 @@ int main(int argc, char *argv[])
 
   //--------------------------------------------------------------------------------------
   // Load the bare executable into scratchpad memory (from the system thread)
-  // Ignoring the first 4096 bytes (stripping the ELF header?)
   //--------------------------------------------------------------------------------------
   int fileOffset    = 0;
   
