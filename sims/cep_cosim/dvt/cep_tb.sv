@@ -131,7 +131,7 @@ module `COSIM_TB_TOP_MODULE;
     .BIT_RATE(12_500_000), // CEP UART DIV = 16, internal clock = 200MHz
  `endif
  `ifdef MODELSIM
-    .BIT_RATE(10_416_666), // CEP UART Div = 16, internal clock = 166.66MHz
+    .BIT_RATE(10_416_666), // CEP UART Div = 16, internal clock = 166.66MHz (should be 200MHz in Modelsim as well)
  `endif
     .CLK_HZ(100_000_000),
     .PAYLOAD_BITS(8),

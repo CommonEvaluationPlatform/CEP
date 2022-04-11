@@ -144,14 +144,14 @@ static int sd_acmd41(void)
   do {
     sd_cmd55();
     kputs("ACMD41");
-    rc = (sd_cmd(0x69, 0x40000000, 0x77) != 0x03F);  /* HCS = 1          */
-    r = sd_dummy();                 /* Check busy bit   */
+    rc = (sd_cmd(0x69, 0x40000000, 0x77) != 0x03F); /* HCS = 1          */
+    r = sd_dummy();                                 /* Check busy bit   */
     sd_dummy();
     sd_dummy();
-    rc |= (sd_dummy() != 0x00);     /* Reserved field   */
+    rc |= (sd_dummy() != 0x00);                     /* Reserved field   */
     sd_cmd_end();
-  } while (((r & 0x80) == 0x00) && (rc == 0));  /* Is initialization complete?   */
-                                              /* And an error has not occured   */
+  } while (((r & 0x80) == 0x00) && (rc == 0));      /* Is initialization complete?   */
+                                                    /* And an error has not occured   */
   return (rc);
 }
 
@@ -286,9 +286,9 @@ int main(void)
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
   if ((scratch_reg & 0x3) != 0x3) {
-    kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
-    kputs("--- Copyright 2022 Massachusetts Institute of Technology ---");
-    kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
+    kprintf("---    Common Evaluation Platform v%x.%x     ---\r\n", major_version, minor_version);
+    kprintf("--- Copyright 2022 Massachusetts Institute of Technology ---\r\n");
+    kprintf("---     BootRom Image built on %s %s      ---\r\n",__DATE__,__TIME__);
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set
