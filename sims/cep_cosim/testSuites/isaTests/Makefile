@@ -29,6 +29,9 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd .; pwd))
 TEST_SUITE_NAME		= $(shell cd .; basename `pwd`)
 
+# Include current test suite common.make
+include ./common.make
+
 # Virtual-Mode test (single thread ONLY)
 # Dont need to use all of them.. Just the pne has more page faults
 ISA_VM_1CORE_ONLY_LIST	= 		\
@@ -194,7 +197,7 @@ ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	@for i in ${ISA_PARALLEL_TEST_LIST}; do															\
+	@for i in ${TEST_LIST}; do																\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
 		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 											\
 		make TEST_NAME=$${i});																\
@@ -239,6 +242,7 @@ ifeq (${PASS_WRITETOHOST},1)
 endif
 	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc 				>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
+	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.img
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@${BIN_DIR}/createPassFail.pl ${RISCV_TEST_DIR}/isa/${TEST_NAME}.dump ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/PassFail.hex
 
@@ -283,6 +287,3 @@ removeISATests:
 ${TEST_SUITE_DIR}/.ISACreated:
 	@echo "CEP_COSIM: Please run 'make createISATests' to continue"
 	@exit 1
-
-# Include current test suite common.make
-include ./common.make

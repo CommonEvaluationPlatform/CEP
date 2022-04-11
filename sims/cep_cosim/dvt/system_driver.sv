@@ -434,7 +434,7 @@ module system_driver (
     always @(posedge dvtFlags[`DVTF_FORCE_SINGLE_THREAD]) begin
       coreActiveMask = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] ;
       singleThread = 1;
-      `logI("==== Force-ing Single Thread coreMask=0x%x===",coreActiveMask);
+      `logI("==== Forcing Single Thread coreMask=0x%x===",coreActiveMask);
       dvtFlags[`DVTF_FORCE_SINGLE_THREAD] = 0;
     end
    

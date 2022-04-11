@@ -104,7 +104,7 @@ BIN_DIR 					:= ${COSIM_TOP_DIR}/bin
 # Variables related to build the RISC-V ISA tests
 ISA_SUITE_DIR				:= ${COSIM_TOP_DIR}/testSuites/isaTests
 ISA_TEST_TEMPLATE 			:= ${ISA_SUITE_DIR}/testTemplate
-RISCV_TEST_DIR 				:= ${COSIM_TOP_DIR}/riscv-tests
+RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/toolchains/riscv-tools/riscv-tests
 
 # Pointers to various binaries
 GCC     					= /usr/bin/g++

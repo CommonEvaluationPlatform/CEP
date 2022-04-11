@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   DUT_WRITE_DVT(DVTF_SET_DEFAULTX_BIT, DVTF_SET_DEFAULTX_BIT, 1);  
   
 
-  // Force a single thread
+  // Test will be run on all four cores, but only one will be operating at any given time
   #ifdef SINGLE_THREAD_ONLY
     DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, mask);
     DUT_WRITE_DVT(DVTF_FORCE_SINGLE_THREAD, DVTF_FORCE_SINGLE_THREAD, 1);
