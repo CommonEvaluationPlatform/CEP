@@ -128,10 +128,10 @@ module `COSIM_TB_TOP_MODULE;
   // Testbench UART receiver
   uart_model #(
  `ifdef CADENCE
-    .BIT_RATE(12_500_000), // CEP UART DIV = 16, internal clock = 200MHz
+    .BIT_RATE(6_250_000),	// CEP UART DIV = 32, internal clock = 200MHz
  `endif
  `ifdef MODELSIM
-    .BIT_RATE(10_416_666), // CEP UART Div = 16, internal clock = 166.66MHz (should be 200MHz in Modelsim as well)
+    .BIT_RATE(5_208_333), 	// CEP UART Div = 32, internal clock = 166.66MHz (should be 200MHz in Modelsim as well)
  `endif
     .CLK_HZ(100_000_000),
     .PAYLOAD_BITS(8),

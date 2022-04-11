@@ -208,7 +208,9 @@ static int sd_copy(void)
 
   kputs("CMD18");
 
-  kprintf("LOADING 0x%xB PAYLOAD\r\n", PAYLOAD_SIZE_B);
+  // Performing multiplication here in the event that PAYLOAD_SIZE is
+  // overriden in simulation
+  kprintf("LOADING 0x%x PAYLOAD\r\n", SECTOR_SIZE_B * PAYLOAD_SIZE);
   kprintf("LOADING  ");
 
   // Begin a multi-cycle read

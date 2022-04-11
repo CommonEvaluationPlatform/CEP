@@ -164,13 +164,15 @@ module system_driver (
 
     // The UART has been enabled in the bootrom, release the appropriate
     // bits of the scratchpad register AND force the divider to a FAST speed 
-    // for the remainder  of the simulation
+    // for the remainder of the simulation
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART]) begin
       release `CEPREGS_PATH.scratch_word0[1:0];
       `logI("BOOTROM: Enabling the UART");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART] = 0;
 
-      force `DUT_UART_DIVIDER = 16'h0010;
+      // A divider of 16 does not seem to simulate properly in xcellium      
+      force `DUT_UART_DIVIDER = 16'h0020;
+
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART])
 
     // The SPI interface has been enabled in the bootrom, release the
@@ -191,6 +193,7 @@ module system_driver (
       // will override the bootrom default (the fullboot test executable
       // is loaded is <16k bytes or 32 512-byte blocks)
       force `CEPREGS_PATH.scratch_word7 = 64'h0000_0000_0000_0020;
+      
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT])
   
   `endif
