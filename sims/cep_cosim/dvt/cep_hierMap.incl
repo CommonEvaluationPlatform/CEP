@@ -30,6 +30,8 @@
 `define DUT_TOP_LEVEL             `COSIM_TB_TOP_MODULE.`DUT_INST
 
 `define DUT_UART_BUSY             ~`DUT_TOP_LEVEL.system.uartClockDomainWrapper.uart_0.txq.empty
+`define DUT_UART_DIVIDER          `DUT_TOP_LEVEL.system.uartClockDomainWrapper.uart_0.div
+`define DUT_SPI_SCKDIV            `DUT_TOP_LEVEL.system.spiClockDomainWrapper.spi_0.ctrl_sck_div
 
 `ifdef RISCV_TESTS
   `define RISCV_PASSFAIL          `SYSTEM_DRIVER.passFail

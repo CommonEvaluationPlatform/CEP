@@ -271,7 +271,6 @@ int main(void)
   minor_version = (version_reg >> 56) & 0xFF;
 
   // Enable the UART
-  REG32(uart, UART_REG_DIV)     = 0x10;
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set

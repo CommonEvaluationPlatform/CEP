@@ -162,20 +162,32 @@ module system_driver (
         release `CEPREGS_PATH.scratch_word0[3:0];
     end
 
+    // The UART has been enabled in the bootrom, release the appropriate
+    // bits of the scratchpad register AND force the divider to a FAST speed 
+    // for the remainder  of the simulation
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART]) begin
       release `CEPREGS_PATH.scratch_word0[1:0];
       `logI("BOOTROM: Enabling the UART");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART] = 0;
+
+      force `DUT_UART_DIVIDER = 16'h0010;
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART])
 
+    // The SPI interface has been enabled in the bootrom, release the
+    // appropriate bits of the scratchpad register AND force the divder to
+    // a FAST speed for the remainder of the simulation
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT]) begin
       release `CEPREGS_PATH.scratch_word0[3:2];
       `logI("BOOTROM: Enabling the SD Boot");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT] = 0;
+
+      force `DUT_SPI_SCKDIV = 12'h010;
     end // always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT])
   
   `endif
   //--------------------------------------------------------------------------------------
+
+
 
   //--------------------------------------------------------------------------------------
   // DVT Flag Processing

@@ -38,7 +38,7 @@ USE_GDB       				?= 0
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
 ASIC_MODE                   ?= 1
-DISABLE_BARE_TRACE			?= 0
+DISABLE_CHISEL_PRINTF		?= 1
 
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
 # The following check ensures one and only one is set
@@ -155,7 +155,7 @@ endif
 	@echo " CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
 	@echo " CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo " CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
-	@echo " CEP_COSIM:   DISABLE_BARE_TRACE     = ${DISABLE_BARE_TRACE}"
+	@echo " CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
 	@echo ""
 #--------------------------------------------------------------------------------------
 

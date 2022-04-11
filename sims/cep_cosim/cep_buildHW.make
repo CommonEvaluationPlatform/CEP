@@ -78,7 +78,7 @@ COSIM_VSIM_ARGS				+= +PLLLIB_M55
 COSIM_VSIM_ARGS				+= +PLLLIB_SHORT_LOCK
 
 # Defines for used within the Chisel Generated Verilog
-ifeq (${DISABLE_BARE_TRACE},1)
+ifeq (${DIABLE_CHISEL_PRINTF},1)
 	COSIM_VLOG_ARGS			+= +define+PRINTF_COND=0
 else
 	COSIM_VLOG_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
