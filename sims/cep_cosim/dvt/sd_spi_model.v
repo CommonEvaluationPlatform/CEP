@@ -466,10 +466,10 @@ always @(*) begin
       // Not an application specific command
       if (~app_cmd) begin 
         case (cmd_index) 
-          6'd0    : R1(8'b0000_0001);
+          6'd0    : R1({7'b000_0000, init_done ? 1'b0 : 1'b1});
           6'd16,
           6'd18,
-          6'd55   : R1({7'b000_0000, init_done ? 1'b0 : 1'b1});         
+          6'd55   : R1({7'b000_0000, init_done ? 1'b0 : 1'b1});
           6'd8    : begin
                       if (VHS_match)
                         `logI ("SD_MODEL: VHS match");
@@ -485,7 +485,7 @@ always @(*) begin
       // Application specific commands
       end else if (~read_multi) begin
         case (cmd_index)
-          6'd41   : R3({1'b0, 1'b0, 6'b111111, OCR});
+          6'd41   : R1({7'b000_0000, init_done ? 1'b0 : 1'b1});
           default : R1(8'b0000_0100); //illegal command 
         endcase 
       end // if (~read_multi)
