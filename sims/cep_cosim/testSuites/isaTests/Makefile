@@ -197,7 +197,7 @@ ifeq (${STAND_ALONE},1)
 	make cleanAll
 	make buildLibs
 endif
-	@for i in ${TEST_LIST}; do																\
+	@for i in ${ISA_PARALLEL_TEST_LIST}; do																\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
 		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; 											\
 		make TEST_NAME=$${i});																\
