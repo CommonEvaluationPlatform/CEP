@@ -225,7 +225,30 @@ endif
 
 clean: cleanTest cleanSuite cleanLib
 
+# isaTests have their executables built seperately, so the cleanTest behavior needs to be different
+# (.img, elf, .dump, and .hex need to be kept)
 cleanTest:
+ifeq (${TEST_SUITE_NAME}, isaTests)
+	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj
+	-rm -f ${TEST_DIR}/*.wlf
+	-rm -f ${TEST_DIR}/*history
+	-rm -f ${TEST_DIR}/*.log
+	-rm -f ${TEST_DIR}/wlf*
+	-rm -f ${TEST_DIR}/c_dispatch
+	-rm -f ${TEST_DIR}/*.KEY
+	-rm -f ${TEST_DIR}/testHistory.txt
+	-rm -f ${TEST_DIR}/transcript
+	-rm -f ${TEST_DIR}/status
+	-rm -f ${TEST_DIR}/*.vstf
+	-rm -f ${TEST_DIR}/xrun.key 
+	-rm -f ${TEST_DIR}/imp.h 
+	-rm -f ${TEST_DIR}/*.trn
+	-rm -f ${TEST_DIR}/*.dsn 
+	-rm -f ${TEST_DIR}/*.err
+	-rm -f ${TEST_DIR}/*.o
+	-rm -rf ${TEST_DIR}/.simvision
+	-rm -rf ${TEST_DIR}/.bpad
+else
 	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj
 	-rm -f ${TEST_DIR}/*.wlf
 	-rm -f ${TEST_DIR}/*history
@@ -249,7 +272,8 @@ cleanTest:
 	-rm -rf ${TEST_DIR}/.simvision
 	-rm -rf ${TEST_DIR}/.bpad
 	-rm -f ${TEST_DIR}/*.img
-	
+endif
+
 cleanTestDo:
 	-rm -f ${TEST_DIR}/*.do
 
