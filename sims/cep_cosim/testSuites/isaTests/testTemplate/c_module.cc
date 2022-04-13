@@ -48,6 +48,15 @@ void *c_module(void *arg) {
   //--------------------------------------------------------------------------------------
   // Test starts here
   //--------------------------------------------------------------------------------------
+  // For the ISA tests, some tests only run on Core 0, with the other cores sitting
+  // in an infinite loop.  Under these conditions, we must not only disable the
+  // "stuck checker" for cores 1 - 4, we need to "assume" success
+#ifdef SINGLE_CORE_ONLY
+  if (cpuId != 0) {
+    DUT_WRITE_DVT(DVTF_SINGLE_CORE_ONLY, DVTF_SINGLE_CORE_ONLY, 1);
+  } // if (cpuId != 0)
+#endif 
+
   // Wait until the program is loaded
   errCnt += is_program_loaded(seed);
 

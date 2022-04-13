@@ -702,8 +702,9 @@ always @(*) begin
       st <= IDLE; 
     end 
 
+    // Trap state
     default : begin
-      `logE("SD_MODEL: trap state");
+      ;
     end
   endcase 
 end 

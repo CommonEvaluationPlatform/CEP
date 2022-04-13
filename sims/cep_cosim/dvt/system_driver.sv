@@ -253,29 +253,6 @@ module system_driver (
     `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT] = 0;
   end // always @(posedge `DVT_FLAG[`DVTF_GET_SOCKET_ID_BIT])
 
-  reg enableWrTrace   = 0;
-  reg enableRdTrace   = 0;   
-  
-  always @(posedge `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING]) begin
-    enableWrTrace = 0;
-    enableRdTrace = 0;      
-    `DVT_FLAG[`DVTF_DISABLE_MAIN_MEM_LOGGING] = 0;
-  end
-  
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING]) begin
-    enableWrTrace = 1;
-    enableRdTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEM_LOGGING] = 0;
-  end
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING]) begin
-    enableWrTrace = 1;
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMWR_LOGGING] = 0;
-  end
-  always @(posedge `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING]) begin
-    enableRdTrace = 1;            
-    `DVT_FLAG[`DVTF_ENABLE_MAIN_MEMRD_LOGGING] = 0;
-  end
-
   reg uart_loopback_enabled = 1;
   always @(posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
   begin
@@ -403,7 +380,7 @@ module system_driver (
 
 
 
-    //--------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------
   // System Driver support tasks when running the RISCV_TESTS
   //--------------------------------------------------------------------------------------
   // This is to handle single threading core: one core active at a time
@@ -426,18 +403,7 @@ module system_driver (
 
     end
 
-    int         curCore         = 0;
-    reg         singleThread    = 0;
-    reg [3:0]   coreActiveMask  = 0;
-
-    // Utility to force a single threaded (one core) operation
-    always @(posedge dvtFlags[`DVTF_FORCE_SINGLE_THREAD]) begin
-      coreActiveMask = dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO] ;
-      singleThread = 1;
-      `logI("==== Forcing Single Thread coreMask=0x%x===",coreActiveMask);
-      dvtFlags[`DVTF_FORCE_SINGLE_THREAD] = 0;
-    end
-   
+    // An alternate success condition for some of the ISA tests
     always @(posedge dvtFlags[`DVTF_PASS_WRITETOHOST]) begin
       `CPU0_DRIVER.passWriteToHost = 1;
       `CPU1_DRIVER.passWriteToHost = 1;
@@ -462,82 +428,8 @@ module system_driver (
         release `TILE3_PATH.reset;  
       end
     endtask // ResetAllCores
-   
-    // Force single-threaded operation
-    always @(posedge singleThread) begin
-   
-      // Put all the cores into reset
-      force `TILE0_PATH.reset =1; 
-      force `TILE1_PATH.reset =1;
-      force `TILE2_PATH.reset =1;
-      force `TILE3_PATH.reset =1;
 
-      // Ensure the program is loaded
-      @(posedge `PROGRAM_LOADED);
-      
-      // Allow caches to get out of reset but not the core!!!
-      release `TILE0_PATH.reset; 
-      release `TILE1_PATH.reset;
-      release `TILE2_PATH.reset;
-      release `TILE3_PATH.reset;
-      force `TILE0_PATH.core.reset = 1; 
-      force `TILE1_PATH.core.reset = 1;
-      force `TILE2_PATH.core.reset = 1;
-      force `TILE3_PATH.core.reset = 1;      
-      
-      // Cycle through all the cores
-      for (int c = 0; c < 4; c = c + 1) 
-      begin
-   
-        if (coreActiveMask[c]) begin
-          case (c)
-
-          // Core 0 is active
-          0: begin
-            `logI("Releasing CPU0 Reset....");
-            `ifdef VIRTUAL_MODE begin
-              ResetAllCores();
-            `endif
-            release `TILE0_PATH.core.reset; 
-            @(posedge (`CPU0_DRIVER.PassStatus || `CPU0_DRIVER.FailStatus));
-          end // Core 0 is active
-
-          // Core 1 is active
-          1: begin
-            `logI("Releasing CPU1 Reset....");  
-            `ifdef VIRTUAL_MODE begin
-              ResetAllCores();
-            `endif
-            release `TILE1_PATH.core.reset;
-            @(posedge (`CPU1_DRIVER.PassStatus || `CPU1_DRIVER.FailStatus));
-          end  // Core 1 is active
-
-          // Core 2 is active
-          2: begin
-            `logI("Releasing CPU2 Reset....");  
-            `ifdef VIRTUAL_MODE begin
-              ResetAllCores();
-            `endif
-            release `TILE2_PATH.core.reset;
-            @(posedge (`CPU2_DRIVER.PassStatus || `CPU2_DRIVER.FailStatus));
-          end // Core 2 is active
-        
-          // Core 3 is active
-          3: begin
-            `logI("Releasing CPU3 Reset....");  
-            `ifdef VIRTUAL_MODE begin
-              ResetAllCores();
-            `endif
-            release `TILE3_PATH.core.reset;
-            @(posedge (`CPU3_DRIVER.PassStatus || `CPU3_DRIVER.FailStatus));
-          end // Core 3 is active      
-      
-          endcase
-        end // end if (coreActiveMask[c])
-      end // for (int c=0;c<4;c=c+1)
-    end // always @(posedge singleThread)
   `endif // endif `ifdef RISCV_TESTS
   //--------------------------------------------------------------------------------------
-
    
 endmodule // v2c_top

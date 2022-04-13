@@ -282,7 +282,7 @@ module `COSIM_TB_TOP_MODULE;
         .enableMe     (enableMask[c]  )
       );
 
-      assign passMask[c] = driver.PassStatus;
+      assign passMask[c] = driver.pcPass;
     end // end for
   endgenerate
 

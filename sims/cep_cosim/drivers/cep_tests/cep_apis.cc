@@ -231,29 +231,23 @@ int check_PassFail_status(int cpuId, int maxTimeOut) {
     DUT_WRITE_DVT(DVTF_GET_CORE_RESET_STATUS, DVTF_GET_CORE_RESET_STATUS, 1);
     inReset = DUT_READ_DVT(DVTF_PAT_LO, DVTF_PAT_LO);
     if (inReset == 0) break;
-    // may be the test already pass
-    DUT_WRITE_DVT(DVTF_GET_PASS_FAIL_STATUS, DVTF_GET_PASS_FAIL_STATUS, 1);
-    d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
-    passMask = (d64 & 0x1); 
-    failMask = ((d64>>1) & 0x1); 
-    LOGI("Current Pass = 0x%x Fail = 0x%x maxTimeOut = %d\n", passMask, failMask, maxTimeOut);
-    if (passMask | failMask) break;    
-    //
     wait4reset--;
     if (wait4reset <= 0) {
-      LOGE("Timeout while waiting to be active\n");
+      LOGE("Timeout while waiting for release of reset\n");
       errCnt++;
       break;
     }
     DUT_RUNCLK(1000);    
   }
+
+  // Poll the Pass/Fail Status
   while ((errCnt == 0) && (maxTimeOut > 0)) {
     // only if I am out of reset
     DUT_WRITE_DVT(DVTF_GET_PASS_FAIL_STATUS, DVTF_GET_PASS_FAIL_STATUS, 1);
     d64 = DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO);
     passMask = (d64 & 0x1); 
     failMask = ((d64>>1) & 0x1); 
-    LOGI("Current Pass=0x%x Fail=0x%x maxTimeOut=%d\n",passMask,failMask,maxTimeOut);
+    LOGI("Current Pass = 0x%x Fail = 0x%x maxTimeOut = %d\n",passMask,failMask,maxTimeOut);
     if (passMask | failMask) break;
     maxTimeOut--;    
     if (maxTimeOut <= 0) {
@@ -263,9 +257,6 @@ int check_PassFail_status(int cpuId, int maxTimeOut) {
     DUT_RUNCLK(1000);        
   }
   errCnt += failMask != 0;
-  if (errCnt) {
-    DUT_WRITE_DVT(DVTF_SET_PASS_FAIL_STATUS, DVTF_SET_PASS_FAIL_STATUS, 1);
-  }
 #endif
   return errCnt;
 }

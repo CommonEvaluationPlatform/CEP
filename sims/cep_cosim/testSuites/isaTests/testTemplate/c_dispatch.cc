@@ -30,12 +30,14 @@ int main(int argc, char *argv[])
   int activeSlot            = 0;          // only 1 board 
   int maxHost               = MAX_CORES;  // number of cores/threads
 
-  // Some ISA Tests only run on a single core and thus only a single core thread will be launched, depending on the
-  // value of the SINGLE_CORE_ONLY parameter
+  // Some ISA Tests only run on a single core with the other cores sitting in an infinite loop.
+  // Behavior is unpredicable when only "some" cores are released from reset / threads spawned.
+  // Thus, all cores will be released from reset, but the mask parameter will be used to
+  // determined if a core's Pass/Fail status should be considered (in c_module.cc)
   #ifdef SINGLE_CORE_ONLY
-    long unsigned int mask  = SINGLE_CORE_ONLY; // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
+    long unsigned int mask  = 0xF;	// Core 0 only 	
   #else
-    long unsigned int mask  = 0xF;              // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
+    long unsigned int mask  = 0xF;	// All cores
   #endif
 
   int done                = 0;
@@ -44,11 +46,9 @@ int main(int argc, char *argv[])
   // Set the active mask for all threads  
   thr.SetActiveMask(mask);
   
-  // spawn threads for each core (MAX_TIMEOUT will be inserted when each test is defined)
+  // Threads are spawned for ALL cores, regardless of if they are active for this test
   for (int i = 0; i < maxHost; i++) {
-    if ((long unsigned int)(1 << i) & mask) {
-      thr.ForkAThread(activeSlot, i, verbose, MAX_TIMEOUT, c_module);
-    }
+    thr.ForkAThread(activeSlot, i, verbose, MAX_TIMEOUT, c_module);
   }
   
   // spawn system thread
@@ -56,12 +56,6 @@ int main(int argc, char *argv[])
 
   // Communicate some items to the cep testbench
   
-  // Test will be run on all four cores, but only one will be operating at any given time
-  #ifdef SINGLE_THREAD_ONLY
-    DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, mask);
-    DUT_WRITE_DVT(DVTF_FORCE_SINGLE_THREAD, DVTF_FORCE_SINGLE_THREAD, 1);
-  #endif
-
   // Some tests just go straight to there if not <fail>
   #ifdef PASS_WRITETOHOST
     DUT_WRITE_DVT(DVTF_PASS_WRITETOHOST, DVTF_PASS_WRITETOHOST, 1);

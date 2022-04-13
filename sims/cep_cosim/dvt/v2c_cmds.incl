@@ -110,10 +110,6 @@
 `define DVTF_GET_CORE_STATUS                  73
 
 // Main memory related items
-`define DVTF_ENABLE_MAIN_MEM_LOGGING          80
-`define DVTF_ENABLE_MAIN_MEMWR_LOGGING        81
-`define DVTF_ENABLE_MAIN_MEMRD_LOGGING        82
-`define DVTF_DISABLE_MAIN_MEM_LOGGING         83
 `define DVTF_FORCE_CORE_RESET                 84
 `define DVTF_RELEASE_CORE_RESET               85
 `define DVTF_FORCE_TILE_RESET                 86
@@ -125,12 +121,12 @@
 `define DVTF_GET_BACKDOOR_SELECT 		      92
 `define DVTF_BOOTROM_ENABLE_UART 			  93
 `define DVTF_BOOTROM_ENABLE_SDBOOT 			  94
+`define DVTF_SINGLE_CORE_ONLY				  95
 
 `define DVTF_TOGGLE_CHIP_RESET_BIT            101
 `define DVTF_GET_CORE_RESET_STATUS            102
 `define DVTF_GET_PASS_FAIL_STATUS             103
-`define DVTF_SET_PASS_FAIL_STATUS             104
-`define DVTF_FORCE_SINGLE_THREAD              105
+
 `define DVTF_ENABLE_TL_MONITORS               106
 `define DVTF_PASS_WRITETOHOST                 107
 `define DVTF_TOGGLE_DMI_RESET_BIT             108

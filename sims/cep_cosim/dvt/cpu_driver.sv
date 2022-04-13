@@ -601,9 +601,6 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Support functions for the RISC-V ISA Tests (which WILL require BARE_MODE)
   //--------------------------------------------------------------------------------------
-  reg           PassStatus          = 0;
-  reg           FailStatus          = 0;
-
   `ifdef RISCV_TESTS
 
     wire [63:0]   curPC;
@@ -613,28 +610,30 @@ module cpu_driver
     reg           pcFail              = 0;
     reg           passWriteToHost     = 0;
     reg           DisableStuckChecker = 0;
+    reg           SingleCoreOnly      = 0;
     int           stuckCnt            = 0;
     reg [63:0]    lastPc              = 0;
     wire          pcStuck             = (stuckCnt >= 500);
 
     // Get Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]) begin
-      dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = {FailStatus,PassStatus};
+      `logI("Pass / Fail = %x/%x", pcFail, pcPass);
+      dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = {pcFail, pcPass};
       dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]  = 0; // self-clear
     end
-
-    // Set Pass / Fail Status
-    always @(posedge dvtFlags[`DVTF_SET_PASS_FAIL_STATUS]) begin
-      PassStatus = 0;
-      FailStatus = 1;
-      dvtFlags[`DVTF_SET_PASS_FAIL_STATUS]  = 0; // self-clear
-    end
-
+    
     // Disable Stuck Checker
     always @(posedge dvtFlags[`DVTF_DISABLE_STUCKCHECKER]) begin
       `logI("DisableStuckChecker = 1");
-      DisableStuckChecker = 1;
-      dvtFlags[`DVTF_DISABLE_STUCKCHECKER] = 0; // self-clear
+      DisableStuckChecker                   = 1;
+      dvtFlags[`DVTF_DISABLE_STUCKCHECKER]  = 0; // self-clear
+    end   
+
+    always @(posedge dvtFlags[`DVTF_SINGLE_CORE_ONLY]) begin
+      `logI("SingleCoreOnly = 1");
+      SingleCoreOnly                    = 1;
+      DisableStuckChecker               = 1;
+      dvtFlags[`DVTF_SINGLE_CORE_ONLY]  = 0; // self-clear
     end   
 
     // Generate per-CPU items
@@ -667,17 +666,14 @@ module cpu_driver
     always @(posedge pcPass or posedge pcFail) begin
       if (~curPCReset) begin
         `logI("C%0d Pass/Fail Detected!!!... Put it to sleep", MY_CPU_ID);
-        PassStatus = pcPass;
-        FailStatus = pcFail;
-        if (!DisableStuckChecker) begin
-          repeat (20) @(posedge clk);
-          case (MY_CPU_ID)
-            0       : force `CORE0_RESET = 1;
-            1       : force `CORE1_RESET = 1;
-            2       : force `CORE2_RESET = 1;
-            default : force `CORE3_RESET = 1;
-          endcase          
-        end
+        
+        repeat (20) @(posedge clk);
+        case (MY_CPU_ID)
+          0       : force `CORE0_RESET = 1;
+          1       : force `CORE1_RESET = 1;
+          2       : force `CORE2_RESET = 1;
+          default : force `CORE3_RESET = 1;
+        endcase          
       end
     end // end always
    
@@ -685,9 +681,6 @@ module cpu_driver
     // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost> (if enabled)
     // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
     always @(*) begin
-      pcPass = 0;
-      pcFail = 0;
-
       // A PC Stuck condition has been detected
       if (pcStuck && ~DisableStuckChecker) begin
         `logE("PC seems to be stuck!!!! Terminating...");
@@ -701,7 +694,7 @@ module cpu_driver
             `RISCV_PASSFAIL[3]  : if (passWriteToHost) pcPass = 1;
             `RISCV_PASSFAIL[4]  : pcFail = 1;
             `RISCV_PASSFAIL[1]  : pcFail = 1;
-            default             : ;
+            default             : if (SingleCoreOnly && (MY_CPU_ID != 0)) pcPass = 1;
           endcase
         end else begin
           pcFail = 1;
