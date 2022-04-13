@@ -601,13 +601,14 @@ module cpu_driver
   //--------------------------------------------------------------------------------------
   // Support functions for the RISC-V ISA Tests (which WILL require BARE_MODE)
   //--------------------------------------------------------------------------------------
+  reg             pcPass              = 0;
+  reg             pcFail              = 0;
+
   `ifdef RISCV_TESTS
 
     wire [63:0]   curPC;
     wire          curPCValid;
     wire          curPCReset;
-    reg           pcPass              = 0;
-    reg           pcFail              = 0;
     reg           passWriteToHost     = 0;
     reg           DisableStuckChecker = 0;
     reg           SingleCoreOnly      = 0;
@@ -617,7 +618,6 @@ module cpu_driver
 
     // Get Pass / Fail Status
     always @(posedge dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]) begin
-      `logI("Pass / Fail = %x/%x", pcFail, pcPass);
       dvtFlags[`DVTF_PAT_HI:`DVTF_PAT_LO]   = {pcFail, pcPass};
       dvtFlags[`DVTF_GET_PASS_FAIL_STATUS]  = 0; // self-clear
     end
