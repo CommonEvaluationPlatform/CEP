@@ -23,7 +23,6 @@ ELF_MODE   			= LOCAL
 TEST_SUITES  =  	bareMetalTests	\
 					bfmTests		\
 					isaTests
-#					vBareTest
 
 # Run tests for all members of the test group
 runAll: 

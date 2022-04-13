@@ -26,9 +26,9 @@
 // Global Stuffs
 //
 pthread_t globalThread2SlotIdMap[MAX_SHIPC];
-pthread_t globalThread2Join[MAX_SHIPC]; // use for Joining
-int globalThreadStatus[MAX_SHIPC];
-int globalThread2SlotIdMap_initDone = 0;
+pthread_t globalThread2Join[MAX_SHIPC];         // use for Joining
+int       globalThreadStatus[MAX_SHIPC];
+int       globalThread2SlotIdMap_initDone = 0;
 
 //
 // Initialize shMem &  thread map table if not yet done so
@@ -39,9 +39,9 @@ void shPthread::InitTables() {
     GlobalShMemory.SetReStartFlag(GetReStartFlag());
     GlobalShMemory.shMemInit(0,0x0);
     for (int i=0;i<MAX_SHIPC;i++) {
-      globalThread2SlotIdMap[i] = (pthread_t)(0xFFFFFFFF);
-      globalThread2Join[i] = (pthread_t)(0xFFFFFFFF);
-      globalThreadStatus[i] = SHIPC_STATUS_INACTIVE;
+      globalThread2SlotIdMap[i]   = (pthread_t)(0xFFFFFFFF);
+      globalThread2Join[i]        = (pthread_t)(0xFFFFFFFF);
+      globalThreadStatus[i]       = SHIPC_STATUS_INACTIVE;
     }
     globalThread2SlotIdMap_initDone = 1;
   }

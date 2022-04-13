@@ -377,7 +377,8 @@ endif
 createISATests: .force
 	@for i in ${ISA_SINGLE_CORE_LIST}; do 											\
 		echo "== Generating Single Core test directory for $${i}";					\
-		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; 						\
+#		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; 						\
+		make TEST_NAME=$${i} makeIsaTest; 						\
 	done
 
 	@for i in ${ISA_VM_1CORE_ONLY_LIST}; do				\

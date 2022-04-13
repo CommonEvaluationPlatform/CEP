@@ -62,14 +62,14 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
       shmctl(shmid,IPC_RMID,0);
       shmdt(0);
       printf("shmget mKey = %d errono = %s (%d)\n",mKey,
-       (errno == EEXIST)        ? "EEXIST" :
-       (errno == EINVAL)        ? "EINVAL" :
-       (errno == EIDRM)         ? "EIDRM" :
-       (errno == ENOSPC)        ? "ENOSPC" :
-       (errno == ENOENT)        ? "ENOENT" :
-       (errno == EACCES)        ? "EACCES" :
-       (errno == ENOMEM)        ? "ENOMEM" :
-       "UNKNOWN",errno);
+        (errno == EEXIST)        ? "EEXIST" :
+        (errno == EINVAL)        ? "EINVAL" :
+        (errno == EIDRM)         ? "EIDRM"  :
+        (errno == ENOSPC)        ? "ENOSPC" :
+        (errno == ENOENT)        ? "ENOENT" :
+        (errno == EACCES)        ? "EACCES" :
+        (errno == ENOMEM)        ? "ENOMEM" :
+        "UNKNOWN",errno);
       if ((shmid = shmget(mKey,(size_t) (MAX_SHIPC * sizeof(shIpc)),0)) == -1) {
         printf("Initiator: Failed second retry as initiator\n");
         printf("shmget mKey = %d errono = %s (%d)\n",mKey,
@@ -81,25 +81,25 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
          (errno == EACCES)        ? "EACCES" :
          (errno == ENOMEM)        ? "ENOMEM" :
          "UNKNOWN",errno);
-  exit(2);
+        exit(2);
       }
       
     }
-    //printf("Initiator:Shared memory segment create successfuly with seed=%x mKey=%x shmid=%x\n",seedOrKey_key,mKey,shmid);
+
     ClientFlag = 0; // as initiator
-    // save the key to file
     SetTheKey((int)mKey,C2VKeyFile);
   }
+
   // NOW ATTACH IT
   segptr = (shIpc *) shmat(shmid, (void *)  0, 0);
   if ((unsigned long)segptr == -1) {
     printf("%s: %s: Failed to attach Shared memory segment with mKey = %x shmid = %x\n", __FUNCTION__, (asClient) ? "Client" : "Initiator", mKey, shmid);
     exit(2);
   }
-  //GlobalShMemory = *this; // make a copy to global space
+
   // if initiator send mKey to client
   if (!ClientFlag) {
-    // init share memory
+
     printf("%s: master: shMem->InitMe\n", __FUNCTION__);
     for (int s=0;s<MAX_SHIPC;s++) {
       (segptr+s)->InitMe(GET_SLOTID(s),GET_CPUID(s));
@@ -108,10 +108,7 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
   } else {
     LOGI("%s: Client: shMem->InitMe Done\n",__FUNCTION__);
   }
-  // printf("%s:shMem OK GlobalShMemory=0x%x segptr=0x%x seed=%x mKey=0x%x shmid=0x%x Size=%d\n",
-  //      (asClient) ? "Client" : "Initiator", (unsigned long)&GlobalShMemory, (unsigned long) segptr,
-  //      seedOrKey_key,mKey,shmid, (size_t) (MAX_SHIPC * sizeof(shIpc)));
-  
+
 #endif
 }
 
@@ -166,19 +163,20 @@ int shMem::GetTheKey(const char *keyFile) {
   }
   FILE *fp;
   fp = fopen(keyFile,"r");
-  fscanf(fp, "mKey = %08x mActiveMask=%016llx",&key,&mActiveMask);
+  fscanf(fp, "mKey = %08x mActiveMask=%016llx", &key, &mActiveMask);
   fclose(fp);
-  LOGI("%s key = 0x%08x to %s mask = 0x%016llx\n",__FUNCTION__,key,keyFile,mActiveMask);      
+  LOGI("%s mKey = 0x%08x, mActiveMask = 0x%016llx from %s\n", __FUNCTION__, key, mActiveMask, keyFile);
 #endif
   return key;
 }
+
 void shMem::SetTheKey(int key, const char *keyFile) {
 #ifdef SIM_ENV_ONLY
   // create the file and put the key there
   FILE *fp;
-  printf("%s key = 0x%x to %s\n",__FUNCTION__,key,keyFile);
+  LOGI("%s key = 0x%08x, mActiveMask = %016llx to %s\n",__FUNCTION__, key, getActiveMask(), keyFile);
   fp = fopen(keyFile,"w");
-  fprintf(fp,"mKey = %x mActiveMask = %016llx\n",key,getActiveMask());
+  fprintf(fp,"mKey = %08x mActiveMask=%016llx", key, getActiveMask());
   fclose(fp);
 #endif
 }
