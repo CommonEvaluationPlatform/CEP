@@ -34,13 +34,17 @@ shMem::shMem() { SetReStartFlag(0); mActiveMask=-1;}
 // client/initiator constructor
 void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
 #ifdef SIM_ENV_ONLY
-  // get the memory segment
-  if (asClient) { // Verilog side
+  
+  // Verilog side of shared memory
+  if (asClient) {
+    
     mKey = seedOrKey_key; 
+    
     // if mKey == -1, get from the file
     if ((int)mKey == -1) {
       mKey = (key_t)GetTheKey(C2VKeyFile);
     }
+    
     // open the share memory segment as client
     if ((shmid = shmget(mKey,(size_t) (MAX_SHIPC * sizeof(shIpc)),0)) == -1) {
       printf("Client:Shared memory segment was not created for me to attach --- exiting\n");
@@ -48,6 +52,7 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
     } 
     ClientFlag = 1; // as client    
   }
+  // C Side of shared memory  
   else { 
     mKey = ftok(".",(int)seedOrKey_key); 
     // open the share memory segment with create mode 
@@ -57,26 +62,26 @@ void shMem::shMemInit( int asClient, key_t seedOrKey_key ) {
       shmctl(shmid,IPC_RMID,0);
       shmdt(0);
       printf("shmget mKey = %d errono = %s (%d)\n",mKey,
-	     (errno == EEXIST)        ? "EEXIST" :
-	     (errno == EINVAL)        ? "EINVAL" :
-	     (errno == EIDRM)         ? "EIDRM" :
-	     (errno == ENOSPC)        ? "ENOSPC" :
-	     (errno == ENOENT)        ? "ENOENT" :
-	     (errno == EACCES)        ? "EACCES" :
-	     (errno == ENOMEM)        ? "ENOMEM" :
-	     "UNKNOWN",errno);
+       (errno == EEXIST)        ? "EEXIST" :
+       (errno == EINVAL)        ? "EINVAL" :
+       (errno == EIDRM)         ? "EIDRM" :
+       (errno == ENOSPC)        ? "ENOSPC" :
+       (errno == ENOENT)        ? "ENOENT" :
+       (errno == EACCES)        ? "EACCES" :
+       (errno == ENOMEM)        ? "ENOMEM" :
+       "UNKNOWN",errno);
       if ((shmid = shmget(mKey,(size_t) (MAX_SHIPC * sizeof(shIpc)),0)) == -1) {
-	printf("Initiator: Failed second retry as initiator\n");
-	printf("shmget mKey = %d errono = %s (%d)\n",mKey,
-	       (errno == EEXIST)        ? "EEXIST" :
-	       (errno == EINVAL)        ? "EINVAL" :
-	       (errno == EIDRM)         ? "EIDRM" :
-	       (errno == ENOSPC)        ? "ENOSPC" :
-	       (errno == ENOENT)        ? "ENOENT" :
-	       (errno == EACCES)        ? "EACCES" :
-	       (errno == ENOMEM)        ? "ENOMEM" :
-	       "UNKNOWN",errno);
-	exit(2);
+        printf("Initiator: Failed second retry as initiator\n");
+        printf("shmget mKey = %d errono = %s (%d)\n",mKey,
+         (errno == EEXIST)        ? "EEXIST" :
+         (errno == EINVAL)        ? "EINVAL" :
+         (errno == EIDRM)         ? "EIDRM" :
+         (errno == ENOSPC)        ? "ENOSPC" :
+         (errno == ENOENT)        ? "ENOENT" :
+         (errno == EACCES)        ? "EACCES" :
+         (errno == ENOMEM)        ? "ENOMEM" :
+         "UNKNOWN",errno);
+  exit(2);
       }
       
     }

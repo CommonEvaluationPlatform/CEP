@@ -73,10 +73,9 @@ void vpp_shMemInit() {
 
 // check if my C driver is ON
 void vpp_isCActive() {
-  long unsigned int mask=-1;
-  int myId = tf_getp(1);
-  int onOff = ((long unsigned int)(1<<myId) & GlobalShMemory.getActiveMask()) ? 1 : 0;
-  //io_printf("%s: myId=%d mask=0x%016llx is onOff=%d\n",__FUNCTION__,myId,GlobalShMemory.getActiveMask(), onOff);
+  long unsigned int mask = -1;
+  int myId                = tf_getp(1);
+  int onOff               = ((long unsigned int)(1<<myId) & GlobalShMemory.getActiveMask()) ? 1 : 0;
   tf_putp ( 2, onOff ); // Yes  
 }
 

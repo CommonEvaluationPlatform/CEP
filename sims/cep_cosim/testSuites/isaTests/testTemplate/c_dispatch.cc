@@ -56,11 +56,6 @@ int main(int argc, char *argv[])
 
   // Communicate some items to the cep testbench
   
-  // Initialize main memory to all zeroes
-  DUT_WRITE_DVT(DVTF_PAT_LO, DVTF_PAT_LO, 0);
-  DUT_WRITE_DVT(DVTF_SET_DEFAULTX_BIT, DVTF_SET_DEFAULTX_BIT, 1);  
-  
-
   // Test will be run on all four cores, but only one will be operating at any given time
   #ifdef SINGLE_THREAD_ONLY
     DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, mask);
