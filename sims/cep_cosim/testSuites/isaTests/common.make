@@ -12,7 +12,7 @@
 override DUT_SIM_MODE			= BARE
 override RISCV_TESTS			= 1
 
-ifeq (${NO_BUILDIN_ELF_MODE},1)
+ifeq (${NO_BUILTIN_ELF_MODE},1)
 override ELF_MODE   			= LOCAL
 else
 override ELF_MODE 	 			= BUILTIN

@@ -65,7 +65,7 @@ ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 $(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(COSIM_TOP_DIR)")
 endif
 
-# Include the file that contains info about the chipyard build
+# Include the file that contains info about the chipyard build (also, a change includes a rebuild)
 include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 
 # The following DEFINES control how the software is
@@ -175,10 +175,17 @@ include ${BUILD_SW_MAKEFILE}
 #
 # ${VSIM_CMD_LINE} is set in the ${BUILD_HW_MAKEFILE} makefile based on simulator type
 #--------------------------------------------------------------------------------------
-.vrun_flag: sim_info ${TEST_SUITE_DIR}/_info ${LIB_DIR}/.buildLibs ${VSIM_DO_FILE} c_dispatch ${RISCV_WRAPPER_IMG} ${COMMON_DEPENDENCIES}
+MY_TEST = $(shell grep "\.v\|\.sv" ${COSIM_BUILD_LIST})
+
+ifeq (${DUT_SIM_MODE},BARE_MODE)
+.vrun_flag: sim_info ${LIB_DIR}/.buildLibs c_dispatch ${TEST_SUITE_DIR}/_info ${VSIM_DO_FILE} ${RISCV_WRAPPER_IMG} ${COMMON_DEPENDENCIES}
+else
+.vrun_flag: sim_info ${LIB_DIR}/.buildLibs c_dispatch ${TEST_SUITE_DIR}/_info ${VSIM_DO_FILE} ${COMMON_DEPENDENCIES}
+endif
+
 ifeq (${COVERAGE},1)
 	@if test ! -d ${COSIM_COVERAGE_PATH}; then	\
-		mkdir  ${COSIM_COVERAGE_PATH};		\
+		mkdir  ${COSIM_COVERAGE_PATH};			\
 	fi
 endif
 

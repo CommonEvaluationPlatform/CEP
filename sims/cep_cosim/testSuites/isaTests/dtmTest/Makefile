@@ -23,7 +23,7 @@ ELF_FILE    = ${RISCV_TEST_DIR}/isa/${TEST_NAME}
 #
 # override anything here before calling the common file
 #
-NO_BUILDIN_ELF_MODE = 1
+NO_BUILTIN_ELF_MODE = 1
 
 #
 # Top target!!!

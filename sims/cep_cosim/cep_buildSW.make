@@ -76,14 +76,14 @@ ALL_C_FILES      = \
 	${BARE_H}        ${BARE_SRC}        
 
 # list of objects: 
-SRC_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${SRC_SRC})},     ${SRC_LIB_DIR}/${t})
-APIS_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,${APIS_SRC})},    ${APIS_LIB_DIR}/${t})
-DIAG_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,${DIAG_SRC})},    ${DIAG_LIB_DIR}/${t})
-SHARE_O_LIST      = $(foreach t,${notdir $(subst .cc,.o,${SHARE_SRC})},   ${SHARE_LIB_DIR}/${t})
-SIMDIAG_O_LIST    = $(foreach t,${notdir $(subst .cc,.o,${SIMDIAG_SRC})}, ${SIMDIAG_LIB_DIR}/${t})
-PLI_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,${PLI_SRC})},     ${PLI_LIB_DIR}/${t})
-BARE_O_LIST       = $(foreach t,${notdir $(subst .c,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
-BARE_O_LIST       += $(foreach t,${notdir $(subst .S,.o,${BARE_SRC})},     ${BARE_LIB_DIR}/${t})
+SRC_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,	${SRC_SRC})},     		${SRC_LIB_DIR}/${t})
+APIS_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,	${APIS_SRC})},    		${APIS_LIB_DIR}/${t})
+DIAG_O_LIST       = $(foreach t,${notdir $(subst .cc,.o,	${DIAG_SRC})},    		${DIAG_LIB_DIR}/${t})
+SHARE_O_LIST      = $(foreach t,${notdir $(subst .cc,.o,	${SHARE_SRC})},   		${SHARE_LIB_DIR}/${t})
+SIMDIAG_O_LIST    = $(foreach t,${notdir $(subst .cc,.o,	${SIMDIAG_SRC})}, 		${SIMDIAG_LIB_DIR}/${t})
+PLI_O_LIST        = $(foreach t,${notdir $(subst .cc,.o,	${PLI_SRC})},     		${PLI_LIB_DIR}/${t})
+BARE_O_LIST_1     = $(foreach t,${notdir $(subst .c,.o,		${BARE_SRC})},     		${BARE_LIB_DIR}/${t})
+BARE_O_LIST       = $(foreach t,${notdir $(subst .S,.o,		${BARE_O_LIST_1})},    	${BARE_LIB_DIR}/${t})
 
 SRC_OBJ_LIST      = $(subst .o,.obj,${SRC_O_LIST})
 APIS_OBJ_LIST     = $(subst .o,.obj,${APIS_O_LIST})
@@ -178,7 +178,7 @@ endif
 COMMON_INCLUDE_LIST		:= $(foreach t,${COMMON_INCLUDE_DIR_LIST}, -I ${t})
 
 # A common set of dependencies (for all test modes)
-COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} ${ALL_C_FILES} ${OBJECT_DIR_LIST}
+COMMON_DEPENDENCIES		:= ${V2C_H_FILE_LIST} ${CEP_VER_H_FILE} ${PERSUITE_CHECK} ${ALL_C_FILES}
 
 # Variables related to the RISCV Toolset (RISCV must already be defined)
 RISCV_GCC         		:= ${RISCV}/bin/riscv64-unknown-elf-gcc
@@ -315,7 +315,7 @@ RISCV_WRAPPER_IMG = ${RISCV_WRAPPER}
 # with -g, tests in virtual adr will run forever when it takes a page fault..!! (sending stuffs to console and stop)
 # so build with -g for dump file only
 ifeq (${VIRTUAL_MODE},1)
-${RISCV_WRAPPER_IMG}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES}
+${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES} riscv_virt.S riscv_wrapper.cc 
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
@@ -323,7 +323,7 @@ ${RISCV_WRAPPER_IMG}: riscv_virt.S riscv_wrapper.cc ${RISCV_VIRT_CFILES} ${COMMO
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
-${RISCV_WRAPPER_IMG}: riscv_wrapper.cc ${COMMON_DEPENDENCIES} ${RISCV_BARE_LFILE} ${RISCV_LIB} 
+${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDENCIES} riscv_wrapper.cc 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
@@ -349,31 +349,21 @@ endif
 # -----------------------------------------------------------------------
 # v2c_lib.a : src/cep_tests/diag/share
 ${V2C_LIB}: ${SRC_O_LIST} ${APIS_O_LIST} ${DIAG_O_LIST} ${SHARE_O_LIST} ${SIMDIAG_O_LIST}
-	$(AR) crv $@ \
-	$(shell ls ${SRC_LIB_DIR}/*.o) \
-	$(shell ls ${APIS_LIB_DIR}/*.o) \
-	$(shell ls ${DIAG_LIB_DIR}/*.o) \
-	$(shell ls ${SHARE_LIB_DIR}/*.o) \
-	$(shell ls ${SIMDIAG_LIB_DIR}/*.o)
-	$(RANLIB) $@
+	$(AR) rcuvs $@ $?
+	touch $@
 
 # libvpp.so : pli/share
 ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
-	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -shared  -g  \
-	-o ${VPP_LIB}	\
-	$(shell ls ${SHARE_LIB_DIR}/*.obj) \
-	$(shell ls ${PLI_LIB_DIR}/*.obj) 
+	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -shared -g -o ${VPP_LIB} $?
+	touch $@
 
 # riscv_lib.a: bare/apis/diag
 ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
-	$(RISCV_AR) rcsv $@ \
-	$(shell ls ${BARE_LIB_DIR}/*.bobj) \
-	$(shell ls ${APIS_LIB_DIR}/*.bobj) \
-	$(shell ls ${DIAG_LIB_DIR}/*.bobj)	 
-	$(RISCV_RANLIB) $@
+	$(RISCV_AR) rcuvs $@ $?
+	touch $@
 
 # Library build target
-${LIB_DIR}/.buildLibs: ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB} | ${OBJECT_DIR_LIST}
+${LIB_DIR}/.buildLibs: ${OBJECT_DIR_LIST} ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB}
 	touch $@
 
 buildLibs: ${LIB_DIR}/.buildLibs
@@ -388,10 +378,10 @@ LOCAL_CC_FILES  		:= $(wildcard ./*.cc)
 LOCAL_H_FILES   		+= $(wildcard ./*.h)
 LOCAL_OBJ_FILES 		+= $(LOCAL_CC_FILES:%.cc=%.o)
 
-c_dispatch:  $(LOCAL_OBJ_FILES) ${V2C_LIB}  ${COMMON_DEPENDENCIES}
-	$(GCC) $(SIM_SW_CFLAGS) $(COMMON_LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${LIBRARY_SWITCHES} 
+c_dispatch: ${LIB_DIR}/.buildLibs $(LOCAL_OBJ_FILES) ${COMMON_DEPENDENCIES}
+	$(GCC) $(SIM_SW_CFLAGS) $(COMMON_LDFLAGS) -o $@ $(LOCAL_OBJ_FILES) ${V2C_LIB} ${LIBRARY_SWITCHES}
 
-%.o: %.cc ${LOCAL_H_FILES} ${V2C_LIB} ${COMMON_DEPENDENCIES} 
+%.o: %.cc ${LIB_DIR}/.buildLibs ${LOCAL_H_FILES} ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 # -----------------------------------------------------------------------
 
