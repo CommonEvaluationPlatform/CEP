@@ -128,7 +128,6 @@
 `define DVTF_GET_PASS_FAIL_STATUS             103
 
 `define DVTF_ENABLE_TL_MONITORS               106
-`define DVTF_PASS_WRITETOHOST                 107
 `define DVTF_TOGGLE_DMI_RESET_BIT             108
 `define DVTF_CONTROL_UART_LOOPBACK            109
 `define DVTF_UART_BUSY                        110

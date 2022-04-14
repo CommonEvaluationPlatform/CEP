@@ -609,7 +609,6 @@ module cpu_driver
     wire [63:0]   curPC;
     wire          curPCValid;
     wire          curPCReset;
-    reg           passWriteToHost     = 0;
     reg           DisableStuckChecker = 0;
     reg           SingleCoreOnly      = 0;
     int           stuckCnt            = 0;

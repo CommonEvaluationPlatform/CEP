@@ -54,12 +54,6 @@ int main(int argc, char *argv[])
   // spawn system thread
   thr.AddSysThread(SYSTEM_SLOT_ID, SYSTEM_CPU_ID);
 
-  // Communicate some items to the cep testbench
-  
-  // Some tests just go straight to there if not <fail>
-  #ifdef PASS_WRITETOHOST
-    DUT_WRITE_DVT(DVTF_PASS_WRITETOHOST, DVTF_PASS_WRITETOHOST, 1);
-  #endif
 
   // Enable waveform capture, unless disabled
   int cycle2start   = 0;

@@ -400,17 +400,7 @@ module system_driver (
         `logI("Reading from PassFail.hex: pass = 0x%0x, fail = 0x%0x, finish = 0x%0x, write_tohost = 0x%0x, hangme = 0x%0x",
           passFail[0], passFail[1], passFail[2], passFail[3], passFail[4]);
       end
-
     end
-
-    // An alternate success condition for some of the ISA tests
-    always @(posedge dvtFlags[`DVTF_PASS_WRITETOHOST]) begin
-      `CPU0_DRIVER.passWriteToHost = 1;
-      `CPU1_DRIVER.passWriteToHost = 1;
-      `CPU2_DRIVER.passWriteToHost = 1;
-      `CPU3_DRIVER.passWriteToHost = 1;
-      dvtFlags[`DVTF_PASS_WRITETOHOST] = 0; // self-clear
-    end   
    
     // Force all cores into reset
     task ResetAllCores;

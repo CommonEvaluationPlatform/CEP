@@ -318,9 +318,7 @@ TEST_LIST 	= ${ISA_SINGLE_CORE_LIST}
 #endif
 
 runAll: ${TEST_SUITE_DIR}/.ISACreated
-	make cleanAll
-	make buildLibs
-	@for i in ${ISA_SINGLE_CORE_LIST}; do													\
+	@for i in ${TEST_LIST}; do													\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
 		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; make);										\
 	done
