@@ -678,7 +678,7 @@ module cpu_driver
     end // end always
    
     // Pass / Fail based on program counting reaching a particular location in the test 
-    // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost> (if enabled)
+    // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost>
     // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
     always @(*) begin
       // A PC Stuck condition has been detected
@@ -691,7 +691,7 @@ module cpu_driver
           case (curPC)
             `RISCV_PASSFAIL[0]  : pcPass = 1;
             `RISCV_PASSFAIL[2]  : pcPass = 1;
-            `RISCV_PASSFAIL[3]  : if (passWriteToHost) pcPass = 1;
+            `RISCV_PASSFAIL[3]  : pcPass = 1;
             `RISCV_PASSFAIL[4]  : pcFail = 1;
             `RISCV_PASSFAIL[1]  : pcFail = 1;
             default             : if (SingleCoreOnly && (MY_CPU_ID != 0)) pcPass = 1;
