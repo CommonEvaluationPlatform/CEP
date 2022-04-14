@@ -309,6 +309,8 @@ ISA_SINGLE_CORE_LIST =			\
 	rv64ud-p-recoding			\
 	rv64ud-p-structural
 
+TEST_LIST 	= ${ISA_SINGLE_CORE_LIST}
+
 # Special Debug Module test (temporarily removed)
 #OPENOCD_CHECK := $(filter Debugger, $(shell openocd --version 2>&1 | grep Debugger))
 #ifeq "$(OPENOCD_CHECK)" "Debugger"

@@ -206,7 +206,9 @@ ${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
 endif
 
+ifneq (,$(wildcard ${COSIM_BUILD_LIST}))
 COSIM_BUILD_LIST_DEPENDENCIES = $(shell grep "\.v\|\.sv" ${COSIM_BUILD_LIST})
+endif
 #--------------------------------------------------------------------------------------
 
 

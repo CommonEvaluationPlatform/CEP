@@ -293,11 +293,9 @@ cleanSuite:
 	-rm -rf ${TEST_SUITE_DIR}/xcelium.d
 	-rm -rf ${TEST_SUITE_DIR}/regressionSummary
 	-rm -rf ${TEST_SUITE_DIR}/.cadenceBuild
-ifneq (${TEST_LIST},)
 	@for i in ${TEST_LIST}; do 							\
 		(if [ -d ${TEST_SUITE_DIR}/$${i} ]; then cd ${TEST_SUITE_DIR}/$${i}; make cleanTest; fi)	\
 	done
-endif
 
 cleanLib:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
