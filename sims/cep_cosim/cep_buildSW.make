@@ -324,12 +324,14 @@ ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_VIRT_CFILES} ${COMMON_DEPEND
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
 ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDENCIES} riscv_wrapper.cc 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} $< ${RISCV_LIB} -o riscv_wrapper.elf
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} riscv_wrapper.cc  ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 
 endif
+
+riscv_wrapper: ${RISCV_WRAPPER_IMG}
 
 riscv_wrapper_sd_write: ${RISCV_WRAPPER_IMG}
 ifneq (,$(wildcard ${DISK}))

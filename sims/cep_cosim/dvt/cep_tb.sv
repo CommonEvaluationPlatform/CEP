@@ -556,14 +556,13 @@ module `COSIM_TB_TOP_MODULE;
       .e_valid                                      (`TILE3_PATH.auto_tl_other_masters_out_e_valid        ),
       .e_bits_sink                                  (`TILE3_PATH.auto_tl_other_masters_out_e_bits_sink    )
     );
-  `endif
-  //--------------------------------------------------------------------------------------
+    `endif // `ifdef BARE_MODE 
+    //--------------------------------------------------------------------------------------
 
-
-  //--------------------------------------------------------------------------------------
-  // When operating in Virtual mode, instantiate the page table walker monitor modules
-  //--------------------------------------------------------------------------------------
-  `ifdef VIRTUAL_MODE
+    //--------------------------------------------------------------------------------------
+    // When operating in Virtual mode, instantiate the page table walker monitor modules
+    //--------------------------------------------------------------------------------------
+    `ifdef VIRTUAL_MODE
     ptw_monitor ptwC0R0 (
       .clk                                  (`TILE0_PATH.ptw.clock                              ),
       .trace_valid                          (`TILE0_PATH.core.csr_io_trace_0_valid              ),
@@ -605,7 +604,7 @@ module `COSIM_TB_TOP_MODULE;
       .io_requestor_x_resp_bits_pte_r       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_r     ),
       .io_requestor_x_resp_bits_pte_v       (`TILE0_PATH.ptw.io_requestor_1_resp_bits_pte_v     )
     );
-  `endif
-  //--------------------------------------------------------------------------------------
-   
+    `endif
+    //--------------------------------------------------------------------------------------   
+
 endmodule  // `COSIM_TB_TOP_MODULE

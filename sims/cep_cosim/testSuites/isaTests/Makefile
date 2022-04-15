@@ -309,7 +309,116 @@ ISA_SINGLE_CORE_LIST =			\
 	rv64ud-p-recoding			\
 	rv64ud-p-structural
 
-TEST_LIST 	= ${ISA_SINGLE_CORE_LIST}
+ISA_VIRTUAL_TEST_LIST = 		\
+	rv64ui-v-add 				\
+	rv64ui-v-addi 				\
+	rv64ui-v-addiw 				\
+	rv64ui-v-addw 				\
+	rv64ui-v-and 				\
+	rv64ui-v-andi 				\
+	rv64ui-v-auipc 				\
+	rv64ui-v-beq 				\
+	rv64ui-v-bge 				\
+	rv64ui-v-bgeu 				\
+	rv64ui-v-blt 				\
+	rv64ui-v-bltu 				\
+	rv64ui-v-bne 				\
+	rv64ui-v-fence_i 			\
+	rv64ui-v-jal 				\
+	rv64ui-v-jalr 				\
+	rv64ui-v-lb 				\
+	rv64ui-v-lbu 				\
+	rv64ui-v-ld 				\
+	rv64ui-v-lh 				\
+	rv64ui-v-lhu 				\
+	rv64ui-v-lui 				\
+	rv64ui-v-lw 				\
+	rv64ui-v-lwu 				\
+	rv64ui-v-or 				\
+	rv64ui-v-ori 				\
+	rv64ui-v-sb 				\
+	rv64ui-v-sd 				\
+	rv64ui-v-sh 				\
+	rv64ui-v-simple 			\
+	rv64ui-v-sll 				\
+	rv64ui-v-slli 				\
+	rv64ui-v-slliw 				\
+	rv64ui-v-sllw 				\
+	rv64ui-v-slt 				\
+	rv64ui-v-slti 				\
+	rv64ui-v-sltiu 				\
+	rv64ui-v-sltu 				\
+	rv64ui-v-sra 				\
+	rv64ui-v-srai 				\
+	rv64ui-v-sraiw 				\
+	rv64ui-v-sraw 				\
+	rv64ui-v-srl 				\
+	rv64ui-v-srli 				\
+	rv64ui-v-srliw 				\
+	rv64ui-v-srlw 				\
+	rv64ui-v-sub 				\
+	rv64ui-v-subw 				\
+	rv64ui-v-sw 				\
+	rv64ui-v-xor 				\
+	rv64ui-v-xori 				\
+	rv64um-v-div 				\
+	rv64um-v-divu 				\
+	rv64um-v-divuw 				\
+	rv64um-v-divw 				\
+	rv64um-v-mul 				\
+	rv64um-v-mulh 				\
+	rv64um-v-mulhsu 			\
+	rv64um-v-mulhu 				\
+	rv64um-v-mulw 				\
+	rv64um-v-rem 				\
+	rv64um-v-remu 				\
+	rv64um-v-remuw 				\
+	rv64um-v-remw 				\
+	rv64ua-v-amoadd_d 			\
+	rv64ua-v-amoadd_w 			\
+	rv64ua-v-amoand_d 			\
+	rv64ua-v-amoand_w 			\
+	rv64ua-v-amomax_d 			\
+	rv64ua-v-amomaxu_d 			\
+	rv64ua-v-amomaxu_w 			\
+	rv64ua-v-amomax_w 			\
+	rv64ua-v-amomin_d 			\
+	rv64ua-v-amominu_d 			\
+	rv64ua-v-amominu_w 			\
+	rv64ua-v-amomin_w 			\
+	rv64ua-v-amoor_d 			\
+	rv64ua-v-amoor_w 			\
+	rv64ua-v-amoswap_d 			\
+	rv64ua-v-amoswap_w 			\
+	rv64ua-v-amoxor_d 			\
+	rv64ua-v-amoxor_w 			\
+	rv64ua-v-lrsc 				\
+	rv64uc-v-rvc 				\
+	rv64ud-v-fadd 				\
+	rv64ud-v-fclass 			\
+	rv64ud-v-fcmp 				\
+	rv64ud-v-fcvt 				\
+	rv64ud-v-fcvt_w 			\
+	rv64ud-v-fdiv 				\
+	rv64ud-v-fmadd 				\
+	rv64ud-v-fmin 				\
+	rv64ud-v-ldst 				\
+	rv64ud-v-move 				\
+	rv64ud-v-recoding 			\
+	rv64ud-v-structural 		\
+	rv64uf-v-fadd 				\
+	rv64uf-v-fclass 			\
+	rv64uf-v-fcmp 				\
+	rv64uf-v-fcvt 				\
+	rv64uf-v-fcvt_w 			\
+	rv64uf-v-fdiv 				\
+	rv64uf-v-fmadd 				\
+	rv64uf-v-fmin 				\
+	rv64uf-v-ldst 				\
+	rv64uf-v-move 				\
+	rv64uf-v-recoding 
+
+TEST_LIST 	= ${ISA_SINGLE_CORE_LIST} ${ISA_VIRTUAL_TEST_LIST}
 
 # Special Debug Module test (temporarily removed)
 #OPENOCD_CHECK := $(filter Debugger, $(shell openocd --version 2>&1 | grep Debugger))
@@ -346,18 +455,12 @@ ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/
 	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
 	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 
-	@echo "#define MAX_TIMEOUT 200"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
+	@echo "#define MAX_TIMEOUT 100"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 
 ifneq (${SINGLE_CORE_ONLY},)
 	@echo "#define SINGLE_CORE_ONLY" 						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_module.cc
 endif
 
-ifeq (${VIRTUAL_MODE},1)
-	@echo "#define VIRTUAL_MODE"       						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-endif
-ifeq (${PASS_WRITETOHOST},1)
-	@echo "#define PASS_WRITETOHOST"    					>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-endif
 	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc 				>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 	@cat ${ISA_TEST_TEMPLATE}/c_module.cc 					>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_module.cc
 	@cp -f ${RISCV_TEST_DIR}/isa/${TEST_NAME}      ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/riscv_wrapper.elf
@@ -373,33 +476,11 @@ createISATests: .force
 		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; 						\
 	done
 
-	@for i in ${ISA_VM_1CORE_ONLY_LIST}; do				\
-		echo "== Generating VM 1CORE test directory for $${i}";		\
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=1 SFX=0 makeIsaTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=2 SFX=1 makeIsaTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=4 SFX=2 makeIsaTest; \
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_CORE_ONLY=8 SFX=3 makeIsaTest; \
+	@for i in ${ISA_VIRTUAL_TEST_LIST}; do 											\
+		echo "== Generating Virtual test directory for $${i}";						\
+		make TEST_NAME=$${i} makeIsaTest; 											\
 	done
-	@for i in ${ISA_VM_SINGETHR_LIST}; do				\
-		echo "== Generating VM SINGETHR test directory for $${i}";		\
-		make TEST_NAME=$${i} VIRTUAL_MODE=1 SINGLE_THREAD=1 makeIsaTest; \
-	done
-	@for i in ${ISA_1CORE_ONLY_LIST}; do				\
-		echo "== Generating 1CORE_ONLY test directory for $${i}";		\
-		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; \
-	done
-	@for i in ${ISA_SINGETHR_LIST}; do				\
-		echo "== Generating SINGETHR test directory for $${i}";		\
-		make TEST_NAME=$${i} SINGLE_THREAD=1 makeIsaTest; \
-	done
-	@for i in ${ISA_PARALLEL_TEST_LIST}; do				\
-		echo "== Generating PARALLEL test directory for $${i}";		\
-		make TEST_NAME=$${i} makeIsaTest; \
-	done
-	@for i in ${ISA_SPECIAL_TESTS}; do				\
-		echo "== Generating SPECIAL TESTs directory for $${i}";		\
-		make TEST_NAME=$${i} PASS_WRITETOHOST=1 makeIsaTest; \
-	done
+
 	touch ${TEST_SUITE_DIR}/.ISACreated
 
 # Cleans 

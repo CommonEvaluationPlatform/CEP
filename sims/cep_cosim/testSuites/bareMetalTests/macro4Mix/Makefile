@@ -18,7 +18,7 @@ TEST_DIR			= $(strip $(shell cd .; pwd))
 TEST_NAME			= $(shell cd .; basename `pwd`)
 
 # default target
-all: .vrun_flag riscv_wrapper.elf
+all: .vrun_flag
 
 # override anything here before calling the common file
 include ${TEST_SUITE_DIR}/common.make

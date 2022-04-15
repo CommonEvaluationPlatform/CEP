@@ -194,6 +194,8 @@ static int sd_copy(void)
   int rc = 0;
 
 // The following logic allows for a simulation overwrite of the number of blocks to be loaded
+// If the scratch_w7 register is not "forced" by the simulation, then the default payload size
+// will prevail.
 #ifdef ENABLE_CEPREG
   REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
   i = REG64(cepregs, CEPREGS_SCRATCH_W7);

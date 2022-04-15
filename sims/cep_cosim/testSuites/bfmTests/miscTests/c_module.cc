@@ -54,13 +54,11 @@ void *c_module(void *arg) {
   //--------------------------------------------------------------------------------------
   pio.RunClk(500);
 
-
-
   switch (cpuId) {
   	case 0 :  errCnt += cepUartTest_runTest(cpuId,seed, verbose); break;
-  	case 1 :  errCnt += cepSpiTest_runTest(cpuId,seed, verbose); break;
-  	case 2 :  errCnt += cepGpioTest_runTest(cpuId,seed, verbose); break;
-  	case 3 :  errCnt += cepMaskromTest_runTest(cpuId,seed, verbose); break;
+//  	case 1 :  errCnt += cepSpiTest_runTest(cpuId,seed, verbose); break;
+  	//case 2 :  errCnt += cepGpioTest_runTest(cpuId,seed, verbose); break;
+//  	case 3 :  errCnt += cepMaskromTest_runTest(cpuId,seed, verbose); break;
   }
 
   pio.RunClk(100);

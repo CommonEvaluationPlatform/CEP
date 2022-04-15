@@ -322,13 +322,10 @@ int cep_srot::LLKI_Setup(int cpuId) {
 // ------------------------------------------------------------------------------------------------------------
 int cep_srot::LLKI_ErrorTest(int cpuId) {
 
-  int       errCnt = 0;
-  uint8_t   status = 0;
+  int       errCnt    = 0;
+  uint8_t   status    = 0;
+  int       iAMmaster = 0;
 
-  // pick the first LSB in cpuActiveMask as master
-  //
-  int iAMmaster = 0;
-#if 0
   for (int i = 0 ; i < 4 ; i++) {
     if (((1 << i) & GetCpuActiveMask())) { // found the first LSB=1 bit
       if (i == cpuId) {
@@ -337,9 +334,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
       break;
     }
   }
-#else
-  iAMmaster =1;
-#endif
+
   //
   // Only one core should be talking to the SRoT
   //
