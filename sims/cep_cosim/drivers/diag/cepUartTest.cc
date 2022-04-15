@@ -191,12 +191,11 @@ int cepUartTest_runTest(int cpuId, int seed, int verbose) {
   char txStr2[] = "LL";
   
   // divisor 16 is smallest!!!, try 15 .loop forever..
-  //if (!errCnt) { errCnt += cepUartTest_runTxRxTest(cpuId,1<< 15, txStr,  1, 0, 1); }
-  if (!errCnt) { errCnt += cepUartTest_runTxRxTest(cpuId,32, txStr,  strlen(txStr), 0, 1); }
+  if (!errCnt) { errCnt += cepUartTest_runTxRxTest(cpuId, 64, txStr,  strlen(txStr), 1, 1); }
 
   return errCnt;
 
-  if (!errCnt) { errCnt += cepUartTest_runTxRxTest(cpuId,63, txStr2, strlen(txStr2),1, 1); }
+  if (!errCnt) { errCnt += cepUartTest_runTxRxTest(cpuId, 63, txStr2, strlen(txStr2),1, 1); }
   
   // this is just for coverage
   DUT_WRITE32_32(uart_base_addr + uart_div, 1 << 15);
@@ -206,7 +205,7 @@ int cepUartTest_runTest(int cpuId, int seed, int verbose) {
   int tmp;
   DUT_READ32_32(uart_base_addr + uart_rxfifo, tmp);
   //
-  if (!errCnt) { errCnt += cepUartTest_runRegTest(cpuId,32, seed, verbose); }
+  if (!errCnt) { errCnt += cepUartTest_runRegTest(cpuId, 32, seed, verbose); }
   //
   return errCnt;
 }
