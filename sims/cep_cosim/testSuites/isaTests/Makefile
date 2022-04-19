@@ -433,9 +433,9 @@ runAll: ${TEST_SUITE_DIR}/.ISACreated
 	done
 
 summary:
-	@date > regressionSummary
+	@date > testSuiteSummary
 	@for i in ${TEST_LIST}; do				\
-		cat ${TEST_SUITE_DIR}/$${i}/status | tee -a regressionSummary;	\
+		cat ${TEST_SUITE_DIR}/$${i}/status | tee -a testSuiteSummary;	\
 	done
 
 makeIsaTest: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump

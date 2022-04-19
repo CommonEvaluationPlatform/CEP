@@ -1,4 +1,4 @@
-#************************************************************************
+ #************************************************************************
 # Copyright 2022 Massachusets Institute of Technology
 # SPDX short identifier: BSD-2-Clause
 #
@@ -27,6 +27,7 @@ TEST_LIST 		= 		\
 	clintIntr 			\
 	clintTest 			\
 	csrTest 			\
+	fullBoot 			\
 	idcache_smc 		\
 	lockfreeAtomic 		\
 	lockTest 			\
@@ -36,12 +37,12 @@ TEST_LIST 		= 		\
 	macro4Mix 			\
 	miscTests 			\
 	multiLock 			\
-	plicPrioIntr 		\
 	plicTest 			\
 	regTest 			\
-	srotMemTest
+	srotMemTest			\
 
 # Tests yet to run/fix/debug
+#plicPrioIntr
 #extIntr
 #lsrcOps
 

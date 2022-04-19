@@ -31,11 +31,11 @@ TEST_LIST = 		\
 	plicTest		\
 	regTest			\
 	scratchpadTest	\
-	srotMemTest
+	srotMemTest		\
+	srotBadKeys		\
+	srotKeyTest
 
 # Tests yet to run/fix/debug
-#	srotBadKeys
-#	srotKeyTest
 #	srotErrorTest
 
 
