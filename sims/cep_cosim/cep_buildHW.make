@@ -85,6 +85,8 @@ else
 endif
 COSIM_VLOG_ARGS				+= +define+STOP_COND=\`SYSTEM_RESET
 COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT
+# The UART Receiver does not simulate properly without the following definition
+COSIM_VLOG_ARGS 			+= +define+RANDOMIZE_REG_INIT
 COSIM_VLOG_ARGS				+= +define+RANDOM="1'b0"
 #--------------------------------------------------------------------------------------
 
