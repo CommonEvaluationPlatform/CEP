@@ -3,7 +3,42 @@
 #
 
 # enable code and FSM coverage
-select_coverage -block -expr -toggle -fsm -instance cep_tb.fpga.topDesign.topMod...
+#select_coverage -block -expr -toggle -fsm -instance cep_tb.dut.system...
+select_coverage -toggle -instance cep_tb.dut.system.bootROMDomainWrapper
+select_coverage -toggle -instance cep_tb.dut.system.aesmodule
+select_coverage -toggle -instance cep_tb.dut.system.aesmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.des3module
+select_coverage -toggle -instance cep_tb.dut.system.des3module.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.iirmodule
+select_coverage -toggle -instance cep_tb.dut.system.iirmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.idftmodule
+select_coverage -toggle -instance cep_tb.dut.system.idftmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.gpsmodule
+select_coverage -toggle -instance cep_tb.dut.system.gpsmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.gpsmodule_1
+select_coverage -toggle -instance cep_tb.dut.system.gpsmodule_1.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.md5module
+select_coverage -toggle -instance cep_tb.dut.system.md5module.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.dftmodule
+select_coverage -toggle -instance cep_tb.dut.system.dftmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.firmodule
+select_coverage -toggle -instance cep_tb.dut.system.firmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.sha256module
+select_coverage -toggle -instance cep_tb.dut.system.sha256module.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.sha256module_1
+select_coverage -toggle -instance cep_tb.dut.system.sha256module_1.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.sha256module_2
+select_coverage -toggle -instance cep_tb.dut.system.sha256module_2.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.rsaasicmodule
+select_coverage -toggle -instance cep_tb.dut.system.rsaasicmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.sha256ModuleRedaction
+select_coverage -toggle -instance cep_tb.dut.system.sha256ModuleRedaction.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.gpslbllmodule
+select_coverage -toggle -instance cep_tb.dut.system.gpslbllmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.gpsredactionmodule
+select_coverage -toggle -instance cep_tb.dut.system.gpsredactionmodule.llki_pp_inst
+select_coverage -toggle -instance cep_tb.dut.system.scratchpadasicmodule
+select_coverage -toggle -instance cep_tb.dut.system.srotasicmodule
 
 # remove instances in the hierarchy without any coverage
 deselect_coverage -remove_empty_instances
@@ -26,7 +61,7 @@ set_expr_coverable_statements -all
 
 
 # toggle specific options
-#set_toggle_portsonly                                                  # limit to ports only
+set_toggle_portsonly                                                  # limit to ports only
 #set_toggle_smart_refinement                                   # enable toggle smart refinement / exclusions
 set_toggle_scoring -sv_mda
 #set_toggle_scoring -sv_mda 16                                 # reduces most of warnings but toggle coverage space large

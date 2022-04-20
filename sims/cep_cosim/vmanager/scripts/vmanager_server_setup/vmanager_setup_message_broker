@@ -1,0 +1,207 @@
+#!/bin/bash
+
+## Version: 2020_06_04
+## Author : Daniel Bayer
+## Email  : danielb@cadence.com
+
+####################################################################################################
+## License: 
+## ----------------------------------------------------------------------------
+##----------------------------------------------------------------------
+##   Copyright 2020 Cadence Design Systems, Inc.
+##   All Rights Reserved Worldwide
+##
+##   Licensed under the Apache License, Version 2.0 (the
+##   "License"); you may not use this file except in
+##   compliance with the License.  You may obtain a copy of
+##   the License at
+##
+##       http://www.apache.org/licenses/LICENSE-2.0
+##
+##   Unless required by applicable law or agreed to in
+##   writing, software distributed under the License is
+##   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+##   CONDITIONS OF ANY KIND, either express or implied.  See
+##   the License for the specific language governing
+##   permissions and limitations under the License.
+####################################################################################################
+
+echo "============================================================================="
+echo "==              vManager Message Broker Setup Script                       =="
+echo "============================================================================="
+echo "== For questions, please contact:     danielb@cadence.com                  =="
+echo "============================================================================="
+echo "(INFO) - Checking for configured vManager root installation...               "
+export VMGR_ROOT_INSTALLATION=`vm_root`
+
+## Setting the path to all the administration tools in vManager installation folder
+export PATH=${VMGR_ROOT_INSTALLATION}/tools/vmgr/admin:${PATH}
+
+export MB_START=-start
+
+#################################################################################################################################################################
+## Parsing the command-line arguments
+while [[ $# -gt 0 ]]; do
+    key="${1}"
+    
+    case ${key} in
+        -h|--help)
+            shift # remove single argument
+            echo "(INFO) vmanager_setup_message_broker options are:"
+            echo "(INFO)    -h | --help                              : Prints this help text"
+            echo "(INFO)"
+            echo "(INFO)   Mandatory options. If not specified, an error will be issued."
+            echo "(INFO)    -inst_root <PATH>                        : The <PATH> must be pointing to the folder containing the profile and DB folder"
+            echo "(INFO)                                               is needed to setup the message broker in parallel to the profile folder."
+            echo "(INFO)    -profile <PATH>                          : The <PATH> must be pointing to the vManager profile folder that is "
+            echo "(INFO)                                               intended to be attached to the message broker"
+            echo "(INFO)    -tcp_port <NUMBER>                       : The <NUMBER> must be set to a free network port number."
+            echo "(INFO)    -stomp_port <NUMBER>                     : The <NUMBER> must be set to a free network port number."
+            echo "(INFO)"
+            echo "(INFO)   Subsequent options are all optional and will use default values, if they were not specified."
+            echo "(INFO)    -skip_port_check                         : Selecting this option skips checking if TCP and STOMP ports are free."
+            echo "(INFO)    -data_dir <PATH>                         : The <PATH> variable is the name under which the message broker configuration is stored."
+            echo "(INFO)                                               If option is not used, default folder name is    message_broker_data"
+            echo "(INFO)    -password <PASS>                         : Create a custom <PASSWORD> for the admin user."
+            echo "(INFO)                                               If option is not used, default password is ->    letmein"
+            echo "(INFO)    -host <HOST_NAME>                        : You can provide a <HOST_NAME> to the configuration script."
+            echo "(INFO)                                               If option is not used, default name is          \`hostname\`"
+            echo "(INFO)                                               NOTE:"
+            echo "(INFO)                                                The server must always be started on the machine that is configured"
+            echo "(INFO)                                                using the hostname!"
+            echo "(INFO)    -nostart                                 : Will create, but not start the message broker."
+            echo "(INFO)"
+            echo "(INFO) ========================================================================================================================================="
+            echo "(INFO) == NOTE:"
+            echo "(INFO) ==  After setting up the message broker, please connect the message broker in the vManager Web Interface per project!"
+            echo "(INFO) ========================================================================================================================================="
+            exit 0
+            ;;
+        -inst_root)
+            shift # remove the -inst_root argument
+            export VMGR_SERVER_INSTANCE_ROOT=${1}
+            shift # remove the argument
+            echo "(INFO) - Using vManager Instance folder  :  ${VMGR_SERVER_INSTANCE_ROOT}"
+            ;;
+        -skip_port_check)
+            shift # remove the -skip_port_check
+            export SKIP_PORT_CHECK
+            echo "(INFO) - Not checking if TCP and STOMP ports are available"
+            ;;
+        -profile)
+            shift # remove the -profile argument
+            export PROFILE_DIR=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using vManager profile folder   :  ${PROFILE_DIR}"
+            ;;
+        -tcp_port)
+            shift # remove the -tcp_port argument
+            export MB_TCP_PORT=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using Message Broker TCP port   : ${MB_TCP_PORT}"
+            ;;
+        -stomp_port)
+            shift # remove the -stomp_port argument
+            export MB_STOMP_PORT=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using Message Broker STOMP port : ${MB_STOMP_PORT}"
+            ;;
+        -data_dir)
+            shift # remove the -data_dir argument
+            export MB_DATA_DIR=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using Message Broker data folder: ${MB_DATA_DIR}"
+            ;;
+        -password)
+            shift # remove the -password argument
+            export MB_PASS=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using Message Broker password   : ${MB_PASS}"
+            ;;
+        -host)
+            shift # remove the -host argument
+            export MB_HOST=${1}
+            shift # remove the second argument
+            echo "(INFO) - Using host name                 : ${MB_HOST}"
+            ;;
+        -nostart)
+            shift # remove the -start argument
+            echo "(INFO) - Message Broker will not be started"
+            MB_START= 
+            ;;
+        *) # default is also unknown option
+            echo  "(WARNING) - Unknown argument ${key} found. Please remove it from the script and run again"
+            exit 1
+            ;;
+    esac
+done
+
+###############################################################################################################################################
+## These Parameters must be given by the user as a bare minimum
+if [[ -z "${VMGR_SERVER_INSTANCE_ROOT}" ]]; then
+    echo "(ERROR) - Option -inst_root <FOLDER> not provided. Please provide the folder for the vManager server instance root (ie. containing the profile folder)"
+    exit 1
+fi
+
+if [[ -z "${PROFILE_DIR}" ]]; then
+    echo "(ERROR) - Option -profile <FOLDER> not provided. Please provide the folder for the vManager server profile"
+    exit 1
+fi
+
+if [[ -z "${MB_TCP_PORT}" ]]; then
+    echo "(ERROR) - Option -tcp_port <PORT_NUMBER> not provided. Please provide an available TCP port for the Message Broker (ie. 80080)"
+    exit 1
+fi
+
+if [[ -z "${MB_STOMP_PORT}" ]]; then
+    echo "(ERROR) - Option -stomp_port <PORT_NUMBER> not provided. Please provide an available STOMP port for the Message Broker (ie. 50432)"
+    exit 1
+fi
+
+if [[ ! -z ${SKIP_PORT_CHECK} ]]; then
+    if [[ -n "`netstat -tlpn | grep LISTEN | grep ${MB_TCP_PORT}`" ]]; then
+        echo "(ERROR) - Can not use Message Broker TCP port number ${MB_TCP_PORT} because it is already in use!"
+        exit 1
+    fi
+    if [[ -n "`netstat -tlpn | grep LISTEN | grep ${MB_STOMP_PORT}`" ]]; then
+        echo "(ERROR) - Can not use Message Broker STOMP port number ${MB_STOMP_PORT} because it is already in use!"
+        exit 1
+    fi
+fi
+###############################################################################################################################################
+
+
+
+###############################################################################################################################################
+## These parameters will be derived automatically.
+if [[ -z "${MB_DATA_DIR}" ]]; then
+    export MB_DATA_DIR=message_broker_data
+    echo "(INFO) - Option -data_dir <FOLDER_NAME> not provided.   => Using default value:  ${MB_DATA_DIR}"  
+fi
+
+if [[ -z "${MB_PASS}" ]]; then
+    export MB_PASS=letmein
+    echo "(INFO) - Option -data_dir <FOLDER_NAME> not provided.   => Using default value:  ${MB_PASS}"  
+fi
+###############################################################################################################################################
+
+vmgrcreatemessagebroker \
+    -data_dir ${VMGR_SERVER_INSTANCE_ROOT}/${MB_DATA_DIR} \
+    -password ${MB_PASS} \
+    -stomp_port ${MB_STOMP_PORT} \
+    -tcp_port ${MB_TCP_PORT} \
+    ${MB_START}
+
+echo ""
+echo "(INFO) ============================================================================================================================================"
+echo "(INFO) == Now creating file: ${PROFILE_DIR}/message-broker.properties "
+echo "(INFO) ============================================================================================================================================"
+
+# Creating maintenance files
+echo "# Message Broker properties for profile (MANUALLY GENERATED)"  >  ${PROFILE_DIR}/message-broker.properties
+echo "# `date`"                                                      >> ${PROFILE_DIR}/message-broker.properties
+echo "message-broker.password=${MB_PASS}"                            >> ${PROFILE_DIR}/message-broker.properties
+echo "message-broker.stomp.port=${MB_STOMP_PORT}"                    >> ${PROFILE_DIR}/message-broker.properties
+echo "message-broker.tcp.port=${MB_TCP_PORT}"                        >> ${PROFILE_DIR}/message-broker.properties
+echo "message-broker.host=${MB_HOST}"                                >> ${PROFILE_DIR}/message-broker.properties
+echo ""                                                              >> ${PROFILE_DIR}/message-broker.properties

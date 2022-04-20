@@ -1,0 +1,849 @@
+#!/bin/bash
+
+## Version: 2020_06_04
+## Author : Daniel Bayer
+## Email  : danielb@cadence.com
+
+####################################################################################################
+## License: 
+## ----------------------------------------------------------------------------
+##----------------------------------------------------------------------
+##   Copyright 2020 Cadence Design Systems, Inc.
+##   All Rights Reserved Worldwide
+##
+##   Licensed under the Apache License, Version 2.0 (the
+##   "License"); you may not use this file except in
+##   compliance with the License.  You may obtain a copy of
+##   the License at
+##
+##       http://www.apache.org/licenses/LICENSE-2.0
+##
+##   Unless required by applicable law or agreed to in
+##   writing, software distributed under the License is
+##   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+##   CONDITIONS OF ANY KIND, either express or implied.  See
+##   the License for the specific language governing
+##   permissions and limitations under the License.
+####################################################################################################
+
+echo "============================================================================="
+echo "==                         vManager Setup Script                           =="
+echo "============================================================================="
+echo "== For questions, please contact:     danielb@cadence.com                  =="
+echo "============================================================================="
+echo "(INFO) - Checking for configured vManager root installation...               "
+export VMGR_ROOT_INSTALLATION=`vm_root`
+
+## Setting the path to all the administration tools in vManager installation folder
+export PATH=${VMGR_ROOT_INSTALLATION}/tools/vmgr/admin:${PATH}
+
+echo "(INFO) - Checking for configured Xcelium root installation...                "
+if [[ `which xmroot` != "" ]]; then
+    export XCELIUM_ROOT_INSTALLATION=`xmroot`
+fi
+
+## Basic sanity checking to avoid any surprises along the road
+if [[ -z ${VMGR_ROOT_INSTALLATION} ]]; then
+    echo "(ERROR) - There was no PATH to vManager executables found. Please set the PATH variable to include vManager's executables."
+    exit 1
+fi
+echo "(INFO) - Using vManager installation ${VMGR_ROOT_INSTALLATION}"
+
+if [[ -z ${CDS_LIC_FILE} ]]; then
+    echo "(ERROR) - The \${CDS_LIC_FILE} variable is empty. Please set the variable to point to your license file/server to be able to launch the server setup."
+    exit 1
+fi
+echo "(INFO) - Using licenses from ${CDS_LIC_FILE}"
+
+if [[ -z ${HOME} ]]; then
+    echo "(ERROR) - The \${HOME} folder was not set, this will cause vManager based processes to not operate as expected."
+    echo "          Please set the \${HOME} variable and try again."
+    exit 1
+fi
+
+if [[ -z ${XCELIUM_ROOT_INSTALLATION} ]]; then
+    echo "(WARNING) - There was no Xcelium installation found. To enable coverage analysis, the Coverage Engine must be configured for this project."
+else 
+    echo "(INFO) - Using Xcelium installation ${XCELIUM_ROOT_INSTALLATION}"
+fi
+
+export SCRIPT_ARGS=${*}
+
+#################################################################################################################################################################
+## Parsing the command-line arguments
+while [[ $# -gt 0 ]]; do
+    key="${1}"
+    
+    case ${key} in
+        -h|--help)
+            echo "(INFO) vmanager_server_setup options are:"
+            echo "(INFO)    -h | --help                              : Prints this help text"
+            echo "(INFO)"
+            echo "(INFO)   Mandatory options. If not specified, an error will be issued."
+            echo "(INFO)    -db_port <NUMBER>                        : The <NUMBER> indicates the Postgres access port that"
+            echo "(INFO)                                               is needed for the server to communicate with the database"
+            echo "(INFO)    -vmgr_server_port <NUMBER>               : The <NUMBER> indicates the vManager's access port that is used"
+            echo "(INFO)                                               to access the vManager server from any vManager client or web-browser."
+            echo "(INFO)"
+            echo "(INFO)   Subsequent options are all optional and will use default values, if they were not specified."
+            echo "(INFO)    -vmgr_version <NAME>                     : The <NAME> is used to set the root folder which then contains"
+            echo "(INFO)                                               the Postgres and vManager server folders."
+            echo "(INFO)                                               If option is not used, default value extracted from vmanager -version is used."
+            echo "(INFO)    -inst_root <PATH>                        : Sets the target vManager instance root path to <PATH>. "
+            echo "(INFO)                                               <PATH> must point to an existing folder."
+            echo "(INFO)                                               If option is not used, \$PWD is used as default."
+            echo "(INFO)    -db_sys_user <USER>                      : Creates a Postgres admin user called <USER>."
+            echo "(INFO)                                               If option is not used, default user is     ->    postgres"
+            echo "(INFO)    -db_sys_pass <PASSWORD>                  : Create a custom <PASSWORD> for the Postgres admin user."
+            echo "(INFO)                                               If option is not used, default password is ->    postgres"
+            echo "(INFO)    -db_dir <FOLDER_NAME>                    : Create a custom <FOLDER_NAME> for Postgres instance folder."
+            echo "(INFO)                                               If option is not used, default folder name is    db"
+            echo "(INFO)    -db_admin_dir <FOLDER_NAME>              : Create a custom <FOLDER_NAME> that is used for Postgres DB Incremental Backups using WAL."
+            echo "(INFO)                                               If option is not used, then incremental backup & restore is not setup."
+            echo "(INFO)    -vmgr_profile <FOLDER_NAME>              : Create a custom <FOLDER_NAME> for vManager server instance folder."
+            echo "(INFO)                                               If option is not used, default folder name is    profile"
+            echo "(INFO)    -vmgr_public_split_profile <FOLDER_NAME> : Create a custom <FOLDER_NAME> for vManager server instance folder."
+            echo "(INFO)                                               If option is not used, default folder name is    profile"
+            echo "(INFO)    -vmgr_memory_size <SIZE>                 : Sets the amount of memory allocated for the vManager server instance."
+            echo "(INFO)                                               This has no effect on the Postgres database memory."
+            echo "(INFO)                                               If option is not used, default size is           4g"
+            echo "(INFO)                                               <SIZE> is a combination of number and m or g."
+            echo "(INFO)                                               <SIZE> = 10240m  -> use 10240 MB for vManager server instance."
+            echo "(INFO)                                               <SIZE> = 8g      -> use 8 GB for vManager server instance."
+            echo "(INFO)                                               NOTE:"
+            echo "(INFO)                                                Do not go below 4g, since this may cause instabilities when projects"
+            echo "(INFO)                                                get reasonably big."
+            echo "(INFO)    -enable_ha                               : If option is used, then the vManager High Availabilty architecture will be used instead of"
+            echo "(INFO)                                               the vManager standard server architecture."
+            echo "(INFO)                                               NOTE:"
+            echo "(INFO)                                                This option requires the vManager High Availability license!"
+            echo "(INFO)    -broker_tcp_port <NUMBER>                : If option is not used, then Message Broker will not be setup."
+            echo "(INFO)                                               If this option is used, then also -broker_stomp_port <NUMBER> must be used."
+            echo "(INFO)    -broker_stomp_port <NUMBER>              : If option is not used, then Message Broker will not be setup."
+            echo "(INFO)                                               If this option is used, then also -broker_tcp_port <NUMBER> must be used."
+            echo "(INFO)    -broker_data_dir <FOLDER_NAME>           : Create a custom <FOLDER_NAME> for Message Broker."
+            echo "(INFO)                                               If option is not used, default folder name is    message_broker_data"
+            echo "(INFO)    -broker_password <PASSWORD>              : Create a custom <PASSWORD> for the Message Broker mechanism."
+            echo "(INFO)                                               If option is not used, default password is       letmein"
+            echo "(INFO)    -hostname <HOST_NAME>                    : You can provide a <HOST_NAME> to the configuration script."
+            echo "(INFO)                                               If option is not used, default name is          \`hostname\`"
+            echo "(INFO)                                               NOTE:"
+            echo "(INFO)                                                The server must always be started on the machine that is configured"
+            echo "(INFO)                                                using the hostname!"
+            echo "(INFO)    -only_create_script                      : This option will skip the vManager setup and create/overwrite the service script."
+            echo "(INFO)"
+            echo "(INFO)  Example:"
+            echo "(INFO)    vmanager_server_setup -vmgr_version 19.06.001 -db_port 5432 -vmgr_server_port 8080"
+            echo "(INFO)      - Creates the following folder structure"
+            echo "(INFO)         \${PWD}/19.06.001/db       -> contains the running Postgres DB instance"
+            echo "(INFO)         \${PWD}/19.06.001/profile  -> contains the running vManager instance"
+            echo "(INFO)      - Uses the access port for Postgres at       :  `hostname`:5432"
+            echo "(INFO)      - Creates and launches the vManager server at:  `hostname`:8080"
+            shift # remove single argument
+            exit 0
+            ;;
+        -inst_root)
+            shift # remove the -inst_root argument
+            export VMGR_SERVER_INSTANCE_ROOT=${1}
+            shift # remove the argument
+            echo "(INFO) - Using vManager Instance folder:  ${VMGR_SERVER_INSTANCE_ROOT}"
+            ;;
+        -vmgr_version)
+            shift # remove the -vmgr_version
+            export VMGR_VERSION=${1}
+            shift # remove the argument
+            echo "(INFO) - Using vManager version: ${VMGR_VERSION}"
+            ;;
+        -db_port)
+            shift # remove the -db_port option
+            export DB_PORT=${1}
+            shift # remove the argument
+            if [[ -n "`netstat -tlpn | grep LISTEN | grep ${DB_PORT}`" ]]; then
+                echo "(ERROR) - Can not use Postgres port number ${DB_PORT} because it is already in use!"
+                exit 1
+            fi
+            echo "(INFO) - Using Postgres port ${DB_PORT}"
+            ;;
+        -db_sys_user)
+            shift # remove the -db_sys_user option
+            export SYS_USER=${1}
+            shift # remove the argument
+            echo "(INFO) - Using Postgres DB System User ${SYS_USER}"
+            ;;
+        -db_sys_pass)
+            shift # remove the -db_sys_pass option
+            export SYS_PASS=${1}
+            shift # remove the argument
+            echo "(INFO) - Using Postgres DB System User PASSWORD ${SYS_PASS}"
+            ;;
+        -db_dir)
+            shift   # Remove the db_dir argument
+            export DB_DIR=${1}
+            shift # need to remove the argument db_dir and the actual path that must be provided
+            echo "(INFO) - Setting up vManager database folder in ${DB_DIR}"
+            ;;
+        -db_admin_dir)
+            shift
+            export DB_ADMIN_DIR=${1}
+            shift
+            echo "(INFO) - Setting up Postgres DB backup administrator folder in ${DB_ADMIN_DIR}"
+            ;;
+        -vmgr_profile)
+            shift # Remove the -vmgr_profile option
+            export PROFILE_DIR=${1}
+            shift # remove the argument
+            echo "(INFO) - Using vManager PROFILE folder ${PROFILE_DIR}"
+            ;;
+        -vmgr_public_split_profile)
+            shift # Remove the -vmgr_public_split_profile option
+            export PUBLIC_PROFILE_SPLIT=${1}
+            shift # remove the argument
+            echo "(INFO) - Using vManager PROFILE folder ${PUBLIC_PROFILE_SPLIT}"
+            ;;
+        -vmgr_server_port)
+            shift # Remove the -vmgr_server_port option
+            export VMGR_SERVER_PORT=${1}
+            shift # remove the argument
+            if [[ -n "`netstat -tlpn | grep LISTEN | grep ${VMGR_SERVER_PORT}`" ]]; then
+                echo "(ERROR) - Can not use vManager Server port number ${VMGR_SERVER_PORT} because it is already in use!"
+                exit 1
+            fi
+            echo "(INFO) - Using port ${VMGR_SERVER_PORT} on vManager server"
+            ;;
+        -vmgr_memory_size)
+            shift # Remove the -vmgr_memory_size option
+            export VMGR_MEMORY_SIZE=${1}
+            shift # remove the argument
+            echo "(INFO) - Setting vManager memory footprint to ${VMGR_MEMORY_SIZE}"
+            ;;
+        -broker_tcp_port)
+            shift # Remove the -vmgr_memory_size option
+            export USE_BROKER=1
+            export BROKER_TCP_PORT=${1}
+            shift # remove the argument
+            if [[ -n "`netstat -tlpn | grep LISTEN | grep ${BROKER_TCP_PORT}`" ]]; then
+                echo "(ERROR) - Can not use Message Broker TCP port number ${BROKER_TCP_PORT} because it is already in use!"
+                exit 1
+            fi
+            echo "(INFO) - Setting Message Broker TCP Port to ${BROKER_TCP_PORT}"
+            ;;
+        -broker_stomp_port)
+            shift # Remove the -vmgr_memory_size option
+            export USE_BROKER=1
+            export BROKER_STOMP_PORT=${1}
+            shift # remove the argument
+            if [[ -n "`netstat -tlpn | grep LISTEN | grep ${BROKER_STOMP_PORT}`" ]]; then
+                echo "(ERROR) - Can not use Message Broker TCP port number ${BROKER_STOMP_PORT} because it is already in use!"
+                exit 1
+            fi
+            echo "(INFO) - Setting Message Broker STOMP Port to ${BROKER_STOMP_PORT}"
+            ;;
+        -broker_data_dir)
+            shift # Remove the -vmgr_memory_size option
+            export BROKER_DATA_DIR=${1}
+            shift # remove the argument
+            echo "(INFO) - Setting Message Broker Data Dir to ${BROKER_DATA_DIR}"
+            ;;
+        -broker_password)
+            shift # Remove the -vmgr_memory_size option
+            export BROKER_PASSWORD=${1}
+            shift # remove the argument
+            echo "(INFO) - Setting Message Broker password to ${BROKER_PASSWORD}"
+            ;;
+        -enable_ha)
+            shift # Remove the -enable_ha
+            export USE_HAP=true
+            echo "(INFO) - Starting vManager server in High Availabilty Mode"
+            ;;
+        -hostname)
+            shift # Remove the -hostname argument
+            export HOST=${1}
+            shift # remove the argument
+            echo "(INFO) - Configuring vManager for host: ${HOST}"
+            ;;
+        -only_create_script)
+            shift # remove the only_create_script argument
+            echo "(INFO) - Only create or overwrite the service script"
+            export ONLY_CREATE_SERVICE_SCRIPT=1
+            ;;
+        *)  # default is also unknown option
+            echo "(WARNING) - Unknown argument ${key} found. Please remove it from the script and run again"
+            exit 1
+            ;;
+    esac
+done
+
+###############################################################################################################################################
+## These Parameters must be given by the user as a bare minimum
+if [[ -z "${VMGR_SERVER_PORT}" ]]; then
+    echo "(ERROR) - Option -vmgr_server_port <PORT_NUMBER> not provided. Please provide a port for the vManager server (ie. 8080)"
+    exit 1
+fi
+
+if [[ -z "${DB_PORT}" ]]; then
+    echo "(ERROR) - Option -db_port <PORT_NUMBER> not provided. Please provide a port for the Postgres server (ie. 5432)"
+    exit 1
+fi
+
+if [[ ! -z ${USE_BROKER} ]]; then
+    if [[ -z ${BROKER_STOMP_PORT} ]]; then
+        echo "(ERROR) - Option -broker_stomp_port <PORT_NUMBER> not provided. Please provide a port for the Message Broker STOMP port"
+        exit 1
+    fi
+    if [[ -z ${BROKER_TCP_PORT} ]]; then
+        echo "(ERROR) - Option -broker_tcp_port <PORT_NUMBER> not provided. Please provide a port for the Message Broker TCP port"
+        exit 1
+    fi
+    if [[ -z ${BROKER_DATA_DIR} ]]; then
+        export BROKER_DATA_DIR=message_broker_data
+        echo "(INFO) - Option -broker_data_dir <FOLDER_NAME> not provided.=> Using default value: ${BROKER_DATA_DIR}"
+    fi
+    if [[ -z ${BROKER_PASSWORD} ]]; then
+        export BROKER_PASSWORD=letmein
+        echo "(INFO) - Option -broker_password <PASSWORD> not provided.=> Using default value   : ${BROKER_PASSWORD}"
+    fi
+fi
+###############################################################################################################################################
+
+###############################################################################################################################################
+## These parameters will be derived automatically.
+if [[ -z "${VMGR_VERSION}" ]]; then
+    export VMGR_VERSION=`vmanager -version | cut -d ':' -f2 | tr -d " "`
+    echo "(INFO) - Option -vmgr_version <VERSION_NUMBER> not provided.=> Using default value:  ${VMGR_VERSION}"
+fi
+
+if [[ -z "${HOST}" ]]; then
+    export HOST=`hostname`
+    echo "(INFO) - Option -hostname <HOSTNAME> not provided.          => Using default value:  ${HOST}"
+fi
+
+if [[ -z "${VMGR_MEMORY_SIZE}" ]]; then
+    export VMGR_MEMORY_SIZE=4g
+    echo "(INFO) - Option -vmgr_memory_size <SIZE> not provided.      => Using default value:  ${VMGR_MEMORY_SIZE}"
+fi
+
+if [[ -z "${SYS_USER}" ]]; then
+    export SYS_USER=postgres
+    echo "(INFO) - Option -db_sys_user <USER_NAME> not provided.      => Using default value:  ${SYS_USER}"  
+fi
+
+if [[ -z "${SYS_PASS}" ]]; then
+    export SYS_PASS=postgres
+    echo "(INFO) - Option -db_sys_pass <PASSWORD> not provided.       => Using default value:  ${SYS_PASS}"  
+fi
+
+if [[ -z "${VMGR_SERVER_INSTANCE_ROOT}" ]]; then
+    export VMGR_SERVER_INSTANCE_ROOT=`pwd`
+    echo "(INFO) - Option -inst_root <FOLDER> was not provided.       => Using default value:  ${VMGR_SERVER_INSTANCE_ROOT}"
+fi
+
+if [[ -z "${DB_DIR}" ]]; then
+    export DB_DIR=db
+    echo "(INFO) - Option -db_dir <FOLDER_NAME> not provided.         => Using default value:  ${DB_DIR}"  
+fi
+
+if [[ -z "${PROFILE_DIR}" ]]; then
+    export PROFILE_DIR=profile
+    echo "(INFO) - Option -vmgr_profile <FOLDER_NAME> not provided.   => Using default value:  ${PROFILE_DIR}"  
+fi
+###############################################################################################################################################
+
+if [[ ! -z "${ONLY_CREATE_SERVICE_SCRIPT}" ]]; then
+    echo "(INFO) - Skipping vManager Server setup."
+else
+    echo "(INFO) - Setting up vManager Project Server with default project 'vmgr'."
+    echo "(INFO) - Full path to Postgres DB                           => ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_DIR}"
+    echo "(INFO) - Full path to vManager profile                      => ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}"
+    echo "(INFO) - Removing old server information from file-system"
+    
+    if [[ "${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}" == "`pwd`" ]] || [[ "${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}" == "`pwd`/" ]]; then
+        echo "(ERROR) - Aborting due to empty \${VMGR_VERSION} variable. Please use script option -vmgr_version example_name"
+        exit 1
+    fi
+    rm -rf ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}
+    
+
+    echo "(INFO) - Creating folder for database and server setup in ${DB_DIR}"
+    mkdir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}
+    mkdir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_DIR}
+
+    echo "(INFO) - Modifying the stacksize and file-descriptor limit"
+    ulimit -Ss unlimited
+    ulimit -Sn unlimited
+
+    # Create the Postgres database
+    echo "(INFO) - Creating new Postgres database"
+    vmgrcreatedb \
+        -db_dir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_DIR} \
+        -db_port ${DB_PORT} \
+        -sys_username ${SYS_USER} \
+        -sys_password ${SYS_PASS}
+
+    RETURN_VALUE=$?
+    if [[ ${RETURN_VALUE} -eq 1 ]]; then
+        echo "(ERROR) - Creating the Postgres database failed."
+        exit 1
+    fi
+
+    # Check if configuring a backup folder was requested
+    if [[ -z ${DB_ADMIN_DIR} ]]; then
+        echo "(INFO) - No Postgres backup setup requested."
+    else
+        ## Setting up the vManager DB admin script, if requested. This requires vManager version 19.03.xxx or higher
+        export VM_SETUP_SCRIPTS=`dirname ${0}`
+        echo "(INFO) - Setting up the vManager administrator level scripting"
+        ${VM_SETUP_SCRIPTS}/vmanager_db_admin_wal_setup \
+            -db_dir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_DIR} \
+            -db_port ${DB_PORT} \
+            -db_config_dir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_ADMIN_DIR} \
+            -db_super_user ${SYS_USER} \
+            -db_notification_emails CHANGE@ME.COM \
+            -db_user ${SYS_USER}
+    fi
+
+    # Start the Postgres database
+    echo "(INFO) - Starting Postgres database"
+    vmgrdb \
+        -db_dir ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_DIR} \
+        -start
+
+    RETURN_VALUE=$?
+    if [[ ${RETURN_VALUE} -eq 1 ]]; then
+        echo "(ERROR) - Starting the Postgres database failed."
+        exit 1
+    fi
+
+    # Creating the profile
+    echo "(INFO) - Creating the vManager base profile"
+    if [[ -z ${XCELIUM_ROOT_INSTALLATION} ]]; then
+        export VMGR_XLM_HOME
+    else
+        export VMGR_XLM_HOME=-xlm_home\ ${XCELIUM_ROOT_INSTALLATION}
+    fi
+
+    if [[ -z ${PUBLIC_PROFILE_SPLIT} ]]; then
+        export NFS_SPLIT
+    else
+        export NFS_SPLIT=-nfs_split\ ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PUBLIC_PROFILE_SPLIT}
+    fi
+
+    vmgrprofile \
+        -profile ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR} \
+        -create \
+        -db_sys_username ${SYS_USER} \
+        -db_sys_password ${SYS_PASS} \
+        -db_host ${HOST} \
+        -db_port ${DB_PORT} \
+        -db_password ${SYS_PASS} \
+        -host ${HOST} \
+        -port ${VMGR_SERVER_PORT} \
+        -memory ${VMGR_MEMORY_SIZE} \
+        ${VMGR_XLM_HOME} \
+        ${NFS_SPLIT}
+
+    RETURN_VALUE=$?
+    if [[ ${RETURN_VALUE} -eq 1 ]]; then
+        echo "(ERROR) - Creating the vManager profile failed."
+        exit 1
+    fi
+
+    # Enable the High Availability Proxy by setting the correct profile.properties tags and use a "standard server" and a "high-availability server" configuration
+    touch ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap
+    chmod 700 ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap
+    mv ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_standard
+    echo "profile.micro.server.mode=true" >> ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap
+    echo "" >> ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap
+    OLD_IFS="${IFS}"
+    IFS=
+    while read line; do
+        if [[ ${line} =~ ^server.xmx* ]]; then
+            echo "server.xmx=1024m"
+        elif [[ ${line} =~ ^profile.micro.server.mode* ]]; then
+            echo "profile.micro.server.mode=true"
+        else
+            echo ${line}
+        fi
+    done < ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_standard >> ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap
+    
+    if [[ -z "${USE_HAP}" ]]; then
+        echo "(INFO) - Configuring vManager Standard Architecture"
+        ln -s ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_standard ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties
+    else
+        echo "(INFO) - Configuring vManager High Availabiliy Architecture"
+        ln -s ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties_hap ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR}/profile.properties
+    fi
+
+    if [[ ! -z ${DB_ADMIN_DIR} ]]; then
+        # In case the Postgres DB Incremental Backup is enabled, we need to do some basics steps before backing up and restoring the DB is fully functional
+        export PATH=${VMGR_ROOT_INSTALLATION}/tools/vmgr/db_scripts:${PATH}
+        echo "(INFO) - Setting up WAL for Incremental Backup"
+        wal_setup.sh ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_ADMIN_DIR} ${SYS_PASS}
+        
+        echo "(INFO) - List of Timezones on Wikipedia: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+        echo "(INFO) - Please enter your timezone (\"TZ database name\" column from Wikipedia website): "
+        read TIMEZONE; export TIMEZONE
+        echo "(INFO) - Setting up the Postgres timezone..."
+        set_db_timezone.sh ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_ADMIN_DIR} ${SYS_PASS} ${TIMEZONE}
+
+
+        echo "(INFO) ============================================================================================================================================"
+        echo "(INFO) == Now creating vManager DB backup access script to easily setup and confiure DB backup:  vmanager_db_backup_menu_${VMGR_VERSION}"
+        echo "(INFO) ============================================================================================================================================"
+        echo "(INFO) == To enter the DB backup options, simply execute:"
+        echo "(INFO) ==    vmanager_db_backup_menu_${VMGR_VERSION}"
+
+        echo "#!/bin/bash                                                                                                                           " >  vmanager_db_backup_menu_${VMGR_VERSION}
+        echo "echo \"(INFO) - Entering vManager Postgres DB Backup Menu...\"                                                                        " >> vmanager_db_backup_menu_${VMGR_VERSION}
+        echo "echo \"         \`vm_root\`/tools/vmgr/db_scripts/db_maintenance.sh ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_ADMIN_DIR}\"    " >> vmanager_db_backup_menu_${VMGR_VERSION}
+        echo "\`vm_root\`/tools/vmgr/db_scripts/db_maintenance.sh ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${DB_ADMIN_DIR}                      " >> vmanager_db_backup_menu_${VMGR_VERSION}
+        echo "" >> vmanager_db_backup_menu_${VMGR_VERSION}
+
+        chmod u+x vmanager_db_backup_menu_${VMGR_VERSION}
+
+        RETURN_VALUE=$?
+        if [[ ${RETURN_VALUE} -eq 1 ]]; then
+            echo "(ERROR) - Creating the Incremental Backup mechanism failed."
+            exit 1
+        fi
+    fi
+
+    if [[ ! -z ${USE_BROKER} ]]; then
+        export VM_SETUP_SCRIPTS=`dirname ${0}`
+
+        # The following script will also launch the message broker directly
+        ${VM_SETUP_SCRIPTS}/vmanager_setup_message_broker \
+            -inst_root ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION} \
+            -profile ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR} \
+            -tcp_port ${BROKER_TCP_PORT} \
+            -stomp_port ${BROKER_STOMP_PORT} \
+            -data_dir ${BROKER_DATA_DIR} \
+            -password ${BROKER_PASSWORD} \
+            -host ${HOST} \
+            -skip_port_check
+
+        RETURN_VALUE=$?
+        if [[ ${RETURN_VALUE} -eq 1 ]]; then
+            echo "(ERROR) - Creating the Message Broker mechanism failed."
+            exit 1
+        fi
+    fi
+
+    # Starting the server
+    echo "(INFO) - Launching the vManager base profile"
+    vmgrserver \
+        -profile ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR} \
+        -start
+
+    RETURN_VALUE=$?
+    if [[ ${RETURN_VALUE} -eq 1 ]]; then
+        echo "(ERROR) - Starting the vManager server profile ${PROFILE_DIR} failed."
+        exit 1
+    fi
+
+    # Configuring vManager's DRM settings
+    echo "(INFO) - Example on how to set the vManager configuration via TCL script parameters:"
+    echo "          vmanager "
+    echo "              -profile ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR} "
+    echo "              -execcmd \""
+    echo "                  config general.client_suspend_timeout_support -set false; "
+    echo "                  config general.open_terminal_cmd -set gnome-terminal; "
+    echo "                  config general.Browser -set firefox; "
+    echo "                  config automation.auto_session_export_vsofx -set true; "
+    echo "                  config runner.drm.enable_new_drm_job_manager -set true; "
+    echo "                  config runner.drm.use_drm_job_arrays -set false; "
+    echo "                  config runner.drm.drm -set PARALLEL_LOCAL; "
+    echo "                  config runner.support_runner_64bit_seed_generation -set true; "
+    echo "                  config session.refresh.auto_refresh_delta -set 10 "
+    echo "                  \""
+    vmanager \
+      -profile ${VMGR_SERVER_INSTANCE_ROOT}/${VMGR_VERSION}/${PROFILE_DIR} \
+      -execcmd "\
+        config general.client_suspend_timeout_support -set false; \
+        config general.open_terminal_cmd -set gnome-terminal; \
+        config general.Browser -set firefox; \
+        config automation.auto_session_export_vsofx -set true; \
+        config runner.drm.enable_new_drm_job_manager -set true; \
+        config runner.drm.use_drm_job_arrays -set false; \
+        config runner.drm.drm -set PARALLEL_LOCAL; \
+        config runner.support_runner_64bit_seed_generation -set true; \
+        config session.refresh.auto_refresh_delta -set 10 \
+      "
+
+    RETURN_VALUE=$?
+    if [[ ${RETURN_VALUE} -eq 1 ]]; then
+        echo "(ERROR) - Setting the example configuration failed."
+        exit 1
+    fi
+fi
+
+
+echo ""
+echo "(INFO) ============================================================================================================================================"
+echo "(INFO) == Now creating vManager maintenance script to easily shutdown and start vManager and DB instances:  vmanager_service_${VMGR_VERSION}"
+echo "(INFO) ============================================================================================================================================"
+echo "(INFO) == To use this script, execute it with the options  <start|stop|restart|status>"
+echo "(INFO) ==    vmanager_service_${VMGR_VERSION} <start|stop|restart|status|backup|restore <VM_CONFIG_BACKUP>"
+
+# Creating maintenance files
+echo "#!/bin/bash"                                                                                                                  >  vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "####################################################################################################"                         >> vmanager_service_${VMGR_VERSION}
+echo "## To use this script, please ensure that"                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "##  VM_ROOT points to the vManager root installation folder"                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "##  VM_DB   points to the installed Postgres DB folder"                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "##  VM_PROF points to the installed vManager profile folder"                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "####################################################################################################"                         >> vmanager_service_${VMGR_VERSION}
+echo "VM_VERSION=${VMGR_VERSION}"                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "####################################################################################################"                         >> vmanager_service_${VMGR_VERSION}
+echo "## Script Generated with this invocation call:"                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "## ${0} \\"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "##   ${SCRIPT_ARGS}"                                                                                                          >> vmanager_service_${VMGR_VERSION}
+echo "####################################################################################################"                         >> vmanager_service_${VMGR_VERSION}
+echo "##                             DO NOT CHANGE BELOW THESE LINES                                    ##"                         >> vmanager_service_${VMGR_VERSION}
+echo "####################################################################################################"                         >> vmanager_service_${VMGR_VERSION}
+echo "if [[ -z \${HOME} ]]; then"                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(ERROR) - The \\\${HOME} folder was not set, this will cause vManager based processes to not operate as expected.\"">> vmanager_service_${VMGR_VERSION}
+echo "    echo \"          Please set the \\\${HOME} variable and try again.\""                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    exit 1"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "fi"                                                                                                                           >> vmanager_service_${VMGR_VERSION}
+echo "VM_ROOT=${VMGR_ROOT_INSTALLATION}"                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "VM_SERVER_INSTANCE_ROOT=${VMGR_SERVER_INSTANCE_ROOT}"                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "VM_DB=${VMGR_SERVER_INSTANCE_ROOT}/\${VM_VERSION}/${DB_DIR}"                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "VM_PROF=${VMGR_SERVER_INSTANCE_ROOT}/\${VM_VERSION}/${PROFILE_DIR}"                                                           >> vmanager_service_${VMGR_VERSION}
+
+if [[ ! -z ${USE_BROKER} ]]; then
+    echo "VM_MESSAGE_BROKER=${VMGR_SERVER_INSTANCE_ROOT}/\${VM_VERSION}/${BROKER_DATA_DIR}"                                       >> vmanager_service_${VMGR_VERSION}
+fi
+
+echo "VM_LICENSE=${CDS_LIC_FILE}"                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "VM_CONF=/tools/vmgr/admin"                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "VM_EXEC_HOST=${HOST}"                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "echo \"=============================================================================\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"==              Generated vManager Service Script                          ==\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"=============================================================================\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"== For questions, please contact:     danielb@cadence.com                  ==\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"=============================================================================\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"(INFO) - Executing Command:                                                  \""                                       >> vmanager_service_${VMGR_VERSION}
+echo "echo \"         \${0} \${*}                                                           \""                                     >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "start() {"                                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                           START (\`hostname\`)                          \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Modifying the stacksize and file-descriptor limit\""                                                      >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Increase the stacksize soft to unlimited\""                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    ulimit -Ss unlimited"                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Increase the descriptors soft to unlimited\""                                                             >> vmanager_service_${VMGR_VERSION}
+echo "    ulimit -Sn unlimited"                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STARTING the vManager database using command:\""                                                          >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -start\""                                                >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -start"                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"\""                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "    if [ -z \${CDS_LIC_FILE} ]; then"                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"Setting CDS_LIC_FILE to $VM_LICENSE\""                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "        export CDS_LIC_FILE=\${VM_LICENSE}"                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    fi"                                                                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STARTING the vManager server using command:\""                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -start\""                                         >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -start"                                                           >> vmanager_service_${VMGR_VERSION}
+
+if [[ ! -z ${USE_BROKER} ]]; then
+    echo "    \${VM_ROOT}/\${VM_CONF}/vmgrmessagebroker -data_dir \${VM_MESSAGE_BROKER} -start"                                     >> vmanager_service_${VMGR_VERSION}
+fi
+
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "stop() {"                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                            STOP (\`hostname\`)                          \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STOPPING the vManager server using command:\""                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -stop\""                                          >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -stop"                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"\""                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STOPPING the vManager database using command:\""                                                          >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -stop\""                                                 >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -stop"                                                                   >> vmanager_service_${VMGR_VERSION}
+
+if [[ ! -z ${USE_BROKER} ]]; then
+    echo "    \${VM_ROOT}/\${VM_CONF}/vmgrmessagebroker -data_dir \${VM_MESSAGE_BROKER} -stop"                                      >> vmanager_service_${VMGR_VERSION}
+fi
+
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo " "                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "status() {"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                            STATUS (\`hostname\`)                        \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STATUS query of the vManager server using command:\""                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -status\""                                        >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -status"                                                          >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"\""                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - STATUS query of the vManager database using command:\""                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -status\""                                               >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrdb -db_dir \${VM_DB} -status"                                                                 >> vmanager_service_${VMGR_VERSION}
+
+if [[ ! -z ${USE_BROKER} ]]; then
+    echo "    \${VM_ROOT}/\${VM_CONF}/vmgrmessagebroker -data_dir \${VM_MESSAGE_BROKER} -status"                                    >> vmanager_service_${VMGR_VERSION}
+fi
+
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo " "                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "backup() {"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                            BACKUP (\`hostname\`)                        \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    stop"                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    BACKUP_NAME=vmanager_full_backup_\${VM_VERSION}_\`date +%Y_%m_%d__%H_%m_%S\`"                                             >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Copying vM setup:\""                                                                                      >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         mkdir \${BACKUP_NAME}\""                                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         rsync -av \${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION}  ==>  \${BACKUP_NAME}\""                             >> vmanager_service_${VMGR_VERSION}
+echo "    mkdir \${BACKUP_NAME}"                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "    rsync -av \${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION} \${BACKUP_NAME}"                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    "                                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "    # This is used for sanity checking. The restore call will check for this file's existance"                                >> vmanager_service_${VMGR_VERSION}
+echo "    touch \${BACKUP_NAME}/\${VM_VERSION}/.is_scripted_backup"                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Copying files done ... now restarting vManager\""                                                         >> vmanager_service_${VMGR_VERSION}
+echo "    start"                                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo " "                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "restore() {"                                                                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                            RESTORE (\`hostname\`)                       \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    if [[ -z \${1} ]]; then"                                                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"(ERROR) - There was no restore snapshot provided in the argument. \""                                          >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"          Please select a folder with a backup snapshot and rerun again.\""                                    >> vmanager_service_${VMGR_VERSION}
+echo "        exit 1"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    fi"                                                                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "    "                                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"RESTORE - Checking if selected snapshot was created by this backup mechanism...\""                                 >> vmanager_service_${VMGR_VERSION}
+echo "    if [[ -e \${1}/\${VM_VERSION}/.is_scripted_backup ]]; then"                                                               >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"(INFO) - Restore file check successful.\""                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    else"                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"(ERROR) - The selected folder \${1} will not be restored.\""                                                   >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"          There was no file found that matches \${1}/\${VM_VERSION}/.is_scripted_backup\""                     >> vmanager_service_${VMGR_VERSION}
+echo "        exit 1"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    fi"                                                                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "    "                                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Ensuring the server is stopped...\""                                                                      >> vmanager_service_${VMGR_VERSION}
+echo "    stop"                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    ORIGINAL_RESTORE_NAME=\${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION}_original_\`date +%Y_%m_%d__%H_%m_%S\`"                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Moving old vManager setup to fail-safe folder using command\""                                            >> vmanager_service_${VMGR_VERSION}
+echo "                    \"mv \${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION} \${ORIGINAL_RESTORE_NAME}\""                              >> vmanager_service_${VMGR_VERSION}
+echo "    mv \${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION} \${ORIGINAL_RESTORE_NAME}"                                                  >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Copying backup vManager setup using command\""                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"         rsync -av \${1}/\${VM_VERSION} \${VM_SERVER_INSTANCE_ROOT}\""                                             >> vmanager_service_${VMGR_VERSION}
+echo "    rsync -av \${1}/\${VM_VERSION} \${VM_SERVER_INSTANCE_ROOT}"                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    # Removing the backup sanity check file, to not accidentally mark a non safed snapshot as backup"                         >> vmanager_service_${VMGR_VERSION}
+echo "    rm -f \${VM_SERVER_INSTANCE_ROOT}/\${VM_VERSION}/.is_scripted_backup"                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    start"                                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "enable_high_availability() {"                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--              ENABLE_HIGH_AVAILABILITY (\`hostname\`)                    \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Stopping vManager server\""                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -stop"                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Changing profile.properties Configuration\""                                                              >> vmanager_service_${VMGR_VERSION}
+echo "    rm -f \${VM_PROF}/profile.properties"                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    ln -s \${VM_PROF}/profile.properties_hap \${VM_PROF}/profile.properties"                                                  >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Starting vManager server\""                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -start"                                                           >> vmanager_service_${VMGR_VERSION}
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "enable_standard_server() {"                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--              ENABLE_STANDARD_SERVER (\`hostname\`)                      \""                                     >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Stopping vManager server\""                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -stop"                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Changing profile.properties Configuration\""                                                              >> vmanager_service_${VMGR_VERSION}
+echo "    rm -f \${VM_PROF}/profile.properties"                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    ln -s \${VM_PROF}/profile.properties_standard \${VM_PROF}/profile.properties"                                             >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Starting vManager server\""                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -start"                                                           >> vmanager_service_${VMGR_VERSION}
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "migrate_to() {"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"--                      MIGRATE_TO \${1} (\`hostname\`)                     \""                                    >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"-------------------------------------------------------------------------\""                                       >> vmanager_service_${VMGR_VERSION}
+echo "    if [[ -z \"\${1}\" ]]; then"                                                                                              >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"(ERROR) - There was no vManager root installation argument provided. \""                                       >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"          Please select the target vManager root folder for migration.\""                                      >> vmanager_service_${VMGR_VERSION}
+echo "        exit 1"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "    else"                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "        if [[ ! -e \${1}/\${VM_CONF}/vmgrconf ]]; then"                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "            echo \"(ERROR) - There was no vManager configuration executable found at given location.\""                       >> vmanager_service_${VMGR_VERSION}
+echo "            echo \"          Please select the target vManager root folder for migration.\""                                  >> vmanager_service_${VMGR_VERSION}
+echo "            exit 1"                                                                                                           >> vmanager_service_${VMGR_VERSION}
+echo "        fi"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    fi"                                                                                                                       >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Stopping vManager server only\""                                                                          >> vmanager_service_${VMGR_VERSION}
+echo "    \${VM_ROOT}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -stop"                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Executing migration using vManager executable \${1}\""                                                    >> vmanager_service_${VMGR_VERSION}
+echo "    \${1}/\${VM_CONF}/vmgrmigrate -profile \${VM_PROF}"                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Starting migrated profile...\""                                                                           >> vmanager_service_${VMGR_VERSION}
+echo "    \${1}/\${VM_CONF}/vmgrserver -profile \${VM_PROF} -start"                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Creating migrated service script: \${0}.migrated\""                                                       >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "    # Preserve whitespace policies"                                                                                           >> vmanager_service_${VMGR_VERSION}
+echo "    OLD_IFS= \"\${IFS}\""                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    IFS="                                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "    while read line; do"                                                                                                      >> vmanager_service_${VMGR_VERSION}
+echo "        if [[ \${line} =~ ^VM_ROOT* ]]; then"                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "            echo \"VM_ROOT=\${1}\""                                                                                           >> vmanager_service_${VMGR_VERSION}
+echo "        else"                                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "            echo \${line}"                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "        fi"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    done < \${0} > \${0}.migrated"                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "    chmod u+x \${0}.migrated"                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "    IFS=\"\${OLD_IFS}\""                                                                                                      >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) - Migration complete.\""                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "    echo \"(INFO) -  Please review the generated file and rename it if necessary: \${0}.migrated\""                           >> vmanager_service_${VMGR_VERSION}
+echo "}"                                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "## Now do the thing"                                                                                                          >> vmanager_service_${VMGR_VERSION}
+echo "case \${1} in"                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "    start)"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "        start"                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    stop)"                                                                                                                    >> vmanager_service_${VMGR_VERSION}
+echo "        stop"                                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    restart)"                                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "        stop"                                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "        start"                                                                                                                >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    backup)"                                                                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "        backup"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    restore)"                                                                                                                 >> vmanager_service_${VMGR_VERSION}
+echo "        restore \${2}"                                                                                                        >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    status)"                                                                                                                  >> vmanager_service_${VMGR_VERSION}
+echo "        status"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    enable_ha)"                                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "        enable_high_availability"                                                                                             >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    enable_standard)"                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "        enable_standard_server"                                                                                               >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    migrate_to)"                                                                                                              >> vmanager_service_${VMGR_VERSION}
+echo "        migrate_to \${2}"                                                                                                     >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "    *)"                                                                                                                       >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"  Usage: \$0 {start|stop|restart|backup|restore <VM_CONF>|migrate_to <NEW_VM_ROOT>|status}\""                  >> vmanager_service_${VMGR_VERSION}
+echo "        echo \"\""                                                                                                            >> vmanager_service_${VMGR_VERSION}
+echo "        ;;"                                                                                                                   >> vmanager_service_${VMGR_VERSION}
+echo "esac"                                                                                                                         >> vmanager_service_${VMGR_VERSION}
+echo "echo \"=============================================================================\""                                       >> vmanager_service_${VMGR_VERSION}
+echo ""                                                                                                                             >> vmanager_service_${VMGR_VERSION}
+
+chmod u+x vmanager_service_${VMGR_VERSION}

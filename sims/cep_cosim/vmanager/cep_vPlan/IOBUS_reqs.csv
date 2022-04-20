@@ -1,0 +1,7 @@
+DEPTH,NODE_KIND,ELEMENT_ID,NAME,details
+0,SECTION,requirements,requirements,
+1,PLANNED_TESTCASE,CEP_000,CEP_000,"Verify all CEP registers can be read/write from any of the RISC‐V cores"
+1,PLANNED_TESTCASE,CEP_001,CEP_001,"Each RISC‐V core pick up a sub set out of 10 macro cores (AES, DES3, etc..) and verifying them in parallel. They also make sure each core never touch the same crypto core at any given time."
+1,PLANNED_TESTCASE,CEP_002,CEP_002,"This test playback the captured vectors during simulation of the cypto cores. These vectors serve 2 purposes: to be used in unit level simulation at transaction/cycle accurate levels,repsectively."
+1,PLANNED_TESTCASE,CEP_003,CEP_003,"This test verifies that each core can obtain/release the lock so they can access the same resource inside the chip without conflict."
+1,PLANNED_TESTCASE,CEP_004,CEP_004,"This test verifies that each core can obtain/release multiple locks so they can access the sane resource inside the chip without conflict and at the same time communicate with each others."
