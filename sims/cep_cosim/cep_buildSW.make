@@ -328,9 +328,9 @@ ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDE
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
-
 endif
 
+.PHONY: riscv_wrapper riscv_wrapper_sd_write
 riscv_wrapper: ${RISCV_WRAPPER_IMG}
 
 riscv_wrapper_sd_write: ${RISCV_WRAPPER_IMG}
@@ -368,6 +368,7 @@ ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
 ${LIB_DIR}/.buildLibs: ${OBJECT_DIR_LIST} ${V2C_LIB} ${VPP_LIB} ${RISCV_LIB}
 	touch $@
 
+.PHONY: buildLibs
 buildLibs: ${LIB_DIR}/.buildLibs
 # -----------------------------------------------------------------------
 
