@@ -1,0 +1,8 @@
+NAME,DEPTH,NODE_KIND,MAPPING_PATTERN,REFERENCE_TO,REFERENCE_TO_NODE,element_id,creator,metrics_port_kind,details
+ACC_CSR_reqs,0,DEFAULT_PERSPECTIVE,,,,ACC_CSR_reqs.csv,,,
+requirements,1,SECTION,,,,requirements,amalhotr,,
+CEP_000,2,PLANNED_COVERAGE,,,,CEP_000,amalhotr,TESTCASE,Verify all CEP registers can be read/write from any of the RISC‐V cores
+CEP_001,2,PLANNED_COVERAGE,,,,CEP_001,amalhotr,TESTCASE,"Each RISC‐V core pick up a sub set out of 10 macro cores (AES, DES3, etc..) and verifying them in parallel. They also make sure each core never touch the same crypto core at any given time."
+CEP_002,2,PLANNED_COVERAGE,,,,CEP_002,amalhotr,TESTCASE,"This test playback the captured vectors during simulation of the cypto cores. These vectors serve 2 purposes: to be used in unit level simulation at transaction/cycle accurate levels,repsectively."
+CEP_003,2,PLANNED_COVERAGE,,,,CEP_003,amalhotr,TESTCASE,This test verifies that each core can obtain/release the lock so they can access the same resource inside the chip without conflict.
+CEP_004,2,PLANNED_COVERAGE,,,,CEP_004,amalhotr,TESTCASE,This test verifies that each core can obtain/release multiple locks so they can access the sane resource inside the chip without conflict and at the same time communicate with each others.

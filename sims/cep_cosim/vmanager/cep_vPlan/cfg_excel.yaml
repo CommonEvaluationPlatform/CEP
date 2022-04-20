@@ -1,0 +1,56 @@
+---
+
+# Tell the Excel parser how to identify a requirement. 
+# There might be rows that have other information in them, like comments,
+# section descriptions, etc.  We can't blindly try to build requirements
+# from every row.
+
+sheet_requirements:
+  accept:
+    - heading : Category
+      regex   : FUNC
+
+sheet_heading_mapping:
+  ID                  : id
+  Test Description    : req_text
+  Block Targeted      : blocks
+
+
+# Section configuration. This can be used if some rows represent hierachy or
+# section names. Here, configure an "accept" filter to select which rows contain
+# section information.
+
+#sheet_sections:
+#  accept:
+#    - heading : Object Heading
+#      regex   : \w+
+
+# Describe which column contain the section name and an indication of the depth.
+# The section depth is assumed to contain numbering like 2.2, 3.1.4.6, etc. The
+# depth will be inferred from the number of decimal points.
+# NOTE: This mapping is in the opposite direction of the sheet_headhing_mapping.
+
+#sheet_section_reverse_mapping:
+#  section_depth    : Object Number
+#  section_heading  : Object Heading
+
+
+# Filter configuration.
+
+#filter:
+#  accept:
+#    - field : verif_method
+#      regex : RTL Simulation
+
+#  reject:
+#    - field : verif_method
+#      regex : Inspect
+#
+#    - field : verif_method
+#      regex : Covered
+
+# grouping is a regex that describes the requirement ID. It includes parenthesis to
+# denote the portion of the ID used to differentiate requirement groups. (The parentheses
+# are part of the regex syntax.)
+
+#grouping: \w+_(\w+)_\w+

@@ -1,0 +1,47 @@
+vManager Server Setup
+1.	Script Package is available to manage creation and maintenance of vManager
+a.	vmanager_server_setup: set up a vManager server instance
+b.	vmanager_service_<label>: allows us to stop and restart server
+2.	To start server: vmanager_server_setup -db_port <db_port_number> -vmgr_server <vmgr_server_port>
+3.	Scripts are available at $CEP_INSTALL/scripts/vmanager_server_setup
+4.	vmanager_server_setup creates a script vmanager_service_<vmgr_version>  in the same directory which allows stopping, starting, and restarting the server
+a.	Ex: vmanager_service_20.08-a001 stop
+5.	Launch vManager -server <machine_name : port_number>
+
+Environment Variables for Tracking Regressions
+1.	CEP_INSTALL – where CEP is installed – This variable should be defined before running anything
+2.	XCELIUM_VERSION/XCELIUM_DIR – Where xcelium software is installed
+3.	RISCV – Points to riscv toolchain
+4.	VPLAN_TOP – point to directory containing vPlans
+5.	LM_LICENSE_FILE – license file for Cadence tools
+6.	VMGR_VERSION/VMGR_DIR – Where vManager software is installed
+7.	VM_DASHBOARD – scripts area
+8.	For all above variables, source tracking_environment_setup.csh in $CEP_INSTALL
+
+Tracking_Run_Vsif
+1.	Define $CEP_INSTALL in crontab
+2.	Inputs
+	a.	Block name
+	b.	VSIF
+	c.	Owner
+	d.	status.txt file for metrics
+	e.	Jira component – Can be replaced by NA
+3.	Defines necessary environment variables
+4.	Change $VMGR_SERVER to your <machine name : port number>
+5.	Status.txt adds tracking data that isn’t tracked by vManager
+
+VSIF
+1.	Each test suite has its own VSIF and CCF
+2.	Tests executed serially with timeout of 1500 seconds
+3.	Launched from crontab using tracking_run_vsif script
+
+vManager Setup
+1.	If the project is using tracking on multiple test-benches, set up the vManager as an “Integration server” using the “Multi Projects Application”. This is configured from the Web interface. https:://<hostname:port>/vmgr
+2.	Add user defined attributes to support tracking dashboard from $CEP_INSTALL/scripts/vm_attributes_tracking.csv. These can be imported into vManager by launching vManager using “vmanager -server $VMGR_SERVER -admin” and using the vManager GUI
+3.	Create a tracking configuration
+	a.	Go to the Tracking tab, and select “new” from the “Tracking Configuration” section
+	b.	Select “Chart Period: All” and “Flat Data Only”
+	c.	On the Metric Hierarchy tab, select “Sample metric attributes” and if the design is small select “All”. If the design is large, limit the number of levels to the bare minimum to capture meaningful data that needs to be tracked. If there are coverage refinements, enter those on this tab.
+4.	On the vPlan tab, select “sample vPlan attributes” and “All”. Fill in the path to the vPlan from the tracking work area ($VPLAN_TOP/SOC.vplanx). And again enter any vPlan refinements that are necessary.
+
+

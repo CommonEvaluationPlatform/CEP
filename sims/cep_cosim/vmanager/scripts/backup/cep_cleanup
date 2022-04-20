@@ -1,0 +1,28 @@
+#!/bin/csh
+# This script cleans up 
+
+echo "Cleanup..."
+
+# Change into the TB directory
+# Necessary environment variables
+#setenv VMGR_VERSION    20.06.001
+#setenv VMGR_DIR        /grid/avs/install/vmanager/AGILE
+#setenv XCELIUM_VERSION 20.09.001
+#setenv XCELIUM_DIR     /grid/avs/install/xcelium/AGILE
+#setenv PATH /grid/common/pkgs/dtc/v1.4.2/bin:${PATH}
+#setenv PATH /grid/common/pkgs/jdk/v1.8.0_191/bin:${PATH}
+#setenv PATH /grid/common/pkgs/gcc/v4.8.3/bin:${PATH}
+#setenv CADENCE_ENABLE_AVSREQ_44905_PHASE_1 1
+#setenv CADENCE_ENABLE_AVSREQ_63188_PHASE_1 1
+#setenv LM_LICENSE_FILE 5280@sjflex:5281@sjflex:5280@sjflex1:5280@sjflex2:5280@sjflex3
+#setenv RISCV $CEP_INSTALL/software/riscv-gnu-toolchain/riscv
+#setenv PATH $RISCV/bin:${PATH}
+cd $CEP_INSTALL/testSuites/bareMetalTests
+make cleanTests CADENCE=1
+cd $CEP_INSTALL/testSuites/bfmTests
+make cleanTests CADENCE=1
+cd $CEP_INSTALL/testSuites/isaTests
+make cleanTests CADENCE=1
+
+
+exit 0
