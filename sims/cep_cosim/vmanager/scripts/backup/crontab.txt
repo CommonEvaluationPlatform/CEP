@@ -1,0 +1,15 @@
+# From crontab(5) manual, first 5 numbers represent:
+# *  * * * *
+# |  | | | |
+# |  | | | +-> day of week    0-7 (0 or 7 is Sun, or use names, * => all days)
+# |  | | +---> month          1-12 (or names, see below, * => all months)
+# |  | +-----> day of month   1-31 (* => all days    )
+# |  +-------> hour           0-23 (* => every hour  )
+# +----------> minute         0-59 (* => every minute)
+
+46  01 * * *  CEP_INSTALL=<CEP INSTALL PATH> $CEP_INSTALL/vmanager/scripts/cep_cleanup
+48  01 * * *  CEP_INSTALL=<CEP INSTALL PATH> $CEP_INSTALL/vmanager/scripts/create_clean_tracking_wa
+50  01 * * *  CEP_INSTALL=<CEP INSTALL PATH> $CEP_INSTALL/vmanager/scripts/tracking_run_vsif bfm_test bfmTests.vsif <username> status.txt NA
+25  02 * * *  CEP_INSTALL=<CEP INSTALL PATH> $CEP_INSTALL/vmanager/scripts/tracking_run_vsif baremetal_test bareMetalTests.vsif <username> status.txt NA
+25  03 * * *  CEP_INSTALL=<CEP INSTALL PATH> $CEP_INSTALL/vmanager/scripts/tracking_run_vsif isa_test isaTests.vsif <username> status.txt NA
+

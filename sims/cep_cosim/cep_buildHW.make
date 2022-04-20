@@ -85,6 +85,7 @@ else
 endif
 COSIM_VLOG_ARGS				+= +define+STOP_COND=\`SYSTEM_RESET
 COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT
+
 # The UART Receiver does not simulate properly without the following definition
 COSIM_VLOG_ARGS 			+= +define+RANDOMIZE_REG_INIT
 COSIM_VLOG_ARGS				+= +define+RANDOM="1'b0"
@@ -100,6 +101,7 @@ COSIM_VLOG_ARGS 			+= +libext+.v +libext+.sv
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
 COSIM_TB_TOP_MODULE_OPT		:= ${COSIM_TB_TOP_MODULE}_opt
+
 # The following parameters units are based on the Verilog timescale directive (default is 1ns)
 COSIM_TB_CLOCK_PERIOD       := 10
 COSIM_TB_RESET_DELAY		:= 100
@@ -346,13 +348,13 @@ ifeq ($(IMC_IN_PATH),)
 endif
 
 # Default parameters
-COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -access +r -notimingchecks -nospecify
+COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -access +r -notimingchecks -nospecify +noassert -timescale '1ns/100ps'
 COSIM_VSIM_ARGS 				+= -64bit -R 
 
 # Enable coverage for Cadence
 ifeq (${COVERAGE},1)
 	COSIM_VLOG_ARGS 			+= -covfile ${COSIM_TOP_DIR}/cadence_cov.ccf
-	COSIM_VSIM_ARGS 			+= -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE} -covtest ${TEST_NAME} 
+	COSIM_VSIM_ARGS 			+= -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE_NAME} -covtest ${TEST_NAME} 
 endif
 
 CAD_TOP_COVERAGE				?= ${COSIM_TOP_DIR}/cad_coverage
@@ -360,7 +362,7 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
-	${XRUN_CMD} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -dpiimpheader imp.h -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE}
+	${XRUN_CMD} -input ${COSIM_TOP_DIR}/vmanager/assertions.tcl ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -dpiimpheader imp.h -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE}
 	touch $@
 
 # Dummy build target to ensure complete dependencies when simulating

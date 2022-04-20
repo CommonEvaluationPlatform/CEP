@@ -1,0 +1,59 @@
+session vBareTests {                                                                                                     
+  top_dir : $ENV(MY_REGRESSION_AREA);                                                                                       
+  output_mode : log_only;                                                                                                   
+}                                                                                                                           
+
+group vBareTests {
+  scan_script: "vm_scan.pl ius_hdl.flt";
+  timeout: 300;
+  drm: "serial local";
+
+test directMap1Level{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/directMap1Level; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test directMap2Levels{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/directMap2Levels; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test dTLB{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/dTLB; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test l0_iTLB{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/l0_iTLB; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test l1_iTLB{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/l1_iTLB; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test l2_iTLB{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/l2_iTLB; make CADENCE=1";
+}                                                                                                                                                                                                            
+
+test l2_scratch{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/l2_scratch; make CADENCE=1";
+} 
+
+test l2_ucache{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/l2_ucache; make CADENCE=1";
+} 
+
+test misalignLdSt2Levels{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/misalignLdSt2Levels; make CADENCE=1";
+} 
+
+test pt3levels{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/pt3levels; make CADENCE=1";
+} 
+
+test special1Level{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/special1Level; make CADENCE=1";
+} 
+
+test superpage2Level{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/vBareTest/superpage2Level; make CADENCE=1";
+} 
+
+} 

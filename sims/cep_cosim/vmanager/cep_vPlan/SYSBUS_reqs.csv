@@ -1,0 +1,5 @@
+DEPTH,NODE_KIND,ELEMENT_ID,NAME,details
+0,SECTION,requirements,requirements,
+1,PLANNED_TESTCASE,CEP_005,CEP_005,"Pre‐load the executable into DDR3 main memory, read back and verify from each core via Tilelink(system bus). This test is need to verify backdoor loading utilized in bare metal mode."
+1,PLANNED_TESTCASE,CEP_007,CEP_007,"verify PRINTF function can be implemented via main memory for simulation"
+1,PLANNED_TESTCASE,CEP_008,CEP_008,"Verify DDR calibration works and then can be read/write from every RISC-V core"
