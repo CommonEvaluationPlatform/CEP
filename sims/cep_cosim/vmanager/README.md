@@ -1,3 +1,7 @@
+[//]: # (Copyright 2022 Massachusetts Institute of Technology)
+
+# Common Evaluation Platform v3.6 - VManager Setup instructions
+
 Setup the vManager Server:
 1. Navigate to the vmanager/scripts/vmanager_server_setup directory. A script package
    is available in this directory to manage creation and maintenance of vManager.
