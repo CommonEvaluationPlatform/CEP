@@ -1,382 +1,1625 @@
-session isaTests { 
-   top_dir : $ENV(MY_REGRESSION_AREA); 
-   output_mode : log_only;   
-   max_runs_in_parallel : 1;
-   pre_session_script   : "cd $ENV(CEP_INSTALL)/testSuites/isaTests; make cleanAll; make buildLibs";
-}    
+session isaTests {
+  top_dir : $ENV(MY_REGRESSION_AREA);
+  output_mode : log_only;
+  max_runs_in_parallel : 1;
+  pre_session_script   : "cd $ENV(CEP_INSTALL)/testSuites/isaTests; make cleanAll; make buildLibs";
+}
 
 group isaTests {
   scan_script: "vm_scan.pl ius_hdl.flt";
   timeout: 1500;
   drm: "serial local";
 
+test rv32mi-p-breakpoint{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-breakpoint; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-csr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-csr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-illegal{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-illegal; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-ma_addr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-ma_addr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-ma_fetch{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-ma_fetch; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-mcsr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-mcsr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-sbreak{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-sbreak; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-scall{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-scall; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32mi-p-shamt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32mi-p-shamt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-csr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-csr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-dirty{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-dirty; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-ma_fetch{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-ma_fetch; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-sbreak{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-sbreak; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-scall{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-scall; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32si-p-wfi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32si-p-wfi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amoadd_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amoadd_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amoand_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amoand_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amomaxu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amomaxu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amomax_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amomax_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amominu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amominu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amomin_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amomin_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amoor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amoor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amoswap_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amoswap_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-amoxor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-amoxor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-p-lrsc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-p-lrsc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amoadd_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amoadd_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amoand_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amoand_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amomaxu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amomaxu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amomax_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amomax_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amominu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amominu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amomin_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amomin_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amoor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amoor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amoswap_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amoswap_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-amoxor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-amoxor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ua-v-lrsc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ua-v-lrsc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uc-p-rvc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uc-p-rvc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uc-v-rvc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uc-v-rvc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-p-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-p-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ud-v-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ud-v-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-move{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-move; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-p-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-p-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-move{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-move; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32uf-v-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32uf-v-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-add{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-add; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-addi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-addi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-and{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-and; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-andi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-andi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-auipc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-auipc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-beq{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-beq; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-bge{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-bge; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-bgeu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-bgeu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-blt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-blt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-bltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-bltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-bne{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-bne; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-fence_i{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-fence_i; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-jal{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-jal; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-jalr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-jalr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lbu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lbu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lui{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lui; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-lw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-lw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-or{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-or; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-ori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-ori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-simple{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-simple; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sll{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sll; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-slli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-slli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-slt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-slt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-slti{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-slti; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sltiu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sltiu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sra{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sra; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-srai{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-srai; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-srl{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-srl; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-srli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-srli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sub{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sub; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-sw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-sw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-xor{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-xor; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-p-xori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-p-xori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-add{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-add; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-addi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-addi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-and{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-and; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-andi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-andi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-auipc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-auipc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-beq{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-beq; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-bge{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-bge; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-bgeu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-bgeu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-blt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-blt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-bltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-bltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-bne{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-bne; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-fence_i{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-fence_i; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-jal{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-jal; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-jalr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-jalr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lbu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lbu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lui{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lui; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-lw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-lw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-or{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-or; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-ori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-ori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-simple{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-simple; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sll{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sll; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-slli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-slli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-slt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-slt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-slti{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-slti; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sltiu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sltiu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sra{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sra; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-srai{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-srai; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-srl{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-srl; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-srli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-srli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sub{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sub; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-sw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-sw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-xor{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-xor; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32ui-v-xori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32ui-v-xori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-div{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-div; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-divu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-divu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-mul{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-mul; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-mulh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-mulh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-mulhsu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-mulhsu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-mulhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-mulhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-rem{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-rem; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-p-remu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-p-remu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-div{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-div; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-divu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-divu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-mul{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-mul; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-mulh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-mulh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-mulhsu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-mulhsu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-mulhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-mulhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-rem{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-rem; make CADENCE=1 COVERAGE=1";
+}
+
+test rv32um-v-remu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv32um-v-remu; make CADENCE=1 COVERAGE=1";
+}
+
 test rv64mi-p-access{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-access; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-access; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64mi-p-breakpoint{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-breakpoint; make CADENCE=1 COVERAGE=1"; 
-}             
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-breakpoint; make CADENCE=1 COVERAGE=1";
+}
 
 test rv64mi-p-csr{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-csr; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-csr; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64mi-p-illegal{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-illegal; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-illegal; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64mi-p-ma_addr{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-ma_addr; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-ma_addr; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64mi-p-ma_fetch{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-ma_fetch; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-ma_fetch; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64mi-p-mcsr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-mcsr; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64mi-p-sbreak{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-sbreak; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-sbreak; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64mi-p-scall{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64mi-p-scall; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64si-p-csr{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-csr; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-csr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64si-p-dirty{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-dirty; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64si-p-icache-alias{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-icache-alias; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64si-p-ma_fetch{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-ma_fetch; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-ma_fetch; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64si-p-sbreak{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-sbreak; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-sbreak; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64si-p-scall{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-scall; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-scall; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64si-p-wfi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64si-p-wfi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoadd_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoadd_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoadd_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoadd_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoand_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoand_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoand_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoand_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomax_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomax_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomaxu_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomaxu_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomaxu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomaxu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomax_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomax_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomin_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomin_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amominu_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amominu_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amominu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amominu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amomin_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amomin_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoor_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoor_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoswap_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoswap_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoswap_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoswap_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoxor_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoxor_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-amoxor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-amoxor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-p-lrsc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-p-lrsc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoadd_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoadd_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoadd_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoadd_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoand_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoand_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoand_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoand_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomax_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomax_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomaxu_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomaxu_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomaxu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomaxu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomax_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomax_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomin_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomin_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amominu_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amominu_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amominu_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amominu_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amomin_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amomin_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoor_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoor_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoswap_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoswap_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoswap_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoswap_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoxor_d{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoxor_d; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-amoxor_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-amoxor_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ua-v-lrsc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ua-v-lrsc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uc-p-rvc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uc-p-rvc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uc-v-rvc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uc-v-rvc; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fadd{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fadd; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fadd; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fclass{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fclass; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fclass; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fcmp{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcmp; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcmp; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fcvt{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcvt; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcvt; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fcvt_w{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcvt_w; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fcvt_w; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fdiv{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fdiv; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fdiv; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fmadd{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fmadd; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fmadd; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-fmin{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fmin; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-p-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-ldst; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-move{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-move; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-move; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ud-p-recoding{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-recoding; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-p-structural{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-p-structural; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-move{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-move; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ud-v-structural{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ud-v-structural; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fadd{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fadd; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fadd; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fclass{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fclass; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fclass; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fcmp{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcmp; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcmp; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fcvt{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcvt; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcvt; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fcvt_w{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcvt_w; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fcvt_w; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fdiv{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fdiv; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fdiv; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fmadd{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fmadd; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fmadd; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-fmin{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fmin; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-fmin; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-ldst{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-ldst; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-ldst; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-move{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-move; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-move; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64uf-p-recoding{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-recoding; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-p-recoding; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fclass{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fclass; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fcmp{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fcmp; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fcvt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fcvt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fcvt_w{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fcvt_w; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fdiv{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fdiv; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fmadd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fmadd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-fmin{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-fmin; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-ldst{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-ldst; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-move{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-move; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64uf-v-recoding{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64uf-v-recoding; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-add{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-add; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-add; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-addi{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addi; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addi; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-addiw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addiw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addiw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-addw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-addw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-and{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-and; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-and; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-andi{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-andi; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-andi; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-auipc{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-auipc; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-auipc; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-beq{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-beq; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-beq; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-bge{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bge; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bge; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-bgeu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bgeu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bgeu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-blt{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-blt; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-blt; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-bltu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bltu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bltu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-bne{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bne; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-bne; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-fence_i{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-fence_i; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-fence_i; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-jal{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-jal; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-jal; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-jalr{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-jalr; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-jalr; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lb{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lb; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lb; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lbu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lbu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lbu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-ld{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-ld; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-ld; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lh{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lh; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lh; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lhu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lhu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lhu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lui{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lui; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lui; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-lwu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lwu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-lwu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-or{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-or; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-or; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-ori{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-ori; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-ori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-p-sb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-p-sd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-p-sh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-p-simple{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-simple; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sll{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sll; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sll; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-slli{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slli; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slli; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-slliw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slliw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slliw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sllw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sllw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sllw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-slt{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slt; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slt; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-slti{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slti; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-slti; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sltiu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sltiu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sltiu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sltu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sltu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sltu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sra{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sra; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sra; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-srai{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srai; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srai; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sraiw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sraiw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sraiw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sraw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sraw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sraw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-srl{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srl; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srl; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-srli{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srli; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srli; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-srliw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srliw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srliw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-srlw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srlw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-srlw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sub{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sub; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sub; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-subw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-subw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-subw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-sw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-sw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-xor{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-xor; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-xor; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64ui-p-xori{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-xori; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-p-xori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-add{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-add; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-addi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-addi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-addiw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-addiw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-addw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-addw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-and{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-and; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-andi{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-andi; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-auipc{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-auipc; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-beq{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-beq; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-bge{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-bge; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-bgeu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-bgeu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-blt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-blt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-bltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-bltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-bne{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-bne; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-fence_i{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-fence_i; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-jal{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-jal; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-jalr{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-jalr; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lbu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lbu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-ld{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-ld; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lui{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lui; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-lwu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-lwu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-or{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-or; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-ori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-ori; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sb{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sb; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sd{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sd; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-simple{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-simple; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sll{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sll; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-slli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-slli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-slliw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-slliw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sllw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sllw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-slt{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-slt; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-slti{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-slti; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sltiu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sltiu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sltu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sltu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sra{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sra; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-srai{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-srai; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sraiw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sraiw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sraw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sraw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-srl{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-srl; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-srli{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-srli; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-srliw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-srliw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-srlw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-srlw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sub{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sub; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-subw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-subw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-sw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-sw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-xor{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-xor; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64ui-v-xori{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64ui-v-xori; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-div{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-div; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-div; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-divu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-divuw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divuw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divuw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-divw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-divw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-mul{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mul; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mul; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-mulh{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulh; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulh; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-mulhsu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulhsu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulhsu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-mulhu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulhu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulhu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-mulw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-mulw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-rem{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-rem; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-rem; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-remu{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remu; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remu; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-remuw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remuw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remuw; make CADENCE=1 COVERAGE=1";
 }
 
 test rv64um-p-remw{
-  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remw; make CADENCE=1 COVERAGE=1"; 
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-p-remw; make CADENCE=1 COVERAGE=1";
 }
 
-} 
- 
+test rv64um-v-div{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-div; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-divu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-divu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-divuw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-divuw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-divw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-divw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-mul{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-mul; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-mulh{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-mulh; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-mulhsu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-mulhsu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-mulhu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-mulhu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-mulw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-mulw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-rem{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-rem; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-remu{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-remu; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-remuw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-remuw; make CADENCE=1 COVERAGE=1";
+}
+
+test rv64um-v-remw{
+  run_script : "cd $ENV(CEP_INSTALL)/testSuites/isaTests/rv64um-v-remw; make CADENCE=1 COVERAGE=1";
+}
+
+}
