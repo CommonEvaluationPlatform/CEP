@@ -12,6 +12,7 @@ export VPLAN_TOP=${CEP_INSTALL}/vmanager/cep_vPlan
 export VMGR_VERSION=VMANAGERAGILE20.06.001
 export VMGR_DIR=/brewhouse/cad4/x86_64/Cadence/VMANAGERAGILE20.06.001/tools/bin
 export VMGR_PATH=/brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}/tools/bin
+export IMC_INSTALL=${VMGR_PATH}
 export PATH=${PATH}:${VMGR_PATH}
 
 export XCELIUM_VERSION=XCELIUMAGILE20.09.001
@@ -19,7 +20,10 @@ export XCELIUM_DIR=/brewhouse/cad4/x86_64/Cadence/XCELIUMAGILE20.09.001/tools/bi
 export XCELIUM_INSTALL=/brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
 export XCELLIUM_PATH=${XCELIUM_INSTALL}/tools/bin
 export PATH=${PATH}:${XCELLIUM_PATH}
-
+export MDV_XLM_HOME=${XCELIUM_INSTALL}
+export DFII_PATH=${XCELIUM_INSTALL}/tools/dfII/bin
+export PATH=${PATH}:${DFII_PATH}
+\
 # Tool configuration and licenses
 export CADENCE_ENABLE_AVSREQ_44905_PHASE_1=1
 export CADENCE_ENABLE_AVSREQ_63188_PHASE_1=1
