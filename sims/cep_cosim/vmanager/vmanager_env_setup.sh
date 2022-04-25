@@ -23,7 +23,7 @@ export PATH=${PATH}:${XCELLIUM_PATH}
 export MDV_XLM_HOME=${XCELIUM_INSTALL}
 export DFII_PATH=${XCELIUM_INSTALL}/tools/dfII/bin
 export PATH=${PATH}:${DFII_PATH}
-\
+
 # Tool configuration and licenses
 export CADENCE_ENABLE_AVSREQ_44905_PHASE_1=1
 export CADENCE_ENABLE_AVSREQ_63188_PHASE_1=1
