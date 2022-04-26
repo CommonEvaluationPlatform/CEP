@@ -27,3 +27,6 @@ export PATH=${PATH}:${DFII_PATH}
 # Tool configuration and licenses
 export CADENCE_ENABLE_AVSREQ_44905_PHASE_1=1
 export CADENCE_ENABLE_AVSREQ_63188_PHASE_1=1
+
+# RISC-V Tools are needed
+source $(git rev-parse --show-toplevel)/env.sh

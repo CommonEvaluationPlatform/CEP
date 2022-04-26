@@ -11,7 +11,7 @@ Setup the vManager Server:
    stopping, starting, and restarting the server. When the server is first created 
    it is also started so you should be able to skip step 3.: 
      ./vmanager_server_setup -db_port <db_port_number> -vmgr_server <vmgr_server_port>
-     e.g.: ./vmanager_server_setup -db_port 5510 -vmgr_server_port 8810
+     e.g.: ./vmanager_server_setup -db_port 5510 -vmgr_server_port 8810 -vmgr_memory_size 32g
 
 3. To start/stop the vManager server execute the following command: 
      vmanager_service_<vmgr_version> <start/stop>

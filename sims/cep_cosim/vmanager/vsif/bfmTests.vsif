@@ -2,7 +2,7 @@ session bfmTests {
    top_dir : $ENV(MY_REGRESSION_AREA); 
    output_mode : log_only;  
    max_runs_in_parallel : 1;
-   pre_session_script   : "cd $ENV(CEP_INSTALL)/testSuites/bfmTests; make cleanAll; make buildLibs";
+   pre_session_script   : "cd $ENV(CEP_INSTALL)/testSuites/bfmTests; make cleanSuite; make buildLibs";
 }    
 
 group bfmTests {
