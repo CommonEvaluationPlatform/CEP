@@ -20,7 +20,7 @@ Setup the vManager Server:
 4. Once the vManager server has been created and started, you can launch the vManager 
    GUI. To launch the GUI execute the following command:
      vmanager -server <machine_name : port_number>
-     e.g.: vmanager -server 566195-mitll:8810
+     e.g.: vmanager -server localhost:8810
 
 Setup the environment variables:
 1. The environment variables needed to run the included vManager scripts are located 

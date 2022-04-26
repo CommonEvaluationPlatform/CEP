@@ -29,7 +29,7 @@ print("ISA Source directory = " + sys.argv[1])
 print("Output VSIF file     = " + sys.argv[2])
 
 # Capture all tests for which a dump file has been generated
-output 		= subprocess.getoutput("ls -1 " + sys.argv[1] +"*.dump | xargs -n 1 basename | sed -e 's/\\.dump$//'")
+output 		= subprocess.getoutput("ls -1 " + sys.argv[1] +"rv64*dump | xargs -n 1 basename | sed -e 's/\\.dump$//'")
 test_list	= output.split()
 
 try: 
