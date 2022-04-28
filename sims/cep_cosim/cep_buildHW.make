@@ -353,7 +353,7 @@ COSIM_VSIM_ARGS 				+= -64bit -R
 
 # Enable coverage for Cadence
 ifeq (${COVERAGE},1)
-	COSIM_VLOG_ARGS 			+= -covfile ${COSIM_TOP_DIR}/cadence_cov.ccf
+	COSIM_VLOG_ARGS 			+= -covfile ${COSIM_TOP_DIR}/vmanager/cadence_cov.ccf
 	COSIM_VSIM_ARGS 			+= -write_metrics -covoverwrite -covworkdir ${COSIM_COVERAGE_PATH} -covscope ${TEST_SUITE_NAME} -covtest ${TEST_NAME} 
 endif
 

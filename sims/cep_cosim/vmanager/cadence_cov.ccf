@@ -2,7 +2,7 @@
 # From Cadence 05/11/21
 #
 
-# enable code and FSM coverage
+## Enable toggle coverage for CEP Modules
 #select_coverage -block -expr -toggle -fsm -instance cep_tb.dut.system...
 select_coverage -toggle -instance cep_tb.dut.system.bootROMDomainWrapper
 select_coverage -toggle -instance cep_tb.dut.system.aesmodule
@@ -37,23 +37,22 @@ select_coverage -toggle -instance cep_tb.dut.system.gpslbllmodule
 select_coverage -toggle -instance cep_tb.dut.system.gpslbllmodule.llki_pp_inst
 select_coverage -toggle -instance cep_tb.dut.system.gpsredactionmodule
 select_coverage -toggle -instance cep_tb.dut.system.gpsredactionmodule.llki_pp_inst
-select_coverage -toggle -instance cep_tb.dut.system.scratchpadasicmodule
-select_coverage -toggle -instance cep_tb.dut.system.srotasicmodule
+select_coverage -toggle -instance cep_tb.dut.system.scratchpadasicmodule.scratchpad_asic_wrapper_inst
+select_coverage -toggle -instance cep_tb.dut.system.srotasicmodule.srot_asic_wrapper_inst
+select_coverage -toggle -instance cep_tb.dut.system.cepregsmodule
 
 
-## Modules to add to coverage metrics
+## Enable toggle coverage for select Rocket Core elements/IP
 select_coverage -toggle -instance cep_tb.dut.system.ibus
 select_coverage -toggle -instance cep_tb.dut.system.subsystem_sbus
 select_coverage -toggle -instance cep_tb.dut.system.subsystem_pbus
 select_coverage -toggle -instance cep_tb.dut.system.subsystem_fbus
 select_coverage -toggle -instance cep_tb.dut.system.subsystem_cbus
 select_coverage -toggle -instance cep_tb.dut.system.subsystem_mbus
-
 select_coverage -toggle -instance cep_tb.dut.system.tile_prci_domain.tile_reset_domain.tile
 select_coverage -toggle -instance cep_tb.dut.system.tile_prci_domain_1.tile_reset_domain.tile
 select_coverage -toggle -instance cep_tb.dut.system.tile_prci_domain_2.tile_reset_domain.tile
 select_coverage -toggle -instance cep_tb.dut.system.tile_prci_domain_3.tile_reset_domain.tile
-
 select_coverage -toggle -instance cep_tb.dut.system.plicDomainWrapper.plic
 select_coverage -toggle -instance cep_tb.dut.system.clint
 select_coverage -toggle -instance cep_tb.dut.system.debug_1
@@ -61,11 +60,8 @@ select_coverage -toggle -instance cep_tb.dut.system.bootROMDomainWrapper.bootrom
 select_coverage -toggle -instance cep_tb.dut.system.uartClockDomainWrapper.uart_0
 select_coverage -toggle -instance cep_tb.dut.system.gpioClockDomainWrapper.gpio_0
 select_coverage -toggle -instance cep_tb.dut.system.spiClockDomainWrapper.spi_0
-select_coverage -toggle -instance cep_tb.dut.system.cepregsmodule
 select_coverage -toggle -instance cep_tb.dut.system.domain.resetCtrl
 select_coverage -toggle -instance cep_tb.dut.system.dtm
-
-
 
 # remove instances in the hierarchy without any coverage
 deselect_coverage -remove_empty_instances
