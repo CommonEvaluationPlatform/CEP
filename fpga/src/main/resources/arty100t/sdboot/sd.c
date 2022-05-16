@@ -9,9 +9,11 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
+#define PAYLOAD_SIZE_B (1 << 19) // 512kB
+
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
+
 // Payload size in # of sectors
 #define PAYLOAD_SIZE (PAYLOAD_SIZE_B / SECTOR_SIZE_B)
 
@@ -177,7 +179,7 @@ static int copy(void)
 	// TODO: Speed up SPI freq. (breaks between these two values)
 	//REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 16666666UL);
 	REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
-	if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
+	if (sd_cmd(0x52, 0, 0xE1) != 0x00) {
 		sd_cmd_end();
 		return 1;
 	}
