@@ -41,11 +41,6 @@ class WithSPI(address: BigInt = 0x64001000) extends Config((site, here, up) => {
     SPIParams(rAddress = address))
 })
 
-// When included, the Black Box PLL will be enabled in Clocks.scala
-class WithBlackBoxPLL extends Config((site, here, up) => {
-  case EnableBlackBoxPLLKey => true
-})
-
 //
 // CEP Specific Configuration Fragments
 //

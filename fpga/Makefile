@@ -8,15 +8,19 @@
 base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
-# do not generate simulation files
-sim_name := none
-
 #########################################################################################
 # include shared variables
 #########################################################################################
+<<<<<<< HEAD
 ifndef SUB_PROJECT
 $(error SUB_PROJECT must be set)
 endif
+=======
+
+VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
+
+SUB_PROJECT ?= vcu118
+>>>>>>> chipyard/arty100t
 
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
@@ -26,7 +30,6 @@ ifeq ($(SUB_PROJECT),vcu118)
 	CONFIG            ?= RocketVCU118Config
 	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
@@ -38,12 +41,12 @@ else ifeq ($(SUB_PROJECT),bringup)
 	CONFIG            ?= RocketBringupConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118.bringup
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
-else ifeq ($(SUB_PROJECT),arty-35)
-	# TODO: Fix with Arty
+endif
+
+ifeq ($(SUB_PROJECT),arty)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= ArtyFPGATestHarness
 	VLOG_MODEL        ?= ArtyFPGATestHarness
@@ -51,9 +54,53 @@ else ifeq ($(SUB_PROJECT),arty-35)
 	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
 	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty
+	FPGA_FAMILY       ?= artix7
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),artysim)
+	# TODO: Fix with Arty
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= ArtyFPGATestHarness
+	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty
+	CONFIG            ?= TinyRocketArtySimConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= ArtyTestDriver
+	TOP               ?= ChipTop
+	BOARD             ?= arty
+	FPGA_FAMILY       ?= artix7
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty100t)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Art100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty100tsim)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Art100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TSimConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= Arty100TTestDriver
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_FAMILY       ?= artix7
 	FPGA_BRAND        ?= xilinx
 else ifeq ($(SUB_PROJECT),arty-100)
 	# TODO: Fix with Arty
@@ -91,8 +138,14 @@ fpga_common_script_dir := $(fpga_dir)/common/tcl
 #########################################################################################
 # setup misc. sim files
 #########################################################################################
-SIM_FILE_REQS += \
-	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
+
+# add the clock gate wrapper
+SIM_FILE_REQS += $(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
+
+# add the testbench if needed for sim
+ifdef TB
+  SIM_FILE_REQS += $(base_dir)/generators/chipyard/src/main/resources/vsrc/$(TB).v
+endif
 
 # copy files but ignore *.h files in *.f (match vcs)
 $(sim_files): $(SIM_FILE_REQS) | $(build_dir)
@@ -133,8 +186,8 @@ $(BIT_FILE): $(synth_list_f)
 		-tclargs \
 			-top-module "$(MODEL)" \
 			-F "$(synth_list_f)" \
-			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
-			-board "$(BOARD)"
+			-board "$(BOARD)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
 
 MCS_FILE := $(build_dir)/obj/$(MODEL).mcs
 $(MCS_FILE): $(BIT_FILE)
@@ -175,6 +228,87 @@ else
 			$(build_dir)/obj/$(MODEL)
 endif
 endif
+
+#########################################################################################
+# sim rules
+#########################################################################################
+
+project-creation-script := $(sim_dir)/scripts/create_project.tcl
+
+# generate the vivado project and add all sources
+vivado-project := $(build_dir)/$(MODEL).xpr
+$(vivado-project): $(synth_list_f) $(project-creation-script)
+	cd $(build_dir); vivado \
+		-nojournal -mode batch \
+		-source  $(project-creation-script) \
+		-tclargs \
+			-top-module "$(MODEL)" \
+			-F "$(synth_list_f)" \
+			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
+			-board "$(BOARD)"
+
+fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
+fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_vhdl_sources.f
+fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
+
+# generate vcs collateral
+vivado-vcs-collateral := $(fpga_sim_verilog_sources) $(fpga_sim_vhdl_sources) $(fpga_sim_cc_sources)
+$(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivado-project)
+	cd $(build_dir); vivado $(vivado-project) \
+		-nojournal -mode batch \
+		-source $(sim_dir)/scripts/generate_vcs_collateral.tcl \
+		-tclargs \
+			$(FPGA_FAMILY) \
+			$(build_dir) \
+			$(MODEL) \
+			$(TB)
+
+include $(base_dir)/vcs.mk
+
+sim_prefix = simv
+sim = $(build_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
+
+xilinx_lib = xil_defaultlib
+
+VCS = vcs -full64
+VLOGAN = vlogan -full64
+VHDLAN = vhdlan -full64
+
+# todo: deduplication between this and other VCS sim makefile
+VLOGAN_OPTS = \
+	-notice \
+	-line \
+	+lint=all,noVCDE,noONGS,noUI \
+	-error=PCWM-L \
+	-error=noZMMCM \
+	-timescale=1ns/10ps \
+	-quiet \
+	-q \
+	+rad \
+	+vcs+lic+wait \
+	+vc+list \
+	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
+	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
+	-debug_pp \
+	+incdir+$(build_dir) \
+	$(PREPROC_DEFINES)
+
+# vcs-mx flow
+$(sim): $(vivado-vcs-collateral)
+	mkdir -p $(build_dir)/vcs_lib/xil_defaultlib
+	if [ -s $(fpga_sim_vhdl_sources) ]; \
+		then \
+			cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log; \
+			fi; \
+	if [ -s $(fpga_sim_verilog_sources) ]; then \
+		cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) +define+DEBUG -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log; \
+	fi; \
+	if [ -s $(fpga_sim_cc_sources) ]; then \
+		cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log -debug_access+all; \
+	fi
+
+.PHONY: sim-fpga
+sim-fpga: $(sim)
 
 #########################################################################################
 # general cleanup rules

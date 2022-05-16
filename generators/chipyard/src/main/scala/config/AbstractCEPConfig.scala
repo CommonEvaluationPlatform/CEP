@@ -15,9 +15,9 @@ class AbstractCEPASICConfig extends Config(
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIGPIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
+  new chipyard.iobinders.WithASICPLLClock ++
   
   // Additional chip configuration items
-  new chipyard.config.WithBlackBoxPLL ++                          // The System Clock & Reset will be routed through a Black Box PLL component
   new chipyard.config.WithNoSubsystemDrivenClocks ++              // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++       // Unspecified clocks within a bus will receive the bus frequency if set
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++       // Unspecified frequencies with match the pbus frequency (which is always set)

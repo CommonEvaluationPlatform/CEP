@@ -12,7 +12,7 @@ import freechips.rocketchip.subsystem._
 import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4SlaveNode, AXI4MasterNode, AXI4EdgeParameters}
 import freechips.rocketchip.util._
-import freechips.rocketchip.prci.{ClockSinkNode, ClockSinkParameters}
+import freechips.rocketchip.prci._
 import freechips.rocketchip.groundtest.{GroundTestSubsystemModuleImp, GroundTestSubsystem}
 
 import sifive.blocks.devices.gpio._
@@ -24,6 +24,7 @@ import barstools.iocell.chisel._
 
 import testchipip._
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
+import chipyard.clocking.{HasChipyardPRCI, DividerOnlyClockGenerator}
 
 import scala.reflect.{ClassTag}
 
@@ -32,6 +33,8 @@ object IOBinderTypes {
   type IOBinderFunction = (Boolean, => Any) => ModuleValue[IOBinderTuple]
 }
 import IOBinderTypes._
+
+import asicBlocks.ceppll._
 
 // System for instantiating binders based
 // on the scala type of the Target (_not_ its IO). This avoids needing to
@@ -583,7 +586,7 @@ class WithAXI4MMIOPunchthrough extends OverrideLazyIOBinder({
   (system: CanHaveMasterAXI4MMIOPort) => {
     implicit val p: Parameters = GetSystemParameters(system)
     val clockSinkNode = p(ExtBus).map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
-    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(MBUS).fixedClockNode)
+    clockSinkNode.map(_ := system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(SBUS).fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
 
     InModuleBody {
@@ -671,5 +674,144 @@ class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
 
+class ClockWithFreq(val freqMHz: Double) extends Bundle {
+  val clock = Clock()
+}
+
+class WithDividerOnlyClockGenerator extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    // Connect the implicit clock
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    // Connect all other requested clocks
+    val referenceClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
+    val dividerOnlyClockGen = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
+
+    (system.allClockGroupsNode
+      := dividerOnlyClockGen.node
+      := referenceClockSource)
+
+    InModuleBody {
+      val clock_wire = Wire(Input(new ClockWithFreq(dividerOnlyClockGen.module.referenceFreq)))
+      val reset_wire = Wire(Input(AsyncReset()))
+      val (clock_io, clockIOCell) = IOCell.generateIOFromSignal(clock_wire, "clock", p(IOCellKey))
+      val (reset_io, resetIOCell) = IOCell.generateIOFromSignal(reset_wire, "reset", p(IOCellKey))
+
+      referenceClockSource.out.unzip._1.map { o =>
+        o.clock := clock_wire.clock
+        o.reset := reset_wire
+      }
+
+      (Seq(clock_io, reset_io), clockIOCell ++ resetIOCell)
+    }
+  }
+})
+
+class WithASICPLLClock extends OverrideLazyIOBinder({
+  (system: HasChipyardPRCI) => {
+    // Connect the implicit clock
+    implicit val p = GetSystemParameters(system)
+    val implicitClockSinkNode = ClockSinkNode(Seq(ClockSinkParameters(name = Some("implicit_clock"))))
+    system.connectImplicitClockSinkNode(implicitClockSinkNode)
+    InModuleBody {
+      val implicit_clock = implicitClockSinkNode.in.head._1.clock
+      val implicit_reset = implicitClockSinkNode.in.head._1.reset
+      system.asInstanceOf[BaseSubsystem].module match { case l: LazyModuleImp => {
+        l.clock := implicit_clock
+        l.reset := implicit_reset
+      }}
+    }
+
+    // Connect all other requested clocks
+    val referenceClockSource = ClockSourceNode(Seq(ClockSourceParameters()))
+    val dividerOnlyClockGen = LazyModule(new DividerOnlyClockGenerator("buildTopClockGenerator"))
+
+    (system.allClockGroupsNode
+      := dividerOnlyClockGen.node
+      := referenceClockSource)
+
+    InModuleBody {
+
+      // Instantiate GPIO cells for all PLL pin
+      val reset_in      = Wire(Input(AsyncReset()))
+      val reset_in_pad  = IO(Analog(1.W)).suggestName(s"reset")
+      val resetIOCell   = {
+        val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_reset")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          reset_in      := (iocell.io.i).asAsyncReset
+          iocell.io.pad <> reset_in_pad
+          Seq(iocell)
+      }
+
+      val clk_in      = Wire(Input(Clock()))
+      val clk_in_pad  = IO(Analog(1.W)).suggestName(s"refclk")
+      val clkIOCell   = {
+        val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_clk")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          clk_in        := (iocell.io.i).asClock
+          iocell.io.pad <> clk_in_pad
+          Seq(iocell)
+      }
+
+      val pll_bypass        = Wire(Input(Bool()))
+      val pll_bypass_pad    = IO(Analog(1.W)).suggestName(s"pll_bypass")
+      val pll_bypassIOCell  = {
+        val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_bypass")
+          iocell.io.o   := false.B
+          iocell.io.oe  := false.B
+          iocell.io.ie  := true.B
+          pll_bypass    := iocell.io.i
+          iocell.io.pad <> pll_bypass_pad
+          Seq(iocell)
+      }
+
+      val pll_observe       = Wire(Output(Clock()))
+      val pll_observe_pad   = IO(Analog(1.W)).suggestName(s"pll_observe")
+      val pll_observeIOCell  = {
+        val iocell  = p(IOCellKey).gpio().suggestName(s"iocell_pll_observe")
+          iocell.io.o   := pll_observe.asBool
+          iocell.io.oe  := true.B
+          iocell.io.ie  := false.B
+          iocell.io.pad <> pll_observe_pad
+          Seq(iocell)
+      }
+
+      // Output wire definitions (not routed to chip IO)
+      val reset_wire              = Wire(Output(AsyncReset()))
+      val clock_wire              = Wire(Output(new ClockWithFreq(dividerOnlyClockGen.module.referenceFreq)))
+
+      // Instantiate the CEP PLL Chisel module
+      val module                  = Module(new CEPPLLModule()).suggestName(s"pll")
+
+      // Connect to the CEP PLL Chisel module I/O
+      module.io.reset_in          := reset_in
+      module.io.clk_in            := clk_in
+      module.io.pll_bypass        := pll_bypass
+      reset_wire                  := module.io.reset_out
+      clock_wire.clock            := module.io.clk_out
+      pll_observe                 := module.io.pll_observe
 
 
+      referenceClockSource.out.unzip._1.map { o =>
+        o.clock := clock_wire.clock
+        o.reset := reset_wire
+      }
+
+      (Seq(reset_in, clk_in, pll_bypass, pll_observe), resetIOCell ++ clkIOCell ++ pll_bypassIOCell ++ pll_observeIOCell)
+    }
+  }
+})

@@ -47,4 +47,11 @@ class WithArtyTweaks extends Config(
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
   new chipyard.TinyRocketConfig)
+
+class TinyRocketArtySimConfig extends Config(
+  new WithFPGASimSerial ++
+  new testchipip.WithDefaultSerialTL ++
+  new chipyard.harness.WithSimSerial ++
+  new chipyard.harness.WithTiedOffDebug ++
+  new TinyRocketArtyConfig)
 // DOC include end: AbstractArty and Rocket
