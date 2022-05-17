@@ -100,6 +100,21 @@ ifeq ($(SUB_PROJECT),arty100tsim)
 	FPGA_BRAND        ?= xilinx
 endif
 
+ifeq ($(SUB_PROJECT),cep_arty100t)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Arty100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TCEPConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+endif
+
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example
@@ -156,6 +171,15 @@ synth_list_f := $(build_dir)/$(long_name).vsrcs.f
 $(synth_list_f): $(sim_common_files) $(all_vsrcs)
 	$(foreach file,$(all_vsrcs),echo "$(file)" >> $@;)
 	cat $(sim_common_files) >> $@
+# These steps are only relevant when building CEP-related targets
+ifneq (,$(findstring cep,$(SUB_PROJECT)))
+	@# Create a dummy CHIPYARD_BUILD_INFO.make in order to allow the build of baremetal
+	@# executables within the CEP CoSimulation environment
+	@touch $(base_dir)/CHIPYARD_BUILD_INFO.make
+	
+	@# Call the blackbox sorting script
+	@${SORT_SCRIPT} ${synth_list_f} ${SORT_FILE}
+endif
 
 BIT_FILE := $(build_dir)/obj/$(MODEL).bit
 $(BIT_FILE): $(synth_list_f)

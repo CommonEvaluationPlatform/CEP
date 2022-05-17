@@ -9,8 +9,9 @@ CFLAGS=-march=rv64ima -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64 -DNONSMP_HART=0
 CFLAGS+= -I $(ROOT_DIR)/include -I.
 LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
+CFLAGS+= -DENABLE_CEPREG
 
-PBUS_CLK ?= 1000000 # default to 1MHz but really should be overridden
+PBUS_CLK ?= 1000000
 
 default: elf bin dump
 

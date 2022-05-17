@@ -59,14 +59,13 @@ else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
 
-
-# Validate the Chipyard verilog has been build by looking for the generated makefile
-ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
-$(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(COSIM_TOP_DIR)")
+# Validate the Chipyard verilog has been built by looking for the generated makefile
+ifeq (,$(wildcard $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
+$(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(REPO_TOP_DIR)")
 endif
 
 # Include the file that contains info about the chipyard build (also, a change includes a rebuild)
-include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+include $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 
 # The following DEFINES control how the software is
 # compiled and if will be overriden by lower level

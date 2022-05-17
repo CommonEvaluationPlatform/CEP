@@ -187,21 +187,20 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 .PHONY: verilog
 verilog: $(sim_vsrcs)
 
-# These steps are only relevant when running the CEP CoSimulation environment
-# All cosim builds will be predicated by "cep_cosim"
-ifneq (,$(findstring cep_cosim,$(SUB_PROJECT)))
+# These steps are only relevant when building CEP-related targets
+ifneq (,$(findstring cep,$(SUB_PROJECT)))
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> CHIPYARD_BUILD_INFO.make
-	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
+	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $(base_dir)/CHIPYARD_BUILD_INFO.make
 
 	@# Call the blackbox sorting script
 	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}

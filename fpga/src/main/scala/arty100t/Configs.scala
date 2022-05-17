@@ -73,6 +73,17 @@ class RocketArty100TSimConfig extends Config(
    new chipyard.harness.WithTiedOffDebug ++
    new RocketArty100TConfig)
 
+class RocketArty100TCEPConfig extends Config(
+  // Add the CEP registers
+  new chipyard.config.WithCEPRegisters ++
+  // reduce L2 size to fit in 100T's BRAMs
+  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=256) ++
+  // with reduced cache size, closes timing at 50 MHz
+  new WithFPGAFrequency(50) ++
+  new WithArty100TTweaks ++
+  new chipyard.RocketConfig)
+
+
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
   new chipyard.config.WithMemoryBusFrequency(fMHz)
