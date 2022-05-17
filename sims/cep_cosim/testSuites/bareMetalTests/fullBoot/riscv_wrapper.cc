@@ -34,14 +34,14 @@
     set_printf(0);
   
     // Set the current core's status to running
-//    set_cur_status(CEP_RUNNING_STATUS);
+    set_cur_status(CEP_RUNNING_STATUS);
     
     // Print a hello to the console (UART) - Core0 only
     if (coreId == 0)
     	kputs("Baremetal - FullBoot Successfull");
     
     // Set the core status
-//    set_status(errCnt, testId[coreId]);
+    set_status(errCnt, testId[coreId]);
 
     // Exit with the error count
     exit(errCnt);

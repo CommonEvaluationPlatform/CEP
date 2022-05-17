@@ -20,25 +20,25 @@ import testchipip.{SerialTLKey}
 import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
-  case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
+  case PeripheryUARTKey   => List(UARTParams(address = BigInt(0x64000000L)))
+  case PeripherySPIKey    => List(SPIParams(rAddress = BigInt(0x64001000L)))
 })
 
-class WithSystemModifications extends Config((site, here, up) => {
+class WithSystemModifications (enableCEPRegs: Int = 0) extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} ENABLE_CEPREGS=${enableCEPRegs} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ArtyDDRSize)))) // set extmem to DDR size
-  case SerialTLKey => None // remove serialized tl port
+  case ExtMem       => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ArtyDDRSize)))) // set extmem to DDR size
+  case SerialTLKey  => None // remove serialized tl port
 })
 
 // DOC include start: AbstractArty100T and Rocket
-class WithArty100TTweaks extends Config(
+class WithArty100TTweaks (enableCEPRegs: Int = 0) extends Config(
   // harness binders
   new WithUART ++
   new WithSPISDCard ++
@@ -49,12 +49,12 @@ class WithArty100TTweaks extends Config(
   new WithTLIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
-  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
+  new chipyard.config.WithTLBackingMemory ++      // use TL backing memory
+  new WithSystemModifications(enableCEPRegs) ++   // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++              // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-  new WithFPGAFrequency(100) // default 100MHz freq
+  new WithFPGAFrequency(100)                      // default 100MHz freq
 )
 
 class RocketArty100TConfig extends Config(
@@ -63,7 +63,8 @@ class RocketArty100TConfig extends Config(
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++
   new WithArty100TTweaks ++
-  new chipyard.RocketConfig)
+  new chipyard.RocketConfig
+)
 // DOC include end: AbstractArty100T and Rocket
 
 class RocketArty100TSimConfig extends Config(
@@ -71,17 +72,22 @@ class RocketArty100TSimConfig extends Config(
    new testchipip.WithDefaultSerialTL ++
    new chipyard.harness.WithSimSerial ++
    new chipyard.harness.WithTiedOffDebug ++
-   new RocketArty100TConfig)
+   new RocketArty100TConfig
+ )
 
 class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers
   new chipyard.config.WithCEPRegisters ++
-  // reduce L2 size to fit in 100T's BRAMs
-  new freechips.rocketchip.subsystem.WithInclusiveCache(capacityKB=256) ++
+
+  // Overide the chip info 
+  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++
-  new WithArty100TTweaks ++
-  new chipyard.RocketConfig)
+  // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
+  new WithArty100TTweaks(1) ++
+  new chipyard.RocketConfig
+)
 
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
