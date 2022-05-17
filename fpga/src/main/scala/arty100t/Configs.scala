@@ -3,7 +3,7 @@ package chipyard.fpga.arty100t
 import sys.process._
 
 import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithDTS}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
@@ -29,7 +29,7 @@ class WithSystemModifications (enableCEPRegs: Int = 0) extends Config((site, her
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} ENABLE_CEPREGS=${enableCEPRegs} bin"
+    val make = s"make -B -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} ENABLE_CEPREG=${enableCEPRegs} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/sdboot/build/sdboot.bin")
   }
