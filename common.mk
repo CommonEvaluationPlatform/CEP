@@ -186,6 +186,10 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 #########################################################################################
 .PHONY: verilog
 verilog: $(sim_vsrcs)
+
+# These steps are only relevant when running the CEP CoSimulation environment
+# All cosim builds will be predicated by "cep_cosim"
+ifeq ($(SUB_PROJECT), $(filter $(SUB_PROJECT), cep_cosim))	
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> CHIPYARD_BUILD_INFO.make
@@ -201,6 +205,7 @@ verilog: $(sim_vsrcs)
 
 	@# Call the blackbox sorting script
 	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
+endif
 
 #########################################################################################
 # helper rules to run simulations
