@@ -49,7 +49,7 @@ default: bootrom_info img dump elf rcf
 #--------------------------------------------------------------------------------------
 # To detect if any important flags has changed since last run
 #--------------------------------------------------------------------------------------
-BOOTROM_CHECK = ${ROOT_DIR}/.BOOTROM_${PBUS_CLK}_${ENABLE_MAIN}_${ENABLE_SD}_${SINGLE_CORE}
+BOOTROM_CHECK = ${ROOT_DIR}/.BOOTROM_${PBUS_CLK}
 
 ${BOOTROM_CHECK}: .force
 	@if test ! -f ${BOOTROM_CHECK}; then rm -f ${ROOT_DIR}/.BOOTROM_*; touch ${BOOTROM_CHECK}; fi

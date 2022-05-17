@@ -28,10 +28,6 @@ EXTRA_SIM_LDFLAGS    	?=
 EXTRA_SIM_SOURCES    	?=
 EXTRA_SIM_REQS       	?=
 
-# Flag to pass to the BootROM makefile.  In the case of the bootrom source in the CEP CoSim directory,
-# this will be used to define a compiler flag that bypasses the main function in order to acceleration
-# simulation,
-FULL_BOOT				?= 0
 #----------------------------------------------------------------------------
 HELP_SIMULATION_VARIABLES += \
 "   EXTRA_SIM_FLAGS        = additional runtime simulation flags (passed within +permissive)" \
@@ -100,7 +96,7 @@ $(build_dir):
 	mkdir -p $@
 
 $(BOOTROM_SOURCES):
-	(cd ${BOOTROM_SRC_DIR}; make FULL_BOOT=$(FULL_BOOT) PBUS_CLK=${PBUS_CLK} SINGLE_CORE=${SINGLE_CORE})
+	(cd ${BOOTROM_SRC_DIR}; make PBUS_CLK=${PBUS_CLK})
 
 $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 	cp -f $(BOOTROM_SOURCES) $(build_dir)

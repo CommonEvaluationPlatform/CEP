@@ -11,16 +11,8 @@ sim_dir=$(abspath .)
 #########################################################################################
 # include shared variables
 #########################################################################################
-<<<<<<< HEAD
-ifndef SUB_PROJECT
-$(error SUB_PROJECT must be set)
-endif
-=======
-
 VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
-
 SUB_PROJECT ?= vcu118
->>>>>>> chipyard/arty100t
 
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
@@ -79,7 +71,7 @@ endif
 ifeq ($(SUB_PROJECT),arty100t)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= Arty100TFPGATestHarness
-	VLOG_MODEL        ?= Art100TFPGATestHarness
+	VLOG_MODEL        ?= Arty100TFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
 	CONFIG            ?= RocketArty100TConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
@@ -92,7 +84,7 @@ endif
 ifeq ($(SUB_PROJECT),arty100tsim)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= Arty100TFPGATestHarness
-	VLOG_MODEL        ?= Art100TFPGATestHarness
+	VLOG_MODEL        ?= Arty100TFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
 	CONFIG            ?= RocketArty100TSimConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t

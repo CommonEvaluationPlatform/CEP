@@ -29,8 +29,6 @@ trait HasHarnessSignalReferences {
   def buildtopReset: Reset
   def dutReset: Reset
   def success: Bool
-  def logicHigh : Bool
-  def logicLow  : Bool
 }
 
 class HarnessClockInstantiator {
@@ -87,11 +85,6 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
 
   val buildtopClock = Wire(Clock())
   val buildtopReset = Wire(Reset())
-
-  val logicHigh     = Wire(Bool())
-  val logicLow      = Wire(Bool())
-  logicHigh         := true.B
-  logicLow          := false.B
 
   val lazyDut = LazyModule(p(BuildTop)(p)).suggestName("chiptop")
   val dut = Module(lazyDut.module)
