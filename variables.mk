@@ -66,7 +66,7 @@ SUB_PROJECT ?= chipyard
 
 # Common Evaluation Platform ASIC Build
 # Default BootROM is overriden
-ifeq ($(SUB_PROJECT),cep_asic)
+ifeq ($(SUB_PROJECT),cep_cosim_asic)
 	SBT_PROJECT       ?= chipyard
 	MODEL             ?= TestHarness
 	VLOG_MODEL        ?= TestHarness

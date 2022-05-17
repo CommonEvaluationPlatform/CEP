@@ -189,7 +189,7 @@ verilog: $(sim_vsrcs)
 
 # These steps are only relevant when running the CEP CoSimulation environment
 # All cosim builds will be predicated by "cep_cosim"
-ifeq ($(SUB_PROJECT), $(filter $(SUB_PROJECT), cep_cosim))	
+ifneq (,$(findstring cep_cosim,$(SUB_PROJECT)))
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f CHIPYARD_BUILD_INFO.make
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> CHIPYARD_BUILD_INFO.make
