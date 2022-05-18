@@ -84,11 +84,11 @@ class RocketArty100TCEPConfig extends Config(
 
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++
+
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithArty100TTweaks(1) ++
-  new chipyard.RocketConfig
+  new chipyard.RocketNoL2Config
 )
-
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

@@ -133,3 +133,9 @@ class CEPASICRocketConfig extends Config(
   // This config fragment needs to be defined early to allow for proper elaboration
   new chipyard.config.WithCEPASICBootROMStub
 )
+
+// Tweak to the default Rocket Config that removes the L2 Cache
+class RocketNoL2Config extends Config(
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractNoL2Config)
+

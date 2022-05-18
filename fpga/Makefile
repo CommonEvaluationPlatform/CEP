@@ -122,7 +122,7 @@ include $(base_dir)/variables.mk
 # setup the board to use
 
 .PHONY: default
-default: $(mcs)
+default: bitstream
 
 #########################################################################################
 # misc. directories
