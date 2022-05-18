@@ -136,6 +136,6 @@ class CEPASICRocketConfig extends Config(
 
 // Tweak to the default Rocket Config that removes the L2 Cache
 class RocketNoL2Config extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++         // single rocket-core
+  new freechips.rocketchip.subsystem.WithNMedCores(1) ++         // single "medium" rocket core
   new chipyard.config.AbstractNoL2Config)
 
