@@ -1,3 +1,12 @@
+#//--------------------------------------------------------------------------------------
+#// Copyright 2022 Massachusets Institute of Technology
+#// SPDX short identifier: BSD-2-Clause
+#//
+#// File          : program_arty100t.tcl
+#// Project       : Common Evaluation Platform (CEP)
+#// Description   : TCL script for automatic programming of Arty100t CEP build
+#// Notes         : This TCL script assumes the arty100t build target
+#//--------------------------------------------------------------------------------------
 open_hw_manager
 connect_hw_server
 open_hw_target
