@@ -130,9 +130,10 @@ static int sd_cmd8(void)
   return rc;
 }
 
+// Printting of cmd55 send status has been removed since the number varies greatly and
+// can result in a lot of scrolling
 static void sd_cmd55(void)
 {
-  kputs("CMD55");
   sd_cmd(0x77, 0, 0x65);
   sd_cmd_end();
 }

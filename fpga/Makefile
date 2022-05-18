@@ -14,7 +14,8 @@ sim_dir=$(abspath .)
 
 VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
 
-SUB_PROJECT ?= vcu118
+# Set default SUB_PROJECT
+SUB_PROJECT ?= cep_arty100t
 
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
