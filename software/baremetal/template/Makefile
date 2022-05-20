@@ -10,6 +10,11 @@
 #
 #************************************************************************
 
+# RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
+ifndef RISCV
+$(error RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
+endif
+
 BASEDIR 	:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 INCDIR 		:= $(BASEDIR)/include
 MAINPROGRAM	?= hello_world
@@ -51,7 +56,7 @@ clean:
 
 sd_write: img
 ifneq (,$(wildcard ${DISK}))
-	sudo dd if=$< of=$(DISK) bs=4096 conv=fsync
+	sudo dd if=$(MAINPROGRAM).img of=$(DISK) bs=4096 conv=fsync
 else
 	$(error Invalid DISK specified for SD write)
 endif
