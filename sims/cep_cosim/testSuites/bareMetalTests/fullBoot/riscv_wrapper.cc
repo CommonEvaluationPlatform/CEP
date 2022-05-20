@@ -11,13 +11,14 @@
 
 // For bareMetal mode ONLY
 #ifdef BARE_MODE
-  #include "cep_apis.h"
-  #include "portable_io.h"
-  #include "CEP.h"
-  #include "cepRegTest.h"
-  
+  #include <stdio.h>
+  #include <stddef.h>
+  #include <stdlib.h>
+  #include <stdint.h>
   #include <platform.h>
   #include "kprintf.h"
+  #include "cep_apis.h"
+  #include "portable_io.h"
   
   #ifdef __cplusplus
   extern "C" {

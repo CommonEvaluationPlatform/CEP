@@ -20,3 +20,11 @@ tags
 env-riscv-tools.sh
 env-esp-tools.sh
 .bsp/
+CHIPYARD_BUILD_INFO.make
+cep_version.h
+cep_adrMap.h
+v2c_cmds.h
+.PERSUITE*
+CEP_CHIPYARD_ASIC/
+toolschains/qemu
+tools/api-config-chipsalliance
