@@ -58,12 +58,14 @@ class Arty100TFPGATestHarness(override implicit val p: Parameters) extends Arty1
 // DOC include end: UartOverlay
 
   /*** SPI ***/
-
   val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
-  /*** DDR ***/
+  /*** GPIO ***/
+  val io_gpio_bb = BundleBridgeSource(() => (new GPIOPortIO(dp(PeripheryGPIOKey).head)))
+  dp(GPIOOverlayKey).head.place(GPIODesignInput(dp(PeripheryGPIOKey).head, io_gpio_bb))
 
+  /*** DDR ***/
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR

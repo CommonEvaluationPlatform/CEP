@@ -116,7 +116,7 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 #--------------------------------------------------------------------------------------
 # To detect if any important flag has changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${VIRTUAL_MODE}_${RISCV_TESTS}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${VIRTUAL_MODE}_${RISCV_TESTS}_${DISABLE_CHISEL_PRINTF}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi

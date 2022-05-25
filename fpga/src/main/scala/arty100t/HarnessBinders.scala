@@ -8,6 +8,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIO, GPIOPortIO}
 
 import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
 import chipyard.harness.{OverrideHarnessBinder}
@@ -42,6 +43,14 @@ class WithDDRMem extends OverrideHarnessBinder({
       val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
       bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
       ddrClientBundle <> ports.head
+    } }
+  }
+})
+
+class WithGPIO extends OverrideHarnessBinder({
+  (system: HasPeripheryGPIO, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
+      arty100tth.arty100tOuter.io_gpio_bb.bundle <> ports.head
     } }
   }
 })
