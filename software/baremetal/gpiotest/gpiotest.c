@@ -39,8 +39,6 @@ int main() {
   // Infinite loop where you read the switches and write the LEDs
   while (1) {
   	data = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL));
-  	for (uint32_t i = 0; i < 5000000; i++) {}
-  	kprintf("switches = %x\n\r", (data >> 8) & 0xF);
   	reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), data << 8);
   }
 
