@@ -2,7 +2,7 @@
 // Copyright 2021 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:       cep_packages.f
+// File Name:       cep_sort.f
 // Program:         Common Evaluation Platform (CEP)
 // Description:     Prioriterized Verilog package list used to sort
 //                  the Chipyard-generate file list in order to ensure

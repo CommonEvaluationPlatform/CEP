@@ -53,17 +53,25 @@ class Arty100TFPGATestHarness(override implicit val p: Parameters) extends Arty1
 // DOC include start: UartOverlay
   // 1st UART goes to the VCU118 dedicated UART
 
-  val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
+  val io_uart_bb  = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 // DOC include end: UartOverlay
 
   /*** SPI ***/
-  val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
+  val io_spi_bb   = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** GPIO ***/
-  val io_gpio_bb = BundleBridgeSource(() => (new GPIOPortIO(dp(PeripheryGPIOKey).head)))
-  dp(GPIOOverlayKey).head.place(GPIODesignInput(dp(PeripheryGPIOKey).head, io_gpio_bb))
+  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
+    val maxGPIOSupport = 32 // max gpio per gpio chip
+    val names = Arty100TGPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
+    Overlay(GPIOOverlayKey, new CustomGPIOArty100TShellPlacer(this, GPIOShellInput(), names))
+  })
+
+  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
+  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
+    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
+  }
 
   /*** DDR ***/
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr

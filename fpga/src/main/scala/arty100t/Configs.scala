@@ -1,6 +1,7 @@
 package chipyard.fpga.arty100t
 
 import sys.process._
+import math.min
 
 import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithDTS}
@@ -23,7 +24,19 @@ import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey   => List(UARTParams(address  = BigInt(0x64000000L)))
   case PeripherySPIKey    => List(SPIParams(rAddress  = BigInt(0x64001000L)))
-  case PeripheryGPIOKey   => List(GPIOParams(address = BigInt(0x64002000L), width = 8))
+  case PeripheryGPIOKey => {
+    if (Arty100TGPIOs.width > 0) {
+      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
+  }
 })
 
 class WithSystemModifications (enableCEPRegs: Int = 0) extends Config((site, here, up) => {

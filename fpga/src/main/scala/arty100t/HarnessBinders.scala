@@ -8,7 +8,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
-import sifive.blocks.devices.gpio.{HasPeripheryGPIO, GPIOPortIO}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
 import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
 import chipyard.harness.{OverrideHarnessBinder}
@@ -33,6 +33,17 @@ class WithSPISDCard extends OverrideHarnessBinder({
   }
 })
 
+/*** GPIO ***/
+class WithGPIO extends OverrideHarnessBinder({
+  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
+      (arty100tth.arty100tOuter.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
+        bb_io.bundle <> dut_io
+      }
+    } }
+  }
+})
+
 /*** Experimental DDR ***/
 class WithDDRMem extends OverrideHarnessBinder({
   (system: CanHaveMasterTLMemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
@@ -43,14 +54,6 @@ class WithDDRMem extends OverrideHarnessBinder({
       val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
       bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
       ddrClientBundle <> ports.head
-    } }
-  }
-})
-
-class WithGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIO, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      arty100tth.arty100tOuter.io_gpio_bb.bundle <> ports.head
     } }
   }
 })
