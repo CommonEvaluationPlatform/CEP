@@ -34,10 +34,10 @@ object Arty100TGPIOs {
         "btn1"  -> ("C9",  "LVCMOS33", false),  // Bit13 - Button1
         "btn2"  -> ("B9",  "LVCMOS33", false),  // Bit14 - Button2
         "btn3"  -> ("B8",  "LVCMOS33", false),  // Bit15 - Button3
-        "led0"  -> ("H5",  "LVCMOS33", false),  // Bit16 - LD4
-        "led1"  -> ("J5",  "LVCMOS33", false),  // Bit17 - LD5
-        "led2"  -> ("T9",  "LVCMOS33", false),  // Bit18 - LD6
-        "led3"  -> ("T10", "LVCMOS33", false)   // Bit19 - LD7
+        "led0"  -> ("H5",  "LVCMOS33", false),  // Bit16 - LED4
+        "led1"  -> ("J5",  "LVCMOS33", false),  // Bit17 - LED5
+        "led2"  -> ("T9",  "LVCMOS33", false),  // Bit18 - LED6
+        "led3"  -> ("T10", "LVCMOS33", false)   // Bit19 - LED7
     )
 
     // return list of names (ordered)

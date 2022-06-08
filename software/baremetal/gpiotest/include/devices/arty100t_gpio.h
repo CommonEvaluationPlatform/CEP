@@ -1,25 +1,25 @@
 #ifndef _ARTY100T_GPIO_H
 #define _ARTY100T_GPIO_H
 
-#define GPIO0_MASK
-
-
-#define GPIO_INPUT_VAL  (0x00)
-#define GPIO_INPUT_EN   (0x04)
-#define GPIO_OUTPUT_EN  (0x08)
-#define GPIO_OUTPUT_VAL (0x0C)
-#define GPIO_PULLUP_EN  (0x10)
-#define GPIO_DRIVE      (0x14)
-#define GPIO_RISE_IE    (0x18)
-#define GPIO_RISE_IP    (0x1C)
-#define GPIO_FALL_IE    (0x20)
-#define GPIO_FALL_IP    (0x24)
-#define GPIO_HIGH_IE    (0x28)
-#define GPIO_HIGH_IP    (0x2C)
-#define GPIO_LOW_IE     (0x30)
-#define GPIO_LOW_IP     (0x34)
-#define GPIO_IOF_EN     (0x38)
-#define GPIO_IOF_SEL    (0x3C)
-#define GPIO_OUTPUT_XOR    (0x40)
+#define GPIO0_MASK      (0x00000001)
+#define GPIO1_MASK      (0x00000002)
+#define GPIO2_MASK      (0x00000004)
+#define GPIO3_MASK      (0x00000008)
+#define GPIO4_MASK      (0x00000010)
+#define GPIO5_MASK      (0x00000020)
+#define GPIO6_MASK      (0x00000040)
+#define GPIO7_MASK      (0x00000080)
+#define SW0_MASK        (0x00000100)
+#define SW1_MASK        (0x00000200)
+#define SW2_MASK        (0x00000400)
+#define SW3_MASK        (0x00000800)
+#define BTN0_MASK       (0x00001000)
+#define BTN1_MASK       (0x00002000)
+#define BTN2_MASK       (0x00004000)
+#define BTN3_MASK       (0x00008000)
+#define LED0_MASK       (0x00010000)
+#define LED1_MASK       (0x00020000)
+#define LED2_MASK       (0x00040000)
+#define LED3_MASK       (0x00080000)
 
 #endif /* _ARTY100T_GPIO_H */

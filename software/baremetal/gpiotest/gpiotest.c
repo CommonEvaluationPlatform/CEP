@@ -16,7 +16,7 @@
 #include "compiler.h"
 #include "kprintf.h"
 #include "platform.h"
-#include "arty100t_gpio.h"
+#include "mmio.h"
 
 int main() {
 
@@ -28,7 +28,21 @@ int main() {
   kputs("");
   kputs("");
   
+  uint32_t data = 0;
 
+  // Enable the switch inputs
+  reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_EN), (uint32_t)(SW0_MASK | SW1_MASK | SW2_MASK | SW3_MASK));
+
+  // Enable the LED outputs
+  reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_EN), (uint32_t)(LED0_MASK | LED1_MASK | LED2_MASK | LED3_MASK));
+
+  // Infinite loop where you read the switches and write the LEDs
+  while (1) {
+  	data = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL));
+  	for (uint32_t i = 0; i < 5000000; i++) {}
+  	kprintf("switches = %x\n\r", (data >> 8) & 0xF);
+  	reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), data << 8);
+  }
 
   return 0;
 }
