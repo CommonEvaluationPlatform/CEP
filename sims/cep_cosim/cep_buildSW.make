@@ -20,6 +20,11 @@ COMMON_CFLAGS	        += -DNOWAVE
 RISCV_BARE_CFLAGS       += -DNOWAVE
 endif
 
+ifeq (${ASIC_MODE},1)
+COMMON_CFLAGS	        += -DASICMODE
+RISCV_BARE_CFLAGS       += -DASICMODE
+endif
+
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #
