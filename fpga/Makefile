@@ -293,4 +293,5 @@ sim-fpga: $(sim)
 #########################################################################################
 .PHONY: clean
 clean:
+	rm -f $(CHIPYARD_BUILD_INFO)
 	rm -rf $(gen_dir)

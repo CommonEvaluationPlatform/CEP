@@ -37,7 +37,6 @@ COVERAGE        			?= 0
 USE_GDB       				?= 0
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
-ASIC_MODE                   ?= 1
 DISABLE_CHISEL_PRINTF		?= 1
 
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
@@ -60,12 +59,19 @@ $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
 
 # Validate the Chipyard verilog has been built by looking for the generated makefile
-ifeq (,$(wildcard $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
+ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 $(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(REPO_TOP_DIR)")
 endif
 
 # Include the file that contains info about the chipyard build (also, a change includes a rebuild)
-include $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+
+# Override the ASIC mode based on inferrence from the CHIPYARD_SUB_PROJECT
+ifeq "$(findstring asic,${CHIPYARD_SUB_PROJECT})" "asic"
+override ASIC_MODE 			= 1
+else
+override ASIC_MODE 			= 0
+endif	
 
 # The following DEFINES control how the software is
 # compiled and if will be overriden by lower level

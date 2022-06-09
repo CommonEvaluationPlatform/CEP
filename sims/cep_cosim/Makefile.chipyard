@@ -23,7 +23,7 @@ sim_name := cep_cosim
 #########################################################################################
 # Default sub project and build target
 #########################################################################################
-SUB_PROJECT = cep_cosim_asic
+SUB_PROJECT = cep_cosim
 
 #########################################################################################
 # include shared variables
@@ -60,5 +60,5 @@ include $(base_dir)/common.mk
 .PHONY: clean
 clean: 
 	(cd ${BOOTROM_SRC_DIR}; make clean)
-	-rm -f $(sim_dir)/CHIPYARD_BUILD_INFO.make
+	-rm -f $(CHIPYARD_BUILD_INFO)
 	-rm -rf $(gen_dir)/*

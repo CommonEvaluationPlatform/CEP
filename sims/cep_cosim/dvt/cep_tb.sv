@@ -205,6 +205,8 @@ module `COSIM_TB_TOP_MODULE;
   end
   assign  pll_bypass_pad  = pll_bypass;
 
+  // Pinouts for the ASIC and FPGA differ
+`ifdef ASIC_MODE
   `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
     .jtag_TMS           (jtag_TMS),
@@ -256,6 +258,32 @@ module `COSIM_TB_TOP_MODULE;
     .pll_bypass         (pll_bypass_pad),
     .pll_observe        (pll_observe)
   );
+  `else 
+  `CHIPYARD_TOP_MODULE `DUT_INST ( 
+    .jtag_TCK           (jtag_TCK),
+    .jtag_TMS           (jtag_TMS),
+    .jtag_TDI           (jtag_TDI),
+    .jtag_TDO           (jtag_TDO),
+    .spi_0_sck          (spi_0_sck),
+    .spi_0_cs_0         (spi_0_cs_0),
+    .spi_0_dq_0         (spi_0_dq_0),
+    .spi_0_dq_1         (spi_0_dq_1),
+    .spi_0_dq_2         (spi_0_dq_2),
+    .spi_0_dq_3         (spi_0_dq_3),
+    .gpio_0_0           (gpio_0_0),
+    .gpio_0_1           (gpio_0_1),
+    .gpio_0_2           (gpio_0_2),
+    .gpio_0_3           (gpio_0_3),
+    .gpio_0_4           (gpio_0_4),
+    .gpio_0_5           (gpio_0_5),
+    .gpio_0_6           (gpio_0_6),
+    .gpio_0_7           (gpio_0_7),
+    .uart_0_txd         (uart_txd),
+    .uart_0_rxd         (uart_rxd),
+    .reset              (sys_rst),
+    .clock_clock        (sys_clk_pad)
+  );
+  `endif
   //--------------------------------------------------------------------------------------
 
 
