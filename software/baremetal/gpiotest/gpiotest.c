@@ -10,7 +10,6 @@
 //
 //************************************************************************
 
-#include <stdio.h>
 #include <stdint.h>
 #include "encoding.h"
 #include "compiler.h"
