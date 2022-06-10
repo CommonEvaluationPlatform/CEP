@@ -16,12 +16,10 @@
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 
-The Common Evaluation Platform (CEP), a SoC design that is representative of typical United States Department of Defense (DoD) microelectronics, but contains only license-unencumbered, freely available components.  Using the CEP, the DoD can easily collaborate with industry and academic researchers to develop security mechanisms to prevent, deter, or detect germane hardware threats. The CEP includes a range of accelerator cores coupled with a key delivery 
-mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing of defensive techniques. The implementation of the CEP includes a comprehensive verification environment to ensure defensive modifications do not impede intended functionality. It is 
-intended to be targeted to either an FPGA or ASIC implementation. 
+The Common Evaluation Platform (CEP) is an SoC design that contains only license-unencumbered, freely available components.  Using the CEP, users can easily collaborate with industry and academic researchers to develop security mechanisms to prevent, deter, or detect germane hardware threats. The CEP includes a range of accelerator cores coupled with a key delivery mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing of defensive techniques. The implementation of the CEP includes a comprehensive verification environment to ensure modifications do not impede intended functionality. It is intended to be targeted to either an FPGA or ASIC implementation. 
  
 <p align="center">
-   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="490">
+   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="450">
 </p>
 <p align="center">
     <img src="./cep_docs/related_logos.jpg" width="442" height="120">
