@@ -22,7 +22,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
-EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS)
+EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS) $(CHIPYARD_BUILD_INFO)
 EXTRA_SIM_CXXFLAGS   	?=
 EXTRA_SIM_LDFLAGS    	?=
 EXTRA_SIM_SOURCES    	?=
@@ -93,24 +93,20 @@ endif
 # CEP: The following targets perform custom steps for the CEP build
 #########################################################################################
 # These steps are only relevant when building CEP-related targets
-ifneq (,$(findstring cep,$(SUB_PROJECT)))
+$(CHIPYARD_BUILD_INFO):
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
-	@rm -f $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $(CHIPYARD_BUILD_INFO)
-
-	@# Call the blackbox sorting script
-	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
-endif
+	@rm -f $@
+	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $@
+	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $@
+	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $@
+	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $@
+	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $@
+	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $@
+	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $@
+	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $@
+	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $@
+	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
+	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
 $(build_dir):
 	mkdir -p $@
@@ -124,9 +120,9 @@ $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 # The following make target will peform some scala file shuffling if we are building
 # the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
 # build to proceed *without* the CEP_Chipyard_ASIC submodule
-.PHONY: cep_asic_preprocessing
-cep_asic_preprocessing: 
-	@echo "Performing CEP AISC Preprocessing step...."
+.PHONY: cep_preprocessing
+cep_preprocessing: 
+	@echo "Performing CEP Preprocessing step...."
 ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
@@ -164,7 +160,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS) | cep_asic_preprocessing
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS) | cep_preprocessing
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
@@ -210,6 +206,10 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--target-dir $(build_dir) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
+# Blackbox sorting script
+ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
+	@${SORT_SCRIPT} ${sim_top_blackboxes} $(SORT_FILE)
+endif
 	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 

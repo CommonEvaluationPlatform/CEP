@@ -186,7 +186,6 @@ class WithCEPBootROM    (address  : BigInt    = 0x10000,
                           size    = size,
                           hang    = hang,
                           contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
-  case ASICBootROMLocated(x) => None
 })
 
 class WithSROT extends Config((site, here, up) => {
