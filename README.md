@@ -10,13 +10,13 @@
     <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
 </p>
 <p align="center">
-    <img src="./cep_docs/version4.0.jpg" width="292" height="163">
+    <img src="./cep_docs/version4.0.jpg" width="146" height="82">
 </p>
 <p align="center">
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 <p align="center">
-    <img src="./cep_docs/related_logos.jpg" width="883" height="240">
+    <img src="./cep_docs/related_logos.jpg" width="442" height="120">
 </p>
 
 DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
