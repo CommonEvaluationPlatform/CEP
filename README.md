@@ -31,10 +31,10 @@ The Common Evaluation Platform (CEP) is an SoC design that contains only license
 ## Licensing
 
 As the CEP has been developed with input from many sources, multiple licenses apply.  Please refer to the following files for licensing info. 
-[CEP License](./LICENSE.md)
-[CEP Components Licenses](./LICENSE.md)
-[Chipyard License](./LICENSE.md)
-[SiFive License](./LICENSE.SiFive.md)
+* [CEP License](./LICENSE.md)
+* [CEP Components Licenses](./LICENSE.md)
+* [Chipyard License](./LICENSE.md)
+* [SiFive License](./LICENSE.SiFive.md)
 
 ## DISTRIBUTION STATEMENT A. Approved for public release: distribution unlimited.
 
