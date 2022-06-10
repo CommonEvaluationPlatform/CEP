@@ -7,16 +7,16 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 <p align="center">
-    <img src="./cep_docs/cep_logo.jpg" width="721" height="300">
+    <img src="./cep_docs/cep_logo.jpg" width="1776" height="857">
 </p>
 <p align="center">
-    <img src="./cep_docs/version4.0.jpg" width="98" height="60">
+    <img src="./cep_docs/version4.0.jpg" width="292" height="163">
 </p>
 <p align="center">
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 <p align="center">
-    <img src="./cep_docs/related_logos.jpg" width="450" height="71">
+    <img src="./cep_docs/related_logos.jpg" width="883" height="240">
 </p>
 
 DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies and their contractors; Software and Documentation; (enter date approved by sponsor). Other requests for this software shall be referred to the Defense Advanced Research Projects Agency.
