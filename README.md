@@ -1,9 +1,7 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-2-Clause)
 
-<p align="center">
-  # Common Evaluation Platform v4.0
-</p>
+# Common Evaluation Platform v4.0
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
@@ -18,7 +16,7 @@
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 <p align="center">
-   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1172" height="566">
+   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="538">
 </p>
 <p align="center">
     <img src="./cep_docs/related_logos.jpg" width="442" height="120">
