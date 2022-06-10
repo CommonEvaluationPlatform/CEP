@@ -174,10 +174,6 @@ $(synth_list_f): $(sim_common_files) $(all_vsrcs)
 	cat $(sim_common_files) >> $@
 # These steps are only relevant when building CEP-related targets
 ifneq (,$(findstring cep,$(SUB_PROJECT)))
-	@# Create a dummy CHIPYARD_BUILD_INFO.make in order to allow the build of baremetal
-	@# executables within the CEP CoSimulation environment
-	@touch $(base_dir)/CHIPYARD_BUILD_INFO.make
-	
 	@# Call the blackbox sorting script
 	@${SORT_SCRIPT} ${synth_list_f} ${SORT_FILE}
 endif
@@ -292,6 +288,5 @@ sim-fpga: $(sim)
 # general cleanup rules
 #########################################################################################
 .PHONY: clean
-clean:
-	rm -f $(CHIPYARD_BUILD_INFO)
+clean: cep_clean
 	rm -rf $(gen_dir)

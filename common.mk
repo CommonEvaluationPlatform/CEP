@@ -22,7 +22,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
-EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS)
+EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS) cep_asic_preprocessing
 EXTRA_SIM_CXXFLAGS   	?=
 EXTRA_SIM_LDFLAGS    	?=
 EXTRA_SIM_SOURCES    	?=
@@ -90,8 +90,28 @@ else
 endif
 
 #########################################################################################
-# CEP: The following targets support CEP BootROM customizations
+# CEP: The following targets perform custom steps for the CEP build
 #########################################################################################
+# These steps are only relevant when building CEP-related targets
+ifneq (,$(findstring cep,$(SUB_PROJECT)))
+	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
+	@rm -f $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $(CHIPYARD_BUILD_INFO)
+	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $(CHIPYARD_BUILD_INFO)
+
+	@# Call the blackbox sorting script
+	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
+endif
+
 $(build_dir):
 	mkdir -p $@
 
@@ -100,6 +120,34 @@ $(BOOTROM_SOURCES):
 
 $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 	cp -f $(BOOTROM_SOURCES) $(build_dir)
+
+# The following make target will peform some scala file shuffling if we are building
+# the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
+# build to proceed *without* the CEP_Chipyard_ASIC submodule
+.PHONY: cep_asic_preprocessing
+cep_asic_preprocessing: 
+ifeq (,$(findstring cep_cosim_asic,$(SUB_PROJECT)))
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/CEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala $(base_dir)/generators/chipyard/src/main/scala/config/fragments
+else
+	-cp $(base_dir)/build.sbt.nonasic ${base_dir}/build.sbt
+	`cp $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala
+endif
+
+PHONY: cep_clean
+cep_clean:
+	-rm -f $(CHIPYARD_BUILD_INFO)
+	-rm $(base_dir)/build.sbt
+	-rm $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
+	-rm $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
+	-rm $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
+	-rm $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
+#########################################################################################
+
+
 
 #########################################################################################
 # create firrtl file rule and variables
@@ -186,26 +234,6 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 #########################################################################################
 .PHONY: verilog
 verilog: $(sim_vsrcs)
-
-# These steps are only relevant when building CEP-related targets
-ifneq (,$(findstring cep,$(SUB_PROJECT)))
-	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
-	@rm -f $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $(CHIPYARD_BUILD_INFO)
-	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $(CHIPYARD_BUILD_INFO)
-
-	@# Call the blackbox sorting script
-	@${SORT_SCRIPT} ${sim_top_blackboxes} ${SORT_FILE}
-endif
 
 #########################################################################################
 # helper rules to run simulations
