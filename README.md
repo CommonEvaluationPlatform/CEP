@@ -18,13 +18,13 @@
 
 The Common Evaluation Platform (CEP) is an SoC design that contains only license-unencumbered, freely available components.  The CEP includes a range of accelerator cores coupled with a key delivery mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing. The implementation of the CEP includes a comprehensive verification environment to ensure modifications do not impede intended functionality. It is intended to be targeted to either an FPGA or ASIC implementation. 
 
-Beginning with CEP v4.0, the platform has been ported to the UCB Chipyard Framework.  The original Chipyard Readme can be found [here](./README.Chipyard.md)
+Beginning with CEP v4.0, the platform has been ported to the UCB Chipyard Framework.  The original Chipyard Readme can be found [here](./README.Chipyard.md).
 
 ## Pre-requisites (validated test/build configurations):
 The following items describe the configuration of the system that CEP has been developed and tested on:
-* Ubuntu 18.04 LTS x86_62 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
+* Ubuntu 18.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
 * Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
-* Vivado 2020.1
+* Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
 * Terminal emulator (such as `minicom`)
 * bash
@@ -35,12 +35,13 @@ Other configurations may work, but they have not been explicitly verified.
 
 To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation at https://chipyard.readthedocs.io/
 
-A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is configured to properly use the proxy.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
+A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
 
 * Install git if not already present on your system
   * Ubuntu - `sudo apt install git`
   * RHEL7  - `sudo yum install git`
 * Clone the CEP repository, change to the directory of the clone
+  * `git clone https://github.com/mit-ll/CEP.git`
 * Install package dependencies.  Copies of these files can also be found in the Chipyard Documentation listed above
   * Ubuntu - `./scripts/ubuntu-reqs.sh`
   * RHEL7  - `./scripts/centos-reqs.sh`
@@ -50,12 +51,13 @@ A note about proxies: If your system is behind a proxy, you'll want to ensure yo
 * Build the RISC-V Toolchain.  
   * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build
   * `./scripts/build-toolchains.sh riscv-tools`
-* It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions is beyond the scope of this document, but they do
+* It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do
   include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
 
 ## Repository Directory Structure
 Providing a complete directory structure is impractical, but some items are highlighted here.
 
+```
 <CEP_ROOT> 
   |- ./sims/cep_cosim/ -  
   |     Defines the CEP co-simulation evironment for performing "chip" level simulations of the CEP in either bare metal or bus functional model 
@@ -68,12 +70,7 @@ Providing a complete directory structure is impractical, but some items are high
   |   |   |- aeees      - Challenge module.  Read [README.md]((./generators/mitll-blocks/src/main/resources/vsrc/aeees/README.md) for more information.
   |   |   |- auto-fir   - Challenge module.  Read [README.md]((./generators/mitll-blocks/src/main/resources/vsrc/auto-fir/README.md) for more information.
   |   |   |- shaaa      - Challenge module.  Read [README.md((./generators/mitll-blocks/src/main/resources/vsrc/shaaa/README.md) for more information.
-
-
-
-
-
-
+```
 
 
 
