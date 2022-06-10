@@ -30,6 +30,7 @@ v2c_cmds.h
 # do not get checked into the repository
 build.sbt
 /generators/chipyard/src/main/scala/DigitalTop.scala
+/generators/chipyard/src/main/scala/System.scala
 /generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
 /generators/chipyard/src/main/scala/config/CEPASICConfig.scala
 /generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala

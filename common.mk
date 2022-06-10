@@ -22,7 +22,7 @@ HELP_COMPILATION_VARIABLES += \
 "   EXTRA_CHISEL_OPTIONS   = additional options to pass to the Chisel compiler" \
 "   EXTRA_FIRRTL_OPTIONS   = additional options to pass to the FIRRTL compiler"
 
-EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS) cep_asic_preprocessing
+EXTRA_GENERATOR_REQS 	?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   	?=
 EXTRA_SIM_LDFLAGS    	?=
 EXTRA_SIM_SOURCES    	?=
@@ -126,25 +126,28 @@ $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 # build to proceed *without* the CEP_Chipyard_ASIC submodule
 .PHONY: cep_asic_preprocessing
 cep_asic_preprocessing: 
-ifeq (,$(findstring cep_cosim_asic,$(SUB_PROJECT)))
+	@echo "Performing CEP AISC Preprocessing step...."
+ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/System.scala $(base_dir)/generators/chipyard/src/main/scala
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/CEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala $(base_dir)/generators/chipyard/src/main/scala/config/fragments
 else
 	-cp $(base_dir)/build.sbt.nonasic ${base_dir}/build.sbt
-	`cp $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala
+	-cp $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
 endif
 
 PHONY: cep_clean
 cep_clean:
 	-rm -f $(CHIPYARD_BUILD_INFO)
-	-rm $(base_dir)/build.sbt
-	-rm $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
-	-rm $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
-	-rm $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
-	-rm $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
+	-rm -f $(base_dir)/build.sbt
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/System.scala
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
 #########################################################################################
 
 
@@ -157,7 +160,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS) | cep_asic_preprocessing
 	mkdir -p $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
