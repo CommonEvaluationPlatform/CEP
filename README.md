@@ -16,7 +16,7 @@
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 <p align="center">
-   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="538">
+   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="510">
 </p>
 <p align="center">
     <img src="./cep_docs/related_logos.jpg" width="442" height="120">
