@@ -15,12 +15,28 @@
 <p align="center">
    Copyright 2022 Massachusetts Institute of Technology
 </p>
+
+The Common Evaluation Platform (CEP), a SoC design that is representative of typical United States Department of Defense (DoD) microelectronics, but contains only license-unencumbered, freely available components.  Using the CEP, the DoD can easily collaborate with industry and academic researchers to develop security mechanisms to prevent, deter, or detect germane hardware threats. The CEP includes a range of accelerator cores coupled with a key delivery 
+mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing of defensive techniques. The implementation of the CEP includes a comprehensive verification environment to ensure defensive modifications do not impede intended functionality. It is 
+intended to be targeted to either an FPGA or ASIC implementation. 
+ 
 <p align="center">
    <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="490">
 </p>
 <p align="center">
     <img src="./cep_docs/related_logos.jpg" width="442" height="120">
 </p>
+
+
+### Please check the [Release Notes](./RELEASE_NOTES.md) to understand what has changed and a list of known issues.
+
+## Licensing
+
+As the CEP has been developed with input from many sources, multiple licenses apply.  Please refer to the following files for licensing info. 
+[CEP License](./LICENSE.md)
+[CEP Components Licenses](./LICENSE.md)
+[Chipyard License](./LICENSE.md)
+[SiFive License](./LICENSE.SiFive.md)
 
 ## DISTRIBUTION STATEMENT A. Approved for public release: distribution unlimited.
 
