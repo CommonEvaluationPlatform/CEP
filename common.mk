@@ -124,7 +124,7 @@ $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 cep_preprocessing: 
 	@echo ""
 	@echo "CEP: ----------------------------------------------------------------------"
-	@echo "CEP: Performing CEP Preprocessing step...."
+	@echo "CEP:  Performing CEP Preprocessing step...."
 	@echo "CEP: ----------------------------------------------------------------------"
 ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
@@ -141,6 +141,7 @@ else
 	-cp $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala
 endif
 	@echo "CEP: ----------------------------------------------------------------------"
+	@echo ""
 
 PHONY: cep_clean
 cep_clean:
