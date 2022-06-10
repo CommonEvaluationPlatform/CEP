@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 <p align="center">
-    <img src="./cep_docs/cep_logo.jpg" width="1776" height="857">
+    <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
 </p>
 <p align="center">
     <img src="./cep_docs/version4.0.jpg" width="292" height="163">
