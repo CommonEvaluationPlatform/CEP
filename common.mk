@@ -108,7 +108,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
-$(build_dir):
+$(build_dir): cep_preprocessing
 	mkdir -p $@
 
 $(BOOTROM_SOURCES):
@@ -120,9 +120,12 @@ $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 # The following make target will peform some scala file shuffling if we are building
 # the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
 # build to proceed *without* the CEP_Chipyard_ASIC submodule
-.PHONY: cep_preprocessing
+#.PHONY: cep_preprocessing
 cep_preprocessing: 
-	@echo "Performing CEP Preprocessing step...."
+	@echo ""
+	@echo "CEP: ----------------------------------------------------------------------"
+	@echo "CEP: Performing CEP Preprocessing step...."
+	@echo "CEP: ----------------------------------------------------------------------"
 ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
@@ -137,6 +140,7 @@ else
 	-cp $(base_dir)/generators/chipyard/src/main/scala/System.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/System.scala
 	-cp $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala
 endif
+	@echo "CEP: ----------------------------------------------------------------------"
 
 PHONY: cep_clean
 cep_clean:
@@ -160,8 +164,7 @@ $(FIRRTL_FILE) $(ANNO_FILE): generator_temp
 	@echo "" > /dev/null
 
 # AG: must re-elaborate if cva6 sources have changed... otherwise just run firrtl compile
-generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS) | cep_preprocessing
-	mkdir -p $(build_dir)
+generator_temp: $(SCALA_SOURCES) $(sim_files) $(SCALA_BUILDTOOL_DEPS) $(EXTRA_GENERATOR_REQS) | $(build_dir)
 	$(call run_scala_main,$(SBT_PROJECT),$(GENERATOR_PACKAGE).Generator,\
 		--target-dir $(build_dir) \
 		--name $(long_name) \
