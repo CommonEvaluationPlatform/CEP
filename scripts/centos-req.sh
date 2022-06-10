@@ -25,6 +25,8 @@ sudo yum install -y devtoolset-8-make
 # install DTC
 sudo yum install -y dtc
 sudo yum install -y python
+# install libcrypto++
+sudo yum install -y libcrypto++-dev
 
 # install verilator
 git clone http://git.veripool.org/git/verilator
