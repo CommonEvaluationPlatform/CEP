@@ -10,9 +10,6 @@
     <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
 </p>
 <p align="center">
-    <img src="./cep_docs/version4.0.jpg" width="146" height="82">
-</p>
-<p align="center">
    Copyright 2022 Massachusetts Institute of Technology
 </p>
 
@@ -76,7 +73,7 @@ Providing a complete directory structure is impractical, but some items are high
 ```
 
 ### CEP Co-Simulation
-A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found here [README.md](./sims/cep_cosim/README.md)
+A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found [here](./sims/cep_cosim/README.md)
 
 
 ### Generated DSP code notes
