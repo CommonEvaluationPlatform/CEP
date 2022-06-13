@@ -12,7 +12,7 @@
 
 The core DSP blocks (DFT/IDFT/IIR/FIR) were generated using the free online hardware generators provided by the [Spiral Project](http://www.spiral.net/). 
 
-Due to licensing restrictions, the generated DFT and IDFT cores cannot be directly included within the CEP repository.  Thus, following generation using the following parameters, the results should be placed in `<CEP ROOT>/generators/mitll-blocks/src/main/resources/vsrc/generated_dsp_code`
+Due to licensing restrictions, the generated DFT and IDFT cores cannot be directly included within the CEP repository.  
 
 ## Generator Websites
 * DFT/iDFT: [Spiral Project DFT Gen](http://www.spiral.net/hardware/dftgen.html)
@@ -82,7 +82,7 @@ Debug Output|**`Off`**|**`Off`**
 
 ## Incorporating the Generated Source Files
 
-Generated source should be placed in <CEP_ROOT>/generated_dsp_code
+Generated source for the DFT and IDFT cores should be placed in `<CEP ROOT>/generators/mitll-blocks/src/main/resources/vsrc/generated_dsp_code`.
 
 * DFT 
   * Save the generated Verilog file to `dft_top.v`
