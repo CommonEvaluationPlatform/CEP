@@ -6,10 +6,7 @@
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
-### Return to the Root CEP readme [README.md](./README.md)
-
-
-## For now, this is intended as a placeholder for a descriptive CoSim README.md (as was included with <= CEPv3.41)
+### Return to the Root CEP [readme](../../README.md).
 
 ## DISTRIBUTION STATEMENT A. Approved for public release: distribution unlimited.
 
