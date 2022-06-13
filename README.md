@@ -12,6 +12,12 @@
 <p align="center">
    Copyright 2022 Massachusetts Institute of Technology
 </p>
+<p align="center">
+   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="450">
+</p>
+<p align="center">
+    <img src="./cep_docs/related_logos.jpg" width="442" height="120">
+</p>
 
 The Common Evaluation Platform (CEP) is an SoC design that contains only license-unencumbered, freely available components.  The CEP includes a range of accelerator cores coupled with a key delivery mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing. The implementation of the CEP includes a comprehensive verification environment to ensure modifications do not impede intended functionality. It is intended to be targeted to either an FPGA or ASIC implementation. 
 
@@ -100,14 +106,6 @@ A custom simulation environment has been developed to suppoort CEP testing.  Det
 
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md)
-
-<p align="center">
-   <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="450">
-</p>
-<p align="center">
-    <img src="./cep_docs/related_logos.jpg" width="442" height="120">
-</p>
-
 
 Please check the [CEP Changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
 
