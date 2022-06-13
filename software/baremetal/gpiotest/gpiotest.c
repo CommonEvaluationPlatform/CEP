@@ -27,7 +27,8 @@ int main() {
   kputs("");
   kputs("");
   
-  uint32_t data = 0;
+  uint32_t switch_old 	= 0xFFFFFFFF;
+  uint32_t switch_new 	= 0;
 
   // Enable the switch inputs
   reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_EN), (uint32_t)(SW0_MASK | SW1_MASK | SW2_MASK | SW3_MASK));
@@ -37,8 +38,16 @@ int main() {
 
   // Infinite loop where you read the switches and write the LEDs
   while (1) {
-  	data = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL));
-  	reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), data << 8);
+
+	switch_new 	= (reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL)) >> 8) & 0xFF;
+
+  	// A change of switch state has been detected... post debounce
+  	if (switch_new != switch_old) {
+  		kprintf("switches = %x\n\r", switch_new);
+  		switch_old = switch_new;
+  	}
+
+  	reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), switch_new << 16);
   }
 
   return 0;

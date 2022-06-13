@@ -55,7 +55,7 @@ A note about proxies: If your system is behind a proxy, you'll want to ensure yo
   include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
 
 ## Repository Directory Structure
-Providing a complete directory structure is impractical, but some items are highlighted here.
+Providing a complete directory structure is impractical, but some items are highlighted here.  It is worth noting that most of the structure is inherited from Chipyard.
 
 ```
 <CEP_ROOT> 
@@ -64,15 +64,21 @@ Providing a complete directory structure is impractical, but some items are high
   |     either bare metal or bus functional model (BFM) mode.  
   |- ./generators/mitll-blocks/
   |   |- src/main/scala - Contains all the custom CEP Chisel code
-  |   |- src/main/resources/vsrc/ - SystemVerilog / Verilog associated with the CEP build
-  |   |   |- generated_dsp_code - Location to place the `dft_top.v` and `idft_top.v'
-  |   |   |- opentitan  - Soft-link to the opentitan submodule located at ./opentitan
-  |   |   |- aeees      - Challenge module.  Read the README.md in this directory for more information.
-  |   |   |- auto-fir   - Challenge module.  Read the README.md in this directory for more information.
-  |   |   |- shaaa      - Challenge module.  Read the README.md in this directory for more information.
+  |   |- src/main/resources/vsrc/ - SystemVerilog / Verilog files associated with the CEP build
+  |       |- generated_dsp_code - Location to place the `dft_top.v` and `idft_top.v'
+  |       |- opentitan  - Soft-link to the opentitan submodule located at ./opentitan
+  |       |- aeees      - Challenge module.  Read the README.md in this directory for more information.
+  |       |- auto-fir   - Challenge module.  Read the README.md in this directory for more information.
+  |       |- shaaa      - Challenge module.  Read the README.md in this directory for more information.
+  |- ./cep_docs - Documents and images unique to the CEP
+  |- ./software/baremetal - Examples of bare metal code that can be run on the Arty100T FPGA target
+                            independent of the CEP Co-Simulation environment
 ```
 
-### Cosim notes
+### CEP Co-Simulation
+A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found here [README.md](./sims/cep_cosim/README.md)
+
+
 ### Generated DSP code notes
 
 <p align="center">
@@ -83,7 +89,7 @@ Providing a complete directory structure is impractical, but some items are high
 </p>
 
 
-### Please check the [Release Notes](./RELEASE_NOTES.md) to understand what has changed and a list of known issues.
+### Please check the [CEP Changelog](./CHANGELOG_CEP.md) to understand what has changed and a list of known issues.
 
 ## Licensing
 

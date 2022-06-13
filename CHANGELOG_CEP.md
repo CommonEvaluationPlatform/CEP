@@ -4,6 +4,10 @@
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
+# CEP Changelog
+
+This changelog follows the format defined here (beginning with v4.0): https://keepachangelog.com/en/1.0.0/
+
 v1.0 - Initial release
 
 v1.1 - (19 July 2018)
@@ -151,7 +155,9 @@ v3.41 - (10 September 2021)
   - Some idft test vectors fail under QuestaSim (xcellium regression ran successfully)
   - Multithreaded test (#23) non-functional under linux
 
-v4.00 - (XX June 2022)
+## [v4.00] - 2022-06-XX
+
+### Changed
 * CEP has been completely ported to the UCB Chipyard Framework (https://github.com/ucb-bar/chipyard)
 * Arty-A7 100T FPGA target running bare-metal code is currently supported (Linux is not currently supported)
 

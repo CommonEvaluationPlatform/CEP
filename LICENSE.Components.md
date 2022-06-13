@@ -148,3 +148,11 @@ License Description : Apache License v2.0
 License Terms       : https://github.com/lowRISC/opentitan/blob/master/LICENSE
 Function            : OpenTitan is the first open source project building a transparent, high-quality reference design and integration guidelines for silicon root of trust (RoT) chips.
                       Main website: www.opentitan.org
+
+Title               : SD Card model for CEP Co-Simulation
+Source              : SD SPI Simulation Model originally released by tsuhuai.chan@gmail.com and subsequented extracted from "Warke, Tejas Pravin, "Verification of 
+                      SD/MMC Controller IP Using UVM" (2018). Thesis. Rochester Institute of Technology"
+CEP Directory       : ./sims/cep_cosim/dvt/sd_spi_model.v
+License Description : Unknown
+License Terms       : Unknown
+Function            : Provides an SD Card Model for simulation of a "full boot" of the CEP

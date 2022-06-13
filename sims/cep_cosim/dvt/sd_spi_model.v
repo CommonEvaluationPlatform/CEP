@@ -2,7 +2,7 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:     cep_tb.v
+// File Name:     sd_spi_model.v
 // Program:       Common Evaluation Platform (CEP)
 // Description:   SD SPI Simulation Model originally released by tsuhuai.chan@gmail.com and
 //                subsequented extracted from "Warke, Tejas Pravin, "Verification of 
