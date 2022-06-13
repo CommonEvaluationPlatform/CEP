@@ -99,7 +99,7 @@ OR
 A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found [here](./sims/cep_cosim/README.md)
 
 ### Generated DSP code notes
-Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mit-ll//src/main/resources/vsrc/dsp/README.md)
+Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md)
 
 <p align="center">
    <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="450">
