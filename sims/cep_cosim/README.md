@@ -1,10 +1,59 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-2-Clause)
 
-# Common Evaluation Platform
+# Common Evaluation Platform - Co-Simulation Environment
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+
+<p align="center">
+   <img src="./cep_docs/cep_architecture.jpg" width="1114" height="450">
+</p>
+
+The CEP Co-Simulation environment supports "chip-level" simulation of the CEP.
+
+The following provides highlights of the cosim directory structure.
+
+<CEP_ROOT/sims/cep_cosim>
+|- bin - Supporting scripts for cosim
+|- bootrom - 
+|- drivers
+|- dvt
+|- generated-src
+|- lib
+|- pli
+|- share
+|- simDiag
+|- src
+|- vmanager
+|- testSuites
+|  |- bfmTests
+|  |- bareMetalTests
+|  |- isaTests
+
+
+
+
+
+
+- Bus Functional Model (BFM) (<CEP_ROOT>/sims/cep_cosim/testSuites/)
+- Bare Metal
+- ISA Tests
+
+These instructions assume you are running an environment as described in the Pre-requisites section [here](../../README.md).
+
+Prior to executing any simulation, the appropriate Chipyard *SUB_PROJECT* must be built.  It is selected by default when you run the following commands:
+
+```
+cd <CEP_ROOT>/sims/cep_cosim
+make -f Makefile.chipyard
+```
+
+This command will generate and copy all of the necessary SystemVerilog/Verilog into the `generated-src` directory.
+
+## Building ISA tests for simulation ## 
+
+
 
 ### Return to the Root CEP [readme](../../README.md).
 
