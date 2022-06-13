@@ -96,4 +96,4 @@ Generated source should be placed in <CEP_ROOT>/generated_dsp_code
 * FIR (already included in repo)
   * Save the generated Verilog file to `FIR_filter.v`
 
-#### Return to the root CEP [README](../../README.md)
+#### Return to the root CEP [README](../../../../../../../README.md)

@@ -72,11 +72,34 @@ Providing a complete directory structure is impractical, but some items are high
                             independent of the CEP Co-Simulation environment
 ```
 
+### Building the CEP
+In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP.  
+
+For the Arty-A7 100T FPGA board, the `cep_arty100t` SUB_PROJECT has been defined.
+
+Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the micro-USB port on the Arty100T.
+
+Default CEP builds can be customized by following the instructions in the Chipyard documentation.
+
+The Arty100T will configure from FLASH or JTAG based on the state of the MODE jumper.  Additional information on the Arty board can be found [here](https://digilent.com/shop/arty-a7-artix-7-fpga-development-board/).
+
+
+```
+cd <REPO_ROOT>/fpga
+make   # cep_arty100t is the default SUB_PROJECT
+
+./program_arty100t_flash.sh - Create the MCS file & program the Arty100T FLASH.  Power needs to be cycled or the *PROG* button needs to be asserted to reboot with the new configuration.
+
+OR
+
+./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
+```
+
 ### CEP Co-Simulation
 A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found [here](./sims/cep_cosim/README.md)
 
-
 ### Generated DSP code notes
+Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mit-ll//src/main/resources/vsrc/dsp/README.md)
 
 <p align="center">
    <img src="./cep_docs/cep_v4.0_architecture.jpg" width="1114" height="450">
@@ -86,7 +109,7 @@ A custom simulation environment has been developed to suppoort CEP testing.  Det
 </p>
 
 
-### Please check the [CEP Changelog](./CHANGELOG_CEP.md) to understand what has changed and a list of known issues.
+Please check the [CEP Changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
 
 ## Licensing
 

@@ -38,7 +38,8 @@ Title               : dsp (DFT) and IDFT)
 Source              : Copyright (c) 2005-2014 Peter A. Milder for the Spiral Project, Carnegie Mellon University
 CEP Directory       : ./generators/mitll-blocks/src/main/resources/vsrc/generated_dsp_code
 License Description : Custom
-License Terms       : The generated code is NOT included within the CEP repository.
+License Terms       : The generated code is NOT included within the CEP repository due to license constraints.  
+                      Pointers to generating these files are included for information purposes only.
 
                       This design is provided for internal, non-commercial research use only
                       and is not for redistribution, with or without modifications.
