@@ -23,6 +23,8 @@ The Common Evaluation Platform (CEP) is an SoC design that contains only license
 
 Beginning with CEP v4.0, the platform has been ported to the UCB Chipyard Framework.  The original Chipyard Readme can be found [here](./README.Chipyard.md).
 
+Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the cloned CEP repository.
+
 ## Pre-requisites (validated test/build configurations):
 The following items describe the configuration of the system that CEP has been developed and tested on:
 * Ubuntu 18.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
@@ -78,10 +80,10 @@ Providing a complete directory structure is impractical, but some items are high
                             independent of the CEP Co-Simulation environment
 ```
 
-### Building the CEP
+### Building the CEP & Co-Simulation
 In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP.  
 
-For the Arty-A7 100T FPGA board, the `cep_arty100t` SUB_PROJECT has been defined.
+For the Arty-A7 100T FPGA board, the `cep_arty100t` SUB_PROJECT has been defined in `<CEP_ROOT>/fpga/Makefile`.
 
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the micro-USB port on the Arty100T.
 
@@ -101,8 +103,7 @@ OR
 ./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
 ```
 
-### CEP Co-Simulation
-A custom simulation environment has been developed to suppoort CEP testing.  Detailed information can be found [here](./sims/cep_cosim/README.md)
+For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` build targets are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).
 
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md)
