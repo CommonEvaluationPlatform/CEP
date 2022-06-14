@@ -336,6 +336,8 @@ else
 	-rm -f ${COSIM_TOP_DIR}/regressionSummary
 	@make cleanLib
 endif
+
+.force:
 #--------------------------------------------------------------------------------------
 
 
@@ -358,7 +360,7 @@ Targets:
   summary                 : Defined at the testSuite and cosim level.  Aggregates test status into a single file.
   runAll                  : Run all the tests below the current level (cosim or testSuite)
 
-Unique isaTests Targets:
+Unique isaTests Targets (recommend following instructions in $(COSIM_TOP_DIR)/README.md)  
   createISATests          : Create individual cosim tests from riscv-tests (Only ISA tests are supported).
   removeISATests          : Remove the cosim tests built from riscv-tests.
 

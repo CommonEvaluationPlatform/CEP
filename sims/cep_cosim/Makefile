@@ -16,6 +16,8 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 DUT_SIM_MODE		= BFM
 ELF_MODE   			= LOCAL
 
+default: usage
+
 # Tests to run as part of the default build target
 TEST_SUITES  =  	bareMetalTests	\
 					bfmTests		\

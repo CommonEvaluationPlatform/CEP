@@ -158,7 +158,12 @@ When a test is run, many files are generated.  Some are highlighted below:
     In addition to all the ports in the design, the above example captures all the signals in the aesmodule and below.
 
 ### Test Status
-
+The following tests are currently non-functional:
+* ./testSuites/bfmTests/srotErorrTest
+* ./testSuites/bareMetalTests/plicPrioIntr
+* ./testSuites/bareMetalTests/extIntr
+* ./testSuites/bareMetalTests/lsrcOps
+* ./testSuites/isaTests/dtmTest
 
 ### Return to the Root CEP [readme](../../README.md).
 
