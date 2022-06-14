@@ -103,14 +103,14 @@ OR
 ./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
 ```
 
-For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` build targets are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
+For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
 
 Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).
 
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md)
 
-Please check the [CEP Changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
+Please check the [CEP changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
 
 ## Errors? Ommissions? Questions?
 Please feel free to file a github issue which the CEP authors check frequently.

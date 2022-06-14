@@ -40,7 +40,7 @@ The following provides highlights of the cosim directory structure.
 
 These instructions assume you are running an environment as described in the pre-requisites section [here](../../README.md).
 
-Prior to executing any simulation, the appropriate Chipyard *SUB_PROJECT* must be built.  It is selected by default when you run the following commands:
+Prior to executing any simulation, the appropriate Chipyard *SUB_PROJECT* must be built.  The `cep_cosim` *SUB_PROJECT* It is selected by default when you run the following commands:
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim
@@ -51,11 +51,11 @@ This command will generate and copy all of the necessary SystemVerilog/Verilog i
 
 ## Building ISA tests for simulation ## 
 
-The cosim supports bare metal execution of the RISC-V ISA tests which are included as submodule.  Additional information about these tests can be found [here](https://github.com/riscv/riscv-tests.git/README.md).
+The cosim supports bare metal execution of the RISC-V ISA tests which are included as submodule.  Additional information about these tests can be found [here](https://github.com/riscv-software-src/riscv-tests/tree/1ce128fa78c24bb0ed399c647e7139322b5353a7).
 
 There are a few know issues with running the ISA tests on the CEP.  Some manual changes are required before incorporating these tests into the cosim.
 
-**Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Even though the riscv-tests [README.md](https://github.com/riscv/riscv-tests.git/README.md) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
+**Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Even though the riscv-tests [README.md](https://github.com/riscv-software-src/riscv-tests/tree/1ce128fa78c24bb0ed399c647e7139322b5353a7) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
 
 Edit the file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/p/riscv_test.h** and look for the lines below:
 
