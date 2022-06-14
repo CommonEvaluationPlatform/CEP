@@ -195,12 +195,14 @@ module `COSIM_TB_TOP_MODULE;
   `endif
 
   initial begin
+  `ifdef ASIC_MODE
   `ifdef BYPASS_PLL
     `logI("PLL is set to bypass mode");
     pll_bypass = 1'b1;
   `else
     `logI("PLL is set to normal mode");
     pll_bypass = 1'b0;
+  `endif
   `endif
   end
   assign  pll_bypass_pad  = pll_bypass;
