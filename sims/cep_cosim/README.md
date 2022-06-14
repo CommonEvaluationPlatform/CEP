@@ -62,8 +62,7 @@ Edit the file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/p/riscv_test.h
 ```
 #define RISCV_MULTICORE_DISABLE                                         \
   csrr a0, mhartid;                                                     \
-  1: bnez a0, 1b
-  
+  1: bnez a0, 1b  
 ```
 
 This define is used to basically do a check and only allow core0 run the test. Other cores will fail if they run. We need to disable this check by removing the **bnez** line  as such:
@@ -72,10 +71,8 @@ This define is used to basically do a check and only allow core0 run the test. O
 #define RISCV_MULTICORE_DISABLE                                         \
   csrr a0, mhartid;                                                     \
 
-
 // Remove/comment out this line
 //  1: bnez a0, 1b
-
 ```
 Save the file.
 
@@ -113,7 +110,7 @@ Save the Makefile.
 
 And now you are ready to do the build as follows
 
-```sh
+```
   cd <CEP_ROOT>/toolchains/riscv-tools/riscv-tests
   autoconf
   ./configure 
@@ -160,11 +157,10 @@ When a test is run, many files are generated.  Some are highlighted below:
     ```
     In addition to all the ports in the design, the above example captures all the signals in the aesmodule and below.
 
+### Test Status
 
 
-
-
-## Return to the Root CEP [readme](../../README.md).
+### Return to the Root CEP [readme](../../README.md).
 
 ## DISTRIBUTION STATEMENT A. Approved for public release: distribution unlimited.
 

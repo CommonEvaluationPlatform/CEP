@@ -9,9 +9,6 @@
 #
 #************************************************************************
 
-# Default build target
-all: runAll
-
 COSIM_TOP_DIR   	= $(strip $(shell cd .; pwd))
 REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 
