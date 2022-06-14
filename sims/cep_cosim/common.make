@@ -352,7 +352,7 @@ User controlled options: (0 = not set, 1 = set)
   NOWAVE                  : Default: 1: When not set, waveforms will be captured based on the rules in vsim.do
   TL_CAPTURE              : Default: 0: Enables capturing of CEP core tilelink I/O as required by bareMetal macroMix tests and unit simulation
   BYPASS_PLL              : Default, 0: Applicable only when running the ASIC simulation, enables PLL bypass when set.
-  DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores.
+  DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores (not applicable in BFM mode)
   
 Targets:
   usage                   : Print this usage information.

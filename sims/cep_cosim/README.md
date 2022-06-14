@@ -158,7 +158,7 @@ When a test is run, many files are generated.  Some are highlighted below:
     In addition to all the ports in the design, the above example captures all the signals in the aesmodule and below.
 
 ### Test Status
-The following tests are currently non-functional:
+The following tests are currently non-functional and are thus excluded from the various testSuite *TEST_LIST*
 * ./testSuites/bfmTests/srotErorrTest
 * ./testSuites/bareMetalTests/plicPrioIntr
 * ./testSuites/bareMetalTests/extIntr
