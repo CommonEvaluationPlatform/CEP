@@ -315,7 +315,8 @@ endif
 
 # Recursively calls make to build the test directories for ALL of the tests in the lists specified above.
 # Given differing test requirements, they are called with different arguments.
-createISATests: .force
+.PHONY: createISATests removeISATests
+createISATests: removeISATests
 	@for i in ${ISA_SINGLE_CORE_LIST}; do 											\
 		echo "== Generating Single Core test directory for $${i}";					\
 		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; 						\

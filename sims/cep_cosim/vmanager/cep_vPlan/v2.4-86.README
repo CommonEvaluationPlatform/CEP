@@ -1,9 +1,0 @@
-To install the refFlow release (v2.4-86):
-
-   - untar v2.4-86.tgz to the desired location, say <my_refflow_area>.
-     This will give you <my_refflow_area>/v2.4-86
-
-   - cd <my_refflow_area>/v2.4-86/scripts
-
-   - execute ./rf_install.sh
-

@@ -112,8 +112,10 @@ Due to licensing contraints, two of the DSP cores used during CEP development ca
 
 Please check the [CEP Changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
 
-## Licensing
+## Errors? Ommissions? Questions?
+Please feel free to file a github issue which the CEP authors check frequently.
 
+## Licensing
 As the CEP has been developed with input from many sources, multiple licenses apply.  Please refer to the following files for licensing info. 
 * [CEP License](./LICENSE.md)
 * [CEP Components Licenses](./LICENSE.md)

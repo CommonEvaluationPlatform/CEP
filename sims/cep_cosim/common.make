@@ -32,12 +32,14 @@ endif
 
 # The following flags / variables can be overridden by lower level makefiles or the command line
 NOWAVE          			?= 1
-PROFILE         			?= 0
-COVERAGE        			?= 0
-USE_GDB       				?= 0
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
+
+# The following flags are defined here to support the eventual enablement of legacy functionality
+override PROFILE   			= 0
+override COVERAGE  			= 0
+override USE_GDB  			= 0
 
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
 # The following check ensures one and only one is set
@@ -334,7 +336,13 @@ endif
 #--------------------------------------------------------------------------------------
 define MAKE_USAGE_HELP_BODY
 Usage summary:
-make [NOWAVE=0|1] [COVERAGE=0|1] [PROFILE=0|1] [USE_GDB=0|1] <all|summary|cleanAll|merge|usage>
+
+Options: (0 = not set, 1 = set)
+  NOWAVE                  : When not set, waveforms will be captured based on the rules in vsim.do
+  TL_CAPTURE              :
+  BYPASS_PLL              : Applicable only when running the ASIC simulation, enables PLL bypass when set
+  DISABLE_CHISEL_PRINTF		?= 1
+
 
 Options:
   NOWAVE=1      : turn off wave capturing. Default is ON for interactive. OFF for regression
@@ -344,6 +352,8 @@ Options:
   TL_CAPTURE=1  : turn on Title-Link comand sequence capturing to be used for BARE Metal (and Unit-level testbench)
   
 Targets:
+  usage         : Print this usage information
+  sim_info      : Display the default/current environment/variable settings used by the cosim
   all        : run the test. Default target (empty string = same as "all")
   summary    : print out regression summary (run at the top or suite directories.
   cleanAll   : clean up and force a rebuild of every thing

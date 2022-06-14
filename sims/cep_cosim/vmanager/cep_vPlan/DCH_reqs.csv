@@ -1,4 +1,0 @@
-DEPTH,NODE_KIND,ELEMENT_ID,NAME,details
-0,SECTION,requirements,requirements,
-1,PLANNED_TESTCASE,CEP_009,CEP_009,"Verify cache coherency: from each core, write/read back a unique line in the same block. Also verify other lines that belong to other cores are visible and non-stale."
-1,PLANNED_TESTCASE,CEP_010,CEP_010,"Ultilizing self‐modifying code to force first level cache miss. Each block will be bounced around each of the core's L1 cache coherently."
