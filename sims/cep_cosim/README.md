@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 <p align="center">
-   <img src="./cep_docs/cep_architecture.jpg" width="1114" height="450">
+   <img src="../../cep_docs/cep_architecture.jpg" width="1114" height="450">
 </p>
 
 The CEP Co-Simulation environment supports "chip-level" simulation of the CEP.
