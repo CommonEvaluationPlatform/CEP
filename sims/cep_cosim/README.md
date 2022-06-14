@@ -22,7 +22,8 @@ The following provides highlights of the cosim directory structure.
 |  |- bare - Baremetal support files
 |  |- cep_tests - Files (Classes) supporting testing of the CEP cores
 |  |- diag - Supporting files used in defining some test cases
-|  |- vectors - Recorded tilelink vectors for the CEP cores that are used with the bareMetal macroMix tests and unit-level simulations (not currently supported)
+|  |- vectors - Recorded tilelink bus vectors for the CEP cores that are used with the bareMetal macroMix tests 
+|  |            and unit-level simulations (not currently supported)
 |  |- virtual - Virtual Mode supporting files (currently not supported)
 |- dvt - Verilog and supporting files used by the cosim testbench
 |- generated-src - Output of the Chipyard build
@@ -37,7 +38,7 @@ The following provides highlights of the cosim directory structure.
 |  |- isaTests - Once generated, contains the modified RISC-V ISA tests for use in the cosim
 ```
 
-These instructions assume you are running an environment as described in the Pre-requisites section [here](../../README.md).
+These instructions assume you are running an environment as described in the pre-requisites section [here](../../README.md).
 
 Prior to executing any simulation, the appropriate Chipyard *SUB_PROJECT* must be built.  It is selected by default when you run the following commands:
 
@@ -46,7 +47,7 @@ cd <CEP_ROOT>/sims/cep_cosim
 make -f Makefile.chipyard
 ```
 
-This command will generate and copy all of the necessary SystemVerilog/Verilog into the `generated-src` directory.
+This command will generate and copy all of the necessary SystemVerilog/Verilog into the `<CEP_ROOT>/sims/cep_cosim/generated-src` directory.
 
 ## Building ISA tests for simulation ## 
 
@@ -54,7 +55,7 @@ The cosim supports bare metal execution of the RISC-V ISA tests which are includ
 
 There are a few know issues with running the ISA tests on the CEP.  Some manual changes are required before incorporating these tests into the cosim.
 
-**Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Eventhough the riscv-tests [README.md](../../toolchains/riscv-tools/riscv-tests/README.md) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
+**Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Even though the riscv-tests [README.md](../../toolchains/riscv-tools/riscv-tests/README.md) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
 
 Edit the file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/p/riscv_test.h** and look for the lines below:
 
