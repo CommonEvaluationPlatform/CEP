@@ -146,7 +146,6 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
           break;
         }
         case GPS_CORE: {
-//          cep_gps gps(coreIndex,seed,verbose);
           cep_gps gps(coreIndex, seed, verbose);
           gps.SetCaptureMode(captureOn, VECTOR_D, core.name);
           errCnt += gps.RunGpsTest(core.maxLoop);

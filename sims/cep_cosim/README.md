@@ -86,7 +86,7 @@ Edit the file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/v/vm.c` and loo
     coherence_torture();
 ```
 
-Remove/comment out that 2 lines and save the file.
+Remove/comment out these 2 lines and save the file.
 
 **Issue with TVM='pt'**: Not supported for now.
 
@@ -158,8 +158,11 @@ When a test is run, many files are generated.  Some are highlighted below:
     In addition to all the ports in the design, the above example captures all the signals in the aesmodule and below.
 
 ### Test Status
+The following tests current "fail" with the notes contained therein:
+* ./testSuites/bfmTests/macroMix            - One test vector failure in the idft core fails, but all others pass.
+
 The following tests are currently non-functional and are thus excluded from the various testSuite *TEST_LIST*
-* ./testSuites/bfmTests/srotErorrTest
+* ./testSuites/bfmTests/srotErrorTest
 * ./testSuites/bareMetalTests/plicPrioIntr
 * ./testSuites/bareMetalTests/extIntr
 * ./testSuites/bareMetalTests/lsrcOps
