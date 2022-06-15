@@ -24,3 +24,5 @@ include/cep_adrMap.h
 include/v2c_cmds.h
 generated-src/
 CHIPYARD_BUILD_INFO.make
+**/*.rcf
+bootrom/.BOOTROM*
