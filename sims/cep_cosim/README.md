@@ -57,7 +57,7 @@ There are a few know issues with running the ISA tests on the CEP.  Some manual 
 
 **Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Even though the riscv-tests [README.md](https://github.com/riscv-software-src/riscv-tests/tree/1ce128fa78c24bb0ed399c647e7139322b5353a7) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
 
-Edit the file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/p/riscv_test.h** and look for the lines below:
+Edit the file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/p/riscv_test.h` and look for the lines below:
 
 ```
 #define RISCV_MULTICORE_DISABLE                                         \
@@ -79,7 +79,7 @@ Save the file.
 
 **Issue with TVM='v'**: Similar problem here, the tests are setup for core0 only, others cores's jobs just do interference to cause cache misses. For simulation, we need to allow any cores to run the same tests. Also, we dont need to run all the rv64*-v-* tests, since, they are the same as when TVM='p' but one run in virtual address mode and the other in strickly physical address mode. The goals for TVM='v' tests are to improve the coverages for page tables (page faults), cache hits/misses.
 
-Edit the file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/v/vm.c** and look for the lines below:
+Edit the file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/v/vm.c` and look for the lines below:
 
 ```
   if (read_csr(mhartid) > 0)
@@ -92,7 +92,7 @@ Remove/comment out that 2 lines and save the file.
 
 Next edit is **OPTIONAL** (only do it if you know what you are doing :-): this edit is to add switches to the build process to including source information in the object dump file for PC's tracing. It is helpful in debugging failed test(s). Be aware, the ELF/dump files will be much bigger!! Only do this if you intend to include the source codes in the object dump file. In addition, RISCV-core will behave differently due to GDB is not supported in simulation when it taking a page fault (dud!). So only do this **edit**  to obtain the object dump file for tracing.
 
-Edit file **<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/isa/Makefile**, look for the lines as such:
+Edit file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/isa/Makefile`, look for the lines as such:
 
 ```
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
@@ -128,7 +128,7 @@ Next step is to port and prepare those ISA tests above for simulation.
   make createISATests  <-- clean old (if any) and prepare all new ISA tests for simulation (take a while.. Be patient)
 ```
 
-**Finally**: There are a lots of magic happen under-the-hood for this type of tests since they are originally written such that their output are used to compare against golden output (from Spike/Verilator). We don't do that here. Therefore, in simulation, hooks are put in place to check the **core's PC** (Program Counter) to see if they enter **pass** or **fail** section. In order to do this, during test preparation, a perl script is called to look into the deassembled code (<test>.dump file) for given test to find where the **pass/fail** locations are, respectively. These locations are needed by the testbench during runtime to determine if the given test is passing or failing.
+**Finally**: There are a lots of magic happen under-the-hood for this type of tests since they are originally written such that their output are used to compare against golden output (from Spike/Verilator). We don't do that here. Therefore, in simulation, hooks are put in place to check the **core's PC** (Program Counter) to see if they enter **pass** or **fail** section. In order to do this, during test preparation, a perl script is called to look into the deassembled code (`<test>.dump` file) for given test to find where the **pass/fail** locations are, respectively. These locations are needed by the testbench during runtime to determine if the given test is passing or failing.
 
 ### OpenOCD / Debug / GDB Support
 Currently, this is not supported with the Chipyard-based CEP.  We'll look to restore this functionality as soon as possible.
