@@ -87,7 +87,12 @@ Providing a complete directory structure is impractical, but some items are high
 ### Building the CEP FPGA
 In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP.  
 
-For the Arty-A7 100T FPGA board, the `cep_arty100t` SUB_PROJECT has been defined in `<CEP_ROOT>/fpga/Makefile`.
+For the Arty-A7 100T FPGA board, the `cep_arty100t` *SUB_PROJECT* has been defined in `<CEP_ROOT>/fpga/Makefile`.
+
+With v4.0, the `cep_arty100t` has the following CEP-unique modules added:
+- CEP Registers
+- 1 x AES Core
+- Surrogate Root of Trust (SRoT)
 
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the micro-USB port on the Arty100T.
 

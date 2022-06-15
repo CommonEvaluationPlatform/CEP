@@ -39,7 +39,7 @@
     
     // Print a hello to the console (UART) - Core0 only
     if (coreId == 0)
-    	kputs("Baremetal - FullBoot Successfull");
+    	LOGI("Baremetal - FullBoot Successfull");
     
     // Set the core status
     set_status(errCnt, testId[coreId]);
