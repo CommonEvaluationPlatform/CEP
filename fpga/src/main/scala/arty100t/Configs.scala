@@ -95,6 +95,24 @@ class RocketArty100TSimConfig extends Config(
 class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers
   new chipyard.config.WithCEPRegisters ++
+  new chipyard.config.WithAES ++
+  new chipyard.config.WithSROTFPGA ++
+
+  // Overide the chip info 
+  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
+  // with reduced cache size, closes timing at 50 MHz
+  new WithFPGAFrequency(50) ++
+
+  // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
+  new WithArty100TTweaks(1) ++
+  new chipyard.RocketNoL2Config
+)
+
+// A minimum CEP configuration with only the registers component
+class RocketArty100TMinCEPConfig extends Config(
+  // Add the CEP registers
+  new chipyard.config.WithCEPRegisters ++
 
   // Overide the chip info 
   new WithDTS("mit-ll,rocketchip-cep", Nil) ++

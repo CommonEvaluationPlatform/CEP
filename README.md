@@ -36,6 +36,8 @@ The following items describe the configuration of the system that CEP has been d
 
 Other configurations may work, but they have not been explicitly verified.
 
+Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of this README.
+
 ## Setting up your environment
 
 To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation at https://chipyard.readthedocs.io/
@@ -56,8 +58,10 @@ A note about proxies: If your system is behind a proxy, you'll want to ensure yo
 * Build the RISC-V Toolchain.  
   * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build
   * `./scripts/build-toolchains.sh riscv-tools`
-* It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do
-  include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
+* The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: ` MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
+* It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
+* Sometimes the toolchain build may fail.  One may need to run the build several times.
+* Once the toolchain is built, your want to source the new environment script: `source <CEP_ROOT>/env.sh`.
 
 ## Repository Directory Structure
 Providing a complete directory structure is impractical, but some items are highlighted here.  It is worth noting that most of the structure is inherited from Chipyard.
@@ -80,7 +84,7 @@ Providing a complete directory structure is impractical, but some items are high
                             independent of the CEP Co-Simulation environment
 ```
 
-### Building the CEP & Co-Simulation
+### Building the CEP FPGA
 In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP.  
 
 For the Arty-A7 100T FPGA board, the `cep_arty100t` SUB_PROJECT has been defined in `<CEP_ROOT>/fpga/Makefile`.
@@ -102,6 +106,69 @@ OR
 
 ./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
 ```
+
+### Building software for the CEP FPGA
+
+In additional to connecting USB to the Arty100T's microUSB port, a Digilent SD or microSD PMOD connected should be connected to connector JA.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
+
+It should be noted that the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.
+
+Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.
+
+An example UART output for the gpiotest is included below:
+```
+---    Common Evaluation Platform v00000004.00000000     ---
+--- Copyright 2022 Massachusetts Institute of Technology ---
+---     BootRom Image built on Jun 13 2022 07:22:08      ---
+INIT
+CMD0
+CMD8
+ACMD41
+CMD58
+CMD16
+CMD18
+LOADING 0x00080000 PAYLOAD
+LOADING  
+BOOT
+
+
+------------------
+ RISC-V GPIO Test 
+------------------
+
+
+switches = 00000000
+switches = 00000004
+switches = 00000005
+switches = 00000001
+switches = 00000000
+```
+
+A developer may use baremetal software from the CEP cosimulation or the examples as provided in `<CEP_ROOT>/software/baremetal`.  
+
+In either case, it is important to note what device your (micro)SD card gets mapped to (e.g., `/dev/sdd`).
+
+As of v4.0, the cosimulation baremetal software does not currently support the console printfs, thus feedback of test results will be minimal.  It is intended to provide an option for building an FPGA version of the software (vs simulation) which will overload the I/O functions according.
+
+Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
+
+```
+cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
+make riscv_wrapper        						<-- builds riscv_wrapper.img
+make DISK=/dev/sdd riscv_wrapper_sd_write		<-- copies riscv_wrapper.img to /dev/sdd (subsitute with your device name)
+```
+
+The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
+
+```
+cd <CEP_ROOT>/software/baremetal/gpiotest
+make DISK=/dev/sdd sd_write        				<-- copies gpiotest.img to /dev/sdd (subsitute with your device name)
+```
+
+It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
+
+### CEP Co-Simulation
 
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
 

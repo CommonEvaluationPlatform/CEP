@@ -217,3 +217,18 @@ class WithSROT extends Config((site, here, up) => {
       )
     ))
 })
+
+class WithSROTFPGA extends Config((site, here, up) => {
+  case SROTKey => List(
+    SROTParams(
+      slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
+      cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),
+      cep_cores_depth     = BigInt(CEPBaseAddresses.cep_cores_depth),
+      // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
+      // The SRoT uses these indicies for routing keys to the appropriate core
+      llki_cores_array    = Array(
+        CEPBaseAddresses.aes_llki_base_addr       // Core Index 0 
+      )
+    ))
+})

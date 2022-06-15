@@ -12,7 +12,14 @@ sim_dir=$(abspath .)
 # include shared variables
 #########################################################################################
 
+# Verify vivado is available
+ifeq (,$(shell which vivado))
+$(error Vivado is not available.  Please install and ensure the environment script is sourced.)
+endif
+
+# Detect and 
 VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
+$(info Vivado $(VIVADO_VERSION) detected.)
 
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
@@ -116,6 +123,20 @@ ifeq ($(SUB_PROJECT),cep_arty100t)
 	SORT_FILE         := $(base_dir)/cep_sort.f
 endif
 
+ifeq ($(SUB_PROJECT),cep_min_arty100t)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Arty100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TMinCEPConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+endif
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example
