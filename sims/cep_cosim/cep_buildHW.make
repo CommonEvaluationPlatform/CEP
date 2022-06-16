@@ -61,7 +61,6 @@ ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
-
 # Pass on the ASIC_MODE argument
 ifeq (${ASIC_MODE},1)
 COSIM_VLOG_ARGS				+= +define+ASIC_MODE
@@ -324,8 +323,8 @@ endif
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
 XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
-VMGR_PATH 						:= /brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}
-XCELIUM_INSTALL					:= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
+VMGR_PATH 						?= /brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}
+XCELIUM_INSTALL					?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
 MDV_XLM_HOME 					:= ${XCELIUM_INSTALL}
 XRUN_CMD 						:= ${XCELIUM_INSTALL}/tools/bin/xrun

@@ -76,7 +76,6 @@ This define is used to basically do a check and only allow core0 run the test. O
 ```
 Save the file.
 
-
 **Issue with TVM='v'**: Similar problem here, the tests are setup for core0 only, others cores's jobs just do interference to cause cache misses. For simulation, we need to allow any cores to run the same tests. Also, we dont need to run all the rv64*-v-* tests, since, they are the same as when TVM='p' but one run in virtual address mode and the other in strickly physical address mode. The goals for TVM='v' tests are to improve the coverages for page tables (page faults), cache hits/misses.
 
 Edit the file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/env/v/vm.c` and look for the lines below:
@@ -156,6 +155,12 @@ When a test is run, many files are generated.  Some are highlighted below:
     }
     ```
     In addition to all the ports in the design, the above example captures all the signals in the aesmodule and below.
+
+### Tool Locations 
+The following variables can be overwritten (or changed in cep_buildHW.make).  They need to match the tool locations in your system.
+  XCELIUM_VERSION  ?= XCELIUMAGILE20.09.001
+  XCELIUM_INSTALL  ?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
+  QUESTASIM_PATH   ?= /opt/questa-2019.1/questasim/bin
 
 ### Test Status
 The following tests current "fail" with the notes contained therein:
