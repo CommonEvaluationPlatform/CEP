@@ -60,7 +60,7 @@ If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found i
 * Build the RISC-V Toolchain.  
   * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build
   * `./scripts/build-toolchains.sh riscv-tools`
-* The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: ` MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
+* The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: `MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
 * It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
 * Sometimes the toolchain build may fail.  One may need to run the build several times.
 * Once the toolchain is built, your want to source the new environment script: `source <CEP_ROOT>/env.sh`.
