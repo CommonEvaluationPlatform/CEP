@@ -25,7 +25,8 @@ if [[ "$1" == "import" ]]; then
 	echo "import"
 elif [[ "$1" == "export" ]]; then
 	# Extract all the submodules into an array
-	git submodule > submoduleExport.txt
+	git submodule | cut -c 2- > submoduleStatus
+
 else
 	scriptname=`basename "$0"`
 	echo "Usage: $scriptname <import | export>"
