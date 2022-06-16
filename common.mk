@@ -3,6 +3,9 @@
 #########################################################################################
 SHELL=/bin/bash
 
+# Without the following, RHEL7 does not execute the build process properly
+.NOTPARALLEL:
+
 ifndef RISCV
 $(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 else
@@ -108,7 +111,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
-$(build_dir): 
+$(build_dir): cep_preprocessing
 	mkdir -p $@
 
 $(BOOTROM_SOURCES):
@@ -244,7 +247,7 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: cep_preprocessing $(sim_vsrcs)
+verilog: $(sim_vsrcs)
 
 #########################################################################################
 # helper rules to run simulations
