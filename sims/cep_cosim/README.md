@@ -173,4 +173,11 @@ The following tests are currently non-functional and are thus excluded from the 
 * ./testSuites/bareMetalTests/lsrcOps
 * ./testSuites/isaTests/dtmTest
 
+The following tests run, but currently fail:
+* ./testSuites/bareMetalTests/plicTest
+* ./testSuites/bfmTests/macroMix              <- Single vector fails
+* ./testSuites/isaTests/rv64mi-p-csr
+* ./testSuites/isaTests/rv64si-p-csr
+
+
 ### Return to the Root CEP [readme](../../README.md).
