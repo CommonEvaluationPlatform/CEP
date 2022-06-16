@@ -25,6 +25,10 @@ COMMON_CFLAGS	        += -DASICMODE
 RISCV_BARE_CFLAGS       += -DASICMODE
 endif
 
+ifeq (${FPGA_SW_BUILD},1)
+RISCV_BARE_CFLAGS       += -DFPGASWBUILD
+endif
+
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #

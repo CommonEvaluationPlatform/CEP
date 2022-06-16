@@ -44,6 +44,8 @@ To build the CEP, several packages and toolsets must be installed and built.  Th
 
 A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
 
+If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
+
 * Install git if not already present on your system
   * Ubuntu - `sudo apt install git`
   * RHEL7  - `sudo yum install git`
@@ -89,10 +91,15 @@ In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* ha
 
 For the Arty-A7 100T FPGA board, the `cep_arty100t` *SUB_PROJECT* has been defined in `<CEP_ROOT>/fpga/Makefile`.
 
-With v4.0, the `cep_arty100t` has the following CEP-unique modules added:
+With v4.0, the following FPGA configurations have been defined with the CEP-unique additions listed:
+
+`cep_arty100t`
 - CEP Registers
 - 1 x AES Core
 - Surrogate Root of Trust (SRoT)
+
+`cep_min_arty100t`
+- CEP Registers
 
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the micro-USB port on the Arty100T.
 
@@ -154,7 +161,7 @@ A developer may use baremetal software from the CEP cosimulation or the examples
 
 In either case, it is important to note what device your (micro)SD card gets mapped to (e.g., `/dev/sdd`).
 
-As of v4.0, the cosimulation baremetal software does not currently support the console printfs, thus feedback of test results will be minimal.  It is intended to provide an option for building an FPGA version of the software (vs simulation) which will overload the I/O functions according.
+As of v4.0, the cosimulation baremetal software does not currently support the console printfs, thus feedback of test results will be minimal.  It is intended to provide an option for building an FPGA version of the software (vs simulation) which will overload the I/O functions according.  Furthermore, many of the bareMetal tests presume the `CEPRocketConfig` configuration, which contains substantially more functionality than can fit on the Arty100T.  As a result, many of the cosimulation tests will require substantial modification to run properly on the FPGA.  
 
 Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
 

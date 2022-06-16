@@ -34,6 +34,7 @@ endif
 NOWAVE          			?= 1
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
+FPGA_SW_BUILD               ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
 
 # The following flags are defined here to support the eventual enablement of legacy functionality
@@ -163,6 +164,7 @@ endif
 	@echo "CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
+	@echo "CEP_COSIM:   FPGA_SW_BUILD          = ${FPGA_SW_BUILD}"
 	@echo ""
 #--------------------------------------------------------------------------------------
 

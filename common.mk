@@ -108,7 +108,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
-$(build_dir): cep_preprocessing
+$(build_dir): 
 	mkdir -p $@
 
 $(BOOTROM_SOURCES):
@@ -244,7 +244,7 @@ $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: $(sim_vsrcs)
+verilog: cep_preprocessing $(sim_vsrcs)
 
 #########################################################################################
 # helper rules to run simulations

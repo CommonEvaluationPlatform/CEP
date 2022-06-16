@@ -157,3 +157,10 @@ CEP Directory       : ./sims/cep_cosim/dvt/sd_spi_model.v
 License Description : Unknown
 License Terms       : Unknown
 Function            : Provides an SD Card Model for simulation of a "full boot" of the CEP
+
+Title               : UART Model for CEP Co-Simulation
+Source              : https://github.com/ben-marshall/uart
+CEP Directory       : ./sims/cep_cosim/dvt/uart_rx.v
+License Description : MIT License
+License Terms       : https://github.com/ben-marshall/uart/blob/master/LICENSE
+Function            : Provides a simple UART Receiver for the CEP testbench
