@@ -120,7 +120,7 @@ $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 # The following make target will peform some scala file shuffling if we are building
 # the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
 # build to proceed *without* the CEP_Chipyard_ASIC submodule
-#.PHONY: cep_preprocessing
+PHONY: cep_preprocessing
 cep_preprocessing: 
 	@echo ""
 	@echo "CEP: ----------------------------------------------------------------------"
