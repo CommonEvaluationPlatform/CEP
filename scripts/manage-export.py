@@ -7,8 +7,8 @@
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    Supports exporting/importing of the CEP releases
 #//                 from the internal to external repositories  
-#// Notes:          
-#//
+#// Notes:          export is run from the internal repository
+#//         import is run from the external repository
 #//************************************************************************
 
 # replaces a `include with the full include file
@@ -18,24 +18,37 @@
 import os
 import sys
 import subprocess
+import csv
+
+# subModules to exclude from the export operation
+# The two vlsi submodules have restricted access and cannot be cloned
+excludeList = ["CEP_Chipyard_ASIC", "vlsi/hammer-mentor-plugins", "vlsi/hammer-synopsys-plugins"]
+fileName    = "./gitSubmoduleExport.csv"
 
 # Check the arguments
 if (len(sys.argv) != 2 or (sys.argv[1] != "import" and sys.argv[1] != "export")):
   sys.exit("Usage: " + __file__ +" <import | export>")
 
 # Grab the repo's root directory and change current working directory accordingly
-repoRoot, repoRootErr = subprocess.Popen(['git', 'rev-parse', '--show-toplevel'], stdout=subprocess.PIPE).communicate()
-repoRoot = repoRoot.decode('utf-8').strip() if repoRoot else u''
-os.chdir(repoRoot)
-cwd = os.getcwd()
+repoRoot = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE, check=True)
+os.chdir(repoRoot.stdout.strip())
+repoRootDir = os.getcwd()
 
-print("Current working directory: {0}".format(cwd))
+print("")
+print("------------------------------------------------")
+print("      CEP Submodule export/import script")
+print("------------------------------------------------")
+print("Current working directory: {0}".format(repoRootDir))
 
 # Perform an inport or export operation
 if (sys.argv[1] == "export"):
 
+  # Some error checking
+  if (not os.path.exists(".gitmodules")):
+    sys.exit("[ERROR] : .gitmodules does not exist")
+  
   # Run the git submodule command with the output being a list of lists, which each sublist being a pair of commit and path
-  gitSubmoduleStatus, gitSubmoduleStatusErr = subprocess.Popen(['git', 'submodule'], stdout=subprocess.PIPE).communicate()
+  gitSubmoduleStatus = subprocess.run(["git", "submodule"], stdout=subprocess.PIPE, check=True).stdout
   gitSubmoduleStatus = gitSubmoduleStatus.decode('utf-8') if gitSubmoduleStatus else u''
   gitSubmoduleStatus = gitSubmoduleStatus.split()
   gitSubmoduleStatus = [x for x in gitSubmoduleStatus if not x.startswith('(')]
@@ -50,9 +63,96 @@ if (sys.argv[1] == "export"):
   gitModules = [x for x in gitModules if x.startswith('[submodule') or x.startswith('path') or x.startswith('url')]
   gitModules = [x.replace('[submodule "', '') for x in gitModules]
   gitModules = [x.replace('"]', '') for x in gitModules]
-#  gitModules = [gitModules[x:x+3] for x in range(0, len(gitModules), 3)]
-  print(gitModules)
+  gitModules = [x.replace('path = ', '') for x in gitModules]
+  gitModules = [x.replace('url = ', '') for x in gitModules]
+  gitModules = [gitModules[x:x+3] for x in range(0, len(gitModules), 3)]
+  
+  print("Submodule exclude list          : " + str(excludeList))
 
+  # The lists should be of equal length
+  if (len(gitSubmoduleStatus) != len(gitModules)):
+    sys.exit("[ERROR] : length mismatch between gitSubmoduleStatus and gitModules")
+  else:
+    print("Total submodules                : " + str(len(gitSubmoduleStatus)))
+
+  # gitSubmoduleStatus now has "doubles" of submodule commit & path
+  # gitModules now has "triples" of submodule name, path, and url
+
+  # Sort each list by the 2nd element (submodule path) of each entry
+  gitSubmoduleStatus = sorted(gitSubmoduleStatus, key = lambda x: x[1])
+  gitModules = sorted(gitModules, key = lambda x: x[1])
+  
+  # Define resulting list
+  gitSubmoduleExport = []
+
+  # Iterate through each list simultaneously
+  for (submodule, module) in zip(gitSubmoduleStatus, gitModules):
+    gitSubmoduleExport.append([module[0], module[1], module[2], submodule[0]])
+
+  # Remove those submodules on the exclude list
+  gitSubmoduleExport = [x for x in gitSubmoduleExport if not x[0] in excludeList]
+
+  print("Total submodules post exclusion : " + str(len(gitSubmoduleExport)))
+
+  # Write the results to the CSV file
+  with open(fileName, "w") as f:
+    wr = csv.writer(f)
+    wr.writerows(gitSubmoduleExport)
+
+  print("")
+  print("Export complete.  Results writen to " + fileName)
+  print("")
 
 else:
-  print("import")
+  # Perform some error checking first
+  if (not os.path.exists(fileName)):
+    sys.exit("[ERROR] : Can't find " + fileName)
+
+  # Force deinitialization of all submodules
+  subprocess.run(["git", "submodule", "deinit", "--force", "--all"], stdout=subprocess.PIPE, check=True)
+
+  # Remove existing .gitmodule .... if it exists
+  if (os.path.exists(".gitmodules")):
+    subprocess.run(["git", "rm", "--force", ".gitmodules"], stdout=subprocess.PIPE, check=True)
+
+  # Read the CSV file into a list of lists
+  with open(fileName, "r") as read_obj:
+    csv_reader          = csv.reader(read_obj)
+    gitSubmoduleImport  = list(csv_reader)
+
+  try:
+    file = open(".gitmodules", "w")
+  except:
+    print("[ERROR]: Can't open .gitmodules for writing")
+    sys.exit()
+
+  # Iterate the list
+  # submodule[0] is submodule name
+  # submodule[1] is submodule path
+  # submodule[2] is submodule url
+  # submodule[3] is submodule commit
+  for submodule in gitSubmoduleImport:
+    print("Adding submodule " + submodule[0])
+    
+    # Remove the submodule path, if it exists
+    if (os.path.exists(submodule[1])):
+      subprocess.run(["rm", "-rf", submodule[1]], stdout=subprocess.PIPE, check=True)
+
+    # Add the submodule and append to the .gitmodules file
+    subprocess.run(["git", "submodule", "add", "--name", submodule[0], submodule[2], submodule[1]], stdout=subprocess.PIPE, check=True)
+    file.write('[submodule "' + submodule[0] + '"]\n')
+    file.write("  path = " + submodule[1] + "\n")
+    file.write("  url = " + submodule[2] + "\n")     
+
+    # Checkout the specific commit for the current submodule
+    os.chdir(submodule[1])
+    print("Checking out commit " + submodule[3])
+    subprocess.run(["git", "checkout", "--quiet", submodule[3]], stdout=subprocess.PIPE, check=True)
+    os.chdir(repoRootDir)
+
+  # Close .gitmodules
+  file.close()
+
+  print("")
+  print("Import complete.")
+  print("")
