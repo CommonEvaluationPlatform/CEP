@@ -154,7 +154,7 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
   - Some idft test vectors fail under QuestaSim (xcellium regression ran successfully)
   - Multithreaded test (#23) non-functional under linux
 
-## [v4.00] - 2022-06-XX
+## [v4.00] - 2022-06-21
 
 ### Added
 * Chipyard Arty100t branch merged in (Commit 4440db0, March 4, 2022)
