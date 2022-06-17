@@ -1,1 +1,4 @@
 generated-src
+*.log
+*.jou
+.Xil/

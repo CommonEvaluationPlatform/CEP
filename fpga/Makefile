@@ -12,7 +12,14 @@ sim_dir=$(abspath .)
 # include shared variables
 #########################################################################################
 
+# Verify vivado is available
+ifeq (,$(shell which vivado))
+$(error Vivado is not available.  Please install and ensure the environment script is sourced.)
+endif
+
+# Detect and 
 VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
+$(info Vivado $(VIVADO_VERSION) detected.)
 
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
@@ -116,6 +123,20 @@ ifeq ($(SUB_PROJECT),cep_arty100t)
 	SORT_FILE         := $(base_dir)/cep_sort.f
 endif
 
+ifeq ($(SUB_PROJECT),cep_min_arty100t)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= Arty100TFPGATestHarness
+	VLOG_MODEL        ?= Arty100TFPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
+	CONFIG            ?= RocketArty100TMinCEPConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
+	GENERATOR_PACKAGE ?= chipyard
+	TOP               ?= ChipTop
+	BOARD             ?= arty_a7_100
+	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+endif
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example
@@ -174,10 +195,6 @@ $(synth_list_f): $(sim_common_files) $(all_vsrcs)
 	cat $(sim_common_files) >> $@
 # These steps are only relevant when building CEP-related targets
 ifneq (,$(findstring cep,$(SUB_PROJECT)))
-	@# Create a dummy CHIPYARD_BUILD_INFO.make in order to allow the build of baremetal
-	@# executables within the CEP CoSimulation environment
-	@touch $(base_dir)/CHIPYARD_BUILD_INFO.make
-	
 	@# Call the blackbox sorting script
 	@${SORT_SCRIPT} ${synth_list_f} ${SORT_FILE}
 endif
@@ -292,5 +309,5 @@ sim-fpga: $(sim)
 # general cleanup rules
 #########################################################################################
 .PHONY: clean
-clean:
+clean: cep_clean
 	rm -rf $(gen_dir)

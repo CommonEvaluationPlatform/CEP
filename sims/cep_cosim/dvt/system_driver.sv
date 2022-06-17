@@ -166,6 +166,7 @@ module system_driver (
     // bits of the scratchpad register AND force the divider to a FAST speed 
     // for the remainder of the simulation
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART]) begin
+      force `CEPREGS_PATH.scratch_word0[1:0] = 0;
       release `CEPREGS_PATH.scratch_word0[1:0];
       `logI("BOOTROM: Enabling the UART");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_UART] = 0;
@@ -182,6 +183,7 @@ module system_driver (
     // Additional, the payload size in bootrom will be forced to a
     // managable size.
     always @(posedge `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT]) begin
+      force `CEPREGS_PATH.scratch_word0[3:2] = 0;
       release `CEPREGS_PATH.scratch_word0[3:2];
       `logI("BOOTROM: Enabling the SD Boot");
       `DVT_FLAG[`DVTF_BOOTROM_ENABLE_SDBOOT] = 0;

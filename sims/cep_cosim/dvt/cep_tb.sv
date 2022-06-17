@@ -127,12 +127,16 @@ module `COSIM_TB_TOP_MODULE;
 
   // Testbench UART receiver
   uart_model #(
- `ifdef CADENCE
-    .BIT_RATE(6_250_000),	  // CEP UART DIV = 32, internal clock = 200MHz
- `endif
- `ifdef MODELSIM
-    .BIT_RATE(5_208_333), 	// CEP UART Div = 32, internal clock = 166.66MHz (should be 200MHz in Modelsim as well)
- `endif
+  `ifdef ASIC_MODE
+  `ifdef CADENCE
+      .BIT_RATE(6_250_000),	  // CEP UART DIV = 32, internal clock = 200MHz
+  `endif
+  `ifdef MODELSIM
+      .BIT_RATE(5_208_333), 	// CEP UART Div = 32, internal clock = 166.66MHz (should be 200MHz in Modelsim as well)
+   `endif
+`else
+  .BIT_RATE(3_125_000),       // CEP UART DIV = 32, internal clock = 100MHz
+`endif
     .CLK_HZ(100_000_000),
     .PAYLOAD_BITS(8),
     .STOP_BITS(2)
@@ -195,6 +199,7 @@ module `COSIM_TB_TOP_MODULE;
   `endif
 
   initial begin
+  `ifdef ASIC_MODE
   `ifdef BYPASS_PLL
     `logI("PLL is set to bypass mode");
     pll_bypass = 1'b1;
@@ -202,9 +207,12 @@ module `COSIM_TB_TOP_MODULE;
     `logI("PLL is set to normal mode");
     pll_bypass = 1'b0;
   `endif
+  `endif
   end
   assign  pll_bypass_pad  = pll_bypass;
 
+  // Pinouts for the ASIC and FPGA differ
+`ifdef ASIC_MODE
   `CHIPYARD_TOP_MODULE `DUT_INST ( 
     .jtag_TCK           (jtag_TCK),
     .jtag_TMS           (jtag_TMS),
@@ -256,6 +264,32 @@ module `COSIM_TB_TOP_MODULE;
     .pll_bypass         (pll_bypass_pad),
     .pll_observe        (pll_observe)
   );
+  `else 
+  `CHIPYARD_TOP_MODULE `DUT_INST ( 
+    .jtag_TCK           (jtag_TCK),
+    .jtag_TMS           (jtag_TMS),
+    .jtag_TDI           (jtag_TDI),
+    .jtag_TDO           (jtag_TDO),
+    .spi_0_sck          (spi_0_sck),
+    .spi_0_cs_0         (spi_0_cs_0),
+    .spi_0_dq_0         (spi_0_dq_0),
+    .spi_0_dq_1         (spi_0_dq_1),
+    .spi_0_dq_2         (spi_0_dq_2),
+    .spi_0_dq_3         (spi_0_dq_3),
+    .gpio_0_0           (gpio_0_0),
+    .gpio_0_1           (gpio_0_1),
+    .gpio_0_2           (gpio_0_2),
+    .gpio_0_3           (gpio_0_3),
+    .gpio_0_4           (gpio_0_4),
+    .gpio_0_5           (gpio_0_5),
+    .gpio_0_6           (gpio_0_6),
+    .gpio_0_7           (gpio_0_7),
+    .uart_0_txd         (uart_txd),
+    .uart_0_rxd         (uart_rxd),
+    .reset              (sys_rst),
+    .clock_clock        (sys_clk_pad)
+  );
+  `endif
   //--------------------------------------------------------------------------------------
 
 

@@ -61,7 +61,6 @@ ifeq (${NOWAVE},1)
 COSIM_VLOG_ARGS				+= +define+NOWAVE
 endif
 
-
 # Pass on the ASIC_MODE argument
 ifeq (${ASIC_MODE},1)
 COSIM_VLOG_ARGS				+= +define+ASIC_MODE
@@ -185,7 +184,10 @@ ${COSIM_BUILD_LIST}: $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
+	@for i in $(shell ls -x ${DVT_DIR}/*.sv 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
+	done
+	@for i in $(shell ls -x ${DVT_DIR}/*.v 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@grep "\.v\|\.sv" ${CHIPYARD_SIM_TOP_BLACKBOXES}  >> ${COSIM_BUILD_LIST}
@@ -200,7 +202,10 @@ ${COSIM_BUILD_LIST}: $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
 	done
-	@for i in $(shell ls -x ${DVT_DIR}/*.{v,sv} 2>/dev/null); do \
+	@for i in $(shell ls -x ${DVT_DIR}/*.sv 2>/dev/null); do \
+		echo $${i} >> ${COSIM_BUILD_LIST}; \
+	done
+	@for i in $(shell ls -x ${DVT_DIR}/*.v 2>/dev/null); do \
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@grep "\.v\|\.sv" ${CHIPYARD_SIM_TOP_BLACKBOXES}  >> ${COSIM_BUILD_LIST}
@@ -318,8 +323,8 @@ endif
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
 XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
-VMGR_PATH 						:= /brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}
-XCELIUM_INSTALL					:= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
+VMGR_PATH 						?= /brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}
+XCELIUM_INSTALL					?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
 MDV_XLM_HOME 					:= ${XCELIUM_INSTALL}
 XRUN_CMD 						:= ${XCELIUM_INSTALL}/tools/bin/xrun

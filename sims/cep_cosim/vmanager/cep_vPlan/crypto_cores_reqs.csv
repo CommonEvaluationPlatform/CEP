@@ -1,4 +1,0 @@
-DEPTH,NODE_KIND,ELEMENT_ID,NAME,details
-0,SECTION,requirements,requirements,
-1,PLANNED_TESTCASE,CEP_001,CEP_001,"Each RISC‐V core pick up a sub set out of 10 macro cores (AES, DES3, etc..) and verifying them in parallel. They also make sure each core never touch the same crypto core at any given time."
-1,PLANNED_TESTCASE,CEP_002,CEP_002,"This test playback the captured vectors during simulation of the cypto cores. These vectors serve 2 purposes: to be used in unit level simulation at transaction/cycle accurate levels,repsectively."

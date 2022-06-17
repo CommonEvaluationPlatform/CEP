@@ -748,23 +748,47 @@ typedef struct cep_key_info_t {
 //
 // KeyLength = High Pointer - Low Pointer + 1
 //
-const cep_key_info_t KEY_DATA[CEP_LLKI_CORES] = {
-  {"AES",      AES_MOCK_TSS_KEY,        0,   1,   INVERT_ALL_BITS},
-  {"MD5",      MD5_MOCK_TSS_KEY,        2,   9,   INVERT_ALL_BITS},
-  {"SHA256.0", CMU_SHA256_TSS_KEY,     10,  517,  INVERT_ALL_BITS}, // CMU Core
-  {"SHA256.1", SHA256_MOCK_TSS_KEY,   518,  525,  INVERT_ALL_BITS},
-  {"SHA256.2", SHA256_MOCK_TSS_KEY,   526,  533,  INVERT_ALL_BITS},
-  {"SHA256.3", SHA256_MOCK_TSS_KEY,   534,  541,  INVERT_ALL_BITS},
-  {"RSA",      RSA_MOCK_TSS_KEY,      542,  542,  INVERT_ALL_BITS},
-  {"DES3",     DES3_MOCK_TSS_KEY,     543,  543,  INVERT_ALL_BITS},
-  {"DFT",      DFT_MOCK_TSS_KEY,      544,  544,  INVERT_ALL_BITS},
-  {"IDFT",     IDFT_MOCK_TSS_KEY,     545,  545,  INVERT_ALL_BITS},
-  {"FIR",      FIR_MOCK_TSS_KEY,      546,  546,  INVERT_ALTERNATE},
-  {"IIR",      IIR_MOCK_TSS_KEY,      547,  547,  INVERT_ALTERNATE},
-  {"GPS.0",    CMU_GPS_LBLL_TSS_KEY,  548,  551,  INVERT_ALL_BITS}, // CMU Core
-  {"GPS.1",    CMU_GPS_TSS_KEY,       552,  677,  INVERT_ALL_BITS},
-  {"GPS.2",    GPS_MOCK_TSS_KEY,      678,  682,  INVERT_ALL_BITS},
-  {"GPS.3",    GPS_MOCK_TSS_KEY,      683,  687,  INVERT_ALL_BITS}
-};
+
+// The ASIC version of the CEP uses a different set of LLKI Key
+#ifdef ASICMODE
+  const cep_key_info_t KEY_DATA[CEP_LLKI_CORES] = {
+    {"AES",      AES_MOCK_TSS_KEY,        0,   1,   INVERT_ALL_BITS},
+    {"MD5",      MD5_MOCK_TSS_KEY,        2,   9,   INVERT_ALL_BITS},
+    {"SHA256.0", CMU_SHA256_TSS_KEY,     10,  517,  INVERT_ALL_BITS}, // CMU Core
+    {"SHA256.1", SHA256_MOCK_TSS_KEY,   518,  525,  INVERT_ALL_BITS},
+    {"SHA256.2", SHA256_MOCK_TSS_KEY,   526,  533,  INVERT_ALL_BITS},
+    {"SHA256.3", SHA256_MOCK_TSS_KEY,   534,  541,  INVERT_ALL_BITS},
+    {"RSA",      RSA_MOCK_TSS_KEY,      542,  542,  INVERT_ALL_BITS},
+    {"DES3",     DES3_MOCK_TSS_KEY,     543,  543,  INVERT_ALL_BITS},
+    {"DFT",      DFT_MOCK_TSS_KEY,      544,  544,  INVERT_ALL_BITS},
+    {"IDFT",     IDFT_MOCK_TSS_KEY,     545,  545,  INVERT_ALL_BITS},
+    {"FIR",      FIR_MOCK_TSS_KEY,      546,  546,  INVERT_ALTERNATE},
+    {"IIR",      IIR_MOCK_TSS_KEY,      547,  547,  INVERT_ALTERNATE},
+    {"GPS.0",    CMU_GPS_LBLL_TSS_KEY,  548,  551,  INVERT_ALL_BITS}, // CMU Core
+    {"GPS.1",    CMU_GPS_TSS_KEY,       552,  677,  INVERT_ALL_BITS}, // CMU Core
+    {"GPS.2",    GPS_MOCK_TSS_KEY,      678,  682,  INVERT_ALL_BITS},
+    {"GPS.3",    GPS_MOCK_TSS_KEY,      683,  687,  INVERT_ALL_BITS}
+  };
+#else
+  const cep_key_info_t KEY_DATA[CEP_LLKI_CORES] = {
+    {"AES",      AES_MOCK_TSS_KEY,        0,   1,   INVERT_ALL_BITS},
+    {"MD5",      MD5_MOCK_TSS_KEY,        2,   9,   INVERT_ALL_BITS},
+    {"SHA256.0", SHA256_MOCK_TSS_KEY,    10,  17,   INVERT_ALL_BITS},
+    {"SHA256.1", SHA256_MOCK_TSS_KEY,    18,  25,   INVERT_ALL_BITS},
+    {"SHA256.2", SHA256_MOCK_TSS_KEY,    26,  33,   INVERT_ALL_BITS},
+    {"SHA256.3", SHA256_MOCK_TSS_KEY,    34,  41,   INVERT_ALL_BITS},
+    {"RSA",      RSA_MOCK_TSS_KEY,       42,  42,   INVERT_ALL_BITS},
+    {"DES3",     DES3_MOCK_TSS_KEY,      43,  43,   INVERT_ALL_BITS},
+    {"DFT",      DFT_MOCK_TSS_KEY,       44,  44,   INVERT_ALL_BITS},
+    {"IDFT",     IDFT_MOCK_TSS_KEY,      45,  45,   INVERT_ALL_BITS},
+    {"FIR",      FIR_MOCK_TSS_KEY,       46,  46,   INVERT_ALTERNATE},
+    {"IIR",      IIR_MOCK_TSS_KEY,       47,  47,   INVERT_ALTERNATE},
+    {"GPS.0",    GPS_MOCK_TSS_KEY,       48,  52,   INVERT_ALL_BITS},
+    {"GPS.1",    GPS_MOCK_TSS_KEY,       53,  57,   INVERT_ALL_BITS},
+    {"GPS.2",    GPS_MOCK_TSS_KEY,       58,  62,   INVERT_ALL_BITS},
+    {"GPS.3",    GPS_MOCK_TSS_KEY,       63,  67,   INVERT_ALL_BITS}
+  };
+#endif // ASICMODE
+
 
 #endif

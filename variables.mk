@@ -63,24 +63,44 @@ HELP_LINES = "" \
 #   - mainly intended for quick developer setup for common flags
 #########################################################################################
 SUB_PROJECT ?= chipyard
+CHIPYARD_BUILD_INFO ?= $(base_dir)/CHIPYARD_BUILD_INFO.make
 
 # Common Evaluation Platform ASIC Build
 # Default BootROM is overriden
 ifeq ($(SUB_PROJECT),cep_cosim_asic)
-	SBT_PROJECT       ?= chipyard
-	MODEL             ?= TestHarness
-	VLOG_MODEL        ?= TestHarness
-	MODEL_PACKAGE     ?= $(SBT_PROJECT)
-	CONFIG            ?= CEPASICRocketConfig
-	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
-	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
-	TB                ?= TestDriver
-	TOP               ?= ChipTop
-	BOOTROM_SRC_DIR	  := $(base_dir)/sims/cep_cosim/bootrom
-	SORT_SCRIPT       := $(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         := $(base_dir)/cep_sort.f
-	BOOTROM_FILES	  := bootrom.rv64.img bootrom.rv64.rcf
-	PBUS_CLK 		  := 200000000
+	SBT_PROJECT       	?= chipyard
+	MODEL             	?= TestHarness
+	VLOG_MODEL        	?= TestHarness
+	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	CONFIG            	?= CEPASICRocketConfig
+	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)
+	TB                	?= TestDriver
+	TOP               	?= ChipTop
+	BOOTROM_SRC_DIR	  	:= $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       	:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         	:= $(base_dir)/cep_sort.f
+	BOOTROM_FILES	  	:= bootrom.rv64.img bootrom.rv64.rcf
+	PBUS_CLK 		  	:= 200000000
+	CHIPYARD_BUILD_INFO := $(sim_dir)/CHIPYARD_BUILD_INFO.make
+endif
+
+ifeq ($(SUB_PROJECT),cep_cosim)
+	SBT_PROJECT       	?= chipyard
+	MODEL             	?= TestHarness
+	VLOG_MODEL        	?= TestHarness
+	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	CONFIG            	?= CEPRocketConfig
+	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)
+	TB                	?= TestDriver
+	TOP               	?= ChipTop
+	BOOTROM_SRC_DIR	  	:= $(base_dir)/sims/cep_cosim/bootrom
+	SORT_SCRIPT       	:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         	:= $(base_dir)/cep_sort.f
+	BOOTROM_FILES	  	:= bootrom.rv64.img bootrom.rv64.rcf
+	PBUS_CLK 		  	:= 200000000
+	CHIPYARD_BUILD_INFO := $(sim_dir)/CHIPYARD_BUILD_INFO.make
 endif
 
 # default chipyard build

@@ -32,13 +32,15 @@ endif
 
 # The following flags / variables can be overridden by lower level makefiles or the command line
 NOWAVE          			?= 1
-PROFILE         			?= 0
-COVERAGE        			?= 0
-USE_GDB       				?= 0
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
-ASIC_MODE                   ?= 1
+FPGA_SW_BUILD               ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
+
+# The following flags are defined here to support the eventual enablement of legacy functionality
+override PROFILE   			= 0
+override COVERAGE  			= 0
+override USE_GDB  			= 0
 
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported
 # The following check ensures one and only one is set
@@ -60,12 +62,19 @@ $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
 
 # Validate the Chipyard verilog has been built by looking for the generated makefile
-ifeq (,$(wildcard $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
+ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 $(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(REPO_TOP_DIR)")
 endif
 
 # Include the file that contains info about the chipyard build (also, a change includes a rebuild)
-include $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+
+# Override the ASIC mode based on inferrence from the CHIPYARD_SUB_PROJECT
+ifeq "$(findstring asic,${CHIPYARD_SUB_PROJECT})" "asic"
+override ASIC_MODE 			= 1
+else
+override ASIC_MODE 			= 0
+endif	
 
 # The following DEFINES control how the software is
 # compiled and if will be overriden by lower level
@@ -114,9 +123,9 @@ VPP_CMD						= ${BIN_DIR}/vpp.pl
 V2C_CMD						= ${BIN_DIR}/v2c.pl
 
 #--------------------------------------------------------------------------------------
-# To detect if any important flag has changed since last run
+# To detect if any important flags have changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${VIRTUAL_MODE}_${RISCV_TESTS}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${DISABLE_CHISEL_PRINTF}_${TL_CAPTURE}_${USE_GDB}_${BYPASS_PLL}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
@@ -133,28 +142,29 @@ sim_info:
 	@echo "CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           "
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
 	@echo ""
-	@echo " CEP_COSIM:"$(shell hostnamectl | grep "Operating System")
-	@echo " CEP_COSIM: Running with the following variables:"
-	@echo " CEP_COSIM:   RISCV                  = $(RISCV))"
+	@echo "CEP_COSIM:"$(shell hostnamectl | grep "Operating System")
+	@echo "CEP_COSIM: Running with the following variables:"
+	@echo "CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
-	@echo " CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH}"
+	@echo "CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH}"
 else ifeq (${CADENCE},1)
-	@echo " CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH}"
-	@echo " CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL}"
+	@echo "CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH}"
+	@echo "CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL}"
 endif
-	@echo " CEP_COSIM:   MODELSIM               = $(MODELSIM)"
-	@echo " CEP_COSIM:   CADENCE                = $(CADENCE)"
-	@echo " CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
-	@echo " CEP_COSIM:   RISCV_TESTS            = ${RISCV_TESTS}"
-	@echo " CEP_COSIM:   NOWAVE                 = ${NOWAVE}"
-	@echo " CEP_COSIM:   PROFILE                = ${PROFILE}"
-	@echo " CEP_COSIM:   COVERAGE               = ${COVERAGE}"
-	@echo " CEP_COSIM:   USE_GDB                = ${USE_GDB}"
-	@echo " CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
-	@echo " CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
-	@echo " CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
-	@echo " CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
-	@echo " CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
+	@echo "CEP_COSIM:   MODELSIM               = $(MODELSIM)"
+	@echo "CEP_COSIM:   CADENCE                = $(CADENCE)"
+	@echo "CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
+	@echo "CEP_COSIM:   RISCV_TESTS            = ${RISCV_TESTS}"
+	@echo "CEP_COSIM:   NOWAVE                 = ${NOWAVE}"
+	@echo "CEP_COSIM:   PROFILE                = ${PROFILE}"
+	@echo "CEP_COSIM:   COVERAGE               = ${COVERAGE}"
+	@echo "CEP_COSIM:   USE_GDB                = ${USE_GDB}"
+	@echo "CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
+	@echo "CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
+	@echo "CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
+	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
+	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
+	@echo "CEP_COSIM:   FPGA_SW_BUILD          = ${FPGA_SW_BUILD}"
 	@echo ""
 #--------------------------------------------------------------------------------------
 
@@ -233,7 +243,9 @@ clean: cleanTest cleanSuite cleanLib
 
 # isaTests have their executables built seperately, so the cleanTest behavior needs to be different
 # (.img, elf, .dump, and .hex need to be kept)
+# Clean test only makes sense when run within a test directory
 cleanTest:
+ifneq (,$(TEST_DIR))
 ifeq (${TEST_SUITE_NAME}, isaTests)
 	-rm -f ${TEST_DIR}/*.o ${TEST_DIR}/*.bobj
 	-rm -f ${TEST_DIR}/*.wlf
@@ -279,11 +291,18 @@ else
 	-rm -rf ${TEST_DIR}/.bpad
 	-rm -f ${TEST_DIR}/*.img
 endif
+else
+	@echo "CEP_COSIM: cleanTest not run"
+endif
 
-cleanTestDo:
+cleanDo:
+ifneq (,$(TEST_DIR))
 	-rm -f ${TEST_DIR}/*.do
+endif
 
+# Clean suite only make sense when in a testSuite or inidividual test directory
 cleanSuite:
+ifneq (,$(TEST_SUITE_DIR))
 	-rm -f ${TEST_SUITE_DIR}/.cosim_build_list
 	-rm -rf ${TEST_SUITE_DIR}/*_work
 	-rm -f ${TEST_SUITE_DIR}/.PERSUITE*
@@ -295,6 +314,9 @@ cleanSuite:
 	@for i in ${TEST_LIST}; do 							\
 		(if [ -d ${TEST_SUITE_DIR}/$${i} ]; then cd ${TEST_SUITE_DIR}/$${i}; make cleanTest; fi)	\
 	done
+else
+	@echo "CEP_COSIM: cleanSuite not run"
+endif
 
 cleanLib:
 	-rm -f ${CHIPYARD_TOP_FILE_bfm}
@@ -318,7 +340,6 @@ else
 endif
 
 .force:
-
 #--------------------------------------------------------------------------------------
 
 
@@ -328,29 +349,38 @@ endif
 #--------------------------------------------------------------------------------------
 define MAKE_USAGE_HELP_BODY
 Usage summary:
-make [NOWAVE=0|1] [COVERAGE=0|1] [PROFILE=0|1] [USE_GDB=0|1] <all|summary|cleanAll|merge|usage>
 
-Options:
-  NOWAVE=1      : turn off wave capturing. Default is ON for interactive. OFF for regression
-  USE_GDB=1     : run the test under "gdb" debugger. Default is OFF. Should only be used for interactive session.
-  COVERAGE=1    : run the test with coverage capture enable. Default is OFF
-  PROFILE=1     : run the test with profiling turn on. Default is OFF
-  TL_CAPTURE=1  : turn on Title-Link comand sequence capturing to be used for BARE Metal (and Unit-level testbench)
+User controlled options: (0 = not set, 1 = set)
+  NOWAVE                  : Default: 1: When not set, waveforms will be captured based on the rules in vsim.do
+  TL_CAPTURE              : Default: 0: Enables capturing of CEP core tilelink I/O as required by bareMetal macroMix tests and unit simulation
+  BYPASS_PLL              : Default, 0: Applicable only when running the ASIC simulation, enables PLL bypass when set.
+  DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores (not applicable in BFM mode)
   
 Targets:
-  all        : run the test. Default target (empty string = same as "all")
-  summary    : print out regression summary (run at the top or suite directories.
-  cleanAll   : clean up and force a rebuild of every thing
-  merge      : merge coverage reports
-  usage      : print this help lines
+  usage                   : Print this usage information.
+  sim_info                : Display the default/current environment/variable settings used by the cosim.
+  summary                 : Defined at the testSuite and cosim level.  Aggregates test status into a single file.
+  runAll                  : Run all the tests below the current level (cosim or testSuite)
 
-  see <common.make> for more options and targets
+Unique isaTests Targets (recommend following instructions in $(COSIM_TOP_DIR)/README.md)  
+  createISATests          : Create individual cosim tests from riscv-tests (Only ISA tests are supported).
+  removeISATests          : Remove the cosim tests built from riscv-tests.
+
+Clean Targets: 
+  cleanTest               : Clean the current test (e.g., regTest).
+  cleanSuite              : Clean the current test suite (e.g., bareMetal).
+  cleanLib                : Clean the cosim generated libraries (e.g., <CEP_ROOT>/lib).
+  clean                   : Runs the following clean targets: cleanTest, cleanSuite, cleanLib.
+  cleanDo                 : Clean any .do files within the current test directory.
+  cleanAll                : Clean all tests, all suites, and libraries.
+
+Default make targets at the cosim and testSuite directory are "usage".  At the individual test level, the simulation will be run.
 
 endef
 
 export MAKE_USAGE_HELP_BODY
 
-usage: sim_info
+usage:
 	@echo "$$MAKE_USAGE_HELP_BODY"
 #--------------------------------------------------------------------------------------
 

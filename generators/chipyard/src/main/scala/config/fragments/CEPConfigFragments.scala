@@ -22,14 +22,6 @@ import mitllBlocks.cep_registers._
 import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
 
-import asicBlocks.sha256Redaction._
-import asicBlocks.gpslbll._
-import asicBlocks.gpsRedaction._
-import asicBlocks.cep_scratchpad_asic._
-import asicBlocks.srot_asic._
-import asicBlocks.rsa_asic._
-import asicBlocks.ASICBootROM._
-
 import sifive.blocks.devices.spi._
 
 import chipyard._
@@ -164,55 +156,7 @@ class WithRSA ( params  : Seq[COREParams] = Seq(
   case PeripheryRSAKey => params
 })
 
-class WithRSAASIC ( params  : Seq[COREParams] = Seq(
-  COREParams(
-    slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
-    slave_depth         = BigInt(CEPBaseAddresses.rsa_depth),
-    llki_base_addr      = BigInt(CEPBaseAddresses.rsa_llki_base_addr),
-    llki_depth          = BigInt(CEPBaseAddresses.rsa_llki_depth),
-    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.rsa_llki_ctrlsts_addr),
-    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
-    dev_name            = s"rsa"))) extends Config((site, here, up) => {
-  case PeripheryRSAASICKey => params
-})
-
-class WithSHA256Redaction ( params  : Seq[COREParams] = Seq(
-  COREParams(
-    slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
-    slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
-    llki_base_addr      = BigInt(CEPBaseAddresses.sha256_0_llki_base_addr),
-    llki_depth          = BigInt(CEPBaseAddresses.sha256_0_llki_depth),
-    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_0_llki_ctrlsts_addr),
-    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
-    dev_name            = s"sha256"))) extends Config((site, here, up) => {
-  case PeripherySHA256RedactionKey => params
-})
-
-class WithGPSLBLL ( params  : Seq[COREParams] = Seq(
-  COREParams(
-    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
-    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
-    llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
-    llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
-    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
-    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
-    dev_name            = s"gps"))) extends Config((site, here, up) => {
-  case PeripheryGPSLBLLKey => params
-})
-
-class WithGPSRedaction ( params  : Seq[COREParams] = Seq(
-  COREParams(
-    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
-    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
-    llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
-    llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
-    llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
-    llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
-    dev_name            = s"gps"))) extends Config((site, here, up) => {
-  case PeripheryGPSRedactionKey => params
-})
-
-    class WithCEPRegisters extends Config((site, here, up) => {
+class WithCEPRegisters extends Config((site, here, up) => {
   case PeripheryCEPRegistersKey => List(
     CEPREGSParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.cepregs_base_addr),
@@ -232,18 +176,6 @@ class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_ad
     ))
 })
 
-// Instantiate the ASIC version which uses technology specify libraries
-class WithCEPASICScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_addr,
-                             size:      BigInt = CEPBaseAddresses.scratchpad_depth) extends Config((site, here, up) => {
-  case CEPScratchpadASICKey => List(
-    CEPScratchpadParams(
-      slave_address       = address,
-      slave_depth         = size,
-      dev_name            = s"scratchpad"
-    ))
-})
-
-
 // Do not define BootROMLocated and ASICBootROMLocated at the same time
 // WithCEPBootROM allows override of default parameters
 class WithCEPBootROM    (address  : BigInt    = 0x10000, 
@@ -254,26 +186,6 @@ class WithCEPBootROM    (address  : BigInt    = 0x10000,
                           size    = size,
                           hang    = hang,
                           contentFileName = s"${site(TargetDirKey)}/bootrom.rv${site(XLen)}.img"))
-  case ASICBootROMLocated(x) => None
-})
-
-// WithCEPASICBootROM defines the key for the CEP ASIC blackbox BootROM.  The contentFileName parameter
-// is not used as the filename is specified in the ROM model
-class WithCEPASICBootROM  (address  : BigInt  = 0x10000, 
-                           size     : Int     = 0x10000,
-                           hang     : BigInt  = 0x10040) extends Config((site, here, up) => {
-  case ASICBootROMLocated(x) => up(ASICBootROMLocated(x), site).map(_.copy(
-                         address = address,
-                         size    = size,
-                         hang    = hang))
-
-  // The underlying freechips.rocketchip.system.BaseConfig configuration defines a default BootROMLocated
-  // This is an override to prevent it's elaboration when using the ASICBootROM
-  case BootROMLocated(x) => None
-})
-
-class WithCEPASICBootROMStub extends Config((site, here, up) => {
-  case ASICBootROMLocated(x) => Some(ASICBootROMParams())
 })
 
 class WithSROT extends Config((site, here, up) => {
@@ -306,8 +218,8 @@ class WithSROT extends Config((site, here, up) => {
     ))
 })
 
-class WithSROTASIC extends Config((site, here, up) => {
-  case SROTASICKey => List(
+class WithSROTFPGA extends Config((site, here, up) => {
+  case SROTKey => List(
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
@@ -316,22 +228,7 @@ class WithSROTASIC extends Config((site, here, up) => {
       // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
       // The SRoT uses these indicies for routing keys to the appropriate core
       llki_cores_array    = Array(
-        CEPBaseAddresses.aes_llki_base_addr,      // Core Index 0 
-        CEPBaseAddresses.md5_llki_base_addr,      // Core Index 1 
-        CEPBaseAddresses.sha256_0_llki_base_addr, // Core Index 2 
-        CEPBaseAddresses.sha256_1_llki_base_addr, // Core Index 3 
-        CEPBaseAddresses.sha256_2_llki_base_addr, // Core Index 4 
-        CEPBaseAddresses.sha256_3_llki_base_addr, // Core Index 5 
-        CEPBaseAddresses.rsa_llki_base_addr,      // Core Index 6 
-        CEPBaseAddresses.des3_llki_base_addr,     // Core Index 7 
-        CEPBaseAddresses.dft_llki_base_addr,      // Core Index 8 
-        CEPBaseAddresses.idft_llki_base_addr,     // Core Index 9 
-        CEPBaseAddresses.fir_llki_base_addr,      // Core Index 10
-        CEPBaseAddresses.iir_llki_base_addr,      // Core Index 11
-        CEPBaseAddresses.gps_0_llki_base_addr,    // Core Index 12
-        CEPBaseAddresses.gps_1_llki_base_addr,    // Core Index 13
-        CEPBaseAddresses.gps_2_llki_base_addr,    // Core Index 14
-        CEPBaseAddresses.gps_3_llki_base_addr     // Core Index 15
+        CEPBaseAddresses.aes_llki_base_addr       // Core Index 0 
       )
     ))
 })

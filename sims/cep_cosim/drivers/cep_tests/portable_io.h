@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#ifdef BARE_MODE
+#include <kprintf.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,7 +74,6 @@ extern "C" {
 
   #endif // if defined(_SIM_HW_ENV)
 
-// Operating on Hardware
 #else
 
   #define DUT_RUNCLK(x)

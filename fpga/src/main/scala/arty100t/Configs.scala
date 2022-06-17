@@ -1,6 +1,7 @@
 package chipyard.fpga.arty100t
 
 import sys.process._
+import math.min
 
 import freechips.rocketchip.config.{Config, Parameters}
 import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithDTS}
@@ -11,6 +12,7 @@ import freechips.rocketchip.tile.{XLen}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{ArtyDDRSize}
@@ -20,8 +22,21 @@ import testchipip.{SerialTLKey}
 import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey   => List(UARTParams(address = BigInt(0x64000000L)))
-  case PeripherySPIKey    => List(SPIParams(rAddress = BigInt(0x64001000L)))
+  case PeripheryUARTKey   => List(UARTParams(address  = BigInt(0x64000000L)))
+  case PeripherySPIKey    => List(SPIParams(rAddress  = BigInt(0x64001000L)))
+  case PeripheryGPIOKey => {
+    if (Arty100TGPIOs.width > 0) {
+      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
+  }
 })
 
 class WithSystemModifications (enableCEPRegs: Int = 0) extends Config((site, here, up) => {
@@ -43,10 +58,12 @@ class WithArty100TTweaks (enableCEPRegs: Int = 0) extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  new WithGPIO ++
   // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
+  new WithGPIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++      // use TL backing memory
@@ -76,6 +93,24 @@ class RocketArty100TSimConfig extends Config(
  )
 
 class RocketArty100TCEPConfig extends Config(
+  // Add the CEP registers
+  new chipyard.config.WithCEPRegisters ++
+  new chipyard.config.WithAES ++
+  new chipyard.config.WithSROTFPGA ++
+
+  // Overide the chip info 
+  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
+  // with reduced cache size, closes timing at 50 MHz
+  new WithFPGAFrequency(50) ++
+
+  // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
+  new WithArty100TTweaks(1) ++
+  new chipyard.RocketNoL2Config
+)
+
+// A minimum CEP configuration with only the registers component
+class RocketArty100TMinCEPConfig extends Config(
   // Add the CEP registers
   new chipyard.config.WithCEPRegisters ++
 

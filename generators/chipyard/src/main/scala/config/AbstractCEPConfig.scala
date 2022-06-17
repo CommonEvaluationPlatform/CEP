@@ -4,9 +4,10 @@ import freechips.rocketchip.config.{Config}
 import freechips.rocketchip.subsystem._
 
 // The following AbstractCEPConfig removes the L2 cache (when compared to AbstractConfig)
-class AbstractCEPASICConfig extends Config(
-  // Currently, the CEP does not depends/leverage the Chipyard TestHarness
-  // The HarnessBinders control generation of hardware in the TestHarness
+class AbstractCEPConfig extends Config(
+
+  // While the test harness is not used for the CEP, the following is required to complete the chipyard build
+  new chipyard.harness.WithClockAndResetFromHarness ++
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs, while simulation-only IOs are directly punched through
@@ -14,8 +15,7 @@ class AbstractCEPASICConfig extends Config(
   new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIGPIOCells ++
-  new chipyard.iobinders.WithTestIOStubs ++
-  new chipyard.iobinders.WithASICPLLClock ++
+  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
   
   // Additional chip configuration items
   new chipyard.config.WithNoSubsystemDrivenClocks ++              // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks

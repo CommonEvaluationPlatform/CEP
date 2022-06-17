@@ -24,6 +24,8 @@ sudo apt-get install -y python
 sudo add-apt-repository ppa:git-core/ppa -y
 sudo apt-get update
 sudo apt-get install git -y
+# install libcrypto++
+sudo apt-get install -y libcrypto++-dev
 
 # install verilator
 sudo apt-get install -y autoconf

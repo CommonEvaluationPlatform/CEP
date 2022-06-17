@@ -20,3 +20,22 @@ tags
 env-riscv-tools.sh
 env-esp-tools.sh
 .bsp/
+CHIPYARD_BUILD_INFO.make
+cep_version.h
+cep_adrMap.h
+v2c_cmds.h
+.PERSUITE*
+
+**/*.img
+**/*.elf
+**/*.o
+
+# The following exclusions ensure the ASIC-related files
+# do not get checked into the repository
+build.sbt
+/generators/chipyard/src/main/scala/DigitalTop.scala
+/generators/chipyard/src/main/scala/System.scala
+/generators/chipyard/src/main/scala/IOBinders.scala
+/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
+/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
+/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
