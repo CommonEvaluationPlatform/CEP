@@ -111,7 +111,7 @@ else:
   # Force deinitialization of all submodules
   subprocess.run(["git", "submodule", "deinit", "--force", "--all"], stdout=subprocess.PIPE, check=True)
 
-  # Remove existing .gitmodule .... if it exists
+  # Remove existing .gitmodules
   if (os.path.exists(".gitmodules")):
     subprocess.run(["git", "rm", "--force", ".gitmodules"], stdout=subprocess.PIPE, check=True)
 
@@ -146,12 +146,17 @@ else:
 
     # Checkout the specific commit for the current submodule
     os.chdir(submodule[1])
-    print("Checking out commit " + submodule[3])
+    print("Checking out commit " + submodule[3] + " ...")
     subprocess.run(["git", "checkout", "--quiet", submodule[3]], stdout=subprocess.PIPE, check=True)
     os.chdir(repoRootDir)
 
   # Close .gitmodules
   file.close()
+
+  # Even the excluded paths will have empty directories in the external repo.  Let's remove them.
+  print("Removing exluded submodule directories...")
+  for excludeDir in excludeList:
+  	subprocess.run(["rm", "-rf", excludeDir], stdout=subprocess.PIPE, check=True)
 
   print("")
   print("Import complete.")
