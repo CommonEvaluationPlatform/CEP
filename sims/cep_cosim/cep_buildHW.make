@@ -179,7 +179,7 @@ ${CHIPYARD_TOP_FILE_bare}: ${CHIPYARD_TOP_FILE}
 #
 # BFM Mode
 ifeq "$(findstring BFM,${DUT_SIM_MODE})" "BFM"
-${COSIM_BUILD_LIST}: $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@rm -f ${COSIM_BUILD_LIST}
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
@@ -197,7 +197,7 @@ ${COSIM_BUILD_LIST}: $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
 else
 # Bare Metal Mode
-${COSIM_BUILD_LIST}: $(REPO_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 	@rm -f ${COSIM_BUILD_LIST}
 	@for i in ${COSIM_INCDIR_LIST}; do \
 		echo "+incdir+"$${i} >> ${COSIM_BUILD_LIST}; \
