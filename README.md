@@ -194,12 +194,16 @@ Please check the [CEP changelog](./CHANGELOG.CEP.md) to understand what has chan
 ## Errors? Ommissions? Questions?
 Please feel free to file a github issue which the CEP developers check frequently.
 
+## Citation Information
+Citation information is contained [here](./citation.cff)
+
 ## Licensing
 As the CEP has been developed with input from many sources, multiple licenses apply.  Please refer to the following files for licensing info. 
 * [CEP License](./LICENSE.md)
 * [CEP Components Licenses](./LICENSE.md)
 * [Chipyard License](./LICENSE.md)
 * [SiFive License](./LICENSE.SiFive.md)
+
 
 ## DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited.
 This material is based upon work supported by the Under Secretary of Defense for Research
