@@ -130,6 +130,7 @@ cep_preprocessing:
 	@echo "CEP:  Performing CEP Preprocessing step...."
 	@echo "CEP: ----------------------------------------------------------------------"
 ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
+	@echo "CEP:  Staging an ASIC build..."
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/System.scala $(base_dir)/generators/chipyard/src/main/scala
@@ -138,6 +139,7 @@ ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/CEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala $(base_dir)/generators/chipyard/src/main/scala/config/fragments
 else
+	@echo "CEP:  Staging an non-ASIC build..."
 	-cp $(base_dir)/build.sbt.nonasic ${base_dir}/build.sbt
 	-cp $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
 	-cp $(base_dir)/generators/chipyard/src/main/scala/System.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/System.scala
