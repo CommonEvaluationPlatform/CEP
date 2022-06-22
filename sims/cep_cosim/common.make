@@ -14,9 +14,12 @@ ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1
 
 # RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
+# not require if all you are doing is cleaning
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifndef RISCV
 $(error CEP_COSIM: RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
+endif 
 
 # Set the default tool based on the OS Distro.  This can be override from the command line
 ifneq (, $(shell hostnamectl | grep "Ubuntu"))
@@ -62,12 +65,20 @@ $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
 
 # Validate the Chipyard verilog has been built by looking for the generated makefile
+# This is not required if the current make target is riscv_wrapper, riscv_wrapper_sd_write, or one of the cleans
+ifeq "$(findstring riscv_wrapper,${MAKECMDGOALS})" ""
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifeq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 $(error "CEP_COSIM: CHIPYARD_BUILD_INFO.make does not exist. run make -f Makefile.chipyard in $(REPO_TOP_DIR)")
 endif
+endif
+endif
 
-# Include the file that contains info about the chipyard build (also, a change includes a rebuild)
+# If the file exists, then include it
+ifneq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
+endif
+
 
 # Override the ASIC mode based on inferrence from the CHIPYARD_SUB_PROJECT
 ifeq "$(findstring asic,${CHIPYARD_SUB_PROJECT})" "asic"

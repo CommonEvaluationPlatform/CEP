@@ -14,7 +14,7 @@ connect_hw_server
 open_hw_target
 
 # Create MCS file
-write_cfgmem  -format mcs -size 16 -interface SPIx4 -loadbit {up 0x00000000 "./generated-src/chipyard.fpga.arty100t.Arty100TFPGATestHarness.RocketArty100TCEPConfig/obj/Arty100TFPGATestHarness.bit" } -force -file "/home/br24169/projects/CEP/CEP_v3.9_development_br24169/fpga/generated-src/chipyard.fpga.arty100t.Arty100TFPGATestHarness.RocketArty100TCEPConfig/obj/Arty100TFPGATestHarness.mcs"
+write_cfgmem  -format mcs -size 16 -interface SPIx4 -loadbit {up 0x00000000 "./generated-src/chipyard.fpga.arty100t.Arty100TFPGATestHarness.RocketArty100TCEPConfig/obj/Arty100TFPGATestHarness.bit" } -force -file "./generated-src/chipyard.fpga.arty100t.Arty100TFPGATestHarness.RocketArty100TCEPConfig/obj/Arty100TFPGATestHarness.mcs"
 
 # Select Arty A7 board via JTAG
 create_hw_cfgmem -hw_device [lindex [get_hw_devices xc7a100t_0] 0] [lindex [get_cfgmem_parts {s25fl128sxxxxxx0-spi-x1_x2_x4}] 0]
