@@ -132,7 +132,6 @@ static int sd_cmd8(void)
 
 static void sd_cmd55(void)
 {
-  kputs("CMD55");
   sd_cmd(0x77, 0, 0x65);
   sd_cmd_end();
 }

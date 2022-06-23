@@ -9,8 +9,14 @@ SHELL=/bin/bash
 ifndef RISCV
 $(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 else
-$(info Running with RISCV=$(RISCV))
+$(info Running with RISCV       = $(RISCV))
 endif
+
+ifndef SUB_PROJECT
+$(error SUB_PROJECT is unset.)
+else
+$(info Running with SUB_PROJECT = $(SUB_PROJECT))
+endif 
 
 #########################################################################################
 # specify user-interface variables
@@ -114,8 +120,9 @@ $(CHIPYARD_BUILD_INFO):
 $(build_dir): cep_preprocessing
 	mkdir -p $@
 
+# Bootrom is forced to rebuild every time, in the event a different build target is selected
 $(BOOTROM_SOURCES):
-	(cd ${BOOTROM_SRC_DIR}; make PBUS_CLK=${PBUS_CLK})
+	make -B -C ${BOOTROM_SRC_DIR} PBUS_CLK=${PBUS_CLK}
 
 $(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
 	cp -f $(BOOTROM_SOURCES) $(build_dir)
@@ -215,7 +222,7 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--target-dir $(build_dir) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-# Blackbox sorting script
+# Blackbox sorting script (for CEP targets)
 ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
 	@${SORT_SCRIPT} ${sim_top_blackboxes} $(SORT_FILE)
 endif

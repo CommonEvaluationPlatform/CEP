@@ -54,13 +54,14 @@ class WithSystemModifications extends Config((site, here, up) => {
 
 // Update to use the same bootrom as the CEP Cosimulation
 class WithCEPSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase => BigInt((1e6).toLong)
+  case DTSTimebase  => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
+    // This is performed from within the Chisel world in order to pass the selected DefaultClockFrequencyKey to the bootrom build
     val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
     val make = s"make -B -C sims/cep_cosim/bootrom PBUS_CLK=${freqMHz}"
     require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./sims/cep_cosim/bootrom/bootrom.rv64.img")
+    p.copy(address = 0x10000L, size = 0x8000, hang = 0x10000, contentFileName = s"./sims/cep_cosim/bootrom/bootrom.rv${site(XLen)}.img")
   }
   case ExtMem       => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ArtyDDRSize)))) // set extmem to DDR size
   case SerialTLKey  => None // remove serialized tl port
