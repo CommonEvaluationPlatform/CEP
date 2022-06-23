@@ -44,7 +44,7 @@ class WithSystemModifications extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -B -C fpga/src/main/resources/arty100t/sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/sdboot/build/sdboot.bin")
   }
@@ -57,18 +57,17 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case DTSTimebase  => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    // This is performed from within the Chisel world in order to pass the selected DefaultClockFrequencyKey to the bootrom build
     val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -B -C sims/cep_cosim/bootrom PBUS_CLK=${freqMHz}"
+    val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
-    p.copy(address = 0x10000L, size = 0x8000, hang = 0x10000, contentFileName = s"./sims/cep_cosim/bootrom/bootrom.rv${site(XLen)}.img")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
   }
   case ExtMem       => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ArtyDDRSize)))) // set extmem to DDR size
   case SerialTLKey  => None // remove serialized tl port
 })
 
 // DOC include start: AbstractArty100T and Rocket
-class WithArty100TTweaks (enableCEPRegs: Int = 0) extends Config(
+class WithArty100TTweaks extends Config(
   // harness binders
   new WithUART ++
   new WithSPISDCard ++
@@ -156,7 +155,7 @@ class RocketArty100TMinCEPConfig extends Config(
   new WithFPGAFrequency(50) ++
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
-  new WithArty100TTweaks(1) ++
+  new WithArty100TCEPTweaks ++
   new chipyard.RocketNoL2Config
 )
 
