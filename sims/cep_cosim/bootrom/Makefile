@@ -77,7 +77,7 @@ rcf: img
 	$(OBJCOPY) -O binary --change-addresses=-0x10000 $< $@
 
 %.dump: %.elf
-	$(OBJDUMP) -d $< > $@
+	$(OBJDUMP) -D -S $< > $@
 
 bootrom.rv32.elf: head.S kprintf.c sd.c ${CEP_LDS_FILE} ${BOOTROM_CHECK}
 	$(CC) $(CFLAGS) $(CFLAGS_RV32) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
