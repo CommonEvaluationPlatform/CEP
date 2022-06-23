@@ -327,7 +327,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   // Put the core, not the tile into reset to stop the program counter
   // If the tile is reset, then it MIGHT lock up the tilelink bus... and thus
   // prevent other cores from completing their work
-  DUT_RUNCLK(100);
+  DUT_RUNCLK(1000);
   LOGI("%s: Putting core in reset to stop the PC...\n",__FUNCTION__);
   DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
   DUT_WRITE_DVT(DVTF_FORCE_CORE_RESET, DVTF_FORCE_CORE_RESET, 1);
