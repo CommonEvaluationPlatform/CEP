@@ -1,8 +1,8 @@
 # Default parameters
 PBUS_CLK 		?= 1000000
-ENABLE_CEPREG	?= 1
 
 # RISCV environment variable must be set
+REPO_ROOT_DIR := $(shell git rev-parse --show-toplevel)
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR := $(ROOT_DIR)/build
 
@@ -13,16 +13,15 @@ CFLAGS=-march=rv64ima -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles
 CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64 -DNONSMP_HART=0
 CFLAGS+= -I $(ROOT_DIR)/include -I.
 LFLAGS=-static -nostdlib -L $(ROOT_DIR)/linker -T sdboot.elf.lds
-ifeq (${ENABLE_CEPREG},1)
-	CFLAGS 		+= -DENABLE_CEPREG
-endif
+
+SDC_SOURCE := $(REPO_ROOT_DIR)/sims/cep_cosim/bootrom/sd.c
 
 default: elf bin dump
 
 elf := $(BUILD_DIR)/sdboot.elf
-$(elf): head.S kprintf.c sd.c
+$(elf): head.S kprintf.c $(SDC_SOURCE)
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S sd.c kprintf.c
+	$(CC) $(CFLAGS) -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S $(SDC_SOURCE) kprintf.c
 
 .PHONY: elf
 elf: $(elf)
