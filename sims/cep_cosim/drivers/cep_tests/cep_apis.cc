@@ -432,7 +432,7 @@ static int inRange(uint64_t adr, uint64_t upperAdr,uint64_t lowerAdr) {
        
 int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int totalCmds, int verbose) {
   if (verbose) {
-    LOGI("%s: playback command sequence totalCmds=%d",__FUNCTION__,totalCmds);
+    LOGI("%s: playback command sequence totalCmds=%d\n",__FUNCTION__,totalCmds);
   }
   int errCnt = 0;
   int i=0, TO;
