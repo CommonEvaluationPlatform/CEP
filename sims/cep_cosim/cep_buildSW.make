@@ -25,8 +25,8 @@ COMMON_CFLAGS	        += -DASICMODE
 RISCV_BARE_CFLAGS       += -DASICMODE
 endif
 
-ifeq (${FPGA_SW_BUILD},1)
-RISCV_BARE_CFLAGS       += -DFPGASWBUILD
+ifeq (${ENABLE_KPRINTF},1)
+RISCV_BARE_CFLAGS       += -DENABLE_KPRINTF
 endif
 
 #--------------------------------------------------------------------------------------
@@ -340,7 +340,7 @@ ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDE
 endif
 
 .PHONY: riscv_wrapper riscv_wrapper_sd_write
-riscv_wrapper: ${RISCV_WRAPPER_IMG}
+riscv_wrapper: sim_info ${RISCV_WRAPPER_IMG}
 
 riscv_wrapper_sd_write: ${RISCV_WRAPPER_IMG}
 ifneq (,$(wildcard ${DISK}))

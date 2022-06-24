@@ -37,7 +37,7 @@ endif
 NOWAVE          			?= 1
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
-FPGA_SW_BUILD               ?= 0
+ENABLE_KPRINTF              ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
 
 # The following flags are defined here to support the eventual enablement of legacy functionality
@@ -136,7 +136,7 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 #--------------------------------------------------------------------------------------
 # To detect if any important flags have changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${DISABLE_CHISEL_PRINTF}_${TL_CAPTURE}_${USE_GDB}_${BYPASS_PLL}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${DISABLE_CHISEL_PRINTF}_${ENABLE_KPRINTF}_${TL_CAPTURE}_${USE_GDB}_${BYPASS_PLL}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
@@ -175,7 +175,7 @@ endif
 	@echo "CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
-	@echo "CEP_COSIM:   FPGA_SW_BUILD          = ${FPGA_SW_BUILD}"
+	@echo "CEP_COSIM:   ENABLE_KPRINTF         = ${ENABLE_KPRINTF}"
 	@echo ""
 #--------------------------------------------------------------------------------------
 
@@ -366,7 +366,8 @@ User controlled options: (0 = not set, 1 = set)
   TL_CAPTURE              : Default: 0: Enables capturing of CEP core tilelink I/O as required by bareMetal macroMix tests and unit simulation
   BYPASS_PLL              : Default, 0: Applicable only when running the ASIC simulation, enables PLL bypass when set.
   DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores (not applicable in BFM mode)
-  
+  ENABLE_KPRINTF          : Default, 0: When set, maps the LOGI/W/E/F functions to kprintf, thus enabling printf functionality in bare metal mode.                           
+    
 Targets:
   usage                   : Print this usage information.
   sim_info                : Display the default/current environment/variable settings used by the cosim.

@@ -80,10 +80,20 @@ extern "C" {
   #define USEC_SLEEP(x)
 
   #ifdef BARE_MODE
-    #define LOGI   kprintf
-    #define LOGW   kprintf
-    #define LOGE   kprintf
-    #define LOGF   kprintf
+
+	// When in bare metal mode, map the LOG functions only when the console
+	// printf is enabled, otherwise they get mapped to nothing
+	#ifdef ENABLE_KPRINTF
+      #define LOGI   kprintf
+      #define LOGW   kprintf
+      #define LOGE   kprintf
+      #define LOGF   kprintf
+	#else
+      #define LOGI   printf
+      #define LOGW   printf
+      #define LOGE   printf
+      #define LOGF   printf
+	#endif
 
     #define DUT_WRITE32_64(a,d)     *(volatile uint64_t *)((intptr_t)a)=d
     #define DUT_READ32_64(a,d)      d = *(volatile uint64_t *)((intptr_t)a)

@@ -161,21 +161,21 @@ A developer may use baremetal software from the CEP cosimulation or the examples
 
 In either case, it is important to note what device your (micro)SD card gets mapped to (e.g., `/dev/sdd`).
 
-As of v4.0, the cosimulation baremetal software does not currently support the console printfs, thus feedback of test results will be minimal.  It is intended to provide an option for building an FPGA version of the software (vs simulation) which will overload the I/O functions according.  Furthermore, many of the bareMetal tests presume the `CEPRocketConfig` configuration, which contains substantially more functionality than can fit on the Arty100T.  As a result, many of the cosimulation tests will require substantial modification to run properly on the FPGA.  
-
 Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
-make riscv_wrapper        						<-- builds riscv_wrapper.img
-make DISK=/dev/sdd riscv_wrapper_sd_write		<-- copies riscv_wrapper.img to /dev/sdd (subsitute with your device name)
+make ENABLE_KPRINTF=1 riscv_wrapper        			<-- builds riscv_wrapper.img with console printf enabled
+make DISK=/dev/sdd riscv_wrapper_sd_write       <-- copies riscv_wrapper.img to /dev/sdd (subsitute with your device name)
 ```
+
+In the above example, the bare metal regTest is build with the console printf function enabled.  It is advised that you enable the addition of a carriage return in your chosen terminal program.
 
 The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
 
 ```
 cd <CEP_ROOT>/software/baremetal/gpiotest
-make DISK=/dev/sdd sd_write        				<-- copies gpiotest.img to /dev/sdd (subsitute with your device name)
+make DISK=/dev/sdd sd_write        				      <-- copies gpiotest.img to /dev/sdd (subsitute with your device name)
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
