@@ -6,17 +6,21 @@ SHELL=/bin/bash
 # Without the following, RHEL7 does not execute the build process properly
 .NOTPARALLEL:
 
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifndef RISCV
 $(error RISCV is unset. You must set RISCV yourself, or through the Chipyard auto-generated env file)
 else
 $(info Running with RISCV       = $(RISCV))
 endif
+endif
 
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifndef SUB_PROJECT
 $(error SUB_PROJECT is unset.)
 else
 $(info Running with SUB_PROJECT = $(SUB_PROJECT))
 endif 
+endif
 
 #########################################################################################
 # specify user-interface variables
