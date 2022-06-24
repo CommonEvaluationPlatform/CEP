@@ -78,8 +78,6 @@ extern "C" {
 #undef printf
 #include "encoding.h"
   extern int printf(const char *format, ...);
-  extern void set_printf(int enable);
-  extern int  get_printf(void);
 #endif
   
 // end of extern

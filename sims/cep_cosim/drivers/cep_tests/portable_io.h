@@ -16,10 +16,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#ifdef BARE_MODE
-#include <kprintf.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -79,22 +75,12 @@ extern "C" {
   #define DUT_RUNCLK(x)
   #define USEC_SLEEP(x)
 
+  #define LOGI   printf
+  #define LOGW   printf
+  #define LOGE   printf
+  #define LOGF   printf
+
   #ifdef BARE_MODE
-
-	// When in bare metal mode, map the LOG functions only when the console
-	// printf is enabled, otherwise they get mapped to nothing
-	#ifdef ENABLE_KPRINTF
-      #define LOGI   kprintf
-      #define LOGW   kprintf
-      #define LOGE   kprintf
-      #define LOGF   kprintf
-	#else
-      #define LOGI   printf
-      #define LOGW   printf
-      #define LOGE   printf
-      #define LOGF   printf
-	#endif
-
     #define DUT_WRITE32_64(a,d)     *(volatile uint64_t *)((intptr_t)a)=d
     #define DUT_READ32_64(a,d)      d = *(volatile uint64_t *)((intptr_t)a)
     #define DUT_WRITE32_8(a,d)      *reinterpret_cast<volatile uint8_t *>(a)=d
@@ -105,11 +91,6 @@ extern "C" {
     #define DUT_READ32_32(a,d)      d = *reinterpret_cast<volatile uint32_t *>(a)
     #define USEC_SLEEP(x)              
   #else
-    #define LOGI   printf
-    #define LOGW   printf
-    #define LOGE   printf
-    #define LOGF   printf
-
     #define DUT_WRITE32_64(a,d)     *reinterpret_cast<volatile uint64_t *>(a)=d
     #define DUT_READ32_64(a,d)      d = *reinterpret_cast<volatile uint64_t *>(a)
     #define DUT_WRITE32_32(a,d)     *reinterpret_cast<volatile uint32_t *>(a)=d
