@@ -72,5 +72,5 @@ uint64_t SROT_playback[] = {
 #define SROT_adrSize 0x10000
 #define SROT_size 703
 #define SROT_cmdCnt4Single 0
-#define SROT_totalCommands 42
+#define SROT_totalCommands 41
 #endif
