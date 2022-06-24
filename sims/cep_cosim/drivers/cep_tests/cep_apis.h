@@ -55,7 +55,7 @@ extern "C" {
   uint64_t cep_raw_read(uint64_t pAddress);
   int cep_playback(uint64_t *cmdSeq,
        uint64_t upperAdr, uint64_t lowerAdr,
-       int totalCmds, int totalSize,
+       int totalCmds,
        int verbose);
 
   //

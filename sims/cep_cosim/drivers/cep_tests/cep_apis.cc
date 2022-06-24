@@ -430,9 +430,9 @@ static int inRange(uint64_t adr, uint64_t upperAdr,uint64_t lowerAdr) {
   return ((adr >= lowerAdr) && (adr < upperAdr)) ? 1 : 0;
 }
        
-int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int totalCmds, int totalSize, int verbose) {
+int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int totalCmds, int verbose) {
   if (verbose) {
-    LOGI("%s: playback command sequence totalCmds=%d totalSize=%d\n",__FUNCTION__,totalCmds,totalSize);
+    LOGI("%s: playback command sequence totalCmds=%d",__FUNCTION__,totalCmds);
   }
   int errCnt = 0;
   int i=0, TO;
@@ -480,6 +480,10 @@ int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int tot
       i += RDSPIN_CMD_SIZE;
     }
   }
+
+  if (verbose)
+  	LOGI("%s: no errors detected\n");
+
   return errCnt;
 }
 

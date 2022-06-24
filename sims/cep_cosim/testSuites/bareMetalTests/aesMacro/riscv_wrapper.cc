@@ -22,11 +22,8 @@
   #include "cepRegTest.h"
 
   // Include the test vectors related to this test
-  #include "SROT_playback.h"
-  #include "MD5_playback.h"
-  #include "SHA256_1_playback.h"
-  #include "SHA256_2_playback.h"
-  #include "SHA256_3_playback.h"
+  #include "SROT_aesonly_playback.h"
+  #include "AES_playback.h"
 
   #ifdef __cplusplus
   extern "C" {
@@ -51,7 +48,7 @@
     int testId[4] = {0x00, 0x11, 0x22, 0x33};
     int coreId    = read_csr(mhartid);
     int revCheck  = 1;
-    int verbose   = 0;
+    int verbose   = 1;
     int maxTO     = 5000;
     uint64_t upper;
     uint64_t lower;
@@ -63,33 +60,12 @@
     if (coreId == 0) {
       upper = SROT_adrBase + SROT_adrSize;
       lower = SROT_adrBase;
-      errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, 0);
+      errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, verbose);
       cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
-      upper = MD5_adrBase + MD5_adrSize;
-      lower = MD5_adrBase;
-      errCnt += cep_playback(MD5_playback, upper, lower, MD5_totalCommands, 0);    
+      upper = AES_adrBase + AES_adrSize;
+      lower = AES_adrBase;
+      errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, verbose);    
     }
-    else if (coreId == 1) {
-      errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
-      if (errCnt) goto cleanup;
-      upper = SHA256_CMU_adrBase + SHA256_CMU_adrSize;
-      lower = SHA256_CMU_adrBase;
-      errCnt += cep_playback(SHA256_CMU_playback, upper, lower, SHA256_1_totalCommands, 0);    
-    }
-    else if (coreId == 2) {
-      errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
-      if (errCnt) goto cleanup;
-      upper = SHA256_2_adrBase + SHA256_2_adrSize;
-      lower = SHA256_2_adrBase;
-      errCnt += cep_playback(SHA256_2_playback, upper, lower, SHA256_2_totalCommands, 0);    
-    }
-    else if (coreId == 3) {
-      errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
-      if (errCnt) goto cleanup;
-      upper = SHA256_3_adrBase + SHA256_3_adrSize;
-      lower = SHA256_3_adrBase;
-      errCnt += cep_playback(SHA256_3_playback, upper, lower, SHA256_3_totalCommands, 0);    
-    }  
 
     // Set the core status
 cleanup:
