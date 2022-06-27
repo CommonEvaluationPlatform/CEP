@@ -163,4 +163,14 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 * CEP has been completely ported to the UCB Chipyard Framework (https://github.com/ucb-bar/chipyard)
 * Arty-A7 100T FPGA target running bare-metal code is currently supported (Linux is not currently supported)
 
+## [v4.10] - 2022-07-01
+
+### Added
+* Added a bareMetal/aesMacro test for running on the Arty100T build, which currently only has one AES core and the SRoT
+
+### Changed
+* Unified/debug console printf functionality when building bare metal executables.  By default, it is disabled, but can be enabled with the ENABLE_KPRINTF directive
+* Arty100T and cep_sim use the same 'sd.c' source file, but leverages the same makefiles as the existing Arty100T bootrom build
+* Misc. code cleanup
+
 #### Return to the root CEP [README](./README.md)

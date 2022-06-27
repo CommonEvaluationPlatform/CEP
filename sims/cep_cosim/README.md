@@ -53,6 +53,12 @@ This command will generate and copy all of the necessary SystemVerilog/Verilog i
 
 The cosim supports bare metal execution of the RISC-V ISA tests which are included as submodule.  Additional information about these tests can be found [here](https://github.com/riscv-software-src/riscv-tests/tree/1ce128fa78c24bb0ed399c647e7139322b5353a7).
 
+In the event that submodule initialization did not include the riscv-tests, one can manually initialize the submodule:
+```
+cd <CEP_ROOT>
+git submodule update --init --recursive ./toolchains/riscv-tools/riscv-tests
+```
+
 There are a few know issues with running the ISA tests on the CEP.  Some manual changes are required before incorporating these tests into the cosim.
 
 **Issue with TVM='p' & 'pm'**: These 2 modes are setup to run in physical address only condition. Even though the riscv-tests [README.md](https://github.com/riscv-software-src/riscv-tests/tree/1ce128fa78c24bb0ed399c647e7139322b5353a7) mentions TVM='pm' mode is supported but the make infrastructure NOT really set up the build for it. In order to improve coverage, we need to be able to run tests on 4 cores. Therefore, we need to do a minor edit to change TVM='p' (virtual memory is disabled, only core 0 boots up) to 'pm' (virtual memory is disabled, all cores boot up)
