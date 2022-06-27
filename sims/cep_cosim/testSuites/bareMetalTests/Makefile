@@ -24,7 +24,6 @@ TEST_LIST 		= 		\
 	clintIntr 			\
 	clintTest 			\
 	csrTest 			\
-	fullBoot 			\
 	idcache_smc 		\
 	lockfreeAtomic 		\
 	lockTest 			\
@@ -36,7 +35,8 @@ TEST_LIST 		= 		\
 	multiLock 			\
 	plicTest 			\
 	regTest 			\
-	srotMemTest			\
+	srotMemTest			
+#	fullBoot 			\
 
 # Tests yet to run/fix/debug
 #plicPrioIntr
