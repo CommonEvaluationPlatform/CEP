@@ -123,7 +123,7 @@ The make command above will compile **mostly** assembly tests in the directory *
 Next step is to port and prepare those ISA tests above for simulation.
 
 ```
-  cd <CEP_ROOT>/simds/cep_cosim/testSuites/isaTests
+  cd <CEP_ROOT>/sims/cep_cosim/testSuites/isaTests
   make createISATests  <-- clean old (if any) and prepare all new ISA tests for simulation (take a while.. Be patient)
 ```
 

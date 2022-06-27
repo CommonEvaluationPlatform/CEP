@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+lk#!/usr/bin/python3
 #//************************************************************************
 #// Copyright 2022 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
@@ -40,7 +40,9 @@ print("      CEP Submodule export/import script")
 print("------------------------------------------------")
 print("Current working directory: {0}".format(repoRootDir))
 
-# Perform an inport or export operation
+#//************************************************************************
+#// Perform an export
+#//************************************************************************
 if (sys.argv[1] == "export"):
 
   # Some error checking
@@ -103,12 +105,15 @@ if (sys.argv[1] == "export"):
   print("Export complete.  Results writen to " + fileName)
   print("")
 
+#//************************************************************************
+#// Perform an import
+#//************************************************************************
 else:
   # Perform some error checking first
   if (not os.path.exists(fileName)):
     sys.exit("[ERROR] : Can't find " + fileName)
 
-  # Force deinitialization of all submodules
+  # Force deinitialization of all submodules (we will re-register them)
   subprocess.run(["git", "submodule", "deinit", "--force", "--all"], stdout=subprocess.PIPE, check=True)
 
   # Remove existing .gitmodules
