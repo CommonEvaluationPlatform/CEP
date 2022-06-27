@@ -26,14 +26,14 @@ TEST_SUITES  =  	bareMetalTests	\
 # Run tests for all members of the test group
 runAll: 
 	@for i in ${TEST_SUITES}; do											\
-		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make STAND_ALONE=0 runAll); 	\
+		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make cleanSuite runAll); 	\
 	done
 
 # Print summary
 summary: .force
 	@date > ${COSIM_TOP_DIR}/regressionSummary
 	@for i in ${TEST_SUITES}; do								\
-		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make -s STAND_ALONE=0 summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
+		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make -s summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
 	done
 
 # Include the common makefile
