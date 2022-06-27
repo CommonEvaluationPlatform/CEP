@@ -87,13 +87,16 @@ void abort()
   exit(128 + SIGABRT);
 }
 
+// Syscall is currently disabled as it does
+// not function properly in simulation
 void printstr(const char* s)
 {
 
 #ifdef ENABLE_KPRINTF
   kputs(s);
 #else
-  syscall(SYS_write, 1, (uintptr_t)s, strlen(s));
+  ;
+//  syscall(SYS_write, 1, (uintptr_t)s, strlen(s));
 #endif
 
 }
@@ -365,18 +368,20 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
   }
 }
 
+// Calling of putchar from printf is currently disabled
+// as syscalls do not function correctly
 int printf(const char* fmt, ...)
 {
-  va_list ap;
-  va_start(ap, fmt);
 
 #ifdef ENABLE_KPRINTF
+  va_list ap;
+  va_start(ap, fmt);
   vprintfmt((void*)kputc, 0, fmt, ap);
-#else
-  vprintfmt((void*)putchar, 0, fmt, ap);
-#endif
-
   va_end(ap);
+#else
+  ;
+//  vprintfmt((void*)putchar, 0, fmt, ap);
+#endif
   return 0; // incorrect return value, but who cares, anyway?
 }
 
