@@ -72,9 +72,9 @@
     else if (coreId == 1) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
       if (errCnt) goto cleanup;
-      upper = SHA256_CMU_adrBase + SHA256_CMU_adrSize;
-      lower = SHA256_CMU_adrBase;
-      errCnt += cep_playback(SHA256_CMU_playback, upper, lower, SHA256_1_totalCommands, 0);    
+      upper = SHA256_1_adrBase + SHA256_1_adrSize;
+      lower = SHA256_1_adrBase;
+      errCnt += cep_playback(SHA256_1_playback, upper, lower, SHA256_1_totalCommands, 0);    
     }
     else if (coreId == 2) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 

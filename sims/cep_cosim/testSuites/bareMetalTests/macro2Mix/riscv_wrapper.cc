@@ -23,8 +23,8 @@
 
   // Include the test vectors related to this test
   #include "SROT_playback.h"
-  #include "GPS_1_playback.h"
   #include "GPS_0_playback.h"
+  #include "GPS_1_playback.h"
   #include "GPS_2_playback.h"
   #include "GPS_3_playback.h"
   
@@ -65,16 +65,16 @@
       lower = SROT_adrBase;
       errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, 0);
       cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
-      upper = GPS_REDACT_adrBase + GPS_REDACT_adrSize;
-      lower = GPS_REDACT_adrBase;
-      errCnt += cep_playback(GPS_REDACT_playback, upper, lower, GPS_0_totalCommands, 0);
+      upper = GPS_0_adrBase + GPS_0_adrSize;
+      lower = GPS_0_adrBase;
+      errCnt += cep_playback(GPS_0_playback, upper, lower, GPS_0_totalCommands, 0);
     }
     else if (coreId == 1) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
       if (errCnt) goto cleanup;
-      upper = GPS_LBLL_adrBase + GPS_LBLL_adrSize;
-      lower = GPS_LBLL_adrBase;
-      errCnt += cep_playback(GPS_LBLL_playback, upper, lower, GPS_1_totalCommands, 0);    
+      upper = GPS_1_adrBase + GPS_1_adrSize;
+      lower = GPS_1_adrBase;
+      errCnt += cep_playback(GPS_1_playback, upper, lower, GPS_1_totalCommands, 0);    
     }
     else if (coreId == 2) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
@@ -86,7 +86,7 @@
     else if (coreId == 3) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
       if (errCnt) goto cleanup;
-      upper = GPS_3_adrBase + GPS_REDACT_adrSize;
+      upper = GPS_3_adrBase + GPS_0_adrSize;
       lower = GPS_3_adrBase;
       errCnt += cep_playback(GPS_3_playback, upper, lower, GPS_3_totalCommands, 0);
     }  
