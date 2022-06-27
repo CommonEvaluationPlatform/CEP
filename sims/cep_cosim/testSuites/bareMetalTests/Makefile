@@ -46,7 +46,7 @@ TEST_LIST 		= 		\
 
 runAll: 
 	@for i in ${TEST_LIST}; do 									\
-		(cd ${TEST_SUITE_DIR}/$${i}; make cleanTest; make);		\
+		make -C ${TEST_SUITE_DIR}/$${i} cleanTest all; 			\
 	done
 
 summary:

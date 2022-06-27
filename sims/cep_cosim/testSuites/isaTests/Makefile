@@ -272,9 +272,9 @@ TEST_LIST 	= ${ISA_SINGLE_CORE_LIST} ${ISA_VIRTUAL_TEST_LIST}
 #endif
 
 runAll: ${TEST_SUITE_DIR}/.ISACreated
-	@for i in ${TEST_LIST}; do													\
+	@for i in ${TEST_LIST}; do 									\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
-		(cd ${TEST_SUITE_DIR}/$${i}; rm -f *.o*; make);										\
+		make -C ${TEST_SUITE_DIR}/$${i} cleanTest all; 			\
 	done
 
 summary:
