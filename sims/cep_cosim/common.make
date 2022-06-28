@@ -9,6 +9,9 @@
 #
 #--------------------------------------------------------------------------------------
 
+# Without the following, RHEL7 does not execute the simulation process properly
+.NOTPARALLEL:
+
 # Avoid redundant inclusions of common.make
 ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1

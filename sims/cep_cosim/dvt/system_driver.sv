@@ -154,7 +154,7 @@ module system_driver (
 
     initial begin
       #1;
-      `logI("BARE_MODE: Forcing scratch_wor0[3:0], thus Disabling UART and SD Boot in the BootROM...");
+      `logI("BARE_MODE: Forcing scratch_word0[3:0], thus Disabling UART and SD Boot in the BootROM...");
       force `CEPREGS_PATH.scratch_word0[3:0] = 4'hF;
     end
 
