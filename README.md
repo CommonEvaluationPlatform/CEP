@@ -187,9 +187,9 @@ For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep
 Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).
 
 ### Generated DSP code notes
-Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md)
+Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
 
-Please check the [CEP changelog](./CHANGELOG.CEP.md) to understand what has changed and a list of known issues.
+Please check the [CEP changelog](./CHANGELOG.CEP.md) for release history.
 
 ## Errors? Ommissions? Questions?
 Please feel free to file a github issue which the CEP developers check frequently.
