@@ -262,20 +262,14 @@ LIBRARY_SWITCHES  		= -lpthread -lcryptopp
 ${SRC_LIB_DIR}/%.o ${SRC_LIB_DIR}/%.obj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
-${APIS_LIB_DIR}/%.o ${APIS_LIB_DIR}/%.obj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
-
-${BARE_LIB_DIR}/%.o ${BARE_LIB_DIR}/%.obj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
-
-${DIAG_LIB_DIR}/%.o ${DIAG_LIB_DIR}/%.obj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
-
 ${SIMDIAG_LIB_DIR}/%.o ${SIMDIAG_LIB_DIR}/%.obj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 ${PLI_LIB_DIR}/%.o ${PLI_LIB_DIR}/%.obj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -c -o $@ $< 
+
+${APIS_LIB_DIR}/%.o ${APIS_LIB_DIR}/%.obj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
 
 # .o & .obj  not same rule
 ${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
@@ -284,11 +278,26 @@ ${SHARE_LIB_DIR}/%.o: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES}
 ${SHARE_LIB_DIR}/%.obj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(GCC) $(SIM_HW_CFLAGS) -DDLL_SIM -fPIC -c -o $@ $< 
 
+${BARE_LIB_DIR}/%.o ${BARE_LIB_DIR}/%.obj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+
+${DIAG_LIB_DIR}/%.o ${DIAG_LIB_DIR}/%.obj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(GCC) $(SIM_SW_CFLAGS) -I. -c -o $@ $<
+
 # .bobj for bare-metal
 ${SRC_LIB_DIR}/%.bobj: ${SRC_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
+${SIMDIAG_LIB_DIR}/%.bobj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
+
+${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
+
 ${APIS_LIB_DIR}/%.bobj: ${APIS_D}/%.cc ${COMMON_DEPENDENCIES} 
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
+
+${SHARE_LIB_DIR}/%.bobj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.S ${COMMON_DEPENDENCIES} 
@@ -298,15 +307,6 @@ ${BARE_LIB_DIR}/%.bobj: ${BARE_D}/%.c ${COMMON_DEPENDENCIES}
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 
 ${DIAG_LIB_DIR}/%.bobj: ${DIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
-
-${SIMDIAG_LIB_DIR}/%.bobj: ${SIMDIAG_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
-
-${SHARE_LIB_DIR}/%.bobj: ${SHARE_D}/%.cc ${COMMON_DEPENDENCIES} 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
-
-${PLI_LIB_DIR}/%.bobj: ${PLI_D}/%.cc ${COMMON_DEPENDENCIES} 
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) -c $< -o $@
 #--------------------------------------------------------------------------------------
 
