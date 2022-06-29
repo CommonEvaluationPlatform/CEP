@@ -274,10 +274,10 @@ TEST_LIST 	= ${ISA_SINGLE_CORE_LIST} ${ISA_VIRTUAL_TEST_LIST}
 #	TEST_LIST += dtmTest
 #endif
 
-runAll: ${TEST_SUITE_DIR}/.ISACreated
+runAll: cleanSuite ${TEST_SUITE_DIR}/.ISACreated 
 	@for i in ${TEST_LIST}; do 									\
 		echo "    PEND : ${TEST_SUITE_DIR}/$${i}"  > ${TEST_SUITE_DIR}/$${i}/status;		\
-		make -C ${TEST_SUITE_DIR}/$${i} cleanTest all; 			\
+		make -C ${TEST_SUITE_DIR}/$${i} all; 			\
 	done
 
 summary:

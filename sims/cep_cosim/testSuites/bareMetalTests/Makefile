@@ -47,9 +47,9 @@ TEST_LIST 		= 		\
 #lsrcOps
 
 
-runAll: 
+runAll: cleanSuite
 	@for i in ${TEST_LIST}; do 									\
-		make -C ${TEST_SUITE_DIR}/$${i} cleanTest all; 			\
+		make -C ${TEST_SUITE_DIR}/$${i} all; 					\
 	done
 
 summary:
