@@ -168,7 +168,9 @@ The following variables can be overwritten (or changed in cep_buildHW.make).  Th
   XCELIUM_INSTALL  ?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
   QUESTASIM_PATH   ?= /opt/questa-2019.1/questasim/bin
 
-### Test Status
+### Test Status / Known Issues
+Cadence XCellium on RHEL7 *occasionally* fails some of the bareMetal tests.  Root cause has not been determined, but it is recommended that the test be re-run.
+
 The following tests current "fail" with the notes contained therein:
 * ./testSuites/bfmTests/macroMix            - One test vector failure in the idft core fails, but all others pass.
 
