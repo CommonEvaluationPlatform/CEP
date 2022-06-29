@@ -38,8 +38,8 @@ TEST_LIST 		= 		\
 	multiLock 			\
 	plicTest 			\
 	regTest 			\
-	srotMemTest			
-#	fullBoot 			\
+	srotMemTest			\
+	fullBoot 			
 
 # Tests yet to run/fix/debug
 #plicPrioIntr
