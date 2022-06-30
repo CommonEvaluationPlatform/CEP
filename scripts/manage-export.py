@@ -1,4 +1,4 @@
-lk#!/usr/bin/python3
+#!/usr/bin/python3
 #//************************************************************************
 #// Copyright 2022 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause

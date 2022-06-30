@@ -334,8 +334,8 @@ createISATests: removeISATests
 
 # Cleans 
 removeISATests:
-	@rm -rf rv64*
-	@rm -f ${TEST_SUITE_DIR}/.ISACreated
+	rm -rf rv64*
+	rm -f ${TEST_SUITE_DIR}/.ISACreated
 
 
 ${TEST_SUITE_DIR}/.ISACreated:
