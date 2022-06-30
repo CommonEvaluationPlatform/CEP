@@ -173,6 +173,7 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 * Unified/debugged console printf functionality when building bare metal executables.  By default, it is disabled, but can be enabled with the ENABLE_KPRINTF directive
 * Arty100T and cep_sim use the same 'sd.c' source file, but leverages the same makefiles as the existing Arty100T bootrom build
 * Misc. code and readme cleanup
+* Bumped Chipyard to v1.7.0 see [CHANGELOG](./CHANGELOG.md).
 
 ### Fixed
 * 
