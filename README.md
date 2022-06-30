@@ -54,7 +54,7 @@ If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found i
 * Install package dependencies.  Copies of these files can also be found in the Chipyard Documentation listed above
   * Ubuntu - `./scripts/ubuntu-reqs.sh`
   * RHEL7  - `./scripts/centos-reqs.sh`
-* Initialize all the git submodules (including FPGA-related submodules)
+* Initialize all the git submodules (including FPGA-related submodules).  There may be a warning about this not being a true chipyard repository which you can answer yes to.
   * `./scripts/init-submodules-no-riscv-tools.sh`
   * `./scripts/init-fpga.sh`
 * Build the RISC-V Toolchain.  

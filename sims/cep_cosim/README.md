@@ -172,7 +172,7 @@ The following variables can be overwritten (or changed in cep_buildHW.make).  Th
 Cadence XCellium on RHEL7 *occasionally* fails some of the bareMetal tests.  Root cause has not been determined, but it is recommended that the test be re-run.
 
 The following tests current "fail" with the notes contained therein:
-* ./testSuites/bfmTests/macroMix            - One test vector failure in the idft core fails, but all others pass.
+* ./testSuites/bfmTests/macroMix            - GPS tests fail.  Updated will be rolled into the next release.
 
 The following tests are currently non-functional and are thus excluded from the various testSuite *TEST_LIST*
 * ./testSuites/bfmTests/srotErrorTest
@@ -183,9 +183,8 @@ The following tests are currently non-functional and are thus excluded from the 
 
 The following tests run, but currently fail:
 * ./testSuites/bareMetalTests/plicTest
-* ./testSuites/bfmTests/macroMix              <- Single vector fails
 * ./testSuites/isaTests/rv64mi-p-csr
 * ./testSuites/isaTests/rv64si-p-csr
-
+* ./testSuites/isaTests/*all -v tests* (virtual mode tests)
 
 ### Return to the Root CEP [readme](../../README.md).
