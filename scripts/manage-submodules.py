@@ -3,12 +3,12 @@
 #// Copyright 2022 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-2-Clause
 #//
-#// File Name:      manage-export.py
+#// File Name:      manage-submodules.py
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    Supports exporting/importing of the CEP releases
 #//                 from the internal to external repositories  
 #// Notes:          export is run from the internal repository
-#//         import is run from the external repository
+#//                 import is run from the external repository
 #//************************************************************************
 
 # replaces a `include with the full include file
@@ -113,23 +113,10 @@ else:
   if (not os.path.exists(fileName)):
     sys.exit("[ERROR] : Can't find " + fileName)
 
-  # Force deinitialization of all submodules (we will re-register them)
-  subprocess.run(["git", "submodule", "deinit", "--force", "--all"], stdout=subprocess.PIPE, check=True)
-
-  # Remove existing .gitmodules
-  if (os.path.exists(".gitmodules")):
-    subprocess.run(["git", "rm", "--force", ".gitmodules"], stdout=subprocess.PIPE, check=True)
-
   # Read the CSV file into a list of lists
   with open(fileName, "r") as read_obj:
     csv_reader          = csv.reader(read_obj)
     gitSubmoduleImport  = list(csv_reader)
-
-  try:
-    file = open(".gitmodules", "w")
-  except:
-    print("[ERROR]: Can't open .gitmodules for writing")
-    sys.exit()
 
   # Iterate the list
   # submodule[0] is submodule name
@@ -137,26 +124,27 @@ else:
   # submodule[2] is submodule url
   # submodule[3] is submodule commit
   for submodule in gitSubmoduleImport:
-    print("Adding submodule " + submodule[0])
+    
+    try:
+      print("Removing submodule at path: " + submodule[1])
+      subprocess.run(["git", "rm", "-r", "--force", submodule[1]], stdout=subprocess.PIPE, check=True)
+    except:
+      print("Removal failed")
+
+    print("Adding submodule " + submodule[0] + " from URL : " + submodule[2])
     
     # Remove the submodule path, if it exists
     if (os.path.exists(submodule[1])):
       subprocess.run(["rm", "-rf", submodule[1]], stdout=subprocess.PIPE, check=True)
 
     # Add the submodule and append to the .gitmodules file
-    subprocess.run(["git", "submodule", "add", "--name", submodule[0], submodule[2], submodule[1]], stdout=subprocess.PIPE, check=True)
-    file.write('[submodule "' + submodule[0] + '"]\n')
-    file.write("  path = " + submodule[1] + "\n")
-    file.write("  url = " + submodule[2] + "\n")     
+    subprocess.run(["git", "submodule", "add", "--force", "--name", submodule[0], submodule[2], submodule[1]], stdout=subprocess.PIPE, check=True)
 
     # Checkout the specific commit for the current submodule
     os.chdir(submodule[1])
     print("Checking out commit " + submodule[3] + " ...")
     subprocess.run(["git", "checkout", "--quiet", submodule[3]], stdout=subprocess.PIPE, check=True)
     os.chdir(repoRootDir)
-
-  # Close .gitmodules
-  file.close()
 
   # Even the excluded paths will have empty directories in the external repo.  Let's remove them.
   print("Removing exluded submodule directories...")

@@ -20,7 +20,6 @@ software/firemarshal,software/firemarshal,https://github.com/firesim/FireMarshal
 software/nvdla-workload,software/nvdla-workload,https://github.com/ucb-bar/nvdla-workload.git,30290c3ed8014577fa2ad234fa1b731a082299fb
 software/spec2017,software/spec2017,https://github.com/ucb-bar/spec2017-workload.git,83e33110472c47aaa762257ed7c053ff1278834c
 toolchains/esp-tools/riscv-gnu-toolchain,toolchains/esp-tools/riscv-gnu-toolchain,https://github.com/ucb-bar/esp-gnu-toolchain.git,9f532293985d08b0c176d96c7b650e5f433780e1
-toolchains/esp-tools/riscv-isa-sim,toolchains/esp-tools/riscv-isa-sim,https://github.com/riscv-software-src/riscv-isa-sim.git,34741e07bc6b56f1762ce579537948d58e28cd5a
 toolchains/esp-tools/riscv-pk,toolchains/esp-tools/riscv-pk,https://github.com/riscv/riscv-pk.git,e8e6b3aaee44d43b48164fbd377864c3a682dbd3
 toolchains/esp-tools/riscv-tests,toolchains/esp-tools/riscv-tests,https://github.com/ucb-bar/esp-tests.git,7c3dfd3205fa90104db06346e797a8eeea149207
 toolchains/libgloss,toolchains/libgloss,https://github.com/ucb-bar/libgloss-htif.git,04b249764b1bc0b784b9f7ff422084f4b53a07ef
