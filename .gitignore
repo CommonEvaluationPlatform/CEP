@@ -34,7 +34,7 @@ v2c_cmds.h
 
 
 
-# The following exclusions ensure the ASIC-related files
+# The following exclusions ensure that ASIC-related files
 # do not get checked into the repository
 build.sbt
 /generators/chipyard/src/main/scala/DigitalTop.scala
