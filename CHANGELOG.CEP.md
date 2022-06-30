@@ -171,13 +171,12 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 
 ### Changed
 * Unified/debugged console printf functionality when building bare metal executables.  By default, it is disabled, but can be enabled with the ENABLE_KPRINTF directive
-* Arty100T and cep_sim use the same 'sd.c' source file, but leverages the same makefiles as the existing Arty100T bootrom build
+* Arty100T and cep_sim use the same 'sd.c' source file, but leverage different makefiles.
 * Misc. code and readme cleanup
-* Bumped Chipyard to v1.7.0 see [CHANGELOG](./CHANGELOG.md).
+* Bumped Chipyard to 1.7.0 from 1.5.0.  See [CHANGELOG](./CHANGELOG.md).
 * Rocket-Chip bumped to v1.5
 
 ### Fixed
-* 
-
+* iDFT test code fixed in cep_idft.cc
 
 #### Return to the root CEP [README](./README.md)
