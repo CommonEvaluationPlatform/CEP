@@ -21,7 +21,7 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (1 << 19) // 512kB
+#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
 
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512

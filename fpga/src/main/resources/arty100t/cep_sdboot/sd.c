@@ -21,7 +21,7 @@
 #include "kprintf.h"
 
 // Total payload in B
-#define PAYLOAD_SIZE_B (1 << 19) // 512kB
+#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
 
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
@@ -127,8 +127,6 @@ static int sd_cmd8(void)
   return rc;
 }
 
-// Printting of cmd55 send status has been removed since the number varies greatly and
-// can result in a lot of scrolling
 static void sd_cmd55(void)
 {
   sd_cmd(0x77, 0, 0x65);
@@ -191,6 +189,12 @@ static int sd_copy(void)
   long i = PAYLOAD_SIZE;
   int rc = 0;
 
+  // The following logic allows for a simulation overwrite of the number of blocks to be loaded
+  // If the scratch_w7 register is not "forced" by the simulation, then the default payload size
+  // will prevail.
+  REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
+  i = REG64(cepregs, CEPREGS_SCRATCH_W7);
+
   kputs("CMD18");
 
   // Performing multiplication here in the event that PAYLOAD_SIZE is
@@ -200,7 +204,7 @@ static int sd_copy(void)
 
   // Begin a multi-cycle read
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
-  if (sd_cmd(0x52, 0, 0xE1) != 0x00) {
+  if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;
   }
@@ -261,6 +265,7 @@ int main(void)
   uint8_t  major_version = 0;
   uint8_t  minor_version = 0;
 
+  scratch_reg = REG64(cepregs, CEPREGS_SCRATCH_W0);
   version_reg = REG64(cepregs, CEPREGS_VERSION);
   major_version = (version_reg >> 48) & 0xFF;
   minor_version = (version_reg >> 56) & 0xFF;
@@ -269,46 +274,50 @@ int main(void)
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
-  kprintf("---    Common Evaluation Platform v%x.%x     ---\r\n", major_version, minor_version);
-  kprintf("--- Copyright 2022 Massachusetts Institute of Technology ---\r\n");
-  kprintf("---     BootRom Image built on %s %s      ---\r\n",__DATE__,__TIME__);
+  if ((scratch_reg & 0x3) != 0x3) {
+    kprintf("---    Common Evaluation Platform v%x.%x     ---\r\n", major_version, minor_version);
+    kprintf("--- Copyright 2022 Massachusetts Institute of Technology ---\r\n");
+    kprintf("---     BootRom Image built on %s %s      ---\r\n",__DATE__,__TIME__);
+  } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set
-  kputs("INIT");
+  if ((scratch_reg & 0xC) != 0xC) {
+    kputs("INIT");
+  
+    sd_poweron();
 
-  sd_poweron();
+    if (sd_cmd0()) {
+      kputs("CMD0 ERROR");
+      return 1;     
+    }
 
-  if (sd_cmd0()) {
-    kputs("CMD0 ERROR");
-    return 1;     
-  }
+    if (sd_cmd8()) {
+      kputs("CMD8 ERROR");
+      return 1;     
+    }
 
-  if (sd_cmd8()) {
-    kputs("CMD8 ERROR");
-    return 1;     
-  }
+    if (sd_acmd41()) {
+      kputs("ACMD41 ERROR");
+      return 1;     
+    }
 
-  if (sd_acmd41()) {
-    kputs("ACMD41 ERROR");
-    return 1;     
-  }
+    if (sd_cmd58()) {
+      kputs("CMD58 ERROR");
+      return 1;     
+    }
 
-  if (sd_cmd58()) {
-    kputs("CMD58 ERROR");
-    return 1;     
-  }
+    if (sd_cmd16()) {
+      kputs("CMD16 ERROR");
+      return 1;     
+    }
 
-  if (sd_cmd16()) {
-    kputs("CMD16 ERROR");
-    return 1;     
-  }
+    if (sd_copy()) {
+      kputs("SDCOPY ERROR");
+      return 1;     
+    }
 
-  if (sd_copy()) {
-    kputs("SDCOPY ERROR");
-    return 1;     
-  }
-
-  kputs("BOOT");
+    kputs("BOOT");
+  } // if ((scratch_reg & 0xC) != 0xC)
 
   // Force instruction and data stream synchronization
   __asm__ __volatile__ ("fence.i" : : : "memory");

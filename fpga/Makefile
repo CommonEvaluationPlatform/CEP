@@ -12,14 +12,15 @@ sim_dir=$(abspath .)
 # include shared variables
 #########################################################################################
 
-# Verify vivado is available
+# Verify vivado is available, capture and display the version if it is...
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifeq (,$(shell which vivado))
 $(error Vivado is not available.  Please install and ensure the environment script is sourced.)
-endif
-
-# Detect and 
+else
 VIVADO_VERSION := $(shell vivado -version | head -1 | grep -o -P '(?<=\s).*(?=\s)')
 $(info Vivado $(VIVADO_VERSION) detected.)
+endif
+endif
 
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
