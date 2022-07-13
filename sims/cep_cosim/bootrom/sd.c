@@ -204,7 +204,7 @@ static int sd_copy(void)
 
   // Begin a multi-cycle read
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
-  if (sd_cmd(0x52, 0, 0xE1) != 0x00) {
+  if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;
   }
