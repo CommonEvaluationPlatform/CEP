@@ -179,4 +179,9 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 ### Fixed
 * iDFT test code fixed in cep_idft.cc
 
+## [v4.20] - 2022-07-22
+* Added kgetc to bare metal console routines
+* Verified firemarshall generated linux build boots on the CEP Arty100T.  Instructions added to [README.md](./README.md)
+
+
 #### Return to the root CEP [README](./README.md)

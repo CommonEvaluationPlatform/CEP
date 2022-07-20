@@ -46,7 +46,7 @@ static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
 static volatile uint32_t * const gpio = (void *)(GPIO_CTRL_ADDR);
 static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
 
-// Inherited from the arty100t_gpio.h used in bare metal code
+// Inherited from arty100t_gpio.h used in bare metal code
 #define BTN0_MASK       (0x00001000)
 
 static inline uint8_t spi_xfer(uint8_t d)
@@ -202,9 +202,12 @@ static int sd_copy(void)
   REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(0);
 
   // The following logic allows for overiding of the default payload size by either holding button zero upon
-  // release from reset OR being forced by the simulation
+  // release from reset OR being forced by the simulation.
+  // Given that the simulation has it's own override, the "fast boot" is targetted to bare metal boots
+  // on the FPGA dev boards. 
   if (fast_boot) {
-    i = 0x20;
+    kputs("Fast Boot enabled");
+    i = 0x100;  // 256 x 512B = 132kB
   } else {
     REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
     i = REG64(cepregs, CEPREGS_SCRATCH_W7);
@@ -214,8 +217,7 @@ static int sd_copy(void)
 
   // Performing multiplication here in the event that PAYLOAD_SIZE is
   // overriden in simulation
-  kprintf("LOADING 0x%x PAYLOAD\r\n", SECTOR_SIZE_B * i);
-  kprintf("LOADING  ");
+  kprintf("LOADING %x kB PAYLOAD\n", (SECTOR_SIZE_B * i)/2);
 
   // Begin a multi-cycle read
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
@@ -290,12 +292,12 @@ int main(void)
 
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
   if ((scratch_reg & 0x3) != 0x3) {
-    kprintf("\r\n");
-    kprintf("---    Common Evaluation Platform v%x.%x     ---\r\n", major_version, minor_version);
-    kprintf("---         Based on the UCB Chipyard Framework          ---\r\n");
-    kprintf("--- Copyright 2022 Massachusetts Institute of Technology ---\r\n");
-    kprintf("---     BootRom Image built on %s %s      ---\r\n",__DATE__,__TIME__);
-    kprintf("\r\n");
+    kprintf("\n");
+    kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
+    kprintf("---         Based on the UCB Chipyard Framework          ---\n");
+    kprintf("--- Copyright 2022 Massachusetts Institute of Technology ---\n");
+    kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
+    kprintf("\n");
   } // if ((scratch_reg & 0x3) != 0x3)
 
   // Enable SD Boot if bits 3 & 2 of the CEP Scratch register are NOT set

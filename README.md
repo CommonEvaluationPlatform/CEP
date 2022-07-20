@@ -119,14 +119,16 @@ OR
 ./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
 ```
 
-### Building software for the CEP FPGA
+### Building Bare Metal software for the CEP FPGA
 
 In additional to connecting USB to the Arty100T's microUSB port, a Digilent SD or microSD PMOD connected should be connected to connector JA.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
 Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
 
-It should be noted that the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.
+It should be noted that the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.  Both HW and SW flow control should be disabled.  
 
-Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.
+It is worth noting that *minicom* enables HW flow control by default.
+
+Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding BTN0 on the Arty100T when the chip is released from reset.
 
 An example UART output for the gpiotest is included below:
 ```
@@ -180,8 +182,16 @@ make DISK=/dev/sdd sd_write        				      <-- copies gpiotest.img to /dev/sdd
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
 
-### CEP Co-Simulation
 
+### Booting Linux
+The CEP Arty100T build has been verified to support a firemarshall-based linux build by following the default workload instructions [here](https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs).
+
+A couple of notes:
+- The SD card must be partitioned as instructed
+- Mounting the 2nd parition from within the CEP takes quite a while (~3min)
+- You need to have built a configuration with one *WithNBigCores(1)*.  A *WithNMedCore(1)* will cause a kernel panic upon boot
+
+### CEP Co-Simulation
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
 
 Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).

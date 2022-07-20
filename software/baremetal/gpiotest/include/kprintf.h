@@ -32,6 +32,7 @@ static inline void kputc(char c)
 			: "r" (c));
 	} while (r < 0);
 #else
+	
 	while ((int32_t)(*tx) < 0);
 	*tx = c;
 #endif
