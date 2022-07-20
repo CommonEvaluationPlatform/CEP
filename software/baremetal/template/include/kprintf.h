@@ -7,6 +7,8 @@
 
 #define REG32(p, i)	((p)[(i) >> 2])
 
+#define UART_RXEMPTY (1 << 31)
+
 #ifndef UART_CTRL_ADDR
   #ifndef UART_NUM
     #define UART_NUM 0
@@ -35,6 +37,7 @@ static inline void kputc(char c)
 #endif
 }
 
+extern int kgetc(int *c);
 extern void kputs(const char *);
 extern void kprintf(const char *, ...);
 
