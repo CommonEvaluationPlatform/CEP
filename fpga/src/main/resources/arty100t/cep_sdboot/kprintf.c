@@ -12,6 +12,20 @@ static inline void _kputs(const char *s)
 		kputc(c);
 }
 
+int kgetc(int *c)
+{
+	uint32_t ch;
+	volatile uint32_t *rx = &REG32(uart, UART_REG_RXFIFO);
+	ch = *rx;
+
+	if ((uint32_t)(ch & UART_RXEMPTY)) {
+		*c = -1;	
+	} else {
+		*c = ch & 0x0ff;
+	}
+	return 0;
+}
+
 void kputs(const char *s)
 {
 	_kputs(s);

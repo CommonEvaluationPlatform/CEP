@@ -7,6 +7,8 @@
 
 #define REG32(p, i)	((p)[(i) >> 2])
 
+#define UART_RXEMPTY (1 << 31)
+
 #ifndef UART_CTRL_ADDR
   #ifndef UART_NUM
     #define UART_NUM 0
@@ -16,11 +18,7 @@
   #define _UART_CTRL_ADDR(UART_NUM) _CONCAT3(UART, UART_NUM, _CTRL_ADDR)
   #define UART_CTRL_ADDR _UART_CTRL_ADDR(UART_NUM)
 #endif
-static volatile uint32_t * const uart = (uint32_t *)(UART_CTRL_ADDR);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+static volatile uint32_t * const uart = (void *)(UART_CTRL_ADDR);
 
 static inline void kputc(char c)
 {
@@ -39,8 +37,9 @@ static inline void kputc(char c)
 #endif
 }
 
-void kputs(const char *);
-void kprintf(const char *, ...);
+extern int kgetc(int *c);
+extern void kputs(const char *);
+extern void kprintf(const char *, ...);
 
 #ifdef DEBUG
 #define dprintf(s, ...)	kprintf((s), ##__VA_ARGS__)
@@ -48,11 +47,6 @@ void kprintf(const char *, ...);
 #else
 #define dprintf(s, ...) do { } while (0)
 #define dputs(s)	do { } while (0)
-#endif
-
-// end of extern
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* _SDBOOT_KPRINTF_H */
