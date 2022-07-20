@@ -39,9 +39,15 @@
 #define F_CLK TL_CLK
 
 #define REG64(p, i) ((p)[(i) >> 3])
+#define REG32(p, i) ((p)[(i) >> 2])
+#define REG16(p, i) ((p)[(i) >> 1])
 
 static volatile uint32_t * const spi = (void *)(SPI_CTRL_ADDR);
+static volatile uint32_t * const gpio = (void *)(GPIO_CTRL_ADDR);
 static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
+
+// Inherited from the arty100t_gpio.h used in bare metal code
+#define BTN0_MASK       (0x00001000)
 
 static inline uint8_t spi_xfer(uint8_t d)
 {
@@ -188,12 +194,21 @@ static int sd_copy(void)
   volatile uint8_t *p = (void *)(MEMORY_MEM_ADDR);
   long i = PAYLOAD_SIZE;
   int rc = 0;
+  uint32_t fast_boot = 0;
 
-  // The following logic allows for a simulation overwrite of the number of blocks to be loaded
-  // If the scratch_w7 register is not "forced" by the simulation, then the default payload size
-  // will prevail.
-  REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
-  i = REG64(cepregs, CEPREGS_SCRATCH_W7);
+  // Read the state of button 0 on the arty100t board to determine if a fast boot is requested
+  REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(BTN0_MASK);
+  fast_boot = REG32(gpio, GPIO_INPUT_VAL) & BTN0_MASK;
+  REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(0);
+
+  // The following logic allows for overiding of the default payload size by either holding button zero upon
+  // release from reset OR being forced by the simulation
+  if (fast_boot) {
+    i = 0x20;
+  } else {
+    REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
+    i = REG64(cepregs, CEPREGS_SCRATCH_W7);
+  }
 
   kputs("CMD18");
 

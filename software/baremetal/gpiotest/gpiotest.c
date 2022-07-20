@@ -19,6 +19,12 @@
 
 int main() {
 
+  int c;
+
+  // Enable UART TX & RX (let's not assume the bootrom did it)
+  REG32(uart, UART_REG_TXCTRL) |= UART_TXEN;
+  REG32(uart, UART_REG_RXCTRL) |= UART_RXEN;
+
   kputs("");
   kputs("");
   kputs("------------------");
@@ -46,6 +52,12 @@ int main() {
   		kprintf("switches = %x\n\r", switch_new);
   		switch_old = switch_new;
   	}
+
+    // A simple tty echo routine
+    kgetc(&c);
+    if (c >= 0) {
+    	kputc(c);
+    }
 
   	reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), switch_new << 16);
   }
