@@ -38,7 +38,7 @@ static inline void kputc(char c)
 #endif
 }
 
-extern int kgetc(int *c);
+extern int kgetc(void);
 extern void kputs(const char *);
 extern void kprintf(const char *, ...);
 
