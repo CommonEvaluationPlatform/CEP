@@ -1,3 +1,14 @@
+// Copyright 2022 Massachusets Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      syscalls_bootrom.c
+// Program:        Common Evaluation Platform (CEP)
+// Description:    Modified baremetal system calls for RISC-V 
+// Notes:          Customized version of syscalls.c for the bootrom
+//
+//--------------------------------------------------------------------------------------
+
+
 // See LICENSE for license details.
 
 #include <stdint.h>
@@ -7,33 +18,12 @@
 #include <stdio.h>
 #include <limits.h>
 #include <sys/signal.h>
-#include "util.h"
 #include "kprintf.h"
+#include "util.h"
 
 #define SYS_write 64
 
 #undef strcmp
-
-extern volatile uint64_t tohost;
-extern volatile uint64_t fromhost;
-
-static uintptr_t syscall(uintptr_t which, uint64_t arg0, uint64_t arg1, uint64_t arg2)
-{
-  volatile uint64_t magic_mem[8] __attribute__((aligned(64)));
-  magic_mem[0] = which;
-  magic_mem[1] = arg0;
-  magic_mem[2] = arg1;
-  magic_mem[3] = arg2;
-  __sync_synchronize();
-
-  tohost = (uintptr_t)magic_mem;
-  while (fromhost == 0)
-    ;
-  fromhost = 0;
-
-  __sync_synchronize();
-  return magic_mem[0];
-}
 
 #define NUM_COUNTERS 2
 static uintptr_t counters[NUM_COUNTERS];
@@ -57,7 +47,6 @@ void setStats(int enable)
 
 void __attribute__((noreturn)) tohost_exit(uintptr_t code)
 {
-  tohost = (code << 1) | 1;
   while (1);
 }
 
@@ -76,9 +65,13 @@ void abort()
   exit(128 + SIGABRT);
 }
 
-void printstr(const char* s)
+// Syscall is currently disabled as it does
+// not function properly in simulation
+int puts(const char* s)
 {
-  syscall(SYS_write, 1, (uintptr_t)s, strlen(s));
+  kputs(s);
+
+  return 0;
 }
 
 void __attribute__((weak)) thread_entry(int cid, int nc)
@@ -91,55 +84,21 @@ void __attribute__((weak)) thread_entry(int cid, int nc)
 int __attribute__((weak)) main(int argc, char** argv)
 {
   // single-threaded programs override this function.
-  printstr("Implement main(), foo!\n");
+  puts("Implement main(), foo!\n");
   return -1;
 }
 
-static void init_tls()
+#undef getchar
+int getchar()
 {
-  register void* thread_pointer asm("tp");
-  extern char _tls_data;
-  extern __thread char _tdata_begin, _tdata_end, _tbss_end;
-  size_t tdata_size = &_tdata_end - &_tdata_begin;
-  memcpy(thread_pointer, &_tls_data, tdata_size);
-  size_t tbss_size = &_tbss_end - &_tdata_end;
-  memset(thread_pointer + tdata_size, 0, tbss_size);
+  return kgetc();
 }
 
-void _init(int cid, int nc)
-{
-
-  // The memset within init_tls does not seem to work correctly on an arty100t build with a single medium core
-  //init_tls();
-  thread_entry(cid, nc);
-
-  // only single-threaded programs should ever get here.
-  int ret = main(0, 0);
-
-  char buf[NUM_COUNTERS * 32] __attribute__((aligned(64)));
-  char* pbuf = buf;
-  for (int i = 0; i < NUM_COUNTERS; i++)
-    if (counters[i])
-      pbuf += sprintf(pbuf, "%s = %" PRIuPTR "\n", counter_names[i], counters[i]);
-  if (pbuf != buf)
-    printstr(buf);
-
-  exit(ret);
-}
 
 #undef putchar
 int putchar(int ch)
 {
-  static __thread char buf[64] __attribute__((aligned(64)));
-  static __thread int buflen = 0;
-
-  buf[buflen++] = ch;
-
-  if (ch == '\n' || buflen == sizeof(buf))
-  {
-    syscall(SYS_write, 1, (uintptr_t)buf, buflen);
-    buflen = 0;
-  }
+  kputc(ch);
 
   return 0;
 }
@@ -155,7 +114,7 @@ void printhex(uint64_t x)
   }
   str[16] = 0;
 
-  printstr(str);
+  puts(str);
 }
 
 static inline void printnum(void (*putch)(int, void**), void **putdat,
@@ -210,10 +169,16 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
 
   while (1) {
     while ((ch = *(unsigned char *) fmt) != '%') {
-      if (ch == '\0')
+      if (ch == '\0') {
         return;
-      fmt++;
-      putch(ch, putdat);
+      } else if (ch == '\n') {
+        putch('\n', putdat);
+        putch('\r', putdat);
+        fmt++;
+      } else {
+        putch(ch, putdat);
+        fmt++;
+      }
     }
     fmt++;
 
@@ -348,14 +313,15 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
   }
 }
 
+// Calling of putchar from printf is currently disabled
+// as syscalls do not function correctly
 int printf(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-
-  vprintfmt((void*)putchar, 0, fmt, ap);
-
+  vprintfmt((void*)kputc, 0, fmt, ap);
   va_end(ap);
+
   return 0; // incorrect return value, but who cares, anyway?
 }
 
@@ -397,7 +363,6 @@ void* memcpy(void* dest, const void* src, size_t len)
 
 void* memset(void* dest, int byte, size_t len)
 {
-
   if ((((uintptr_t)dest | len) & (sizeof(uintptr_t)-1)) == 0) {
     uintptr_t word = byte & 0xFF;
     word |= word << 8;

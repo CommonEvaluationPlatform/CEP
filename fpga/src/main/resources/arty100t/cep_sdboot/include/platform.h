@@ -1,4 +1,13 @@
-// See LICENSE for license details.
+//-------------------------------------------------------------------------------------
+// Copyright 2022 Massachusets Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      platform.h
+// Program:        Common Evaluation Platform (CEP)
+// Description:    
+// Notes:          This version has a 1GB main memory size and 1 core
+//
+//--------------------------------------------------------------------------------------
 
 #ifndef _CHIPYARD_PLATFORM_H
 #define _CHIPYARD_PLATFORM_H

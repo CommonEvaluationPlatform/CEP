@@ -19,6 +19,7 @@
 #include "devices/spi.h"
 #include "devices/uart.h"
 #include "devices/cepregs.h"
+#include "devices/arty100t_gpio.h"
 
  // Some things missing from the official encoding.h
 #if __riscv_xlen == 32

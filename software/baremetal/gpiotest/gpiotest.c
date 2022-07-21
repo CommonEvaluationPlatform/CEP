@@ -6,7 +6,7 @@
 // Program:        Common Evaluation Platform
 // Description:    A program that sets up the GPIO to read the
 //                 Arty100T switches and set the User LEDs accordingly
-// Notes:          
+// Notes:          GPIO mapping from arty100t_gpio.h
 //
 //************************************************************************
 
@@ -19,23 +19,28 @@
 #include "mmio.h"
 
 #define   DEBOUNCE_CNT  10
+#define   DEBOUNCE_WS   50000
 
-// A simple routine to debouce the switch inputs
-uint32_t get_gpio(void) {
+// A simple routine to debouce gpio reads
+uint32_t get_gpio_debounced(uint32_t mask) {
 
-  uint32_t  gpio_old;
-  uint32_t  gpio_new;
+  uint32_t  gpio_old = 0;
+  uint32_t  gpio_new = 0;
   int       debounce_counter = 0;
 
   while (debounce_counter < DEBOUNCE_CNT) {
-    gpio_old = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL));
-    gpio_new = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL));
+    gpio_new = reg_read32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_VAL)) & mask;
+
+    // Introduce some wait states beteween reads
+    for (volatile int i = 0; i < DEBOUNCE_WS; i++) {}
 
     if (gpio_new == gpio_old) {
       debounce_counter++;
     } else {
       debounce_counter = 0;
     }
+
+    gpio_old = gpio_new;
 
   } // end while
 
@@ -73,7 +78,7 @@ int main() {
   while (1) {
 
     // Get the switches state
-    gpio_new = get_gpio();
+    gpio_new = get_gpio_debounced(SW0_MASK | SW1_MASK | SW2_MASK | SW3_MASK);
 
     // A change of switch state has been detected... post debounce
     if (gpio_new != gpio_old) {

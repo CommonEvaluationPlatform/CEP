@@ -1,10 +1,10 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      syscalls.c
+// File Name:      syscalls_bootrom.c
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Modified baremetal system calls for RISC-V 
-// Notes:          Roll
+// Notes:          Customized version of syscalls.c for the bootrom
 //
 //--------------------------------------------------------------------------------------
 
@@ -24,9 +24,6 @@
 #define SYS_write 64
 
 #undef strcmp
-
-extern volatile uint64_t tohost;
-extern volatile uint64_t fromhost;
 
 #define NUM_COUNTERS 2
 static uintptr_t counters[NUM_COUNTERS];
@@ -50,7 +47,6 @@ void setStats(int enable)
 
 void __attribute__((noreturn)) tohost_exit(uintptr_t code)
 {
-  tohost = (code << 1) | 1;
   while (1);
 }
 
@@ -90,36 +86,6 @@ int __attribute__((weak)) main(int argc, char** argv)
   // single-threaded programs override this function.
   puts("Implement main(), foo!\n");
   return -1;
-}
-
-static void init_tls()
-{
-  register void* thread_pointer asm("tp");
-  extern char _tls_data;
-  extern __thread char _tdata_begin, _tdata_end, _tbss_end;
-  size_t tdata_size = &_tdata_end - &_tdata_begin;
-  memcpy(thread_pointer, &_tls_data, tdata_size);
-  size_t tbss_size = &_tbss_end - &_tdata_end;
-  memset(thread_pointer + tdata_size, 0, tbss_size);
-}
-
-void _init(int cid, int nc)
-{
-  init_tls();
-  thread_entry(cid, nc);
-
-  // only single-threaded programs should ever get here.
-  int ret = main(0, 0);
-
-  char buf[NUM_COUNTERS * 32] __attribute__((aligned(64)));
-  char* pbuf = buf;
-  for (int i = 0; i < NUM_COUNTERS; i++)
-    if (counters[i])
-      pbuf += sprintf(pbuf, "%s = %" PRIuPTR "\n", counter_names[i], counters[i]);
-  if (pbuf != buf)
-    puts(buf);
-
-  exit(ret);
 }
 
 #undef getchar

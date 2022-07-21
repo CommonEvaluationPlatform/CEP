@@ -1,10 +1,10 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-2-Clause
 //
-// File Name:      syscalls_light.c
+// File Name:      syscalls.c
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Modified baremetal system calls for RISC-V 
-// Notes:          The light version has kept only the print related routines
+// Notes:          Roll
 //
 //--------------------------------------------------------------------------------------
 
@@ -24,6 +24,9 @@
 #define SYS_write 64
 
 #undef strcmp
+
+extern volatile uint64_t tohost;
+extern volatile uint64_t fromhost;
 
 #define NUM_COUNTERS 2
 static uintptr_t counters[NUM_COUNTERS];
@@ -45,11 +48,93 @@ void setStats(int enable)
 #undef READ_CTR
 }
 
+void __attribute__((noreturn)) tohost_exit(uintptr_t code)
+{
+  tohost = (code << 1) | 1;
+  while (1);
+}
+
+uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uintptr_t regs[32])
+{
+  tohost_exit(1337);
+}
+
+void exit(int code)
+{
+  tohost_exit(code);
+}
+
+void abort()
+{
+  exit(128 + SIGABRT);
+}
+
 // Syscall is currently disabled as it does
 // not function properly in simulation
-void printstr(const char* s)
+int puts(const char* s)
 {
   kputs(s);
+
+  return 0;
+}
+
+void __attribute__((weak)) thread_entry(int cid, int nc)
+{
+  // multi-threaded programs override this function.
+  // for the case of single-threaded programs, only let core 0 proceed.
+  while (cid != 0);
+}
+
+int __attribute__((weak)) main(int argc, char** argv)
+{
+  // single-threaded programs override this function.
+  puts("Implement main(), foo!\n");
+  return -1;
+}
+
+static void init_tls()
+{
+  register void* thread_pointer asm("tp");
+  extern char _tls_data;
+  extern __thread char _tdata_begin, _tdata_end, _tbss_end;
+  size_t tdata_size = &_tdata_end - &_tdata_begin;
+  memcpy(thread_pointer, &_tls_data, tdata_size);
+  size_t tbss_size = &_tbss_end - &_tdata_end;
+  memset(thread_pointer + tdata_size, 0, tbss_size);
+}
+
+void _init(int cid, int nc)
+{
+  init_tls();
+  thread_entry(cid, nc);
+
+  // only single-threaded programs should ever get here.
+  int ret = main(0, 0);
+
+  char buf[NUM_COUNTERS * 32] __attribute__((aligned(64)));
+  char* pbuf = buf;
+  for (int i = 0; i < NUM_COUNTERS; i++)
+    if (counters[i])
+      pbuf += sprintf(pbuf, "%s = %" PRIuPTR "\n", counter_names[i], counters[i]);
+  if (pbuf != buf)
+    puts(buf);
+
+  exit(ret);
+}
+
+#undef getchar
+int getchar()
+{
+  return kgetc();
+}
+
+
+#undef putchar
+int putchar(int ch)
+{
+  kputc(ch);
+
+  return 0;
 }
 
 void printhex(uint64_t x)
@@ -63,7 +148,7 @@ void printhex(uint64_t x)
   }
   str[16] = 0;
 
-  printstr(str);
+  puts(str);
 }
 
 static inline void printnum(void (*putch)(int, void**), void **putdat,
@@ -111,17 +196,23 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
 {
   register const char* p;
   const char* last_fmt;
-  register int ch, err;
+  register int ch;
   unsigned long long num;
-  int base, lflag, width, precision, altflag;
+  int base, lflag, width, precision;
   char padc;
 
   while (1) {
     while ((ch = *(unsigned char *) fmt) != '%') {
-      if (ch == '\0')
+      if (ch == '\0') {
         return;
-      fmt++;
-      putch(ch, putdat);
+      } else if (ch == '\n') {
+        putch('\n', putdat);
+        putch('\r', putdat);
+        fmt++;
+      } else {
+        putch(ch, putdat);
+        fmt++;
+      }
     }
     fmt++;
 
@@ -131,7 +222,6 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
     width = -1;
     precision = -1;
     lflag = 0;
-    altflag = 0;
   reswitch:
     switch (ch = *(unsigned char *) fmt++) {
 
@@ -173,7 +263,6 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
       goto reswitch;
 
     case '#':
-      altflag = 1;
       goto reswitch;
 
     process_precision:
@@ -262,7 +351,6 @@ static void vprintfmt(void (*putch)(int, void**), void **putdat, const char *fmt
 // as syscalls do not function correctly
 int printf(const char* fmt, ...)
 {
-
   va_list ap;
   va_start(ap, fmt);
   vprintfmt((void*)kputc, 0, fmt, ap);

@@ -22,7 +22,7 @@ MAINPROGRAM	?= hello_world
 CC 			:= riscv64-unknown-elf-gcc
 OBJDUMP 	:= riscv64-unknown-elf-objdump
 OBJCOPY 	:= riscv64-unknown-elf-objcopy
-CFLAGS 		:= -mcmodel=medany -std=gnu99 -O2 -fno-common -fno-builtin-printf -Wall -Wno-unused-function
+CFLAGS 		:= -mcmodel=medany -O2 -fno-common -fno-builtin-printf -fno-builtin-puts -Wall -Wno-unused-function
 CFLAGS 		+= -I $(INCDIR)
 LDFLAGS 	:= -static -nostdlib -nostartfiles -lgcc
 OBJS 		:= crt.o syscalls.o kprintf.o

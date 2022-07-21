@@ -18,13 +18,13 @@
 
 int main() {
 
-  kputs("");
-  kputs("");
-  kputs("------------------");
-  kputs("RISC-V Hello World");
-  kputs("------------------");
-  kputs("");
-  kputs("");
+  puts("");
+  puts("");
+  puts("------------------");
+  puts("RISC-V Hello World");
+  puts("------------------");
+  puts("");
+  puts("");
   
   return 0;
 }
