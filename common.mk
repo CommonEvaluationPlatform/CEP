@@ -156,6 +156,7 @@ else
 	-cp $(base_dir)/generators/chipyard/src/main/scala/System.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/System.scala
 	-cp $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala
 endif
+	-cp $(base_dir)/customized_submodules/CEPRocketConfigs.scala $(base_dir)/generators/rocket-chip/src/main/scala/subsystem
 	@echo "CEP: ----------------------------------------------------------------------"
 	@echo ""
 
@@ -169,6 +170,7 @@ cep_clean:
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
+	-rm -f $(base_dir)/generators/rocket-chip/src/main/scala/subsystem/CEPRocketConfigs.scala
 #########################################################################################
 
 

@@ -180,8 +180,14 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 * iDFT test code fixed in cep_idft.cc
 
 ## [v4.20] - 2022-07-22
+
+### Added
 * Added kgetc to bare metal console routines
 * Verified firemarshall generated linux build boots on the CEP Arty100T.  Instructions added to [README.md](./README.md)
+
+### Changed
+* Unified console print routines across bootroms, cosim baremetal, and standalone bare metal code.  Bare metal prints are now handled using stdio functions with
+  putchar, getchar, and putstr being mapped to the console versions
 
 
 #### Return to the root CEP [README](./README.md)

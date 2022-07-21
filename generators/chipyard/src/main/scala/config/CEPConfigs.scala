@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------------------
+// Copyright 2022 Massachusets Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:     CEPConfigs.scala
+// Program:       Common Evaluation Platform (CEP)
+// Description:   CEP specific chipyard configurations
+// Notes:         
+//--------------------------------------------------------------------------------------
+
 package chipyard
 
 import freechips.rocketchip.config.{Config}
@@ -123,6 +133,6 @@ class CEPRocketConfig extends Config(
 
 // Tweak to the default Rocket Config that removes the L2 Cache (and uses a medium core)
 class RocketNoL2Config extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new freechips.rocketchip.subsystem.WithNKindaBigCores(1) ++
   new chipyard.config.AbstractNoL2Config)
 
