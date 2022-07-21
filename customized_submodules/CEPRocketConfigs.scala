@@ -5,7 +5,8 @@
 // File Name:     CEPRocketConfigs.scala
 // Program:       Common Evaluation Platform (CEP)
 // Description:   CEP specific rocket-chip subsystem configurations
-// Notes:         
+// Notes:         The goal with the kindabig core is to figure the minimum sized
+//                tile that will boot linux on the Arty100T.
 //--------------------------------------------------------------------------------------
 
 // See LICENSE.SiFive for license details.
@@ -29,18 +30,10 @@ class WithNKindaBigCores(n: Int, overrideIdOffset: Option[Int] = None) extends C
     val kindabig = RocketTileParams(
       dcache = Some(DCacheParams(
         rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBSets = 1,
-        nTLBWays = 4,
         nMSHRs = 0,
         blockBytes = site(CacheBlockBytes))),
       icache = Some(ICacheParams(
         rowBits = site(SystemBusKey).beatBits,
-        nSets = 64,
-        nWays = 1,
-        nTLBSets = 1,
-        nTLBWays = 4,
         blockBytes = site(CacheBlockBytes))))
     List.tabulate(n)(i => kindabig.copy(hartId = i + idOffset)) ++ prev
   }
