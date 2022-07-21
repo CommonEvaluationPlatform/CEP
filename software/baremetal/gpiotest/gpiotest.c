@@ -59,9 +59,10 @@ int main() {
 
   puts("");
   puts("");
-  puts("------------------");
-  puts(" RISC-V GPIO Test ");
-  puts("------------------");
+  puts("--------------------");
+  puts("  RISC-V GPIO Test  ");
+  puts("--------------------");
+  puts("Console Echo Enabled");
   puts("");
   puts("");
   

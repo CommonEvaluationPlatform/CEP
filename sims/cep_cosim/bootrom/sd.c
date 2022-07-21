@@ -206,7 +206,6 @@ static int sd_copy(void)
   // Given that the simulation has it's own override, the "fast boot" is targetted to bare metal boots
   // on the FPGA dev boards. 
   if (fast_boot) {
-    puts("Fast Boot enabled");
     i = 0x100;  // 256 x 512B = 132kB
   } else {
     REG64(cepregs, CEPREGS_SCRATCH_W7) = i;
@@ -215,7 +214,7 @@ static int sd_copy(void)
 
   // Performing multiplication here in the event that PAYLOAD_SIZE is
   // overriden in simulation
-  printf("LOADING %ld kB PAYLOAD\n", (i * SECTOR_SIZE_B)/1024);
+  printf("LOADING %ldkB PAYLOAD\n", (i * SECTOR_SIZE_B)/1024);
 
   // Begin a multi-cycle read
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
