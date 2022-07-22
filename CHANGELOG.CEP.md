@@ -188,6 +188,6 @@ This changelog follows the format defined here (beginning with v4.0): https://ke
 ### Changed
 * Unified console print routines across bootroms, cosim baremetal, and standalone bare metal code.  Bare metal prints are now handled using stdio functions with
   putchar, getchar, and putstr being mapped to the console versions
-
+* Added `helloworld` example linux program that can be manually compiled or installed into firemarshal's build root
 
 #### Return to the root CEP [README](./README.md)
