@@ -16,7 +16,7 @@ endif
 
 BASEDIR 	:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 INCDIR 		:= $(BASEDIR)/include
-MAINPROGRAM	?= hello_world
+MAINPROGRAM	?= gpiotest
 
 CC 			:= riscv64-unknown-linux-gnu-gcc
 OBJDUMP 	:= riscv64-unknown-linux-gnu-objdump
@@ -24,7 +24,7 @@ OBJCOPY 	:= riscv64-unknown-linux-gnu-objcopy
 CFLAGS 		:= -mcmodel=medany -O2 -Wall
 CFLAGS 		+= -I $(INCDIR)
 LDFLAGS 	:= 
-OBJS 		:= 
+OBJS 		:= $(MAINPROGRAM).o foo.o
 LDSCRIPT 	:= 
 HDRS 		:= $(wildcard *.h) $(wildcard $(INCDIR)/*.h)
 
@@ -32,20 +32,11 @@ HDRS 		:= $(wildcard *.h) $(wildcard $(INCDIR)/*.h)
 	$(CC) $(CFLAGS) -o $@ -c $<
 %.o: %.S $(hdrs)
 	$(CC) $(CFLAGS) -D__ASSEMBLY__=1 -o $@ -c $<
-%.elf: %.o $(OBJS) $(LDSCRIPT)
-	$(CC) $(LDFLAGS) $(if $(LDSCRIPT),-T $(LDSCRIPT)) -o $@ $< $(OBJS)
-%.dump: %.elf
-	$(OBJDUMP) -d $< > $@
+$(MAINPROGRAM): $(OBJS) $(LDSCRIPT)
+	$(CC) $(LDFLAGS) $(if $(LDSCRIPT),-T $(LDSCRIPT)) -o $@ $(OBJS)
 
-.DEFAULT: elf
-
-.PHONY: elf dump
-elf: $(addsuffix .elf,$(MAINPROGRAM))
-dump: $(addsuffix .dump,$(MAINPROGRAM))
+.DEFAULT: $(MAINPROGRAM)
 
 .PHONY: clean
 clean:
-	rm -f -- *.elf *.o *.dump *.img
-
-.SUFFIXES:
-.SUFFIXES: .o .c .S
+	rm -f -- $(MAINPROGRAM) *.o

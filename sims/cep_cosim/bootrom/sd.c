@@ -216,8 +216,8 @@ static int sd_copy(void)
   // overriden in simulation
   printf("LOADING %ldkB PAYLOAD\n", (i * SECTOR_SIZE_B)/1024);
 
-  // Begin a multi-cycle read
-  REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
+  // Begin a multi-cycle read.  Speed up interface by resetting divider
+  REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 25000000UL);
   if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;

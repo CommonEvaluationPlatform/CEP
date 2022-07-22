@@ -28,6 +28,7 @@ class WithNKindaBigCores(n: Int, overrideIdOffset: Option[Int] = None) extends C
     val prev = up(RocketTilesKey, site)
     val idOffset = overrideIdOffset.getOrElse(prev.size)
     val kindabig = RocketTileParams(
+      core   = RocketCoreParams(fpu = None),
       dcache = Some(DCacheParams(
         rowBits = site(SystemBusKey).beatBits,
         nMSHRs = 0,
