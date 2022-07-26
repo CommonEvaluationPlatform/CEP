@@ -185,3 +185,8 @@ License Terms       : Copyright (c) 2018 Project Nayuki. (MIT License)
                       *   liability, whether in an action of contract, tort or otherwise, arising from,
                       *   out of or in connection with the Software or the use or other dealings in the
                       *   Software.
+
+Title               : libgpiod-example
+Source              : https://github.com/starnight/libgpiod-example
+CEP Directory       : ./software/linux/gpiotest
+License Description : BSD 3-Clause

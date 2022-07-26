@@ -1,4 +1,0 @@
-config BR2_PACKAGE_HOST_HELLOWORLD
-	bool "host helloworld"
-	help
-	  A simple hello world program

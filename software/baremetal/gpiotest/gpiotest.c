@@ -59,10 +59,10 @@ int main() {
 
   puts("");
   puts("");
-  puts("--------------------");
-  puts("  RISC-V GPIO Test  ");
-  puts("--------------------");
-  puts("Console Echo Enabled");
+  puts("--------------------------");
+  puts("     RISC-V GPIO Test     ");
+  puts("--------------------------");
+  puts("   Console Echo Enabled   ");
   puts("");
   puts("");
   
@@ -87,7 +87,7 @@ int main() {
       gpio_old = gpio_new;
     }
 
-    // A simple tty echo routine where CR and LF are converted to CR+LF
+    // A simple tty echo routine where CR and LF are converted to CR+LF (getchar, which mapps to kgetc in baremetal, is non-blocking)
     c = getchar();
     if (c == '\r' || c == '\n') {
       putchar('\r');

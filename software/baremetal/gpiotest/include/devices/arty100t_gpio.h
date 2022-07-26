@@ -1,3 +1,14 @@
+//************************************************************************
+// Copyright 2022 Massachusets Institute of Technology
+// SPDX short identifier: BSD-2-Clause
+//
+// File Name:      arty100t_gpio.h
+// Program:        Common Evaluation Platform
+// Description:    Bit mappings for the CEP's Arty100T GPIO
+// Notes:          
+//
+//************************************************************************
+
 #ifndef _ARTY100T_GPIO_H
 #define _ARTY100T_GPIO_H
 

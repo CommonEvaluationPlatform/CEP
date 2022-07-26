@@ -194,8 +194,7 @@ A couple of notes:
 - As the CEP on ther Artyy100T does not have an FPU, a few changes to the default firemarshal build need to be made
     Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/linux-config` and add `CONFIG_FPU=n`
     Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/buildroot-config` and add `BR2_RISCV_ISA_RVF=n`
-- Due to a bug in libguestfs on Ubuntu, the firemarshal build *may* fail.  Ensure your current shell has active sudo permissions before running the build.  I used a quick `sudo su`, exited
-  the root shell, and then ran the build.
+- Due to a bug in libguestfs on Ubuntu, the firemarshal build *may* fail.  Ensure your current shell has active sudo permissions before running the build.  I used a quick `sudo su`, exited the root shell, and then ran the build.
 
 ### CEP Co-Simulation
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
