@@ -13,7 +13,7 @@ add_executable(helloworld helloworld.c)
 
 target_include_directories(helloworld PRIVATE)
 
-target_link_libraries(helloworld PRIVATE "gpiod")
+target_link_libraries(helloworld PRIVATE)
 
 set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Standard install prefix" FORCE)
 

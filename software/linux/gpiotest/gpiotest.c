@@ -34,6 +34,11 @@ int main(int argc, char **argv)
   int ret;
   char ch;
 
+  // Setup ncurses
+  initscr();
+  nodelay(stdscr, true);
+  noecho();
+
   puts("");
   puts("");
   puts("--------------------------");
@@ -75,11 +80,6 @@ int main(int argc, char **argv)
     goto release_lines;
   }
  
-  // Setup ncurses
-  initscr();
-  nodelay(stdscr, true);
-  noecho();
-
   // Simple loop to read the switches and write the LEDs
   do {
     ch = getch();
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
       perror("Set line value failed\n");
       goto release_lines;
     }
-  } while (ch != '^D');
+  } while (ch != 0x24);
 
 release_lines:
   gpiod_line_release_bulk(&input_lines);

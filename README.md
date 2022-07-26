@@ -188,13 +188,14 @@ The CEP Arty100T build has been verified to support a firemarshall-based linux b
 
 A couple of notes:
 - The SD card must be partitioned as instructed
-- Mounting the 2nd parition from within the CEP takes quite a while (~3min)
-- The default configuration for the Arty100T board uses a custom rocket-chip configuration *WithNKindaBigCores*.  Through trial and error, this minimally sized configuration
-  boots linux w/the changes below.
+- The CEP build for the Arty100T board uses a custom rocket-chip configuration *WithNKindaBigCores*.  Through trial and error, this minimally sized configuration boots linux w/the changes below.
 - As the CEP on ther Artyy100T does not have an FPU, a few changes to the default firemarshal build need to be made
     Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/linux-config` and add `CONFIG_FPU=n`
-    Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/buildroot-config` and add `BR2_RISCV_ISA_RVF=n`
+    Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/buildroot-config` and add `BR2_RISCV_ISA_RVF=n`.  Change `BR2_riscv_g=y` to `BR2_riscv_g=n`.
 - Due to a bug in libguestfs on Ubuntu, the firemarshal build *may* fail.  Ensure your current shell has active sudo permissions before running the build.  I used a quick `sudo su`, exited the root shell, and then ran the build.
+
+### Linux Applications
+You can install an example application in firemarshal's buildroot prior to building linux by running `make MAINPROGRAM=<prog name> install` from <CEP_ROOT>/software/linux.  Applications include `helloworld` and `gpiotest`. 
 
 ### CEP Co-Simulation
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  

@@ -13,7 +13,7 @@ PACKAGE    					= $(shell echo $(MAINPROGRAM) | tr '[:lower:]' '[:upper:]')
 
 $(PACKAGE)_VERSION 			= 1.0.0
 $(PACKAGE)_LICENSE 			= BSD-2-Clause
-$(PACKAGE)_DEPENDENCIES 	= libgpiod lncurses
+$(PACKAGE)_DEPENDENCIES 	= 
 $(PACKAGE)_SITE 			= $(TOPDIR)/../../../../../../linux/$(MAINPROGRAM)
 $(PACKAGE)_SITE_METHOD 		= local
 $(PACKAGE)_INSTALL_STAGING 	= NO
