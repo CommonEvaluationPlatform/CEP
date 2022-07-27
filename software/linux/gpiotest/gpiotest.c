@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     for (i = 0; i < GPIO_WIDTH; i++) {
       if (!compare_arrays(values_new, values_old, GPIO_WIDTH)) {
         printf("switches = ");
-        for (j = 0; j < GPIO_WIDTH; j++) {
+        for (j = GPIO_WIDTH - 1; j >= 0; j--) {
           printf("%0x", values_new[j]);
           values_old[j] = values_new[j];
         }
