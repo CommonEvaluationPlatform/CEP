@@ -29,8 +29,8 @@ static uint16_t X1B_period = 4093;
 static uint16_t X2A_period = 4092;
 static uint16_t X2B_period = 4093;
 
-static uint16_t XN_cnt_speed = 1;
-static uint16_t Z_cnt_speed  = 1;
+static uint32_t XN_cnt_speed = 1;
+static uint32_t Z_cnt_speed  = 1;
 
 static uint16_t X_a_full_count = 3750;
 static uint16_t X_b_full_count = 3749;
@@ -101,10 +101,10 @@ x2a = 0b100100100101
 x2b = 0b010101010100
 */
 void cep_gps::SetPcodeXnInit (uint16_t x1a_initial, uint16_t x1b_initial, uint16_t x2a_initial, uint16_t x2b_initial) {
-  m_x1a_initial &= x1a_initial & 0xfff;
-  m_x1b_initial &= x1b_initial & 0xfff;
-  m_x2a_initial &= x2a_initial & 0xfff;
-  m_x2b_initial &= x2b_initial & 0xfff;
+  m_x1a_initial = x1a_initial & 0xfff;
+  m_x1b_initial = x1b_initial & 0xfff;
+  m_x2a_initial = x2a_initial & 0xfff;
+  m_x2b_initial = x2b_initial & 0xfff;
   // Update values for fast loop
   X1A_period = 10;
   X1B_period = 9;
