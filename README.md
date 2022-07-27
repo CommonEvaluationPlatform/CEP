@@ -1,7 +1,7 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-2-Clause)
 
-# Common Evaluation Platform v4.1
+# Common Evaluation Platform v4.2
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
@@ -121,7 +121,8 @@ OR
 
 ### Building Bare Metal software for the CEP FPGA
 
-In additional to connecting USB to the Arty100T's microUSB port, a Digilent SD or microSD PMOD connected should be connected to connector JA.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+In additional to connecting USB to the Arty100T's microUSB port, a Digilent SD or microSD PMOD board should be connected to connector JA.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+
 Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
 
 It should be noted that the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.  Both HW and SW flow control should be disabled.  
@@ -161,6 +162,8 @@ switches = 00000000
 
 A developer may use baremetal software from the CEP cosimulation or the examples as provided in `<CEP_ROOT>/software/baremetal`.  
 
+The (micro)SD card needs to be partitioned as described in (https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs).  Once partitioned, proceed to the next step.
+
 In either case, it is important to note what device your (micro)SD card gets mapped to (e.g., `/dev/sdd`).
 
 Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
@@ -168,7 +171,7 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
 make ENABLE_KPRINTF=1 riscv_wrapper        			<-- builds riscv_wrapper.img with console printf enabled
-make DISK=/dev/sdd riscv_wrapper_sd_write       <-- copies riscv_wrapper.img to /dev/sdd (subsitute with your device name)
+make DISK=/dev/sdd1 riscv_wrapper_sd_write          <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 In the above example, the bare metal regTest is build with the console printf function enabled.  It is advised that you enable the addition of a carriage return in your chosen terminal program.
@@ -177,7 +180,7 @@ The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
 
 ```
 cd <CEP_ROOT>/software/baremetal/gpiotest
-make DISK=/dev/sdd sd_write        				      <-- copies gpiotest.img to /dev/sdd (subsitute with your device name)
+make DISK=/dev/sdd1 sd_write        				 <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
@@ -188,14 +191,14 @@ The CEP Arty100T build has been verified to support a firemarshall-based linux b
 
 A couple of notes:
 - The SD card must be partitioned as instructed
-- The CEP build for the Arty100T board uses a custom rocket-chip configuration *WithNKindaBigCores*.  Through trial and error, this minimally sized configuration boots linux w/the changes below.
-- As the CEP on ther Artyy100T does not have an FPU, a few changes to the default firemarshal build need to be made
-    Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/linux-config` and add `CONFIG_FPU=n`
-    Modify `<CEP_ROOT>/software/firemarshal/boards/prototype/base-workloads/br-base/buildroot-config` and add `BR2_RISCV_ISA_RVF=n`.  Change `BR2_riscv_g=y` to `BR2_riscv_g=n`.
 - Due to a bug in libguestfs on Ubuntu, the firemarshal build *may* fail.  Ensure your current shell has active sudo permissions before running the build.  I used a quick `sudo su`, exited the root shell, and then ran the build.
 
 ### Linux Applications
 You can install an example application in firemarshal's buildroot prior to building linux by running `make MAINPROGRAM=<prog name> install` from <CEP_ROOT>/software/linux.  Applications include `helloworld` and `gpiotest`. 
+
+It is advisable to clean the buildroot build, should you change the configuration.  This can accomplished by running `make clean` within `<CEP_ROOT>/software/firemarshal/boards/prototype/distros/br/buildroot/`.
+
+If you ncurses-based gpiotest application crashes before cleanup, executing the `reset` command should restore terminal behavior.
 
 ### CEP Co-Simulation
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  

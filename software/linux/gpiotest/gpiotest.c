@@ -16,7 +16,50 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <ncurses.h>
+
+#define   GPIO_WIDTH    4
+#define   DEBOUNCE_CNT  10
+
+
+// Compare arrays function
+int compare_arrays(int left[], int right[], int num_elements) {
+  for (int i = 0; i < num_elements; i++) {
+    if (left[i] != right[i]) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+// A simple routine to debouce gpio reads
+int get_switches_debounced(struct gpiod_line_bulk *bulk, int values_old[GPIO_WIDTH]) {
+
+  int values_new[GPIO_WIDTH]  = {0, 0, 0, 0};
+  int debounce_counter        = 0;
+  int i;
+  int ret;
+
+  while (debounce_counter < DEBOUNCE_CNT) {
+    
+    ret = gpiod_line_get_value_bulk(bulk, values_new);
+    if (ret)
+      return ret;
+
+    if (compare_arrays(values_new, values_old, GPIO_WIDTH))
+      debounce_counter++;
+    else
+      debounce_counter = 0;
+
+    for (i = 0; i < GPIO_WIDTH; i++) {
+      values_old[i] = values_new[i];
+    }
+
+  } // end while
+
+  return 0;
+
+} // get_switch
 
 int main(int argc, char **argv)
 {
@@ -24,28 +67,23 @@ int main(int argc, char **argv)
   char *chipname = "gpiochip0";
   struct gpiod_chip *chip;
   struct gpiod_line_bulk input_lines;
-  unsigned int input_line_offsets[] = {8, 9, 10, 11};
-  struct gpiod_line_request_config input_config[4];
+  unsigned int input_line_offsets[GPIO_WIDTH] = {8, 9, 10, 11};       // Offsets to switches
+  struct gpiod_line_request_config input_config[GPIO_WIDTH];
   struct gpiod_line_bulk output_lines;
-  unsigned int output_line_offsets[] = {16, 17, 18, 19};
-  struct gpiod_line_request_config output_config[4];
-  int values[] = {0, 0, 0, 0};
+  unsigned int output_line_offsets[GPIO_WIDTH] = {16, 17, 18, 19};    // Offsets to LEDs
+  struct gpiod_line_request_config output_config[GPIO_WIDTH];
+  int values_old[GPIO_WIDTH] = {2, 2, 2, 2};	// guarentees at least one printout
+  int values_new[GPIO_WIDTH] = {0, 0, 0, 0};
   int i;
+  int j;
   int ret;
-  char ch;
 
-  // Setup ncurses
-  initscr();
-  nodelay(stdscr, true);
-  noecho();
-
-  puts("");
-  puts("");
-  puts("--------------------------");
-  puts("  Linux RISC-V GPIO Test  ");
-  puts("--------------------------");
-  puts("     Press ^D to exit     ");
-  puts("");
+  printf("\n");
+  printf("\n");
+  printf("--------------------------\n");
+  printf("  Linux RISC-V GPIO Test  \n");
+  printf("--------------------------\n");
+  printf("\n");
 
   // Enable access to the GPIO Device
   chip = gpiod_chip_open_by_name(chipname);
@@ -63,7 +101,7 @@ int main(int argc, char **argv)
   }
 
   // Setup the configs
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < GPIO_WIDTH; i++) {
     input_config[i].consumer       = "gpiotest";
     input_config[i].request_type   = GPIOD_LINE_REQUEST_DIRECTION_INPUT;
     input_config[i].flags          = 0;
@@ -73,8 +111,8 @@ int main(int argc, char **argv)
   }
 
   // Set the gpio directions
-  ret =  gpiod_line_request_bulk(&input_lines, input_config, values);
-  ret |= gpiod_line_request_bulk(&output_lines, output_config, values);
+  ret =  gpiod_line_request_bulk(&input_lines, input_config, values_old);
+  ret |= gpiod_line_request_bulk(&output_lines, output_config, values_old);
   if (ret) {
     perror("gpiod_line_request_bulk\n");
     goto release_lines;
@@ -82,27 +120,39 @@ int main(int argc, char **argv)
  
   // Simple loop to read the switches and write the LEDs
   do {
-    ch = getch();
-    ret = gpiod_line_get_value_bulk(&input_lines, values);
+
+    ret = get_switches_debounced(&input_lines, values_new);
     if (ret) {
       perror("Get line value failed\n");
       goto release_lines;
     }
-    printf("switches = %0x %0x %0x %0x\n", values[3], values[2], values[1], values[0]);
-    sleep(1);
-    ret = gpiod_line_set_value_bulk(&output_lines, values);
+
+    // Print the switches value if there is a change in state
+    for (i = 0; i < GPIO_WIDTH; i++) {
+      if (!compare_arrays(values_new, values_old, GPIO_WIDTH)) {
+        printf("switches = ");
+        for (j = 0; j < GPIO_WIDTH; j++) {
+          printf("%0x", values_new[j]);
+          values_old[j] = values_new[j];
+        }
+        printf("\n");
+        break;
+      }
+    }
+
+    // LEDs are always set to new, regardless if there has been a change or not
+    ret = gpiod_line_set_value_bulk(&output_lines, values_new);
     if (ret) {
       perror("Set line value failed\n");
       goto release_lines;
     }
-  } while (ch != 0x24);
+  } while (1);
 
 release_lines:
   gpiod_line_release_bulk(&input_lines);
   gpiod_line_release_bulk(&output_lines);
 close_chip:
   gpiod_chip_close(chip);
-  endwin();
 end:
   return 0;
 }
