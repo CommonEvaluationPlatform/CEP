@@ -96,8 +96,8 @@ int main() {
       putchar(c);
     }
 
-    // Write the 
-    reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), (gpio_new & 0x00000FF00) << 8);
+    // Write the LEDs
+    reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_VAL), gpio_new << SW2LED_SHIFT);
   }
 
   return 0;

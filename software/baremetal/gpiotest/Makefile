@@ -15,6 +15,7 @@ ifndef RISCV
 $(error RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
+BOARD		?= arty_a7_100
 BASEDIR 	:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 INCDIR 		:= $(BASEDIR)/include
 MAINPROGRAM	?= gpiotest
@@ -25,9 +26,18 @@ OBJCOPY 	:= riscv64-unknown-elf-objcopy
 CFLAGS 		:= -mcmodel=medany -O2 -fno-common -fno-builtin-printf -fno-builtin-puts -Wall -Wno-unused-function
 CFLAGS 		+= -I $(INCDIR)
 LDFLAGS 	:= -static -nostdlib -nostartfiles -lgcc
+ifeq ($(BOARD),arty_a7_100)
+CFLAGS	+= -DARTY100T_TARGET
+else ifeq ($(BOARD),vc707)
+CFLAGS	+= -DVC707_TARGET
+else
+$(error $(BOARD) is not a supported BOARD target...)
+endif
 OBJS 		:= crt.o syscalls.o kprintf.o
 LDSCRIPT 	:= link.ld
 HDRS 		:= $(wildcard *.h) $(wildcard $(INCDIR)/*.h)
+
+$(info Build for $(BOARD)...)
 
 %.o: %.c $(HDRS)
 	$(CC) $(CFLAGS) -o $@ -c $<

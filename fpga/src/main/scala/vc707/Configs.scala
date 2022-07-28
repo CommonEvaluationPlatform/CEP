@@ -24,6 +24,19 @@ import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey   => List(UARTParams(address  = BigInt(0x64000000L)))
   case PeripherySPIKey    => List(SPIParams(rAddress  = BigInt(0x64001000L)))
+  case PeripheryGPIOKey => {
+    if (VC707GPIOs.width > 0) {
+      require(VC707GPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((VC707GPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(VC707GPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
+  }
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
@@ -78,10 +91,12 @@ class WithVC707CEPTweaks extends Config(
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
+  new WithGPIO ++
   // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
+  new WithGPIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++      // use TL backing memory
@@ -103,7 +118,7 @@ class RocketVC707CEPConfig extends Config(
   new chipyard.config.WithSROTFPGA ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+  new WithDTS("mit-ll,rocketchip-cep-vc707", Nil) ++
 
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++

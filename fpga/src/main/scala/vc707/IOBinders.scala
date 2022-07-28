@@ -25,6 +25,16 @@ class WithUARTIOPassthrough extends OverrideIOBinder({
   }
 })
 
+class WithGPIOPassthrough extends OverrideIOBinder({
+  (system: HasPeripheryGPIOModuleImp) => {
+    val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
+    (io_gpio_pins_temp zip system.gpio).map { case (io, sysio) =>
+      io <> sysio
+    }
+    (io_gpio_pins_temp, Nil)
+  }
+})
+
 class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI

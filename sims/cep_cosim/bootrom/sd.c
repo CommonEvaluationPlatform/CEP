@@ -46,7 +46,13 @@ static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
 static volatile uint32_t * const uart = (void *)(UART_CTRL_ADDR);
 
 // Inherited from arty100t_gpio.h used in bare metal code
-#define BTN0_MASK       (0x00001000)
+#ifdef VC707
+  // GPIO Button N on VC707
+  #define BTN0_MASK       (0x00000100)
+#else
+  // BTN0 on Arty100T
+  #define BTN0_MASK       (0x00001000)
+#endif
 
 static inline uint8_t spi_xfer(uint8_t d)
 {
@@ -197,11 +203,9 @@ static int sd_copy(void)
   puts("CMD18");
 
   // Read the state of button 0 on the arty100t board to determine if a fast boot is requested
-#ifndef DISABLE_GPIO
   REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(BTN0_MASK);
   fast_boot = REG32(gpio, GPIO_INPUT_VAL) & BTN0_MASK;
   REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(0);
-#endif
   
   // The following logic allows for overiding of the default payload size by either holding button zero upon
   // release from reset OR being forced by the simulation.

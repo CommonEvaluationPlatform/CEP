@@ -20,6 +20,9 @@
 #define   GPIO_WIDTH    4
 #define   DEBOUNCE_CNT  10
 
+// Defines the support board targets
+enum board {vc707, arty100t};
+typedef enum board	Board;
 
 // Compare arrays function
 int compare_arrays(int left[], int right[], int num_elements) {

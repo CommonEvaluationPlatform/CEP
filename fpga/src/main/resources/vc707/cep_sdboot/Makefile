@@ -21,7 +21,7 @@ default: elf bin dump
 elf := $(BUILD_DIR)/sdboot.elf
 $(elf): head.S ${SDSOURCE} kprintf.c syscalls_bootrom.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DDISABLE_GPIO -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S ${SDSOURCE} kprintf.c syscalls_bootrom.c
+	$(CC) $(CFLAGS) -DVC707 -DTL_CLK="$(PBUS_CLK)UL" $(LFLAGS) -o $@ head.S ${SDSOURCE} kprintf.c syscalls_bootrom.c
 
 .PHONY: elf
 elf: $(elf)

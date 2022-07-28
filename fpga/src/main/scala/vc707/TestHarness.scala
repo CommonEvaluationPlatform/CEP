@@ -59,8 +59,19 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
-  /*** DDR ***/
+  /*** GPIO ***/
+  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
+    val maxGPIOSupport = 32 // max gpio per gpio chip
+    val names = VC707GPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
+    Overlay(GPIOOverlayKey, new CustomGPIOVC707ShellPlacer(this, GPIOShellInput(), names))
+  })
 
+  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
+  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
+    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
+  }
+
+  /*** DDR ***/
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL)).overlayOutput.ddr
 
   // connect 1 mem. channel to the FPGA DDR

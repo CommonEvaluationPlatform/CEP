@@ -1,13 +1,19 @@
 package chipyard.fpga.vc707
 
-import chipyard.{CanHaveMasterTLMemPort, HasHarnessSignalReferences}
-import chipyard.harness.OverrideHarnessBinder
-import chisel3.Wire
-import chisel3.experimental.BaseModule
-import freechips.rocketchip.tilelink.TLBundle
-import freechips.rocketchip.util.HeterogeneousBag
-import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+import chisel3._
+import chisel3.experimental.{BaseModule}
+
+import freechips.rocketchip.util.{HeterogeneousBag}
+import freechips.rocketchip.tilelink.{TLBundle}
+
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
+import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
+
+import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
+import chipyard.harness.{OverrideHarnessBinder}
+
+import testchipip._
 
 /*** UART ***/
 class WithUART extends OverrideHarnessBinder({
@@ -23,6 +29,17 @@ class WithSPISDCard extends OverrideHarnessBinder({
   (system: HasPeripherySPI, th: BaseModule with HasHarnessSignalReferences, ports: Seq[SPIPortIO]) => {
     th match { case vc707th: VC707FPGATestHarnessImp => {
       vc707th.vc707Outer.io_spi_bb.bundle <> ports.head
+    } }
+  }
+})
+
+/*** GPIO ***/
+class WithGPIO extends OverrideHarnessBinder({
+  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+    th match { case vc707th: VC707FPGATestHarnessImp => {
+      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
+        bb_io.bundle <> dut_io
+      }
     } }
   }
 })
