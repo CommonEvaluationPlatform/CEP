@@ -129,13 +129,15 @@ It should be noted that the microUSB port uses an FTDI chip to provide both JTAG
 
 It is worth noting that *minicom* enables HW flow control by default.
 
-Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding BTN0 on the Arty100T when the chip is released from reset.
+Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding *BTN0* on the Arty100T when the chip is released from reset.
 
-An example UART output for the gpiotest is included below:
+An example UART output for the baremetal gpiotest follows:
 ```
----    Common Evaluation Platform v00000004.00000000     ---
+---          Common Evaluation Platform v4.20            ---
+---         Based on the UCB Chipyard Framework          ---
 --- Copyright 2022 Massachusetts Institute of Technology ---
----     BootRom Image built on Jun 13 2022 07:22:08      ---
+---     BootRom Image built on Jul 27 2022 15:11:33      ---
+
 INIT
 CMD0
 CMD8
@@ -143,21 +145,25 @@ ACMD41
 CMD58
 CMD16
 CMD18
-LOADING 0x00080000 PAYLOAD
-LOADING  
+LOADING 128kB PAYLOAD
+....
 BOOT
 
 
-------------------
- RISC-V GPIO Test 
-------------------
+--------------------------
+     RISC-V GPIO Test     
+--------------------------
+   Console Echo Enabled   
 
 
-switches = 00000000
-switches = 00000004
-switches = 00000005
-switches = 00000001
-switches = 00000000
+gpio = 00000f00
+gpio = 00000e00
+gpio = 00000c00
+gpio = 00000800
+gpio = 00000000
+gpio = 00000400
+gpio = 00000600
+...
 ```
 
 A developer may use baremetal software from the CEP cosimulation or the examples as provided in `<CEP_ROOT>/software/baremetal`.  

@@ -197,10 +197,12 @@ static int sd_copy(void)
   puts("CMD18");
 
   // Read the state of button 0 on the arty100t board to determine if a fast boot is requested
+#ifndef DISABLE_GPIO
   REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(BTN0_MASK);
   fast_boot = REG32(gpio, GPIO_INPUT_VAL) & BTN0_MASK;
   REG32(gpio, GPIO_INPUT_EN) = (uint32_t)(0);
-
+#endif
+  
   // The following logic allows for overiding of the default payload size by either holding button zero upon
   // release from reset OR being forced by the simulation.
   // Given that the simulation has it's own override, the "fast boot" is targetted to bare metal boots
