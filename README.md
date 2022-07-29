@@ -40,7 +40,7 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 ## Setting up your environment
 
-To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation at https://chipyard.readthedocs.io/
+To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation at https://chipyard.readthedocs.i
 
 A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
 
@@ -117,31 +117,36 @@ Assuming the Vivado environment scripts have been sourced within your current sh
 
 Default CEP builds can be customized by following the instructions in the Chipyard documentation.
 
-The Arty100T will configure from FLASH or JTAG based on the state of the MODE jumper.  Additional information on the Arty board can be found [here](https://digilent.com/shop/arty-a7-artix-7-fpga-development-board/).
+The FPGA boards will configure from FLASH or JTAG based on the state of the MODE jumper.  Additional information cane be found:
+* Arty100T - [here](https://digilent.com/shop/arty-a7-artix-7-fpga-development-board/).
+* VC707    - [here](https://www.xilinx.com/products/boards-and-kits/ek-v7-vc707-g.html/).
+* VCU118   - [here](https://www.xilinx.com/products/boards-and-kits/vcu118.html/).
 
 
 ```
 cd <REPO_ROOT>/fpga
-make   # cep_arty100t is the default SUB_PROJECT
+make SUB_PROJECT=<cep_arty100t | cep_vc707 | cep_vcu118>
 
-./program_arty100t_flash.sh - Create the MCS file & program the Arty100T FLASH.  Power needs to be cycled or the *PROG* button needs to be asserted to reboot with the new configuration.
+./program_<arty100t | vc707 | vcu118>_flash.sh - Create the MCS file & program the development board's flash.  Power needs to be cycled or the *PROG* button needs to be asserted to reboot with the new configuration.
 
 OR
 
-./program_arty100t_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
+./program_<arty100t | vc707 | vcu118>_jtag.sh - Program the FPGA via JTAG.  System will automatically reset or you can use the *RESET* button.
 ```
 
 ### Building Bare Metal software for the CEP FPGA
 
-In additional to connecting USB to the Arty100T's microUSB port, a Digilent SD or microSD PMOD board should be connected to connector JA.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+The Arty100T shares a single microUSB connector for JTAG and UART, while the VC707 and VCU118 have seperate ports for each.
+
+For the Arty100T, connecte a Digilent SD or microSD PMOD board should be connected to connector JA.  For the VCU118, connect the same to the PMOD connector on the right side of the board.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
 
 Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
 
-It should be noted that the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.  Both HW and SW flow control should be disabled.  
+As noted, for the Arty100T the microUSB port uses an FTDI chip to provide both JTAG and UART functionality.  Your system may differ, but typically the UART shows up as `/dev/ttyUSB0` or `/dev/ttyUSB1`.  UART settings are 115200baud, 8N1 and should be visible to any terminal program.  Both HW and SW flow control should be disabled.  
 
 It is worth noting that *minicom* enables HW flow control by default.
 
-Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding *BTN0* on the Arty100T when the chip is released from reset.
+Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding *BTN0* on the Arty100T or *SWN* on the VC707/VCU118 when the chip is released from reset.
 
 An example UART output for the baremetal gpiotest follows:
 ```
@@ -203,9 +208,8 @@ make DISK=/dev/sdd1 sd_write        				 <-- copies gpiotest.img to partition /d
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
 
-
 ### Booting Linux
-The CEP Arty100T build has been verified to support a firemarshall-based linux build by following the default workload instructions [here](https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs).
+The CEP Arty100T/VC707/VCU118 builds has been verified to support a firemarshall-based linux build by following the default workload instructions [here](https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs).
 
 A couple of notes:
 - The SD card must be partitioned as instructed
