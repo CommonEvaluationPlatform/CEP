@@ -129,9 +129,6 @@ class RocketVCU118CEPConfig extends Config(
   new chipyard.RocketNoL2Config)
 // DOC include end: AbstractVCU118 and Rocket
 
-
-
-
 class BoomVCU118Config extends Config(
   new WithFPGAFrequency(50) ++
   new WithVCU118Tweaks ++

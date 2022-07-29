@@ -25,19 +25,6 @@ endif
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
 
-ifeq ($(SUB_PROJECT),vcu118)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= VCU118FPGATestHarness
-	VLOG_MODEL        ?= VCU118FPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.vcu118
-	CONFIG            ?= RocketVCU118Config
-	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118
-	GENERATOR_PACKAGE ?= chipyard
-	TOP               ?= ChipTop
-	BOARD             ?= vcu118
-	FPGA_BRAND        ?= xilinx
-endif
-
 ifeq ($(SUB_PROJECT),cep_vcu118)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VCU118FPGATestHarness
@@ -49,64 +36,9 @@ ifeq ($(SUB_PROJECT),cep_vcu118)
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),arty)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty
-	CONFIG            ?= TinyRocketArtyConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty
-	GENERATOR_PACKAGE ?= chipyard
-	TOP               ?= ChipTop
-	BOARD             ?= arty
-	FPGA_FAMILY       ?= artix7
-	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),artysim)
-	# TODO: Fix with Arty
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty
-	CONFIG            ?= TinyRocketArtySimConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty
-	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= ArtyTestDriver
-	TOP               ?= ChipTop
-	BOARD             ?= arty
-	FPGA_FAMILY       ?= artix7
-	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),arty100t)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= Arty100TFPGATestHarness
-	VLOG_MODEL        ?= Arty100TFPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
-	CONFIG            ?= RocketArty100TConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
-	GENERATOR_PACKAGE ?= chipyard
-	TOP               ?= ChipTop
-	BOARD             ?= arty_a7_100
-	FPGA_BRAND        ?= xilinx
-endif
-
-ifeq ($(SUB_PROJECT),arty100tsim)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= Arty100TFPGASimTestHarness
-	VLOG_MODEL        ?= Arty100TFPGASimTestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
-	CONFIG            ?= RocketArty100TSimConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
-	GENERATOR_PACKAGE ?= chipyard
-	TB                ?= Arty100TTestDriver
-	TOP               ?= ChipTop
-	BOARD             ?= arty_a7_100
-	FPGA_FAMILY       ?= artix7
-	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT		  := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+	BOOTROM_TARGETS	  :=
 endif
 
 # Bootrom targets are "cleared" for CEP FPGA targets, since
