@@ -25,6 +25,8 @@ endif
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
 
+# Bootrom targets are "cleared" for CEP FPGA targets, since
+# build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vcu118)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VCU118FPGATestHarness
