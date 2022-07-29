@@ -9,11 +9,6 @@
 #
 #************************************************************************
 
-# RISCV *must* be defined (while BFM mode does not use RISCV executables, the SW process builds EVERYTHING, including RISCV)
-ifndef RISCV
-$(error RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
-endif
-
 REPOROOT     	:= $(shell git rev-parse --show-toplevel)
 BASEDIR 		:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 PACKAGE     	= BR2_PACKAGE_$(shell echo $(MAINPROGRAM) | tr '[:lower:]' '[:upper:]')

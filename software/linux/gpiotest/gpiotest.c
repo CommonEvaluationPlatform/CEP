@@ -21,16 +21,20 @@
 #define   GPIO_WIDTH        4
 #define   DEBOUNCE_CNT      10
 #define   SUPPORTED_BOARDS  3
+#define   MAX_LINE_LENGTH   80
 
 // Defines the supported board targets
-string board_names[SUPPORTED_BOARDS] = {"arty100t", "vc707", "vcu118"};
+const char* board_names[SUPPORTED_BOARDS] = {"arty100t", "vc707", "vcu118"};
 
-const int arty100t_input_line_offets    = { 8,  9, 10, 11};
-const int arty100t_output_line_offsets  = {16, 17, 18, 19};
-const int vc707_input_line_offets       = { 8,  9, 10, 11};
-const int vc707_output_line_offsets     = {16, 17, 18, 19};
-const int vcu118_input_line_offets      = { 8,  9, 10, 11};
-const int vcu118_output_line_offsets    = {16, 17, 18, 19};
+const int input_line_offets[SUPPORTED_BOARDS][GPIO_WIDTH] =
+    { { 8,  9, 10, 11},
+      { 8,  9, 10, 11},
+      { 4,  5,  6,  7}};
+
+const int output_line_offets[SUPPORTED_BOARDS][GPIO_WIDTH]  = 
+    { {16, 17, 18, 19},
+      {13, 14, 15, 16},
+      {10, 11, 12, 13}};
 
 // Compare arrays function
 int compare_arrays(int left[], int right[], int num_elements) {
@@ -49,6 +53,7 @@ int get_switches_debounced(struct gpiod_line_bulk *bulk, int values_old[GPIO_WID
   int values_new[GPIO_WIDTH]  = {0, 0, 0, 0};
   int debounce_counter        = 0;
   int i;
+  int j;
   int ret;
 
   while (debounce_counter < DEBOUNCE_CNT) {
@@ -81,29 +86,31 @@ int main(int argc, char **argv)
   struct gpiod_line_request_config input_config[GPIO_WIDTH];
   struct gpiod_line_bulk output_lines;
   struct gpiod_line_request_config output_config[GPIO_WIDTH];
-  int values_old[GPIO_WIDTH] = {2, 2, 2, 2};	// guarentees at least one printout
+  int values_old[GPIO_WIDTH] = {2, 2, 2, 2};  // guarentees at least one printout
   int values_new[GPIO_WIDTH] = {0, 0, 0, 0};
   int i;
-  int j;
-  int board_match = 0;
+  int board_match = -1;
   int ret;
+  char *soc_compatible;
 
   // Retrieve the board variant we are running on...
-  FILE *soc_compatible = fopen("/sys/firmware/devicetree/base/soc/compatible", "r");
-  fgets(line, MAX_LINE_LENGTH, soc_compatible);
-  fclose(soc_compatible);
+  FILE *compatible_file = fopen("/sys/firmware/devicetree/base/soc/compatible", "r");
+  fgets(soc_compatible, MAX_LINE_LENGTH, compatible_file);
+  fclose(compatible_file);
 
   // Look for a board type match
   for (i = 0; i < SUPPORTED_BOARDS; i++) {
-
+    if (strstr(soc_compatible, board_names[i])) {
+      board_match = i;
+      break;
+    }
   }
 
-  unsigned int input_line_offsets[GPIO_WIDTH] = {8, 9, 10, 11};       // Offsets to switches
-  unsigned int output_line_offsets[GPIO_WIDTH] = {16, 17, 18, 19};    // Offsets to LEDs
-
-
-
-
+  // No match was found
+  if (board_match == -1) {
+    perror("Unsupported board\n");
+    goto end;
+  }
 
   printf("\n");
   printf("\n");
@@ -120,8 +127,8 @@ int main(int argc, char **argv)
   }
 
   // Get the gpio lines
-  ret  = gpiod_chip_get_lines(chip, input_line_offsets , 4, &input_lines);
-  ret |= gpiod_chip_get_lines(chip, output_line_offsets, 4, &output_lines);
+  ret  = gpiod_chip_get_lines(chip, input_line_offsets[board_match]  , GPIO_WIDTH, &input_lines);
+  ret |= gpiod_chip_get_lines(chip, output_line_offsets[board_match] , GPIO_WIDTH, &output_lines);
   if (ret) {
     perror("Get line failed\n");
     goto release_lines;
