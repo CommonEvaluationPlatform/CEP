@@ -26,12 +26,12 @@
 // Defines the supported board targets
 const char* board_names[SUPPORTED_BOARDS] = {"arty100t", "vc707", "vcu118"};
 
-const int input_line_offets[SUPPORTED_BOARDS][GPIO_WIDTH] =
+const int input_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH] =
     { { 8,  9, 10, 11},
       { 8,  9, 10, 11},
       { 4,  5,  6,  7}};
 
-const int output_line_offets[SUPPORTED_BOARDS][GPIO_WIDTH]  = 
+const int output_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH]  = 
     { {16, 17, 18, 19},
       {13, 14, 15, 16},
       {10, 11, 12, 13}};
@@ -89,6 +89,7 @@ int main(int argc, char **argv)
   int values_old[GPIO_WIDTH] = {2, 2, 2, 2};  // guarentees at least one printout
   int values_new[GPIO_WIDTH] = {0, 0, 0, 0};
   int i;
+  int j;
   int board_match = -1;
   int ret;
   char *soc_compatible;

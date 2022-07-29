@@ -5,7 +5,7 @@
 #// File          : program_vcu118_flash.tcl
 #// Project       : Common Evaluation Platform (CEP)
 #// Description   : TCL script for automatic programming of VCU118 CEP build
-#// Notes         : This TCL script assumes the VCU118 CEP build target
+#// Notes         : T
 #//--------------------------------------------------------------------------------------
 
 # Script to program the memory configuration device

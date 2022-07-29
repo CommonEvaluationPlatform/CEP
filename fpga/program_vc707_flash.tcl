@@ -4,8 +4,8 @@
 #//
 #// File          : program_vc707_flash.tcl
 #// Project       : Common Evaluation Platform (CEP)
-#// Description   : TCL script for automatic programming of VC707 CEP build
-#// Notes         : This TCL script assumes the VC707 CEP build target
+#// Description   : TCL script for automatic programming of VC707 CEP build via FLASH
+#// Notes         : 
 #//--------------------------------------------------------------------------------------
 
 # Script to program the memory configuration device
