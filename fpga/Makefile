@@ -97,6 +97,10 @@ ifeq ($(SUB_PROJECT),cep_vc707)
 	BOOTROM_TARGETS	  :=
 endif
 
+ifeq ($(SBT_PROJECT),)
+$(error Invalid SUB_PROJECT)
+endif
+
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example

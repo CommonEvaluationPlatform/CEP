@@ -13,10 +13,25 @@
 * Verified firemarshal generated linux build boots on the CEP Arty100T.  Instructions added to [README.md](./README.md)
 * Added `helloworld` and `gpiotest` to ./software/linux.  Makefiles allow application's install to firemarshal's buildroot
 * Added VC707 FPGA target thanks to the folks at NECSTLab (https://github.com/necst)
+* Added VCU118 FPGA target
 
 ### Changed
 * Unified console print routines across bootroms, cosim baremetal, and standalone bare metal code.  Bare metal prints are now handled using stdio functions with
   putchar, getchar, and putstr being mapped to the console versions
+
+### Known issues
+* cep_cosim
+  * Cadence XCellium on RHEL7 *occasionally* fails some of the bareMetal tests.  Root cause has not been determined, but it is recommended that the test be re-run.
+  * Known est failures: 
+    * ./testSuites/bfmTests/macroMix - GPS tests fail.
+    * Virtual mode ISA tests - Failure on Questsim/Ubuntu, passes on XCellium/RHEL7
+    * ./testSuites/isaTests/rv64mi-p-csr
+    * ./testSuites/isaTests/rv64si-p-csr
+    * ./testSuites/bfmTests/srotErrorTest
+    * ./testSuites/bareMetalTests/plicPrioIntr
+    * ./testSuites/bareMetalTests/extIntr
+    * ./testSuites/bareMetalTests/lsrcOps
+    * ./testSuites/isaTests/dtmTest
 
 ## [v4.10] - 2022-07-01
 

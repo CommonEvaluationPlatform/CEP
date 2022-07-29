@@ -12,8 +12,8 @@ object VCU118GPIOs {
         "sw3"   -> ("D21",  "LVCMOS12", false), // Bit3  - 4-Pole DIP Bit 3
         "swN"   -> ("BB24", "LVCMOS18", false), // Bit4  - GPIO Button N
         "swE"   -> ("BE23", "LVCMOS18", false), // Bit5  - GPIO Button E
-        "swS"   -> ("BF22", "LVCMOS18", false), // Bit6  - GPIO Button S
-        "swW"   -> ("BE22", "LVCMOS18", false), // Bit7  - GPIO Button W
+        "swW"   -> ("BF22", "LVCMOS18", false), // Bit6  - GPIO Button W
+        "swS"   -> ("BE22", "LVCMOS18", false), // Bit7  - GPIO Button S
         "swC"   -> ("BD23", "LVCMOS18", false), // Bit8  - GPIO Button C
         "led0"  -> ("AT32", "LVCMOS12", false), // Bit9  - GPIO LED 0
         "led1"  -> ("AV34", "LVCMOS12", false), // Bit10 - GPIO LED 1

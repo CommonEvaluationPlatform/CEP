@@ -45,8 +45,11 @@ static volatile uint32_t * const gpio = (void *)(GPIO_CTRL_ADDR);
 static volatile uint64_t * const cepregs = (void *)(CEPREGS_ADDR);
 static volatile uint32_t * const uart = (void *)(UART_CTRL_ADDR);
 
-// Inherited from arty100t_gpio.h used in bare metal code
-#ifdef VC707
+// Button used to allow for a "fast boot"
+#ifdef VCU118
+  // GPIO Button N on VCU118
+  #define BTN0_MASK       (0x00000010)
+#elif VC707
   // GPIO Button N on VC707
   #define BTN0_MASK       (0x00000100)
 #else
@@ -222,12 +225,14 @@ static int sd_copy(void)
   // overriden in simulation
   printf("LOADING %ldkB PAYLOAD\n", (i * SECTOR_SIZE_B)/1024);
 
-  // Begin a multi-cycle read.  Speed up interface by resetting divider
-  REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 25000000UL);
+  // Begin a multi-cycle read.  Divider taked from default VCU118 Bootroml
+  REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
+  
   if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;
   }
+
   do {
     uint16_t crc, crc_exp;
     long n;

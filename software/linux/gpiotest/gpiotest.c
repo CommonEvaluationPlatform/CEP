@@ -6,7 +6,8 @@
 // Program:        Common Evaluation Platform
 // Description:    Linux program that uses gpiod to read the switches
 //                 and set the LEDs accordingly
-// Notes:          
+// Notes:          The board type will be determined by examining the
+//                 appropriate value from the devicetree
 //
 //************************************************************************
 
@@ -17,12 +18,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#define   GPIO_WIDTH    4
-#define   DEBOUNCE_CNT  10
+#define   GPIO_WIDTH        4
+#define   DEBOUNCE_CNT      10
+#define   SUPPORTED_BOARDS  3
 
-// Defines the support board targets
-enum board {vc707, arty100t};
-typedef enum board	Board;
+// Defines the supported board targets
+string board_names[SUPPORTED_BOARDS] = {"arty100t", "vc707", "vcu118"};
+
+const int arty100t_input_line_offets    = { 8,  9, 10, 11};
+const int arty100t_output_line_offsets  = {16, 17, 18, 19};
+const int vc707_input_line_offets       = { 8,  9, 10, 11};
+const int vc707_output_line_offsets     = {16, 17, 18, 19};
+const int vcu118_input_line_offets      = { 8,  9, 10, 11};
+const int vcu118_output_line_offsets    = {16, 17, 18, 19};
 
 // Compare arrays function
 int compare_arrays(int left[], int right[], int num_elements) {
@@ -70,16 +78,32 @@ int main(int argc, char **argv)
   char *chipname = "gpiochip0";
   struct gpiod_chip *chip;
   struct gpiod_line_bulk input_lines;
-  unsigned int input_line_offsets[GPIO_WIDTH] = {8, 9, 10, 11};       // Offsets to switches
   struct gpiod_line_request_config input_config[GPIO_WIDTH];
   struct gpiod_line_bulk output_lines;
-  unsigned int output_line_offsets[GPIO_WIDTH] = {16, 17, 18, 19};    // Offsets to LEDs
   struct gpiod_line_request_config output_config[GPIO_WIDTH];
   int values_old[GPIO_WIDTH] = {2, 2, 2, 2};	// guarentees at least one printout
   int values_new[GPIO_WIDTH] = {0, 0, 0, 0};
   int i;
   int j;
+  int board_match = 0;
   int ret;
+
+  // Retrieve the board variant we are running on...
+  FILE *soc_compatible = fopen("/sys/firmware/devicetree/base/soc/compatible", "r");
+  fgets(line, MAX_LINE_LENGTH, soc_compatible);
+  fclose(soc_compatible);
+
+  // Look for a board type match
+  for (i = 0; i < SUPPORTED_BOARDS; i++) {
+
+  }
+
+  unsigned int input_line_offsets[GPIO_WIDTH] = {8, 9, 10, 11};       // Offsets to switches
+  unsigned int output_line_offsets[GPIO_WIDTH] = {16, 17, 18, 19};    // Offsets to LEDs
+
+
+
+
 
   printf("\n");
   printf("\n");

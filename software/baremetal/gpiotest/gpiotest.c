@@ -70,7 +70,11 @@ int main() {
   uint32_t gpio_new  = 0;
 
   // Enable the switch inputs
+#ifdef VCU118_TARGET
+  reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_EN), (uint32_t)(SWN_MASK | SWE_MASK | SWS_MASK | SWW_MASK));
+#else
   reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_INPUT_EN), (uint32_t)(SW0_MASK | SW1_MASK | SW2_MASK | SW3_MASK));
+#endif
 
   // Enable the LED outputs
   reg_write32((uintptr_t)(GPIO_CTRL_ADDR + GPIO_OUTPUT_EN), (uint32_t)(LED0_MASK | LED1_MASK | LED2_MASK | LED3_MASK));
@@ -79,7 +83,7 @@ int main() {
   while (1) {
 
     // Get the switches state
-    gpio_new = get_gpio_debounced(SW0_MASK | SW1_MASK | SW2_MASK | SW3_MASK);
+    gpio_new = get_gpio_debounced(SWN_MASK | SWE_MASK | SWS_MASK | SWW_MASK);
 
     // A change of switch state has been detected... post debounce
     if (gpio_new != gpio_old) {
