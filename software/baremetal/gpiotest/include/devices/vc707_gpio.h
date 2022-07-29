@@ -35,7 +35,8 @@
 #define LED6_MASK       (0x00080000)
 #define LED7_MASK       (0x00100000)
 
-#define SW2LED_SHIFT	13
+#define SWtoLED_SHIFT	13
+#define SWtoLED_MASK	(0x000000FF)
 
-#endif /* _ARTY100T_GPIO_H */
+#endif /* _VC707_GPIO_H */
 #endif /* VC707_TARGET */

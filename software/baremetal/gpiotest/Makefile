@@ -30,6 +30,8 @@ ifeq ($(BOARD),arty_a7_100)
 CFLAGS	+= -DARTY100T_TARGET
 else ifeq ($(BOARD),vc707)
 CFLAGS	+= -DVC707_TARGET
+else ifeq ($(BOARD),vcu118)
+CFLAGS	+= -DVCU118_TARGET
 else
 $(error $(BOARD) is not a supported BOARD target...)
 endif
@@ -37,7 +39,9 @@ OBJS 		:= crt.o syscalls.o kprintf.o
 LDSCRIPT 	:= link.ld
 HDRS 		:= $(wildcard *.h) $(wildcard $(INCDIR)/*.h)
 
+$(info )
 $(info Build for $(BOARD)...)
+$(info )
 
 %.o: %.c $(HDRS)
 	$(CC) $(CFLAGS) -o $@ -c $<

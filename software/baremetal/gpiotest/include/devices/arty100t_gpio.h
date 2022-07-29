@@ -34,7 +34,8 @@
 #define LED2_MASK       (0x00040000)
 #define LED3_MASK       (0x00080000)
 
-#define SW2LED_SHIFT	8
+#define SWtoLED_SHIFT	8
+#define SWtoLED_MASK	(0x00000F00)
 
 #endif /* _ARTY100T_GPIO_H */
 #endif /* ARTY100T_TARGET */
