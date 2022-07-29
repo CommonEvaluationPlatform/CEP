@@ -8,7 +8,7 @@
 #// Notes         : This TCL script assumes the arty100t CEP build target
 #//--------------------------------------------------------------------------------------
 
-# Script to program the Arty A7 memory configuration device
+# Script to program the configuration device
 open_hw_manager
 connect_hw_server
 open_hw_target

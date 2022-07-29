@@ -12,13 +12,22 @@
 
 #include <stdio.h>
 
+#define MAX_LINE_LENGTH 80
+
 int main() {
+
+  char line[MAX_LINE_LENGTH] = {0};
 
   puts("");
   puts("");
   puts("--------------------------");
   puts(" Linux RISC-V Hello World ");
   puts("--------------------------");
+  
+  FILE *soc_compatible = fopen("/sys/firmware/devicetree/base/soc/compatible", "r");
+  fgets(line, MAX_LINE_LENGTH, soc_compatible);
+  fclose(soc_compatible);
+  puts(line);
   puts("");
   puts("");
   

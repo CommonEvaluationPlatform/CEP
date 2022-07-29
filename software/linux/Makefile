@@ -14,7 +14,6 @@ ifndef RISCV
 $(error RISCV is unset.  You must set RISCV yourself, or through the Chipyard auto-generated env file)
 endif
 
-BOARD			?= arty_a7_100
 REPOROOT     	:= $(shell git rev-parse --show-toplevel)
 BASEDIR 		:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 PACKAGE     	= BR2_PACKAGE_$(shell echo $(MAINPROGRAM) | tr '[:lower:]' '[:upper:]')
@@ -31,10 +30,6 @@ ifeq (, $(wildcard ${MAINPROGRAM}))
 $(error Directory ${MAINPROGRAM} not found)
 endif
 
-ifneq ($(BOARD),$(filter $(BOARD),arty_a7_100 vc707))
-$(error $(BOARD) is not a supported BOARD target...)
-endif
-
 info:
 	@echo "Usage: make install - Installs application in firemarshal's buildroot"
 
@@ -48,7 +43,6 @@ ifeq (,$(shell grep "package/${MAINPROGRAM}/Config.in" ${BR_CONFIG_IN}))
 endif
 	rm -rf $(INSTALL_DIR)
 	mkdir $(INSTALL_DIR)
-	-cp CMakeLists.$(BOARD).txt CMakeLists.txt
 	-cp $(MAINPROGRAM)/Config.in $(MAINPROGRAM)/$(MAINPROGRAM).mk $(INSTALL_DIR)
 
 .PHONY: clean
@@ -60,4 +54,3 @@ endif
 ifneq (,$(shell grep "package/${MAINPROGRAM}/Config.in" ${BR_CONFIG_IN}))
 	sed -i '/package\/${MAINPROGRAM}\/Config.in/d' $(BR_CONFIG_IN)
 endif
-	rm CMakeLists.txt

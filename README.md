@@ -87,21 +87,33 @@ Providing a complete directory structure is impractical, but some items are high
 ```
 
 ### Building the CEP FPGA
-In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP.  
+In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.
 
-For the Arty-A7 100T FPGA board, the `cep_arty100t` *SUB_PROJECT* has been defined in `<CEP_ROOT>/fpga/Makefile`.
+These subprojects define the system configuration and are as follows.
 
-With v4.0, the following FPGA configurations have been defined with the CEP-unique additions listed:
-
-`cep_arty100t`
+`cep_arty100t` - Arty100T Development Board 
+- 50 MHz Core Frequency
 - CEP Registers
 - 1 x AES Core
 - Surrogate Root of Trust (SRoT)
 
-`cep_min_arty100t`
+`cep_min_arty100t` - Arty100T Development Board
+- 50 MHz Core Frequency
 - CEP Registers
 
-Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the micro-USB port on the Arty100T.
+`cep_vc707` - VC707 Development Board
+- 100 MHz Core Frequency
+- CEP Registers
+- 1 x AES Core
+- Surrogate Root of Trust (SRoT)
+
+`cep_vcu118` - VCU118 Development Board
+- 100 MHz Core Frequency
+- CEP Registers
+- 1 x AES Core
+- Surrogate Root of Trust (SRoT)
+
+Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the JTAG USB-port of you preffered FPGA board.
 
 Default CEP builds can be customized by following the instructions in the Chipyard documentation.
 

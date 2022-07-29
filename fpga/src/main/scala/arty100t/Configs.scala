@@ -133,7 +133,7 @@ class RocketArty100TCEPConfig extends Config(
   new chipyard.config.WithSROTFPGA ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,rocketchip-cep-arty100t", Nil) ++
+  new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++
@@ -149,7 +149,7 @@ class RocketArty100TMinCEPConfig extends Config(
   new chipyard.config.WithCEPRegisters ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+  new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
   // with reduced cache size, closes timing at 50 MHz
   new WithFPGAFrequency(50) ++

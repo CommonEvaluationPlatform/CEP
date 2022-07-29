@@ -65,7 +65,6 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
-// DOC include start: AbstractVC707 and Rocket
 class WithVC707Tweaks extends Config(
   // harness binders
     new WithUART ++
@@ -85,9 +84,8 @@ class WithVC707Tweaks extends Config(
     new WithFPGAFrequency(50) // default 100MHz freq
 )
 
-// DOC include start: AbstractArty100T and Rocket
 class WithVC707CEPTweaks extends Config(
-  // harness binders
+  // harness bindersn
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++
@@ -118,12 +116,12 @@ class RocketVC707CEPConfig extends Config(
   new chipyard.config.WithSROTFPGA ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,rocketchip-cep-vc707", Nil) ++
+  new WithDTS("mit-ll,cep-vc707", Nil) ++
 
   // with reduced cache size, closes timing at 50 MHz
-  new WithFPGAFrequency(50) ++
+  new WithFPGAFrequency(100) ++
 
-  // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
+  // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithVC707CEPTweaks ++
   new chipyard.RocketNoL2Config
 )

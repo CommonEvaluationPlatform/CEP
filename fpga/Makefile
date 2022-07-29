@@ -38,13 +38,13 @@ ifeq ($(SUB_PROJECT),vcu118)
 	FPGA_BRAND        ?= xilinx
 endif
 
-ifeq ($(SUB_PROJECT),bringup)
+ifeq ($(SUB_PROJECT),cep_vcu118)
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= BringupVCU118FPGATestHarness
-	VLOG_MODEL        ?= BringupVCU118FPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.vcu118.bringup
-	CONFIG            ?= RocketBringupConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118.bringup
+	MODEL             ?= VCU118FPGATestHarness
+	VLOG_MODEL        ?= VCU118FPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.vcu118
+	CONFIG            ?= RocketVCU118CEPConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118
 	GENERATOR_PACKAGE ?= chipyard
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118

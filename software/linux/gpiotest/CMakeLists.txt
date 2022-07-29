@@ -10,7 +10,6 @@
 
 project(gpiotest C)
 add_executable(gpiotest gpiotest.c)
-set(CMAKE_C_FLAGS_RELEASE "-DVC707_TARGET")
 
 target_include_directories(gpiotest PRIVATE)
 
