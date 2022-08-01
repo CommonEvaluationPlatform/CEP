@@ -93,22 +93,21 @@ These subprojects define the system configuration and are as follows.
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
+- 98% LUT Utilization
 - CEP Registers
 - 1 x AES Core
 - Surrogate Root of Trust (SRoT)
 
-`cep_min_arty100t` - Arty100T Development Board
-- 50 MHz Core Frequency
-- CEP Registers
-
 `cep_vc707` - VC707 Development Board
 - 100 MHz Core Frequency
+- 11% LUT Utilization
 - CEP Registers
 - 1 x AES Core
 - Surrogate Root of Trust (SRoT)
 
 `cep_vcu118` - VCU118 Development Board
 - 100 MHz Core Frequency
+- 5% LUT Utilization
 - CEP Registers
 - 1 x AES Core
 - Surrogate Root of Trust (SRoT)
@@ -194,7 +193,7 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
 make ENABLE_KPRINTF=1 riscv_wrapper        			<-- builds riscv_wrapper.img with console printf enabled
-make DISK=/dev/sdd1 riscv_wrapper_sd_write          <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your device name)
+make DISK=/dev/sdd1 riscv_wrapper_sd_write      <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 In the above example, the bare metal regTest is build with the console printf function enabled.  It is advised that you enable the addition of a carriage return in your chosen terminal program.
@@ -203,7 +202,7 @@ The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
 
 ```
 cd <CEP_ROOT>/software/baremetal/gpiotest
-make DISK=/dev/sdd1 sd_write        				 <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
+make DISK=/dev/sdd1 sd_write        				    <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
@@ -214,6 +213,7 @@ The CEP Arty100T/VC707/VCU118 builds has been verified to support a firemarshall
 A couple of notes:
 - The SD card must be partitioned as instructed
 - Due to a bug in libguestfs on Ubuntu, the firemarshal build *may* fail.  Ensure your current shell has active sudo permissions before running the build.  I used a quick `sudo su`, exited the root shell, and then ran the build.
+- Customization of the linux build will affect the resulting image size `<CEP_ROOT>/software/firemarshal/images/br-base-bin-nodisk-flat`.  Ensure that `PAYLOAD_SIZE_B` in `<CEP_ROOT>/sims/cep_cosim/bootrom/sd.c` is sized to accomodated the image.
 
 ### Linux Applications
 You can install an example application in firemarshal's buildroot prior to building linux by running `make MAINPROGRAM=<prog name> install` from <CEP_ROOT>/software/linux.  Applications include `helloworld` and `gpiotest`. 

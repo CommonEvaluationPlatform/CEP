@@ -11,6 +11,7 @@
 //                - Updated ACMD41 processing to read all five bytes of the R3 response and check
 //                  the busy bit in the response per specification Figure 4-4 (Response bit 39)
 //                - Removed 34-byte BBL offset in sd_copy (now set to 0)
+//                - Increased default payload size to 35MB to accomodate larger Linux images
 //--------------------------------------------------------------------------------------
 
 // See LICENSE.Sifive for license details.
@@ -18,8 +19,8 @@
 #include <stdint.h>
 #include <platform.h>
 
-// Total payload in B
-#define PAYLOAD_SIZE_B (30 << 20) // default: 30MiB
+// Payload size in bytes
+#define PAYLOAD_SIZE_B (35 << 20) // 35 MB
 
 // A sector is 512 bytes, so (1 << 11) * 512B = 1 MiB
 #define SECTOR_SIZE_B 512
@@ -262,7 +263,7 @@ static int sd_copy(void)
     if (STATUS_UPDATE(i)) {
       putchar('.');
       if (STATUS_NEWLINE(i)) {
-        printf("\n");
+        printf("%ldkB\n", (i * SECTOR_SIZE_B)/1024);
       }
     }
 

@@ -92,7 +92,7 @@ int main(int argc, char **argv)
   int j;
   int board_match = -1;
   int ret;
-  char *soc_compatible;
+  char soc_compatible[MAX_LINE_LENGTH];
 
   // Retrieve the board variant we are running on...
   FILE *compatible_file = fopen("/sys/firmware/devicetree/base/soc/compatible", "r");

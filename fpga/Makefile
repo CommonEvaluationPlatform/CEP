@@ -63,24 +63,6 @@ endif
 
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
-ifeq ($(SUB_PROJECT),cep_min_arty100t)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= Arty100TFPGATestHarness
-	VLOG_MODEL        ?= Arty100TFPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.arty100t
-	CONFIG            ?= RocketArty100TMinCEPConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
-	GENERATOR_PACKAGE ?= chipyard
-	TOP               ?= ChipTop
-	BOARD             ?= arty_a7_100
-	FPGA_BRAND        ?= xilinx
-	SORT_SCRIPT		  := $(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         := $(base_dir)/cep_sort.f
-	BOOTROM_TARGETS	  :=
-endif
-
-# Bootrom targets are "cleared" for CEP FPGA targets, since
-# build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vc707)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VC707FPGATestHarness
