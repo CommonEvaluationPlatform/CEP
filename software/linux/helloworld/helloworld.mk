@@ -8,15 +8,12 @@
 # Notes:          
 #************************************************************************
 
-MAINPROGRAM					?= helloworld
-PACKAGE    					= $(shell echo $(MAINPROGRAM) | tr '[:lower:]' '[:upper:]')
-
-$(PACKAGE)_VERSION 			= 1.0.0
-$(PACKAGE)_LICENSE 			= BSD-2-Clause
-$(PACKAGE)_DEPENDENCIES 	= 
-$(PACKAGE)_SITE 			= $(TOPDIR)/../../../../../../linux/$(MAINPROGRAM)
-$(PACKAGE)_SITE_METHOD 		= local
-$(PACKAGE)_INSTALL_STAGING 	= NO
-$(PACKAGE)_INSTALL_TARGET 	= YES
+HELLOWORLD_VERSION 			= 1.0.0
+HELLOWORLD_LICENSE 			= BSD-2-Clause
+HELLOWORLD_DEPENDENCIES 	= 
+HELLOWORLD_SITE 			= $(TOPDIR)/../../../../../../linux/helloworld
+HELLOWORLD_SITE_METHOD 		= local
+HELLOWORLD_INSTALL_STAGING 	= NO
+HELLOWORLD_INSTALL_TARGET 	= YES
 
 $(eval $(cmake-package))

@@ -11,6 +11,5 @@
 config BR2_PACKAGE_GPIOTEST
 	bool "gpiotest"
 	depends on BR2_PACKAGE_LIBGPIOD
-	depends on BR2_PACKAGE_NCURSES
 	help
 	  A linux port of the baremetal gpiotest program

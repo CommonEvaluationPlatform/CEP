@@ -8,15 +8,12 @@
 # Notes:          
 #************************************************************************
 
-MAINPROGRAM					?= gpiotest
-PACKAGE    					= $(shell echo $(MAINPROGRAM) | tr '[:lower:]' '[:upper:]')
-
-$(PACKAGE)_VERSION 			= 1.0.0
-$(PACKAGE)_LICENSE 			= BSD-2-Clause
-$(PACKAGE)_DEPENDENCIES 	= libgpiod ncurses
-$(PACKAGE)_SITE 			= $(TOPDIR)/../../../../../../linux/$(MAINPROGRAM)
-$(PACKAGE)_SITE_METHOD 		= local
-$(PACKAGE)_INSTALL_STAGING 	= NO
-$(PACKAGE)_INSTALL_TARGET 	= YES
+GPIOTEST_VERSION 			= 1.0.0
+GPIOTEST_LICENSE 			= BSD-2-Clause
+GPIOTEST_DEPENDENCIES 		= libgpiod
+GPIOTEST_SITE 				= $(TOPDIR)/../../../../../../linux/gpiotest
+GPIOTEST_SITE_METHOD 		= local
+GPIOTEST_INSTALL_STAGING 	= NO
+GPIOTEST_INSTALL_TARGET 	= YES
 
 $(eval $(cmake-package))

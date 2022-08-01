@@ -26,12 +26,12 @@
 // Defines the supported board targets
 const char* board_names[SUPPORTED_BOARDS] = {"arty100t", "vc707", "vcu118"};
 
-const int input_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH] =
+unsigned int input_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH] =
     { { 8,  9, 10, 11},
       { 8,  9, 10, 11},
       { 4,  5,  6,  7}};
 
-const int output_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH]  = 
+unsigned int output_line_offsets[SUPPORTED_BOARDS][GPIO_WIDTH]  = 
     { {16, 17, 18, 19},
       {13, 14, 15, 16},
       {10, 11, 12, 13}};
@@ -118,6 +118,7 @@ int main(int argc, char **argv)
   printf("--------------------------\n");
   printf("  Linux RISC-V GPIO Test  \n");
   printf("--------------------------\n");
+  printf("    %s detected\n", board_names[board_match]);
   printf("\n");
 
   // Enable access to the GPIO Device

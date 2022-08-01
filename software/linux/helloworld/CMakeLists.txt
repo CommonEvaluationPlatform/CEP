@@ -7,8 +7,10 @@
 # Description:    CMake file
 # Notes:          
 #************************************************************************
-
+cmake_minimum_required(VERSION 3.8)
 project(helloworld C)
+set(CMAKE_C_STANDARD 11)
+
 add_executable(helloworld helloworld.c)
 
 target_include_directories(helloworld PRIVATE)
