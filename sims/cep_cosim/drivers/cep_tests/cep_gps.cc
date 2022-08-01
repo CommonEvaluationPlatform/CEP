@@ -44,10 +44,6 @@ static uint64_t X1_period      = X1A_period * X1A_loops;
 static uint64_t X2_period      = X1_period + 37;
 static uint64_t X_b_hold       = ((X1A_period*X1A_loops) - (X1B_period*X1B_loops));
 
-
-//static uint64_t X2A_last_hold = ((CODE_LENGTH % X2_period) % X2A_period);
-//static uint64_t X2B_last_hold = ((CODE_LENGTH % X2_period) % X2B_period);
-
 static uint64_t X2A_last_hold = ((Code_length % X2_period) % X2A_period);
 static uint64_t X2B_last_hold = ((Code_length % X2_period) % X2B_period);
 
@@ -120,7 +116,6 @@ void cep_gps::SetPcodeXnInit (uint16_t x1a_initial, uint16_t x1b_initial, uint16
 
   XN_cnt_speed = 163;
   Z_cnt_speed  = 174763;
-
 
   X1A_loops      = ((int) ((X_a_full_count+XN_cnt_speed-1)/ XN_cnt_speed));
   X1B_loops      = ((int) ((X_b_full_count+XN_cnt_speed-1)/ XN_cnt_speed));
@@ -248,10 +243,8 @@ uint8_t cep_gps::x1_lookup(uint8_t * x_buf, uint64_t index) {
     index = index % X1_period;
     uint8_t x1a = (x_buf[index % X1A_period]>>0) &1;
 
-    // if ( index >= 15345000-343 )
     if ( index >= X1_period - X_b_hold ){      
 	index = X1B_period -1; //Hold logic for x1b
-       //index = 4092; //Hold logic for x1b
     }
     uint8_t x1b = (x_buf[index % X1B_period]>>1) &1;
 
@@ -264,40 +257,30 @@ uint8_t cep_gps::x2_lookup(uint8_t * x_buf, uint64_t index) {
     uint64_t index_a   = index % X1_period;
     uint64_t index_b   = index_a;
 
-	    
-    // if (index_a>=(15345037-37))
     if (index_x2a >= X1_period){
       index_x2a = X2A_period - 1; //Hold logic for x2a
     }
     uint8_t x2a = (x_buf[index_x2a % X2A_period]>>2) &1;
 
-    //if ( index_b >= 15345037-37-343 )
-      if ( index_x2b >= X1_period - X_b_hold ){
-       index_x2b = X2B_period - 1; //Hold logic for x2b
-      }
+    if ( index_x2b >= X1_period - X_b_hold ){
+      index_x2b = X2B_period - 1; //Hold logic for x2b
+    }
     uint8_t x2b = (x_buf[index_x2b % X2B_period]>>3) &1;
 
     return x2a ^ x2b;
 }
 
 uint8_t cep_gps::x2_lookup_last(uint8_t * x_buf, uint64_t index) {
-   //  uint64_t index_x2a = index % 15345037;
     uint64_t index_x2a = index % X2_period;
     uint64_t index_x2b = index_x2a;
-    //uint64_t index_a   = index % 15345000;
     uint64_t index_a   = index % X1_period;
     uint64_t index_b   = index_a;
     
-        
-   //  if (index_a>=(15345000-1069)){
-   // if (index >= (X1_period - X2A_last_hold)){
     if (index >= (Code_length - X2A_last_hold)){
 	index_x2a = X2A_period - 1 ; //Hold logic for x2a
     }
     uint8_t x2a = (x_buf[index_x2a % X2A_period]>>2) &1;
 
-    //if ( index_b >= 15345000-965 ){//breaks
-    //  if ( index >= X1_period - X2B_last_hold){ 
     if ( index >= Code_length - X2B_last_hold){ 
        index_x2b = X2B_period - 1; //Hold logic for x2b
     }
@@ -308,20 +291,14 @@ uint8_t cep_gps::x2_lookup_last(uint8_t * x_buf, uint64_t index) {
 
 uint8_t cep_gps::pcode_lookup(uint8_t * x_buf, uint64_t index, uint8_t prn) {
     uint8_t day = (prn-1)/37;
-    PrintMe("Don prn val:   ", &(prn), 1);
-    PrintMe("Don day val:   ", &(day), 1);
     index += CHIP_RATE*86400*day;
-   // uint64_t index_x2 = (CODE_LENGTH + index - prn) % CODE_LENGTH; //pre add CODE_LENGTH, otherwise problems with index-prn being negative
-   // index %= CODE_LENGTH;
     uint64_t index_x2 = (Code_length + index - prn) % Code_length; //pre add CODE_LENGTH, otherwise problems with index-prn being negative
     index %= Code_length;
 
     uint8_t p_x1 = x1_lookup(x_buf, index);
     uint8_t p_x2 = x2_lookup(x_buf, index_x2);
-    if ((index_x2>= Code_length - X1A_period) ) { // uknown if should be hit, if not yields propper answer.
-//	     if ((index_x2>= CODE_LENGTH - X1A_period) ) { // uknown if should be hit, if not yields propper answer.
-
-        p_x2 = x2_lookup_last(x_buf, index_x2); // ERROR START
+    if ((index_x2>= Code_length - X1A_period) ) { 
+        p_x2 = x2_lookup_last(x_buf, index_x2); 
     }
 
     return p_x1 ^ p_x2;
@@ -331,9 +308,7 @@ uint8_t cep_gps::pcode_lookup(uint8_t * x_buf, uint64_t index, uint8_t prn) {
 void cep_gps::GenP_Code(void) {
 
    if (m_pcode_index == x_buf_size){
-
      m_pcode_index = 0;
-     PrintMe("PCODE INDeX = Buf SIZE:   ", (uint8_t *) &(m_pcode_index), 8);
   }
 
   for (int i = 0; i < 128; i+=4) {
@@ -342,15 +317,6 @@ void cep_gps::GenP_Code(void) {
     code |= pcode_lookup(m_x_buf, m_pcode_index++, mSvNum) << 2;
     code |= pcode_lookup(m_x_buf, m_pcode_index++, mSvNum) << 1;
     code |= pcode_lookup(m_x_buf, m_pcode_index++, mSvNum) << 0;
-    
-   /* uint8_t *print_pointer;
-    print_pointer = (uint8_t *) &m_pcode_index;
-    PrintMe("pcode_lookup INDEX PASSED: ", &(print_pointer[0]),8);
-*/
-    PrintMe("Don CODE  val:   ", &(code), 1);
-    PrintMe("Don pre mSwPt   ", &(mSwPt[0]), mBlockSize);
-    PrintMe("Don m_pcode_index val:   ", (uint8_t *) &(m_pcode_index), 8);
-
 
     // Lower nibble
     if (i % 8 == 0)
@@ -358,9 +324,6 @@ void cep_gps::GenP_Code(void) {
     // Upper nibble
     else
       mSwPt[i/8] |= (code & 0x0F);
-    
-    PrintMe("Don post mSwPt   ", &(mSwPt[0]), mBlockSize);
-
   }
 
 } // void cep_gps::GenP_Code(void)
@@ -690,7 +653,6 @@ int cep_gps::RunGpsTest(int maxLoop) {
     // Static mode, the initialization vectors will NOT be changed
     if (!mStaticPCodeInit) {
       SetPcodeXnInit(120, 3666, 766, 1474); //_A loops over 10 values, _B loops over 9 values.
-//      SetPcodeSpeed(163, 174763); //Xn: XnA epoch = 24 loops, XnB reaches end in only 23.
     } // if (!mLegacyPCode)
 
     ResetCA_Code();
