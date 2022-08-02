@@ -21,6 +21,8 @@
 
 The Common Evaluation Platform (CEP) is an SoC design that contains only license-unencumbered, freely available components.  The CEP includes a range of accelerator cores coupled with a key delivery mechanism, and parametrically-defined challenge modules which can be synthesized to support developmental testing. The implementation of the CEP includes a comprehensive verification environment to ensure modifications do not impede intended functionality. It is intended to be targeted to either an FPGA or ASIC implementation. 
 
+Please check the [CEP changelog](./CHANGELOG.CEP.md) for release history.
+
 Beginning with CEP v4.0, the platform has been ported to the UCB Chipyard Framework.  The original Chipyard Readme can be found [here](./README.Chipyard.md).
 
 Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the cloned CEP repository.
@@ -40,7 +42,7 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 ## Setting up your environment
 
-To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation at https://chipyard.readthedocs.i
+To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation [here](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/index.html).
 
 A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
 
@@ -58,9 +60,9 @@ If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found i
   * `./scripts/init-submodules-no-riscv-tools.sh`
   * `./scripts/init-fpga.sh`
 * Build the RISC-V Toolchain.  
-  * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build
+  * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build.
   * `./scripts/build-toolchains.sh riscv-tools`
-* The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: `MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
+* RHEL7: The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: `MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
 * It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
 * Sometimes the toolchain build may fail.  One may need to run the build several times.
 * Once the toolchain is built, your want to source the new environment script: `source <CEP_ROOT>/env.sh`.
@@ -100,7 +102,7 @@ These subprojects define the system configuration and are as follows:
 - Surrogate Root of Trust (SRoT)
 
 `cep_vc707` - VC707 Development Board
-- 100 MHz Core Frequency
+- 100 MHz Core Frequency4
 - 11% LUT Utilization
 - 1x WithNBigCore
 - CEP Registers
@@ -109,6 +111,7 @@ These subprojects define the system configuration and are as follows:
 
 `cep_big_vc707` - VC707 Development Board
 - 100 MHz Core Frequency
+- 70% LUT Utilization
 - 4x WithNBigCores
 - CEP Registers
 - AES Core
@@ -213,7 +216,7 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
 make DISABLE_KPRINTF=0 riscv_wrapper            <-- builds riscv_wrapper.img with console printf enabled
-make DISK=/dev/sdd1 riscv_wrapper_sd_write      <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your device name)
+make DISK=/dev/sdd1 riscv_wrapper_sd_write      <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your partition name)
 ```
 
 In the above example, the bare metal regTest is built with the console printf function enabled.
@@ -250,8 +253,6 @@ Instructions on the CEP Co-Simulation (including the Chipyard build) can be foun
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
 
-Please check the [CEP changelog](./CHANGELOG.CEP.md) for release history.
-
 ## Errors? Ommissions? Questions?
 Please feel free to file a github issue which the CEP developers check frequently.
 
@@ -264,7 +265,6 @@ As the CEP has been developed with input from many sources, multiple licenses ap
 * [CEP Components Licenses](./LICENSE.md)
 * [Chipyard License](./LICENSE.md)
 * [SiFive License](./LICENSE.SiFive.md)
-
 
 ## DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited.
 This material is based upon work supported by the Defense Advanced Research Projects Agency under Air Force Contract No. FA8702-15-D-0001. Any opinions, findings, conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Defense Advanced Research Projects Agency.

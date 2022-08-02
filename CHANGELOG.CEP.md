@@ -12,8 +12,8 @@
 * Added kgetc to bare metal console routines
 * Verified firemarshal generated linux build boots on the Arty100T, VC707, and VCU118.  Instructions added to [README.md](./README.md)
 * Added `helloworld` and `gpiotest` to ./software/linux.  Makefiles allow application's install to firemarshal's buildroot.
-* Added VC707 FPGA target thanks to the folks at NECSTLab (https://github.com/necst)
-* Added VCU118 FPGA target
+* Added VC707 CEP FPGA target thanks to the folks at NECSTLab (https://github.com/necst)
+* Added VCU118 CEP FPGA target
 
 ### Changed
 * Unified console print routines across bootroms, cosim baremetal, and standalone bare metal code.  Bare metal prints are now handled using stdio functions with
@@ -23,7 +23,7 @@
 * cep_cosim
   * Cadence XCellium on RHEL7 *occasionally* fails some of the bareMetal tests.  Root cause has not been determined, but it is recommended that the test be re-run.
   * Known est failures: 
-    * ./testSuites/bfmTests/macroMix - GPS tests fail.
+    * ./testSuites/bfmTests/macroMix - GPS Test - First core passes, subsequent cores fail.
     * Virtual mode ISA tests - Failure on Questsim/Ubuntu, passes on XCellium/RHEL7
     * ./testSuites/isaTests/rv64mi-p-csr
     * ./testSuites/isaTests/rv64si-p-csr
