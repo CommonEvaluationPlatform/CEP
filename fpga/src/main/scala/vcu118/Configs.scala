@@ -42,19 +42,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
   }
 })
 
-class WithSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase => BigInt((1e6).toLong)
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    // invoke makefile for sdboot
-    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
-    require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
-  }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
-  case SerialTLKey => None // remove serialized tl port
-})
-
 class WithCEPSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
@@ -67,26 +54,6 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
   case SerialTLKey => None // remove serialized tl port
 })
-
-// DOC include start: AbstractVCU118 and Rocket
-class WithVCU118Tweaks extends Config(
-  // harness binders
-  new WithUART ++
-  new WithSPISDCard ++
-  new WithDDRMem ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
-  // other configuration
-  new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
-  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++ // remove debug module
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-  new WithFPGAFrequency(100) // default 100MHz freq
-)
 
 class WithVCU118CEPTweaks extends Config(
   // harness binders
@@ -108,11 +75,6 @@ class WithVCU118CEPTweaks extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
   new WithFPGAFrequency(100) // default 100MHz freq
 )
-
-class RocketVCU118Config extends Config(
-  new WithVCU118Tweaks ++
-  new chipyard.RocketConfig)
-// DOC include end: AbstractVCU118 and Rocket
 
 class RocketVCU118CEPConfig extends Config(
   // Add the CEP registers
@@ -136,11 +98,6 @@ class RocketVCU118CEPConfig extends Config(
   new chipyard.config.AbstractNoL2Config
 )
 // DOC include end: AbstractVCU118 and Rocket
-
-class BoomVCU118Config extends Config(
-  new WithFPGAFrequency(50) ++
-  new WithVCU118Tweaks ++
-  new chipyard.MegaBoomConfig)
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

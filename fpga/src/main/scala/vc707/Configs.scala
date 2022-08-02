@@ -41,19 +41,6 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
   }
 })
 
-class WithSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase => BigInt((1e6).toLong)
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    // invoke makefile for sdboot
-    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -B -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
-    require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vd707/sdboot/build/sdboot.bin")
-  }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7071GDDRSize)))) // set extmem to DDR size
-  case SerialTLKey => None // remove serialized tl port
-})
-
 class WithCEPSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
@@ -66,25 +53,6 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7071GDDRSize)))) // set extmem to DDR size
   case SerialTLKey => None // remove serialized tl port
 })
-
-class WithVC707Tweaks extends Config(
-  // harness binders
-    new WithUART ++
-    new WithDDRMem ++
-    new WithSPISDCard ++
-    // io binders
-    new WithUARTIOPassthrough ++
-    new WithTLIOPassthrough ++
-    new WithSPIIOPassthrough ++
-    // other configuration
-    new WithDefaultPeripherals ++
-    new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
-    new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-    new chipyard.config.WithNoDebug ++ // remove debug module
-    new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-    new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-    new WithFPGAFrequency(50) // default 100MHz freq
-)
 
 class WithVC707CEPTweaks extends Config(
   // harness bindersn
@@ -106,10 +74,6 @@ class WithVC707CEPTweaks extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
   new WithFPGAFrequency(100)                      // default 100MHz freq
 )
-
-class RocketVC707Config extends Config(
-  new WithVC707Tweaks ++
-  new chipyard.RocketConfig)
 
 class RocketVC707CEPConfig extends Config(
   // Add the CEP registers
