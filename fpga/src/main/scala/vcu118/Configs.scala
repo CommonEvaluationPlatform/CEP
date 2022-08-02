@@ -17,6 +17,8 @@ import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
+import mitllBlocks.cep_addresses._
+
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
@@ -126,7 +128,13 @@ class RocketVCU118CEPConfig extends Config(
 
   // Include the VCU118 Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithVCU118CEPTweaks ++
-  new chipyard.RocketNoL2Config)
+
+  // Instantiate one big core
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  
+  // Default Chipyard AbstractConfig with L2 removed
+  new chipyard.config.AbstractNoL2Config
+)
 // DOC include end: AbstractVCU118 and Rocket
 
 class BoomVCU118Config extends Config(

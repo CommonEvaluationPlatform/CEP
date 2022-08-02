@@ -87,40 +87,58 @@ Providing a complete directory structure is impractical, but some items are high
 ```
 
 ### Building the CEP FPGA
-In addition to those included with Chipyard, multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.
+Multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.
 
-These subprojects define the system configuration and are as follows.
+These subprojects define the system configuration and are as follows:
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
 - 98% LUT Utilization
+- 1x WithNBigCore
 - CEP Registers
-- 1 x AES Core
+- AES Core
 - Surrogate Root of Trust (SRoT)
 
 `cep_vc707` - VC707 Development Board
 - 100 MHz Core Frequency
 - 11% LUT Utilization
+- 1x WithNBigCore
 - CEP Registers
-- 1 x AES Core
+- AES Core
 - Surrogate Root of Trust (SRoT)
+
+`cep_big_vc707` - VC707 Development Board
+- 100 MHz Core Frequency
+- 4x WithNBigCores
+- CEP Registers
+- AES Core
+- DES3 Core
+- FIR Core
+- IIR Core
+- DFT Core
+- IDFT Core
+- MD5 Core
+- 4x GPS Cores
+- 4x SHA-256 Cores
+- RSA Core
+- Surrogate Root of Trust
 
 `cep_vcu118` - VCU118 Development Board
 - 100 MHz Core Frequency
 - 5% LUT Utilization
+- 1x WithNBigCore
 - CEP Registers
-- 1 x AES Core
+- AES Core
 - Surrogate Root of Trust (SRoT)
 
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the JTAG USB-port of you preffered FPGA board.
 
 Default CEP builds can be customized by following the instructions in the Chipyard documentation.
 
-The FPGA boards will configure from FLASH or JTAG based on the state of the MODE jumper.  Additional information cane be found:
+The FPGA boards will configure from FLASH or JTAG based on the state of the MODE jumper.  Additional information can be found:
 * Arty100T - [here](https://digilent.com/shop/arty-a7-artix-7-fpga-development-board/).
 * VC707    - [here](https://www.xilinx.com/products/boards-and-kits/ek-v7-vc707-g.html/).
 * VCU118   - [here](https://www.xilinx.com/products/boards-and-kits/vcu118.html/).
-
 
 ```
 cd <REPO_ROOT>/fpga
@@ -137,7 +155,7 @@ OR
 
 The Arty100T shares a single microUSB connector for JTAG and UART, while the VC707 and VCU118 have seperate ports for each.
 
-For the Arty100T, connecte a Digilent SD or microSD PMOD board should be connected to connector JA.  For the VCU118, connect the same to the PMOD connector on the right side of the board.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+For the Arty100T, connect a Digilent SD or microSD PMOD board o connector JA.  For the VCU118, connect the same to the PMOD connector on the right side of the board.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
 
 Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
 
@@ -145,14 +163,14 @@ As noted, for the Arty100T the microUSB port uses an FTDI chip to provide both J
 
 It is worth noting that *minicom* enables HW flow control by default.
 
-Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is 30MB, which is the size needed for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden (to 128kB) at boot time by holding *BTN0* on the Arty100T or *SWN* on the VC707/VCU118 when the chip is released from reset.
+Once released from reset, the CEP's bootrom will read the baremetal executable from the SD card, copy it DDR memory, and then jump to that location and execute the program.  The bootrom's default payload size is large enough for a linux boot.  For bare metal executables, the payloads are typically much smaller.  The payload size can be overriden at boot time by holding *BTN0* on the Arty100T or *SWN* on the VC707/VCU118 when the chip is released from reset.
 
 An example UART output for the baremetal gpiotest follows:
 ```
 ---          Common Evaluation Platform v4.20            ---
 ---         Based on the UCB Chipyard Framework          ---
 --- Copyright 2022 Massachusetts Institute of Technology ---
----     BootRom Image built on Jul 27 2022 15:11:33      ---
+---     BootRom Image built on Aug  1 2022 12:41:36      ---
 
 INIT
 CMD0
@@ -169,16 +187,18 @@ BOOT
 --------------------------
      RISC-V GPIO Test     
 --------------------------
+     Built for VCU118
    Console Echo Enabled   
 
 
-gpio = 00000f00
-gpio = 00000e00
-gpio = 00000c00
-gpio = 00000800
+gpio = 00000010
 gpio = 00000000
-gpio = 00000400
-gpio = 00000600
+gpio = 00000020
+gpio = 00000000
+gpio = 00000080
+gpio = 00000000
+gpio = 00000040
+gpio = 00000000
 ...
 ```
 
@@ -192,17 +212,17 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
-make ENABLE_KPRINTF=1 riscv_wrapper        			<-- builds riscv_wrapper.img with console printf enabled
+make DISABLE_KPRINTF=0 riscv_wrapper            <-- builds riscv_wrapper.img with console printf enabled
 make DISK=/dev/sdd1 riscv_wrapper_sd_write      <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
-In the above example, the bare metal regTest is build with the console printf function enabled.  It is advised that you enable the addition of a carriage return in your chosen terminal program.
+In the above example, the bare metal regTest is built with the console printf function enabled.
 
 The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
 
 ```
 cd <CEP_ROOT>/software/baremetal/gpiotest
-make DISK=/dev/sdd1 sd_write        				    <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
+make DISK=/dev/sdd1 sd_write                    <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.

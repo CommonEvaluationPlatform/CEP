@@ -62,6 +62,13 @@ int main() {
   puts("--------------------------");
   puts("     RISC-V GPIO Test     ");
   puts("--------------------------");
+#ifdef VCU118_TARGET
+  puts("     Built for VCU118");
+#elif VC707_TARGET
+  puts("     Built for VC707");
+#else
+  puts("    Built for Arty100T");
+#endif
   puts("   Console Echo Enabled   ");
   puts("");
   puts("");

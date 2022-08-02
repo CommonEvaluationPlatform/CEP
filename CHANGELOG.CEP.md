@@ -6,12 +6,12 @@
 
 # CEP Changelog
 
-## [v4.20] - 2022-07-22
+## [v4.20] - 2022-08-03
 
 ### Added
 * Added kgetc to bare metal console routines
-* Verified firemarshal generated linux build boots on the CEP Arty100T.  Instructions added to [README.md](./README.md)
-* Added `helloworld` and `gpiotest` to ./software/linux.  Makefiles allow application's install to firemarshal's buildroot
+* Verified firemarshal generated linux build boots on the Arty100T, VC707, and VCU118.  Instructions added to [README.md](./README.md)
+* Added `helloworld` and `gpiotest` to ./software/linux.  Makefiles allow application's install to firemarshal's buildroot.
 * Added VC707 FPGA target thanks to the folks at NECSTLab (https://github.com/necst)
 * Added VCU118 FPGA target
 

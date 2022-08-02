@@ -131,8 +131,3 @@ class CEPRocketConfig extends Config(
 
 )
 
-// Tweak to the default Rocket Config that removes the L2 Cache (and uses a medium core)
-class RocketNoL2Config extends Config(
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  new chipyard.config.AbstractNoL2Config)
-
