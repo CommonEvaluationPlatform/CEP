@@ -23,30 +23,6 @@
 #include "random48.h"
 
 static uint16_t x_buf_size = 4096;
-/*
-static uint16_t X1A_period = 4092;
-static uint16_t X1B_period = 4093;
-static uint16_t X2A_period = 4092;
-static uint16_t X2B_period = 4093;
-
-static uint32_t XN_cnt_speed = 1;
-static uint32_t Z_cnt_speed  = 1;
-
-static uint32_t X_a_full_count = 3750;
-static uint32_t X_b_full_count = 3749;
-static uint32_t X1A_loops      = ((int) ((X_a_full_count+XN_cnt_speed-1)/ XN_cnt_speed));
-static uint32_t X1B_loops      = ((int) ((X_b_full_count+XN_cnt_speed-1)/ XN_cnt_speed));	
-
-static uint64_t Z_full_period  = 403200;
-static uint64_t Z_period       = ((Z_full_period + Z_cnt_speed - 1 ) / Z_cnt_speed);
-static uint64_t Code_length    = (Z_period * X1A_loops * X1A_period); 
-static uint64_t X1_period      = X1A_period * X1A_loops;
-static uint64_t X2_period      = X1_period + 37;
-static uint64_t X_b_hold       = ((X1A_period*X1A_loops) - (X1B_period*X1B_loops));
-
-static uint64_t X2A_last_hold = ((Code_length % X2_period) % X2A_period);
-static uint64_t X2B_last_hold = ((Code_length % X2_period) % X2B_period);
-*/
 
 cep_gps::cep_gps(int coreIndex, int seed, int verbose) : cep_aes(coreIndex, seed, verbose) {
   init(coreIndex);
