@@ -91,6 +91,30 @@ protected:
   uint16_t  m_x2b_initial;
   uint8_t   m_x_buf[4096];
   uint64_t  m_pcode_index;
+  
+  // P-code fast/standard variables
+  uint16_t X1A_period;
+  uint16_t X1B_period;
+  uint16_t X2A_period;
+  uint16_t X2B_period;
+  
+  uint32_t XN_cnt_speed;
+  uint32_t Z_cnt_speed;
+  
+  uint32_t X_a_full_count;
+  uint32_t X_b_full_count;
+  uint32_t X1A_loops;
+  uint32_t X1B_loops;
+  
+  uint64_t Z_full_period;  
+  uint64_t Z_period;
+  uint64_t Code_length;  
+  uint64_t X1_period;    
+  uint64_t X2_period;    
+  uint64_t X_b_hold;     
+  
+  uint64_t X2A_last_hold;
+  uint64_t X2B_last_hold;
 
   // CA Code SW implementation is a mirror of the hardware
   uint8_t   g1[11]; // [0] not used to match HW
