@@ -67,6 +67,7 @@ void *c_module(void *arg) {
 //  int coreMask = 0x00000200;  // IDFT
 //  int coreMask = 0x00000400;  // FIR
 //  int coreMask = 0x00000800;  // IIR
+//  int coreMask = 0x00001000;  // GPS.0
 //  int coreMask = 0x00002000;  // GPS.1
 //  int coreMask = 0x00004000;  // GPS.2
 //  int coreMask = 0x00008000;  // GPS.3

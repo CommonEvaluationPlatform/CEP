@@ -1,7 +1,7 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-2-Clause)
 
-# Common Evaluation Platform v4.2
+# Common Evaluation Platform v4.3
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
@@ -89,7 +89,7 @@ Providing a complete directory structure is impractical, but some items are high
 ```
 
 ### Building the CEP FPGA
-Multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.
+Multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.  All of these have been verified to boot linux.
 
 These subprojects define the system configuration and are as follows:
 
@@ -102,14 +102,6 @@ These subprojects define the system configuration and are as follows:
 - Surrogate Root of Trust (SRoT)
 
 `cep_vc707` - VC707 Development Board
-- 100 MHz Core Frequency4
-- 11% LUT Utilization
-- 1x WithNBigCore
-- CEP Registers
-- AES Core
-- Surrogate Root of Trust (SRoT)
-
-`cep_big_vc707` - VC707 Development Board
 - 100 MHz Core Frequency
 - 70% LUT Utilization
 - 4x WithNBigCores
@@ -126,13 +118,22 @@ These subprojects define the system configuration and are as follows:
 - RSA Core
 - Surrogate Root of Trust
 
-`cep_vcu118` - VCU118 Development Board
-- 100 MHz Core Frequency
-- 5% LUT Utilization
-- 1x WithNBigCore
+`cep_big_vcu118` - 
+- 125 MHz Core Frequency
+- 17% LUT Utilization
+- 4x WithNBigCores
 - CEP Registers
 - AES Core
-- Surrogate Root of Trust (SRoT)
+- DES3 Core
+- FIR Core
+- IIR Core
+- DFT Core
+- IDFT Core
+- MD5 Core
+- 4x GPS Cores
+- 4x SHA-256 Cores
+- RSA Core
+- Surrogate Root of Trust
 
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the JTAG USB-port of you preffered FPGA board.
 

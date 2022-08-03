@@ -77,27 +77,105 @@ class WithVCU118CEPTweaks extends Config(
 )
 
 class RocketVCU118CEPConfig extends Config(
-  // Add the CEP registers
-  new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithAES ++
-  new chipyard.config.WithSROTFPGA ++
+  new chipyard.config.WithDES3 ++
+  new chipyard.config.WithFIR ++
+  new chipyard.config.WithIIR ++
+  new chipyard.config.WithDFT ++
+  new chipyard.config.WithIDFT ++
+  new chipyard.config.WithMD5 ++
+  new chipyard.config.WithGPS(params = Seq(
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.gps_0_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.gps_0_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_0_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_0_llki_sendrecv_addr),
+      dev_name            = s"gps_0"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_1_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_1_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.gps_1_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.gps_1_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_1_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_1_llki_sendrecv_addr),
+      dev_name            = s"gps_1"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_2_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.gps_2_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.gps_2_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_2_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_2_llki_sendrecv_addr),
+      dev_name            = s"gps_2"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_3_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_3_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.gps_3_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.gps_3_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.gps_3_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.gps_3_llki_sendrecv_addr),
+      dev_name            = s"gps_3")
+    )) ++
+  new chipyard.config.WithSHA256(params = Seq(
+    COREParams( 
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_0_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.sha256_0_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_0_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_0_llki_sendrecv_addr),
+      dev_name            = s"sha256_0"),
+    COREParams( 
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_1_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_1_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_1_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.sha256_1_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_1_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_1_llki_sendrecv_addr),
+      dev_name            = s"sha256_1"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_2_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_2_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_2_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.sha256_2_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_2_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_2_llki_sendrecv_addr),
+      dev_name            = s"sha256_2"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_3_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_3_depth),
+      llki_base_addr      = BigInt(CEPBaseAddresses.sha256_3_llki_base_addr),
+      llki_depth          = BigInt(CEPBaseAddresses.sha256_3_llki_depth),
+      llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.sha256_3_llki_ctrlsts_addr),
+      llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_3_llki_sendrecv_addr),
+      dev_name            = s"sha256_3")
+    )) ++
+
+  new chipyard.config.WithCEPRegisters ++
+
+  // Instantiation of the RSA core (with or w/o the ARM compiled memories)
+  new chipyard.config.WithRSA ++
+
+  // Instantiation of the Surrogate Root of Trust (with or w/o the ARM compiled memories)
+  new chipyard.config.WithSROT ++
 
   // Overide the chip info 
   new WithDTS("mit-ll,cep-vcu118", Nil) ++
 
-  // with reduced cache size, closes timing at 50 MHz
-  new WithFPGAFrequency(100) ++
+  // VCU118 closes timing @ 125MHz
+  new WithFPGAFrequency(125) ++
 
-  // Include the VCU118 Tweaks with CEP Registers enabled (passed to the bootrom build)
+  // Include the VCU118 Tweaks
   new WithVCU118CEPTweaks ++
 
-  // Instantiate one big core
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  // Instantiate four big cores
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
   
-  // Default Chipyard AbstractConfig with L2 removed
-  new chipyard.config.AbstractNoL2Config
+  // Default Chipyard AbstractConfig
+  new chipyard.config.AbstractConfig
 )
-// DOC include end: AbstractVCU118 and Rocket
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

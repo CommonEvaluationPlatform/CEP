@@ -76,28 +76,6 @@ class WithVC707CEPTweaks extends Config(
 )
 
 class RocketVC707CEPConfig extends Config(
-  // Add the CEP registers
-  new chipyard.config.WithCEPRegisters ++
-  new chipyard.config.WithAES ++
-  new chipyard.config.WithSROTFPGA ++
-
-  // Overide the chip info 
-  new WithDTS("mit-ll,cep-vc707", Nil) ++
-
-  // with reduced cache size, closes timing at 50 MHz
-  new WithFPGAFrequency(100) ++
-
-  // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
-  new WithVC707CEPTweaks ++
-
-  // Instantiate one big core
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  
-  // Default Chipyard AbstractConfig with L2 removed
-  new chipyard.config.AbstractNoL2Config
-)
-
-class RocketVC707BigCEPConfig extends Config(
   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithFIR ++
