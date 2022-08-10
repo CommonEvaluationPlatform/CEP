@@ -107,6 +107,5 @@ class TestHarness(implicit val p: Parameters) extends Module with HasHarnessSign
   implicitHarnessClockBundle.clock := clock
   implicitHarnessClockBundle.reset := reset
   p(HarnessClockInstantiatorKey).instantiateHarnessDividerPLL(implicitHarnessClockBundle)
-} // TestHarness
-
+}
 
