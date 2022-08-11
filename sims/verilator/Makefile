@@ -169,6 +169,7 @@ VERILATOR_NONCC_OPTS = \
 	--top-module $(VLOG_MODEL) \
 	--vpi \
 	-f $(sim_common_files) \
+	-I$(build_dir) \
 	$(sim_vsrcs)
 
 #----------------------------------------------------------------------------------------

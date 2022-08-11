@@ -35,6 +35,7 @@ output l_code_valid;
 
 
 wire gps_clk_fast;
+wire gps_clk_slow;
 
 // Start of round edge detection
 reg startRound_r;

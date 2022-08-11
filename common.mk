@@ -118,6 +118,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $@
 	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $@
 	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $@
+	@echo "CHIPYARD_SIM_COMMON_FILES = ${sim_common_files}" >> $@
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
@@ -227,11 +228,8 @@ firrtl_temp: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--target-dir $(build_dir) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-# Blackbox sorting script (for CEP targets)
-ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
-	@${SORT_SCRIPT} ${sim_top_blackboxes} $(SORT_FILE)
-endif
-	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
+# Force creation of the sim_harness_blackboxes file in the even that the harness is empty
+	touch $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs
@@ -256,12 +254,15 @@ harness_macro_temp: $(HARNESS_SMEMS_CONF) | top_macro_temp
 ########################################################################################
 $(sim_common_files): $(sim_files) $(sim_top_blackboxes) $(sim_harness_blackboxes)
 	sort -u $^ | grep -v '.*\.\(svh\|h\)$$' > $@
+ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
+	@${SORT_SCRIPT} ${sim_common_files} $(SORT_FILE)
+endif
 
 #########################################################################################
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: $(sim_vsrcs)
+verilog: $(sim_vsrcs) $(sim_common_files)
 
 #########################################################################################
 # helper rules to run simulations

@@ -175,7 +175,7 @@ package llki_pkg;
                                                             // processed
     localparam  LLKI_STATUS_KEY_PRESENT         = 8'h01;    // In response to a LLKI_MID_KL/C2KEYSTATUSREQ, indicates that the
                                                             // target core has a key present
-    localparam  LLKI_STATUS_KEY_NOT_PRESENT     = 9'h02;    // In response to a LLKI_MID_KL/C2KEYSTATUSREQ, indicates that the
+    localparam  LLKI_STATUS_KEY_NOT_PRESENT     = 8'h02;    // In response to a LLKI_MID_KL/C2KEYSTATUSREQ, indicates that the
                                                             // target core does not have a key present
 
     localparam  LLKI_STATUS_BAD_MSG_ID          = 8'h20;    // A message ID received via the LLKI-C2 interface is not valid

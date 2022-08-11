@@ -242,7 +242,7 @@ always @(posedge clk)
 always @(posedge clk)
     begin
         if(rst)
-            sreg<={SREG_WIDTH{1'b1}};
+            sreg<={SREG_WIDTH+1{1'b1}};
         else if(en)
             sreg<={sreg[SREG_WIDTH-1:0], (x2a[XREG_WIDTH-1]^x2b[XREG_WIDTH-1])};
     end

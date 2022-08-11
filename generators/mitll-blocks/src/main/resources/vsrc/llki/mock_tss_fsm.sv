@@ -105,7 +105,7 @@ module mock_tss_fsm import llki_pkg::*; #(
           if (wait_state_counter == 0) begin
 
             // No more words exist, now jump to another wait state
-            if (llkid_key_word_counter == KEY_WORDS - 1) begin 
+            if (llkid_key_word_counter == 8'(KEY_WORDS) - 1) begin 
               wait_state_counter      <= MOCKTSS_WAIT_STATE_COUNTER_INIT;
               current_state           <= ST_MOCKTSS_WAIT_STATE2;
             end else begin

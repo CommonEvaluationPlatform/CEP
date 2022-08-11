@@ -131,32 +131,32 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
   `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
   
+  // Make Slave A channel connections
   always @*
   begin
-    slave_tl_h2d.a_size                         <= '0;
-    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;
-    slave_tl_h2d.a_source                       <= '0;
-    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     <= slave_a_source;
-    slave_tl_h2d.a_address                      <= '0;
-    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_address;
+    slave_tl_h2d.a_size                         = '0;
+    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       = slave_a_size;
+    slave_tl_h2d.a_source                       = '0;
+    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     = slave_a_source;
+    slave_tl_h2d.a_address                      = '0;
+    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     = slave_a_address;
     
-    slave_d_size                                <= slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
-    slave_d_source                              <= slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
-    slave_d_sink                                <= slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+    slave_d_size                                = slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
+    slave_d_source                              = slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
+    slave_d_sink                                = slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+
+    slave_tl_h2d.a_valid                        = slave_a_valid;
+    slave_tl_h2d.a_opcode                       = ( slave_a_opcode == 3'h0) ? PutFullData : 
+                                                  ((slave_a_opcode == 3'h1) ? PutPartialData : 
+                                                  ((slave_a_opcode == 3'h4) ? Get : 
+                                                    Get));                                   
+    slave_tl_h2d.a_param                        = slave_a_param;
+    slave_tl_h2d.a_mask                         = slave_a_mask;
+    slave_tl_h2d.a_data                         = slave_a_data;
+    slave_tl_h2d.a_user                         = tl_a_user_t'('0);  // User field is unused by Rocket Chip
+    slave_tl_h2d.d_ready                        = slave_d_ready; 
   end
 
-  // Make Slave A channel connections
-  assign slave_tl_h2d.a_valid     = slave_a_valid;
-  assign slave_tl_h2d.a_opcode    = ( slave_a_opcode == 3'h0) ? PutFullData : 
-                                    ((slave_a_opcode == 3'h1) ? PutPartialData : 
-                                    ((slave_a_opcode == 3'h4) ? Get : 
-                                      Get));                                   
-  assign slave_tl_h2d.a_param     = slave_a_param;
-  assign slave_tl_h2d.a_mask      = slave_a_mask;
-  assign slave_tl_h2d.a_data      = slave_a_data;
-  assign slave_tl_h2d.a_user      = tl_a_user_t'('0);  // User field is unused by Rocket Chip
-  assign slave_tl_h2d.d_ready     = slave_d_ready;
-  
   // Make Slave D channel connections
   // Converting from the OpenTitan enumerated type to specific bit mappings
   assign slave_d_opcode         = ( slave_tl_d2h.d_opcode == AccessAck)     ? 3'h0 :
@@ -175,18 +175,29 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   `ASSERT_INIT(srot_masterTlDbw, top_pkg::TL_DBW == MASTER_TL_DBW)
   `ASSERT_INIT(srot_masterTlDw, top_pkg::TL_DW == MASTER_TL_DW)
 
+  // Make Master D channel connections
   always @*
   begin
-    master_a_size                             <= master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
-    master_a_source                           <= master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
-    master_a_address                          <= master_tl_h2d.a_address[MASTER_TL_AW-1:0];
+    master_a_size                             = master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
+    master_a_source                           = master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
+    master_a_address                          = master_tl_h2d.a_address[MASTER_TL_AW-1:0];
 
-    master_tl_d2h.d_size                      <= '0;
-    master_tl_d2h.d_size[MASTER_TL_SZW-1:0]   <= master_d_size;
-    master_tl_d2h.d_source                    <= '0;
-    master_tl_d2h.d_source[MASTER_TL_AIW-1:0] <= master_d_source;
-    master_tl_d2h.d_sink                      <= '0;
-    master_tl_d2h.d_sink[MASTER_TL_DIW-1:0]   <= master_d_sink;
+    master_tl_d2h.d_size                      = '0;
+    master_tl_d2h.d_size[MASTER_TL_SZW-1:0]   = master_d_size;
+    master_tl_d2h.d_source                    = '0;
+    master_tl_d2h.d_source[MASTER_TL_AIW-1:0] = master_d_source;
+    master_tl_d2h.d_sink                      = '0;
+    master_tl_d2h.d_sink[MASTER_TL_DIW-1:0]   = master_d_sink;
+
+    master_tl_d2h.d_data                      = master_d_data;
+    master_tl_d2h.d_opcode                    = ( master_d_opcode == 3'h0) ? AccessAck : 
+                                                ((master_d_opcode == 3'h1) ? AccessAckData : 
+                                                  AccessAck); 
+    master_tl_d2h.d_param                     = master_d_param;
+    master_tl_d2h.d_user                      = tl_a_user_t'('0);
+    master_tl_d2h.d_error                     = master_d_corrupt || master_d_denied;
+    master_tl_d2h.d_valid                     = master_d_valid;
+    master_tl_d2h.a_ready                     = master_a_ready;
   end
 
   // Make Master A channel connections
@@ -200,17 +211,6 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   assign master_a_corrupt       = 0;
   assign master_a_valid         = master_tl_h2d.a_valid;
   assign master_d_ready         = master_tl_h2d.d_ready;
-
-  // Make Master D channel connections
-  assign master_tl_d2h.d_data   = master_d_data;
-  assign master_tl_d2h.d_opcode = ( master_d_opcode == 3'h0) ? AccessAck : 
-                                  ((master_d_opcode == 3'h1) ? AccessAckData : 
-                                    AccessAck); 
-  assign master_tl_d2h.d_param  = master_d_param;
-  assign master_tl_d2h.d_user   = tl_a_user_t'('0);
-  assign master_tl_d2h.d_error  = master_d_corrupt || master_d_denied;
-  assign master_tl_d2h.d_valid  = master_d_valid;
-  assign master_tl_d2h.a_ready  = master_a_ready;
 
   // Define some of the wires and registers associated with the tlul_adapter_reg
   wire                          reg_we_o;
@@ -350,8 +350,8 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   );
 
   // Generate the full and empty signals for the LLKIC2 Send FIFO
-  assign llkic2_reqfifo_empty = llkic2_reqfifo_depth_o == '0;
-  assign llkic2_reqfifo_full  = llkic2_reqfifo_depth_o == FIFO_DEPTH;
+  assign llkic2_reqfifo_empty = (llkic2_reqfifo_depth_o == '0);
+  assign llkic2_reqfifo_full  = (llkic2_reqfifo_depth_o == DepthW'(FIFO_DEPTH));
   //------------------------------------------------------------------------
 
 
@@ -399,8 +399,8 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   );
 
   // Generate the full and empty signals for the Rx FIFO
-  assign llkic2_respfifo_empty  = llkic2_respfifo_depth_o == '0;
-  assign llkic2_respfifo_full   = llkic2_respfifo_depth_o == FIFO_DEPTH;
+  assign llkic2_respfifo_empty  = (llkic2_respfifo_depth_o == '0);
+  assign llkic2_respfifo_full   = (llkic2_respfifo_depth_o == DepthW'(FIFO_DEPTH));
   //------------------------------------------------------------------------
 
 
@@ -475,14 +475,14 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   always @*
   begin
     if (srot_current_state != ST_SROT_IDLE) begin
-      keyindexram_addr_i          <= keyindexram_stm_addr_i;
-      keyram_addr_i               <= keyram_stm_addr_i;
+      keyindexram_addr_i          = keyindexram_stm_addr_i;
+      keyram_addr_i               = keyram_stm_addr_i;
     end else if (reg_we_o_d1) begin
-      keyindexram_addr_i          <= (reg_addr_o_d1 - SROT_KEYINDEXRAM_ADDR) >> 3;
-      keyram_addr_i               <= (reg_addr_o_d1 - SROT_KEYRAM_ADDR) >> 3;
+      keyindexram_addr_i          = (reg_addr_o_d1 - SROT_KEYINDEXRAM_ADDR) >> 3;
+      keyram_addr_i               = (reg_addr_o_d1 - SROT_KEYRAM_ADDR) >> 3;
     end else begin
-      keyindexram_addr_i          <= (reg_addr_o - SROT_KEYINDEXRAM_ADDR) >> 3;
-      keyram_addr_i               <= (reg_addr_o - SROT_KEYRAM_ADDR) >> 3;
+      keyindexram_addr_i          = (reg_addr_o - SROT_KEYINDEXRAM_ADDR) >> 3;
+      keyram_addr_i               = (reg_addr_o - SROT_KEYRAM_ADDR) >> 3;
     end   // end if (reg_we_do_d1)
   end // end always @*
   //------------------------------------------------------------------------
@@ -511,11 +511,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
     end else begin
       
       // Default signal assignments
-      write_error                 <= 1'b0;
-      keyindexram_write_i         <= 1'b0;
-      keyram_write_i              <= 1'b0;
-      llkic2_reqfifo_wvalid_i     <= 1'b0;
-      llkic2_reqfifo_wdata_i      <= 1'b0;
+      write_error                 <= '0;
+      keyindexram_write_i         <= '0;
+      keyram_write_i              <= '0;
+      llkic2_reqfifo_wvalid_i     <= '0;
+      llkic2_reqfifo_wdata_i      <= '0;
 
       // Registered version of the tlul_adapter_reg output (used outside of the 
       // write decode process) to ensure proper alignment
@@ -788,7 +788,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             msg_len                   <= llkic2_reqfifo_rdata_o[31:16];
             key_index                 <= llkic2_reqfifo_rdata_o[39:32];
 
-            rsvd                      <= llkic2_reqfifo_rdata_o[63:40];
+            rsvd[23:0]                <= llkic2_reqfifo_rdata_o[63:40];
 
             // Assert the Send FIFO read enable
             llkic2_reqfifo_rready_i  <= 1'b1;
@@ -821,8 +821,8 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             LLKI_MID_C2LOADKEYREQ,
             LLKI_MID_C2CLEARKEYREQ,
             LLKI_MID_C2KEYSTATUSREQ : begin
-              keyindexram_stm_addr_i  <= key_index;
-              srot_current_state      <= ST_SROT_RETRIEVE_KEY_INDEX_WAIT_STATE;
+              keyindexram_stm_addr_i[7:0]   <= key_index;
+              srot_current_state            <= ST_SROT_RETRIEVE_KEY_INDEX_WAIT_STATE;
               ;
             end
             // All other message ID (error condition)
@@ -842,7 +842,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           end // end if (msg_len != 1)
 
           // The Key Index must >= 0 and < SROT_KEYINDEXRAM_SIZE
-          if (key_index >= SROT_KEYINDEXRAM_SIZE) begin
+          if (key_index >= 8'(SROT_KEYINDEXRAM_SIZE)) begin
             llkic2_reqfifo_clr_i      <= 1'b1;
             status                    <= LLKI_STATUS_KEY_INDEX_EXCEED;
             srot_current_state        <= ST_SROT_C2_RESPONSE;
@@ -895,15 +895,15 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             status                  <= LLKI_STATUS_KEY_INDEX_INVALID;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           // Pointer related checks
-          end else if (low_pointer   >= SROT_KEYRAM_SIZE  ||  // Low pointer exceeds the key RAM
-                       high_pointer  >= SROT_KEYRAM_SIZE  ||  // High pointer exceeds the key RAM
+          end else if (low_pointer   >= 16'(SROT_KEYRAM_SIZE)  ||  // Low pointer exceeds the key RAM
+                       high_pointer  >= 16'(SROT_KEYRAM_SIZE)  ||  // High pointer exceeds the key RAM
                         low_pointer  > high_pointer) begin    // Low pointer > high pointer
             llkic2_reqfifo_clr_i    <= 1'b1;
             status                  <= LLKI_STATUS_BAD_POINTER_PAIR;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           // The specified target core index exceeds the maximum entry
           // in the LLKI Core Index Array
-          end else if (core_index > $high(LLKI_CORE_INDEX_ARRAY)) begin
+          end else if (core_index > 8'($high(LLKI_CORE_INDEX_ARRAY))) begin
             llkic2_reqfifo_clr_i    <= 1'b1;
             status                  <= LLKI_STATUS_BAD_CORE_INDEX;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
@@ -1004,7 +1004,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             if (host_err_o) begin
               msg_id                <= LLKI_MID_C2ERRORRESP;        
               status                <= LLKI_STATUS_KL_TILELINK_ERROR;
-              msg_len               <= 8'h01;
+              msg_len               <= 16'h0001;
               srot_current_state    <= ST_SROT_C2_RESPONSE;
             end
           end // end if (host_gnt_o)
@@ -1029,7 +1029,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_valid_o) begin
 
             // Point the Key RAM to the current word
-            keyram_stm_addr_i       <= current_pointer;
+            keyram_stm_addr_i[15:0] <= current_pointer;
 
             // If this is a Load Key request, then we need to begin
             // the cycle of reading the ready bit from the selected
@@ -1067,7 +1067,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 8'h01;
+            msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           // Wait until the request has been granted, then jump to
           // the check status state
@@ -1138,7 +1138,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 8'h01;
+            msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           end else if (wait_state_counter == 0) begin
             srot_current_state      <= ST_SROT_KL_READ_READY_STATUS;
@@ -1197,9 +1197,9 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             // read the LLKI-PP ready status
             end else begin
               // Point the Key RAM to the next word
-              keyram_stm_addr_i     <= current_pointer + 1;
+              keyram_stm_addr_i     <= current_pointer + 16'(1);
 
-              current_pointer       <= current_pointer + 1;
+              current_pointer       <= current_pointer + 16'(1);
               srot_current_state    <= ST_SROT_KL_READ_READY_STATUS;
             end // end if (current_pointer == high_pointer)
 
@@ -1231,7 +1231,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 8'h01;
+            msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           // Wait until the request has been granted, then jump to
           // the check status state
@@ -1298,7 +1298,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 8'h01;
+            msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           end else if (wait_state_counter == 0) begin
             srot_current_state      <= ST_SROT_KL_READ_RESP_STATUS;
@@ -1326,7 +1326,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 8'h01;
+            msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
           // Valid data has been received
           end else if (host_valid_o) begin
@@ -1381,7 +1381,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
 
               // Set most of the LLKI-C2 response fields
               llkic2_respfifo_wdata_i[15:8]   <= status;
-              llkic2_respfifo_wdata_i[31:16]  <= 8'h01;
+              llkic2_respfifo_wdata_i[31:16]  <= 16'h0001;
               llkic2_respfifo_wdata_i[63:32]  <= rsvd;
               llkic2_respfifo_wvalid_i        <= 1'b1;
 

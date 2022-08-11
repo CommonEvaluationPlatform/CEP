@@ -104,30 +104,30 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   
   always @*
   begin
-    slave_tl_h2d.a_size                         <= '0;
-    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       <= slave_a_size;
-    slave_tl_h2d.a_source                       <= '0;
-    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     <= slave_a_source;
-    slave_tl_h2d.a_address                      <= '0;
-    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     <= slave_a_address;
+    slave_tl_h2d.a_size                         = '0;
+    slave_tl_h2d.a_size[SLAVE_TL_SZW-1:0]       = slave_a_size;
+    slave_tl_h2d.a_source                       = '0;
+    slave_tl_h2d.a_source[SLAVE_TL_AIW-1:0]     = slave_a_source;
+    slave_tl_h2d.a_address                      = '0;
+    slave_tl_h2d.a_address[SLAVE_TL_AW-1:0]     = slave_a_address;
     
-    slave_d_size                                <= slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
-    slave_d_source                              <= slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
-    slave_d_sink                                <= slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+    slave_d_size                                = slave_tl_d2h.d_size[SLAVE_TL_SZW-1:0];
+    slave_d_source                              = slave_tl_d2h.d_source[SLAVE_TL_AIW-1:0];
+    slave_d_sink                                = slave_tl_d2h.d_sink[SLAVE_TL_DIW-1:0];
+
+    slave_tl_h2d.a_valid                        = slave_a_valid;
+    slave_tl_h2d.a_opcode                       = ( slave_a_opcode == 3'h0) ? PutFullData : 
+                                                  ((slave_a_opcode == 3'h1) ? PutPartialData : 
+                                                  ((slave_a_opcode == 3'h4) ? Get : 
+                                                    Get));                                   
+    slave_tl_h2d.a_param                        = slave_a_param;
+    slave_tl_h2d.a_mask                         = slave_a_mask;
+    slave_tl_h2d.a_data                         = slave_a_data;
+    slave_tl_h2d.a_user                         = tl_a_user_t'('0);  // User field is unused by Rocket Chip
+    slave_tl_h2d.d_ready                        = slave_d_ready;
   end
 
   // Make Slave A channel connections
-  assign slave_tl_h2d.a_valid     = slave_a_valid;
-  assign slave_tl_h2d.a_opcode    = ( slave_a_opcode == 3'h0) ? PutFullData : 
-                                    ((slave_a_opcode == 3'h1) ? PutPartialData : 
-                                    ((slave_a_opcode == 3'h4) ? Get : 
-                                      Get));                                   
-  assign slave_tl_h2d.a_param     = slave_a_param;
-  assign slave_tl_h2d.a_mask      = slave_a_mask;
-  assign slave_tl_h2d.a_data      = slave_a_data;
-  assign slave_tl_h2d.a_user      = tl_a_user_t'('0);  // User field is unused by Rocket Chip
-  assign slave_tl_h2d.d_ready     = slave_d_ready;
-  
   // Make Slave D channel connections
   // Converting from the OpenTitan enumerated type to specific bit mappings
   assign slave_d_opcode         = ( slave_tl_d2h.d_opcode == AccessAck)     ? 3'h0 :

@@ -36,7 +36,7 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   input [2:0]                     slave_a_param,
   input [SLAVE_TL_SZW-1:0]        slave_a_size,
   input [SLAVE_TL_AIW-1:0]        slave_a_source,
-  input [SLAVE_TL_AW-1:00]        slave_a_address,
+  input [SLAVE_TL_AW-1:0]         slave_a_address,
   input [SLAVE_TL_DBW-1:0]        slave_a_mask,
   input [SLAVE_TL_DW-1:0]         slave_a_data,
   input                           slave_a_corrupt,
@@ -87,31 +87,32 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   `ASSERT_INIT(scratchpad_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
   `ASSERT_INIT(scratchpad_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
   
+  // Make Slave A channel connections
   always @*
   begin
-    slave_tl_h2d_i.a_size                       <= '0;
-    slave_tl_h2d_i.a_size[SLAVE_TL_SZW-1:0]     <= slave_a_size;
-    slave_tl_h2d_i.a_source                     <= '0;
-    slave_tl_h2d_i.a_source[SLAVE_TL_AIW-1:0]   <= slave_a_source;
-    slave_tl_h2d_i.a_address                    <= '0;
-    slave_tl_h2d_i.a_address[SLAVE_TL_AW-1:0]   <= slave_a_address;
+    slave_tl_h2d_i.a_size                       = '0;
+    slave_tl_h2d_i.a_size[SLAVE_TL_SZW-1:0]     = slave_a_size;
+    slave_tl_h2d_i.a_source                     = '0;
+    slave_tl_h2d_i.a_source[SLAVE_TL_AIW-1:0]   = slave_a_source;
+    slave_tl_h2d_i.a_address                    = '0;
+    slave_tl_h2d_i.a_address[SLAVE_TL_AW-1:0]   = slave_a_address;
     
-    slave_d_size                                <= slave_tl_d2h_o.d_size[SLAVE_TL_SZW-1:0];
-    slave_d_source                              <= slave_tl_d2h_o.d_source[SLAVE_TL_AIW-1:0];
-    slave_d_sink                                <= slave_tl_d2h_o.d_sink[SLAVE_TL_DIW-1:0];
+    slave_d_size                                = slave_tl_d2h_o.d_size[SLAVE_TL_SZW-1:0];
+    slave_d_source                              = slave_tl_d2h_o.d_source[SLAVE_TL_AIW-1:0];
+    slave_d_sink                                = slave_tl_d2h_o.d_sink[SLAVE_TL_DIW-1:0];
+  
+    slave_tl_h2d_i.a_valid                      = slave_a_valid;
+    slave_tl_h2d_i.a_opcode                     = ( slave_a_opcode == 3'h0) ? PutFullData : 
+                                                  ((slave_a_opcode == 3'h1) ? PutPartialData : 
+                                                  ((slave_a_opcode == 3'h4) ? Get : 
+                                                    Get));                                   
+    slave_tl_h2d_i.a_param                      = slave_a_param;
+    slave_tl_h2d_i.a_mask                       = slave_a_mask;
+    slave_tl_h2d_i.a_data                       = slave_a_data;
+    slave_tl_h2d_i.a_user                       = tl_a_user_t'('0);  // User field is unused by Rocket Chip
+    slave_tl_h2d_i.d_ready                      = slave_d_ready;
   end
 
-  // Make Slave A channel connections
-  assign slave_tl_h2d_i.a_valid     = slave_a_valid;
-  assign slave_tl_h2d_i.a_opcode    = ( slave_a_opcode == 3'h0) ? PutFullData : 
-                                    ((slave_a_opcode == 3'h1) ? PutPartialData : 
-                                    ((slave_a_opcode == 3'h4) ? Get : 
-                                      Get));                                   
-  assign slave_tl_h2d_i.a_param     = slave_a_param;
-  assign slave_tl_h2d_i.a_mask      = slave_a_mask;
-  assign slave_tl_h2d_i.a_data      = slave_a_data;
-  assign slave_tl_h2d_i.a_user      = tl_a_user_t'('0);  // User field is unused by Rocket Chip
-  assign slave_tl_h2d_i.d_ready     = slave_d_ready;
   
   // Make Slave D channel connections
   // Converting from the OpenTitan enumerated type to specific bit mappings
@@ -191,7 +192,7 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   begin
     for (int i = 0; i < RegBw; i = i + 1)
       for (int j = 0; j < 8; j = j + 1)
-        scratchpad_mask_i[i*8 + j] <= slave_tl_h2d_o.a_mask[i];
+        scratchpad_mask_i[i*8 + j] = slave_tl_h2d_o.a_mask[i];
   end // end always
 
   // Generate the scratchpad address (which needs to be in terms of 64-bit words)
@@ -201,49 +202,53 @@ module scratchpad_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   assign scratchpad_write_i       = slave_tl_h2d_o.a_valid & slave_tl_d2h_i.a_ready & ((slave_tl_h2d_o.a_opcode == PutFullData) | (slave_tl_h2d_o.a_opcode == PutPartialData));
   assign scratchpad_wdata_i       = slave_tl_h2d_o.a_data;
 
-  // D Channel read data is immediately mapped to the FIFO given theat registered RAM reads.  All other d_channel 
-  // signals will need be registered to ensure it is aligned with the data
-  assign slave_tl_d2h_i.d_data    = scratchpad_rdata_o;
+  // See if an out of bound address was provided
+  always @*
+  begin
+    if ((slave_tl_h2d_o.a_valid == 1) && (scratchpad_addr_i >= (DEPTH / 8)))
+      addr_err                  = 1'b1;
+    else
+      addr_err                  = 1'b0;
+  end
 
-  // The issue with directly connecting d_ready to a_ready, is that it does NOT allow for proper absorption of a request that was just read from
-  // the request FIFO (Channel A).  Given the registered RAM output (and associated registering of other signals destined for the D Channel), 
-  // there could be a reequest in-flight when d_channel becomes NOT ready, thus the need for using almost full.
-  assign slave_tl_d2h_i.a_ready   = !rsp_almost_full;
+  always @*
+  begin
+    // D Channel read data is immediately mapped to the FIFO given theat registered RAM reads.  All other d_channel 
+    // signals will need be registered to ensure it is aligned with the data
+    slave_tl_d2h_i.d_data    = scratchpad_rdata_o;
 
-  // See if an out of bound address was provided 
-  always @(scratchpad_addr_i or slave_tl_h2d_o.a_valid) begin
-    addr_err                    <= 1'b0;
-    
-    if (slave_tl_h2d_o.a_valid == 1 && scratchpad_addr_i >= (DEPTH / 8))
-      addr_err                  <= 1'b1;
+    // The issue with directly connecting d_ready to a_ready, is that it does NOT allow for proper absorption of a request that was just read from
+    // the request FIFO (Channel A).  Given the registered RAM output (and associated registering of other signals destined for the D Channel), 
+    // there could be a reequest in-flight when d_channel becomes NOT ready, thus the need for using almost full.
+    slave_tl_d2h_i.a_ready   = !rsp_almost_full;
   end
 
   // Perform the remaining tilelink connections
   always_ff @(posedge clk or posedge rst) begin
     if (rst) begin
-      slave_tl_d2h_i.d_opcode   <= AccessAck;
-      slave_tl_d2h_i.d_param    <= '0;
-      slave_tl_d2h_i.d_size     <= '0;
-      slave_tl_d2h_i.d_source   <= '0;
-      slave_tl_d2h_i.d_sink     <= '0;
-      slave_tl_d2h_i.d_user     <= '0;
-      slave_tl_d2h_i.d_error    <= '0;
-      slave_tl_d2h_i.d_valid    <= '0;
+      slave_tl_d2h_i.d_opcode   = AccessAck;
+      slave_tl_d2h_i.d_param    = '0;
+      slave_tl_d2h_i.d_size     = '0;
+      slave_tl_d2h_i.d_source   = '0;
+      slave_tl_d2h_i.d_sink     = '0;
+      slave_tl_d2h_i.d_user     = '0;
+      slave_tl_d2h_i.d_error    = '0;
+      slave_tl_d2h_i.d_valid    = '0;
     end else begin
       //  The following assingment methodology is borrowed from the tlul_adapter_reg component
       if ((slave_tl_h2d_o.a_opcode == PutFullData) | (slave_tl_h2d_o.a_opcode == PutPartialData))
-        slave_tl_d2h_i.d_opcode   <= AccessAck;
+        slave_tl_d2h_i.d_opcode   = AccessAck;
       else
-        slave_tl_d2h_i.d_opcode   <= AccessAckData;
+        slave_tl_d2h_i.d_opcode   = AccessAckData;
 
-      slave_tl_d2h_i.d_param    <= '0;
-      slave_tl_d2h_i.d_size     <= slave_tl_h2d_o.a_size;
-      slave_tl_d2h_i.d_source   <= slave_tl_h2d_o.a_source;
-      slave_tl_d2h_i.d_sink     <= '0;
-      slave_tl_d2h_i.d_user     <= '0;
-      slave_tl_d2h_i.d_error    <= tl_err || addr_err;
+      slave_tl_d2h_i.d_param    = '0;
+      slave_tl_d2h_i.d_size     = slave_tl_h2d_o.a_size;
+      slave_tl_d2h_i.d_source   = slave_tl_h2d_o.a_source;
+      slave_tl_d2h_i.d_sink     = '0;
+      slave_tl_d2h_i.d_user     = '0;
+      slave_tl_d2h_i.d_error    = tl_err || addr_err;
       // We cannot process the response if not ready
-      slave_tl_d2h_i.d_valid    <= slave_tl_h2d_o.a_valid & slave_tl_d2h_i.a_ready;
+      slave_tl_d2h_i.d_valid    = slave_tl_h2d_o.a_valid & slave_tl_d2h_i.a_ready;
     end // end if (!rst_ni)
   end // always_ff @(posedge clk_i or negedge rst_ni)
 
