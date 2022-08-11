@@ -102,6 +102,20 @@ ifeq ($(SUB_PROJECT),cep_cosim)
 	CHIPYARD_BUILD_INFO := $(sim_dir)/CHIPYARD_BUILD_INFO.make
 endif
 
+ifeq ($(SUB_PROJECT),cep_verilator)
+	SBT_PROJECT       	?= chipyard
+	MODEL             	?= TestHarness
+	VLOG_MODEL        	?= TestHarness
+	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	CONFIG            	?= CEPVerilatorRocketConfig
+	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
+	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)
+	TB                	?= TestDriver
+	TOP               	?= ChipTop
+	SORT_SCRIPT       	:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         	:= $(base_dir)/cep_sort.f
+endif
+
 # default chipyard build
 ifeq ($(SUB_PROJECT),chipyard)
 	SBT_PROJECT       ?= chipyard

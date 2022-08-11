@@ -6,6 +6,18 @@
 
 # CEP Changelog
 
+## [v4.30] - 2022-08-XX
+
+### Added
+  - Add cep_verilator SUB_PROJECT to allow for Verilator-based CEP simulations
+
+### Changed
+  - Removed all // synopsys full_case parallel_case synthesis directives
+  - Performed verilator-based lint cleanup of CEP verilog/system verilog code
+
+### Fixed
+  - GPS pcode Known Answer Tests now agrees with the HW
+
 ## [v4.20] - 2022-08-03
 
 ### Added
