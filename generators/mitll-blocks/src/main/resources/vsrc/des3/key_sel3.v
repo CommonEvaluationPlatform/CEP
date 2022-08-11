@@ -55,7 +55,7 @@ always @(clk)
         if (reset)
             K = 56'b0;
         else
-    case ({decrypt, roundSel[5:4]})  // synopsys full_case parallel_case
+    case ({decrypt, roundSel[5:4]})
         3'b0_00:
             K = key1;
         3'b0_01:
@@ -79,7 +79,7 @@ assign decrypt_int = (roundSel[5:4]==2'h1) ? !decrypt : decrypt;
 
 always @(*)
     begin
-            case(roundSel[3:0])  // synopsys full_case parallel_case
+            case(roundSel[3:0])
                 0:
                     K_sub = K1;
                 1:

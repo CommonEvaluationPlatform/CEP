@@ -43,7 +43,7 @@ input clk;
 
 always @(*)
     begin
-        case ({addr[1], addr[6], addr[2:5]}) //synopsys full_case parallel_case
+        case ({addr[1], addr[6], addr[2:5]})
             0:
                 dout =  2;
             1:

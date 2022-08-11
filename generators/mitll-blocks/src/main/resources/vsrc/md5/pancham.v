@@ -302,7 +302,7 @@ always @(current_state
 
         next_state = current_state;
 
-        case (1'b1) // synopsys full_case parallel_case
+        case (1'b1)
 
             current_state[IDLE_BIT]:
                 begin // {
