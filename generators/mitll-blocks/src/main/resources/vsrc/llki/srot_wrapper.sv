@@ -1197,7 +1197,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             // read the LLKI-PP ready status
             end else begin
               // Point the Key RAM to the next word
-              keyram_stm_addr_i     <= current_pointer + 16'(1);
+              keyram_stm_addr_i     <= top_pkg::TL_AW'(current_pointer) + top_pkg::TL_AW'(1);
 
               current_pointer       <= current_pointer + 16'(1);
               srot_current_state    <= ST_SROT_KL_READ_READY_STATUS;

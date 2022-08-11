@@ -102,6 +102,7 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   `ASSERT_INIT(srot_slaveTlDbw, top_pkg::TL_DBW == SLAVE_TL_DBW)
   `ASSERT_INIT(srot_slaveTlDw, top_pkg::TL_DW == SLAVE_TL_DW)
   
+  // Make Slave A channel connections
   always @*
   begin
     slave_tl_h2d.a_size                         = '0;
@@ -127,7 +128,6 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
     slave_tl_h2d.d_ready                        = slave_d_ready;
   end
 
-  // Make Slave A channel connections
   // Make Slave D channel connections
   // Converting from the OpenTitan enumerated type to specific bit mappings
   assign slave_d_opcode         = ( slave_tl_d2h.d_opcode == AccessAck)     ? 3'h0 :
