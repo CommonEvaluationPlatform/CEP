@@ -5,6 +5,9 @@ ifndef GCC
 $(error GCC is not defined)
 endif
 
+REPO_ROOT_DIR		:= $(shell git rev-parse --show-toplevel)
+
+
 libgloss_specs := htif_nano.specs
 
 # Test whether libgloss-htif is globally installed and usable
@@ -16,11 +19,11 @@ BUILD_LIBGLOSS ?= $(shell { echo 'int main(void) { return 0; }' | \
 ifneq ($(BUILD_LIBGLOSS),)
 $(info libgloss-htif: Using local build)
 
-libgloss_srcdir := ../toolchains/libgloss
+libgloss_srcdir := $(REPO_ROOT_DIR)/toolchains/libgloss
 libgloss_builddir := libgloss
 libgloss_specs := $(libgloss_srcdir)/util/$(libgloss_specs)
 libgloss_lib := $(libgloss_builddir)/libgloss_htif.a
-libgloss := $(libgloss_lib) $(libgloss_specs) htif.ld
+libgloss := $(libgloss_lib) $(libgloss_specs) $(libgloss_srcdir)/util/htif.ld
 
 LDFLAGS += -L libgloss
 

@@ -2,3 +2,4 @@
 *.dump
 *.elf
 *.img
+*.riscv

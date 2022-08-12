@@ -11,10 +11,6 @@
 //************************************************************************
 
 #include <stdio.h>
-#include <stdint.h>
-#include "encoding.h"
-#include "compiler.h"
-#include "kprintf.h"
 
 int main() {
 
