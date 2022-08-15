@@ -218,7 +218,7 @@ class WithSROT extends Config((site, here, up) => {
     ))
 })
 
-class WithSROTFPGA extends Config((site, here, up) => {
+class WithSROTFPGAAESOnly extends Config((site, here, up) => {
   case SROTKey => List(
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),

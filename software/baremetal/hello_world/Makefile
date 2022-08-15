@@ -53,6 +53,7 @@ LDFLAGS 		+= -nostdlib -nostartfiles -lgcc
 OBJS 			:= crt.o syscalls.o kprintf.o
 LDSCRIPT 		:= link.ld
 
+# Include libgloss if targetting verilator
 else ifeq ($(PLATFORM_TARGET), verilator)
 include $(REPO_ROOT_DIR)/tests/libgloss.mk
 endif
@@ -63,7 +64,6 @@ default: riscv dump img elf
 .PHONY: default riscv dump img elf
 
 dump: $(addsuffix .dump,$(MAINPROGRAM))
-img: $(addsuffix .img,$(MAINPROGRAM))
 
 # Common targets
 %.o: %.S $(HDRS)
@@ -75,6 +75,7 @@ img: $(addsuffix .img,$(MAINPROGRAM))
 # FPGA unique targets
 ifeq ($(PLATFORM_TARGET), fpga)
 elf: $(addsuffix .elf,$(MAINPROGRAM))
+img: $(addsuffix .img,$(MAINPROGRAM))
 
 %.elf: %.o $(OBJS) $(LDSCRIPT)
 	$(GCC) $(LDFLAGS) -T $(LDSCRIPT) -o $@ $< $(OBJS)
@@ -95,8 +96,6 @@ riscv: $(addsuffix .riscv,$(MAINPROGRAM))
 
 %.riscv: %.o $(libgloss)
 	$(GCC) $(LDFLAGS) $< -o $@
-%.img: %.riscv
-	$(OBJCOPY) -O binary $< $@
 %.dump: %.riscv
 	$(OBJDUMP) -D $< > $@
 endif

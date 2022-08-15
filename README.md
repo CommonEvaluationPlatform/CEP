@@ -118,7 +118,7 @@ These subprojects define the system configuration and are as follows:
 - RSA Core
 - Surrogate Root of Trust
 
-`cep_big_vcu118` - 
+`cep_vcu118` - 
 - 125 MHz Core Frequency
 - 17% LUT Utilization
 - 4x WithNBigCores

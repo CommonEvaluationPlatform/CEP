@@ -3,7 +3,7 @@
 //
 // This file is auto-generated for test: DFT. Do not modify!!!
 //
-// Generated on: Jun 15 2022 07:52:54
+// Generated on: Aug 15 2022 14:11:08
 //************************************************************************
 #ifndef DFT_playback_H
 #define DFT_playback_H
@@ -1978,7 +1978,6 @@ uint64_t DFT_playback[] = {
 
 #define DFT_adrBase 0x0070050000
 #define DFT_adrSize 0x10000
-#define DFT_size 5870
 #define DFT_cmdCnt4Single 390
 #define DFT_totalCommands 1950
 #endif

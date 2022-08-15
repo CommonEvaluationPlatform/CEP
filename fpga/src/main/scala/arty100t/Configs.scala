@@ -81,7 +81,7 @@ class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithAES ++
-  new chipyard.config.WithSROTFPGA ++
+  new chipyard.config.WithSROTFPGAAESOnly ++
 
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++

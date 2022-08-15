@@ -6,7 +6,7 @@
 
 void kputc(int c)
 {
-#ifndef DISABLE_KPRINTF 
+#ifdef ENABLE_KPUTC
   volatile uint32_t *tx = &REG32(uart, UART_REG_TXFIFO);
   while ((int32_t)(*tx) < 0);
   *tx = (c & 0xFF);
@@ -15,7 +15,7 @@ void kputc(int c)
 
 int kgetc(void)
 {
-#ifndef DISABLE_KPRINTF
+#ifdef ENABLE_KPUTC
   uint32_t ch;
   volatile uint32_t *rx = &REG32(uart, UART_REG_RXFIFO);
   ch = *rx;

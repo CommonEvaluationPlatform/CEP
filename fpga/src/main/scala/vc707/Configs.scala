@@ -163,8 +163,8 @@ class RocketVC707CEPConfig extends Config(
   // Overide the chip info 
   new WithDTS("mit-ll,cep-vc707", Nil) ++
 
-  // with reduced cache size, closes timing at 50 MHz
-  new WithFPGAFrequency(100) ++
+  // Set operating frequency
+  new WithFPGAFrequency(75) ++
 
   // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithVC707CEPTweaks ++
@@ -172,8 +172,8 @@ class RocketVC707CEPConfig extends Config(
   // Instantiate four big cores
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++
   
-  // Default Chipyard AbstractConfig with L2 removed
-  new chipyard.config.AbstractNoL2Config
+  // Default Chipyard AbstractConfig
+  new chipyard.config.AbstractConfig
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config(

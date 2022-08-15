@@ -165,6 +165,10 @@ ifeq ($(SUB_PROJECT),icenet)
 	TOP               ?= UnitTestSuite
 endif
 
+ifeq ($(SBT_PROJECT),)
+$(error Invalid SUB_PROJECT)
+endif
+
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################

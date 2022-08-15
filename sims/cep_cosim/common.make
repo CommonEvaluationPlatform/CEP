@@ -40,8 +40,8 @@ endif
 NOWAVE          			?= 1
 TL_CAPTURE      			?= 0
 BYPASS_PLL                  ?= 0
-DISABLE_KPRINTF             ?= 1
 DISABLE_CHISEL_PRINTF		?= 1
+BAREMETAL_PRINTF			?= none
 
 # The following flags are defined here to support the eventual enablement of legacy functionality
 override PROFILE   			= 0
@@ -139,7 +139,7 @@ V2C_CMD						= ${BIN_DIR}/v2c.pl
 #--------------------------------------------------------------------------------------
 # To detect if any important flags have changed since last run
 #--------------------------------------------------------------------------------------
-PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${DISABLE_CHISEL_PRINTF}_${DISABLE_KPRINTF}_${TL_CAPTURE}_${USE_GDB}_${BYPASS_PLL}
+PERSUITE_CHECK = ${TEST_SUITE_DIR}/.PERSUITE_${DUT_SIM_MODE}_${NOWAVE}_${PROFILE}_${COVERAGE}_${DISABLE_CHISEL_PRINTF}_${BAREMETAL_PRINTF}_${TL_CAPTURE}_${USE_GDB}_${BYPASS_PLL}
 
 ${PERSUITE_CHECK}: .force
 	@if test ! -f ${PERSUITE_CHECK}; then rm -f ${TEST_SUITE_DIR}/.PERSUITE_*; touch ${PERSUITE_CHECK}; fi
@@ -178,7 +178,7 @@ endif
 	@echo "CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
 	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
-	@echo "CEP_COSIM:   DISABLE_KPRINTF        = ${DISABLE_KPRINTF}"
+	@echo "CEP_COSIM:   BAREMETAL_PRINTF       = ${BAREMETAL_PRINTF}"
 	@echo ""
 #--------------------------------------------------------------------------------------
 
@@ -369,8 +369,12 @@ User controlled options: (0 = not set, 1 = set)
   TL_CAPTURE              : Default: 0: Enables capturing of CEP core tilelink I/O as required by bareMetal macroMix tests and unit simulation
   BYPASS_PLL              : Default, 0: Applicable only when running the ASIC simulation, enables PLL bypass when set.
   DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores (not applicable in BFM mode)
-  DISABLE_KPRINTF         : Default, 1: When not set, maps the LOGI/W/E/F functions to printf, thus enabling printf functionality in bare metal mode.
-    
+  BAREMETAL_PRINTF        : <libgloss | kputc | none>: When compiling bare metal executables (e.g., riscv_wrapper.cc), controls how console I/O is handled.
+                            Options are:
+                            - libgloss : Use libgloss + UCB Host Target Interface.  Only applicable to simulating with Verilator.
+                            - kputc    : Use console (UART) I/O routines.  Naturally slow in simulation.  Must have for FPGA.
+                            - none     : Default.  Disable BAREMETAL I/O routines (any prints will effectively be routed to a /dev/null).
+
 Targets:
   usage                   : Print this usage information.
   sim_info                : Display the default/current environment/variable settings used by the cosim.
@@ -395,6 +399,8 @@ endef
 
 export MAKE_USAGE_HELP_BODY
 
+help: 
+	@echo "$$MAKE_USAGE_HELP_BODY"
 usage:
 	@echo "$$MAKE_USAGE_HELP_BODY"
 #--------------------------------------------------------------------------------------

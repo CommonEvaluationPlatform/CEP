@@ -131,7 +131,8 @@ class CEPRocketConfig extends Config(
 
 )
 
-// Chipyard Configuration for running with Verilator
+// CEP Chipyard Configuration for running with Verilator.  
+// Peripherals (UART, BootROM, etc.) are left @ chipyard default
 class CEPVerilatorRocketConfig extends Config(
   // Add the CEP Accelerator Cores
   new chipyard.config.WithAES ++

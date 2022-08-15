@@ -3,7 +3,7 @@
 //
 // This file is auto-generated for test: DES3. Do not modify!!!
 //
-// Generated on: Jun 15 2022 07:52:54
+// Generated on: Aug 15 2022 14:11:08
 //************************************************************************
 #ifndef DES3_playback_H
 #define DES3_playback_H
@@ -1528,7 +1528,6 @@ uint64_t DES3_playback[] = {
 
 #define DES3_adrBase 0x0070040000
 #define DES3_adrSize 0x10000
-#define DES3_size 4900
 #define DES3_cmdCnt4Single 30
 #define DES3_totalCommands 1500
 #endif

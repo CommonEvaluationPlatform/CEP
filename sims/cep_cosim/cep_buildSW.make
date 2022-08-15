@@ -25,10 +25,6 @@ COMMON_CFLAGS	        += -DASICMODE
 RISCV_BARE_CFLAGS       += -DASICMODE
 endif
 
-ifeq (${DISABLE_KPRINTF},1)
-RISCV_BARE_CFLAGS       += -DDISABLE_KPRINTF
-endif
-
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #
@@ -230,12 +226,20 @@ RISCV_VIRT_INC     		+= -I${DRIVERS_DIR}/virtual -I${RISCV_TEST_DIR}/isa/macros/
 # -lgcc                 - ?????
 RISCV_BARE_CFLAGS  		+= -mcmodel=medany -O2 -fno-common -fno-builtin-printf -fno-builtin-puts -Wall -Wno-unused-function
 RISCV_BARE_CFLAGS 		+= -I ${BARE_D} -I ${BARE_D}/include -I ${VECTOR_D} ${COMMON_INCLUDE_LIST}
-RISCV_BARE_CFLAGS 		+= -mabi=lp64 -march=rv64ima
 RISCV_BARE_CFLAGS 		+= -DBARE_MODE -DRISCV_CPU
 RISCV_BARE_LFILE		+= ${BARE_D}/cep_link.lds
-#RISCV_BARE_LFLAGS 		+= -static -nostdlib  -nostartfiles -lgcc -T ${RISCV_BARE_LFILE}
-#RISCV_BARE_LFLAGS 		+= -L${LIB_DIR} -lriscv
-RISCV_BARE_LFLAGS 		+= -static -nostdlib -nostartfiles -T ${RISCV_BARE_LFILE}
+RISCV_BARE_LFLAGS 		+= -static
+
+# Select the baremetal printf routines based on user choice
+ifeq ($(BAREMETAL_PRINTF), libgloss)
+RISCV_BARE_CFLAGS       += -DVERILATOR	
+RISCV_BARE_LFLAGS		+= -L libgloss -specs=htif_nano.specs
+else ifeq ($(BAREMETAL_PRINTF), kputc)
+RISCV_BARE_CFLAGS       += -DENABLE_KPUTC -mabi=lp64 -march=rv64ima
+else
+RISCV_BARE_CFLAGS       += -mabi=lp64 -march=rv64ima
+RISCV_BARE_LFLAGS 		+= -nostdlib -nostartfiles -T ${RISCV_BARE_LFILE}
+endif
 
 # Additional common flags
 COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
@@ -333,7 +337,7 @@ ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_VIRT_CFILES} ${COMMON_DEPEND
 	${BIN_DIR}/createPassFail.pl riscv_wrapper.dump PassFail.hex
 else
 ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDENCIES} riscv_wrapper.cc 
-	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} riscv_wrapper.cc  ${RISCV_LIB} -o riscv_wrapper.elf
+	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} riscv_wrapper.cc ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
@@ -369,7 +373,11 @@ ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
 	touch $@
 
 # riscv_lib.a: bare/apis/diag
+ifeq ($(BAREMETAL_PRINTF),libgloss)
+${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST}
+else
 ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
+endif
 	$(RISCV_AR) rcuvs $@ $?
 	touch $@
 
