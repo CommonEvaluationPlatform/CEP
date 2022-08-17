@@ -55,7 +55,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
 })
 
 class WithVC707CEPTweaks extends Config(
-  // harness bindersn
+  // harness binders
   new WithUART ++
   new WithSPISDCard ++
   new WithDDRMem ++

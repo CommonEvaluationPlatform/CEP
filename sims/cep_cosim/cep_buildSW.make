@@ -236,6 +236,7 @@ RISCV_BARE_CFLAGS       += -DVERILATOR
 RISCV_BARE_LFLAGS		+= -L libgloss -specs=htif_nano.specs
 else ifeq ($(BAREMETAL_PRINTF), kputc)
 RISCV_BARE_CFLAGS       += -DENABLE_KPUTC -mabi=lp64 -march=rv64ima
+RISCV_BARE_LFLAGS 		+= -nostdlib -nostartfiles -T ${RISCV_BARE_LFILE}
 else
 RISCV_BARE_CFLAGS       += -mabi=lp64 -march=rv64ima
 RISCV_BARE_LFLAGS 		+= -nostdlib -nostartfiles -T ${RISCV_BARE_LFILE}

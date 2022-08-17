@@ -67,6 +67,15 @@ else
 $(error CEP_COSIM: ${DUT_SIM_MODE} is invalid)
 endif
 
+# Perform BAREMETAL_PRINTF check
+ifeq "$(findstring libgloss,${BAREMETAL_PRINTF})" "libgloss"
+override BAREMETAL_PRINTF = libgloss
+else ifeq "$(findstring kputc,${BAREMETAL_PRINTF})" "kputc"
+override BAREMETAL_PRINTF = kputc
+else
+override BAREMETAL_PRINTF = none
+endif
+
 # Validate the Chipyard verilog has been built by looking for the generated makefile
 # This is not required if the current make target is riscv_wrapper, riscv_wrapper_sd_write, or one of the cleans
 ifeq "$(findstring riscv_wrapper,${MAKECMDGOALS})" ""

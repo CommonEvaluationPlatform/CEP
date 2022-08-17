@@ -1249,7 +1249,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           host_addr_i               <= '0;
           host_we_i                 <= '0;
           host_wdata_i              <= '0;
-          keyram_stm_addr_i           <= '0;
+          keyram_stm_addr_i         <= '0;
           llkic2_reqfifo_rready_i   <= '0;
           llkic2_respfifo_wvalid_i  <= '0;
           llkic2_respfifo_wdata_i   <= '0;

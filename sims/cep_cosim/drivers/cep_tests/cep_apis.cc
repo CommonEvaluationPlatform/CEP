@@ -481,9 +481,6 @@ int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int tot
     }
   }
 
-  if (verbose)
-  	LOGI("%s: no errors detected\n");
-
   return errCnt;
 }
 
