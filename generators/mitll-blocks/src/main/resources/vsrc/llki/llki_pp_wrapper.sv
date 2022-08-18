@@ -218,7 +218,7 @@ module llki_pp_wrapper import tlul_pkg::*; import llki_pkg::*; #(
       llkipp_ctrlstatus_register[LLKIKL_CTRLSTS_RESP_WAITING]   <= llkipp_response_waiting;
 
       // The LLKI-PP provides minimal buffering for messages (and key words) received from
-      // Thus,  the SRoT can poll the ready for key bit in the LLKI-PP Control/Status register
+      // Thus,  the SRoT must poll the ready for key bit in the LLKI-PP Control/Status register
       // to determine that the LLKI-PP (and TSS) is ready to receive the next key word
       llkipp_ctrlstatus_register[LLKIKL_CTRLSTS_READY_FOR_KEY]  <= llkid_key_ready;
       

@@ -158,10 +158,17 @@ package llki_pkg;
     // +----------------------------------------------------------------------+
     //
     //
-    // MSG ID : Only the following message IDs are valid on the LLKIC2 request interface:
-    //  - LLKI_MID_C2LOADKEYREQ
-    //  - LLKI_MID_C2CLEARKEYREQ
-    //  - LLKI_MID_C2KEYSTATUSREQ
+    // MSG ID : Only the following message IDs are valid on the LLKIKL request interface:
+    //  - LLKI_MID_KLLOADKEYREQ
+    //  - LLKI_MID_KLCLEARKEYREQ
+    //  - LLKI_MID_KLKEYSTATUSREQ
+    //
+    // LLKI KL PP -> SRoT Message Format
+    //
+    // 63                               32 31             16 15     8 7      0  
+    // +----------------------------------+-----------------+--------+--------+ 
+    // |              Reserved            |     MSG LEN     | STATUS | MSG ID |  1
+    // +----------------------------------+-----------------+--------+--------+ 
     localparam  LLKI_MID_KLLOADKEYREQ           = 8'h07;
     localparam  LLKI_MID_KLCLEARKEYREQ          = 8'h08;
     localparam  LLKI_MID_KLKEYSTATUSREQ         = 8'h09;
@@ -214,7 +221,6 @@ package llki_pkg;
         ST_SROT_RETRIEVE_KEY_INDEX,
         
         ST_SROT_KL_REQ_HEADER,
-        ST_SROT_KL_REQ_ISSUE,
         ST_SROT_KL_REQ_WAIT_FOR_ACK,
 
         ST_SROT_KL_READ_READY_STATUS,

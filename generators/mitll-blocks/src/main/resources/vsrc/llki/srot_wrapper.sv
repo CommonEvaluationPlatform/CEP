@@ -107,8 +107,10 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Create the structures for communicating with OpenTitan-based Tilelink
   tl_h2d_t                      slave_tl_h2d;
   tl_d2h_t                      slave_tl_d2h;
-  tl_h2d_t                      master_tl_h2d;
-  tl_d2h_t                      master_tl_d2h;
+  tl_h2d_t                      master_tl_h2d_i;
+  tl_h2d_t                      master_tl_h2d_o;
+  tl_d2h_t                      master_tl_d2h_i;
+  tl_d2h_t                      master_tl_d2h_o;
 
   // In the OpenTitan world, TL buses are encapsulated with the structures instantitated above
   // and as defined in top_pkg.sv.  This includes field widths.
@@ -178,39 +180,39 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Make Master D channel connections
   always @*
   begin
-    master_a_size                             = master_tl_h2d.a_size[MASTER_TL_SZW-1:0];
-    master_a_source                           = master_tl_h2d.a_source[MASTER_TL_AIW-1:0];
-    master_a_address                          = master_tl_h2d.a_address[MASTER_TL_AW-1:0];
+    master_a_size                               = master_tl_h2d_o.a_size[MASTER_TL_SZW-1:0];
+    master_a_source                             = master_tl_h2d_o.a_source[MASTER_TL_AIW-1:0];
+    master_a_address                            = master_tl_h2d_o.a_address[MASTER_TL_AW-1:0];
 
-    master_tl_d2h.d_size                      = '0;
-    master_tl_d2h.d_size[MASTER_TL_SZW-1:0]   = master_d_size;
-    master_tl_d2h.d_source                    = '0;
-    master_tl_d2h.d_source[MASTER_TL_AIW-1:0] = master_d_source;
-    master_tl_d2h.d_sink                      = '0;
-    master_tl_d2h.d_sink[MASTER_TL_DIW-1:0]   = master_d_sink;
+    master_tl_d2h_i.d_size                      = '0;
+    master_tl_d2h_i.d_size[MASTER_TL_SZW-1:0]   = master_d_size;
+    master_tl_d2h_i.d_source                    = '0;
+    master_tl_d2h_i.d_source[MASTER_TL_AIW-1:0] = master_d_source;
+    master_tl_d2h_i.d_sink                      = '0;
+    master_tl_d2h_i.d_sink[MASTER_TL_DIW-1:0]   = master_d_sink;
 
-    master_tl_d2h.d_data                      = master_d_data;
-    master_tl_d2h.d_opcode                    = ( master_d_opcode == 3'h0) ? AccessAck : 
-                                                ((master_d_opcode == 3'h1) ? AccessAckData : 
-                                                  AccessAck); 
-    master_tl_d2h.d_param                     = master_d_param;
-    master_tl_d2h.d_user                      = tl_a_user_t'('0);
-    master_tl_d2h.d_error                     = master_d_corrupt || master_d_denied;
-    master_tl_d2h.d_valid                     = master_d_valid;
-    master_tl_d2h.a_ready                     = master_a_ready;
+    master_tl_d2h_i.d_data                      = master_d_data;
+    master_tl_d2h_i.d_opcode                    = ( master_d_opcode == 3'h0) ? AccessAck : 
+                                                  ((master_d_opcode == 3'h1) ? AccessAckData : 
+                                                    AccessAck); 
+    master_tl_d2h_i.d_param                     = master_d_param;
+    master_tl_d2h_i.d_user                      = tl_a_user_t'('0);
+    master_tl_d2h_i.d_error                     = master_d_corrupt || master_d_denied;
+    master_tl_d2h_i.d_valid                     = master_d_valid;
+    master_tl_d2h_i.a_ready                     = master_a_ready;
   end
 
   // Make Master A channel connections
-  assign master_a_mask          = master_tl_h2d.a_mask;
-  assign master_a_data          = master_tl_h2d.a_data;
-  assign master_a_opcode        = ( master_tl_h2d.a_opcode == PutFullData)    ? 3'h0 :
-                                  ((master_tl_h2d.a_opcode == PutPartialData) ? 3'h1 :
-                                  ((master_tl_h2d.a_opcode == Get)            ? 3'h4 :
+  assign master_a_mask          = master_tl_h2d_o.a_mask;
+  assign master_a_data          = master_tl_h2d_o.a_data;
+  assign master_a_opcode        = ( master_tl_h2d_o.a_opcode == PutFullData)    ? 3'h0 :
+                                  ((master_tl_h2d_o.a_opcode == PutPartialData) ? 3'h1 :
+                                  ((master_tl_h2d_o.a_opcode == Get)            ? 3'h4 :
                                     3'h4));
-  assign master_a_param         = master_tl_h2d.a_param;
+  assign master_a_param         = master_tl_h2d_o.a_param;
   assign master_a_corrupt       = 0;
-  assign master_a_valid         = master_tl_h2d.a_valid;
-  assign master_d_ready         = master_tl_h2d.d_ready;
+  assign master_a_valid         = master_tl_h2d_o.a_valid;
+  assign master_d_ready         = master_tl_h2d_o.d_ready;
 
   // Define some of the wires and registers associated with the tlul_adapter_reg
   wire                          reg_we_o;
@@ -300,8 +302,42 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
     .valid_o  (host_valid_o       ),
     .rdata_o  (host_rdata_o       ),
     .err_o    (host_err_o         ),
-    .tl_o     (master_tl_h2d      ),
-    .tl_i     (master_tl_d2h      )
+    .tl_o     (master_tl_h2d_i    ),
+    .tl_i     (master_tl_d2h_o    )
+  );
+  //------------------------------------------------------------------------
+
+
+  //------------------------------------------------------------------------
+  // Instiated a TL-UL FIFO to buffer the mastered interface
+  //------------------------------------------------------------------------
+  localparam        REQ_FIFO_DEPTH        = 8;
+  localparam        REQ_FIFO_ALMOST_FULL  = REQ_FIFO_DEPTH - 2;
+  wire [DepthW-1:0] req_depth_o;
+  wire              req_almost_full;
+  assign            req_almost_full       = (req_depth_o >= REQ_FIFO_ALMOST_FULL) ? 1'b1 : 1'b0;
+
+  tlul_fifo_sync #(
+    .ReqPass      (1),                // The request FIFO will be a fall-through
+    .RspPass      (1),                // The response FIFO will be also be fall-through
+    .ReqDepth     (REQ_FIFO_DEPTH),   // Complete passthrough mode
+    .RspDepth     (0),                // The maximum number of words we can expect
+    .SpareReqW    (1),                // Unused (A value of zero results in an incorrect FIFO width)
+    .SpareRspW    (1)                 // Unused
+  ) tlul_master_fifo_sync_inst (
+    .clk_i        (clk),
+    .rst_ni       (~rst),
+    .tl_h_i       (master_tl_h2d_i),
+    .tl_h_o       (master_tl_d2h_o),
+    .tl_d_i       (master_tl_d2h_i),
+    .tl_d_o       (master_tl_h2d_o),
+    .spare_req_i  ('0),
+    .spare_req_o  (),
+    .spare_rsp_i  ('0),
+    .spare_rsp_o  (),
+    .req_depth_o  (req_depth_o),
+    .rsp_depth_o  ()
+
   );
   //------------------------------------------------------------------------
 
@@ -404,7 +440,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   //------------------------------------------------------------------------
 
 
-
+  
   //------------------------------------------------------------------------
   // Key Index RAM
   //------------------------------------------------------------------------
@@ -531,7 +567,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
       srot_ctrlstatus_register[SROT_CTRLSTS_RESP_WAITING]   <= ~llkic2_respfifo_empty;
 
       // Test Bits
-      srot_ctrlstatus_register[63:32]						<= 32'hDEAD_BEEF;
+      srot_ctrlstatus_register[63:32]           <= 32'hDEAD_BEEF;
 
       // A write has been requested
       if (reg_we_o) begin
@@ -739,9 +775,9 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
       host_wdata_i              <= '0;
       keyindexram_stm_addr_i    <= '0;
       keyram_stm_addr_i         <= '0;
-      llkic2_reqfifo_clr_i      <= 1'b0;
-      llkic2_reqfifo_rready_i   <= 1'b0;
-      llkic2_respfifo_wvalid_i  <= 1'b0;
+      llkic2_reqfifo_clr_i      <= '0;
+      llkic2_reqfifo_rready_i   <= '0;
+      llkic2_respfifo_wvalid_i  <= '0;
       llkic2_respfifo_wdata_i   <= '0;
       rsvd                      <= '0;
       msg_id                    <= '0;
@@ -766,8 +802,8 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           host_wdata_i              <= '0;
           keyindexram_stm_addr_i    <= '0;
           keyram_stm_addr_i         <= '0;
-          llkic2_reqfifo_rready_i   <= 1'b0;
-          llkic2_respfifo_wvalid_i  <= 1'b0;
+          llkic2_reqfifo_rready_i   <= '0;
+          llkic2_respfifo_wvalid_i  <= '0;
           llkic2_respfifo_wdata_i   <= '0;
           rsvd                      <= '0;
           msg_id                    <= '0;
@@ -917,6 +953,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
         end   // ST_RETRIEVE_KEY_INDEX
         //------------------------------------------------------------------
         // Create Header for the request to the specified LLKI-PP
+        // We're gonna wait here until the Master TL-UL FIFO is not full
         //------------------------------------------------------------------
         ST_SROT_KL_REQ_HEADER             : begin
           // Default signal assignment
@@ -929,86 +966,56 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           llkic2_respfifo_wvalid_i  <= '0;
           llkic2_respfifo_wdata_i   <= '0;
           wait_state_counter        <= SROT_WAIT_STATE_COUNTER_INIT;
-          srot_current_state        <= ST_SROT_KL_REQ_ISSUE;
+          srot_current_state        <= ST_SROT_KL_REQ_HEADER;
 
-          // Save the low pointer, as it will used to determine how many key
-          // words we will be sending as well as indexing the Key RAM
-          current_pointer           <= low_pointer;
+          // Does the Master TL-UL FIFO have space?
+          if (~req_almost_full) begin
 
-          // Header generation is message specific
-          case (msg_id)
-            LLKI_MID_C2LOADKEYREQ   : begin
-              host_wdata_i[7:0]       <= LLKI_MID_KLLOADKEYREQ;
-              // For the Load Key Request Message length is equal
-              // to the 2 + (high_pointer - low pointer).
-              host_wdata_i[31:16]     <= (high_pointer - low_pointer) + 2;
-              host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
-              // Assert write enable and req (indicates a TL PutFullData operation)
-              host_req_i              <= 1'b1;
-              host_we_i               <= 1'b1;
-
-            end
-            LLKI_MID_C2CLEARKEYREQ  : begin
-              host_wdata_i[7:0]       <= LLKI_MID_KLCLEARKEYREQ;
-              host_wdata_i[31:16]     <= 16'h01;
-              host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
-              // Assert write enable and req (indicates a TL PutFullData operation)
-              host_req_i              <= 1'b1;
-              host_we_i               <= 1'b1;
-            end
-            LLKI_MID_C2KEYSTATUSREQ : begin
-              host_wdata_i[7:0]       <= LLKI_MID_KLKEYSTATUSREQ;
-              host_wdata_i[31:16]     <= 16'h01;
-              host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
-              // Assert write enable and req (indicates a TL PutFullData operation)
-              host_req_i              <= 1'b1;
-              host_we_i               <= 1'b1;
-            end
-            // Since we already checked for valid message IDs,
-            // this truely is a trap condition
-            default                 : begin
-              llkic2_reqfifo_clr_i    <= 1'b1;
-              status                  <= LLKI_STATUS_BAD_CORE_INDEX;
-              srot_current_state      <= ST_SROT_C2_RESPONSE;
-            end
-          endcase
-
-        end   // ST_SROT_KL_CREATE_HEADER
-        //------------------------------------------------------------------
-        // Assert host request in order to send the LLKI-PP Request
-        //------------------------------------------------------------------
-        ST_SROT_KL_REQ_ISSUE                : begin
-          // Default signal assignment
-          host_req_i                <= '0;
-          host_we_i                 <= '0;
-          keyram_stm_addr_i         <= '0;
-          llkic2_reqfifo_rready_i   <= '0;
-          llkic2_respfifo_wvalid_i  <= '0;
-          llkic2_respfifo_wdata_i   <= '0;
-          wait_state_counter        <= SROT_WAIT_STATE_COUNTER_INIT;
-          srot_current_state        <= ST_SROT_KL_REQ_ISSUE;
-
-          // Continue to assert write enable and req (indicates a TL PutFullData operation)
-          host_req_i                <= 1'b1;
-          host_we_i                 <= 1'b1;
-
-          // Wait for grant indicating the write has been sent
-          if (host_gnt_o) begin
-            host_req_i              <= 1'b0;
-            host_we_i               <= 1'b0;
-            
-            // Jump to the Request Wait for Ack state
+            // Request is going to be issued, jump to "wait for acknowledgement"
             srot_current_state      <= ST_SROT_KL_REQ_WAIT_FOR_ACK;
 
-            // Did an error get asserted?
-            if (host_err_o) begin
-              msg_id                <= LLKI_MID_C2ERRORRESP;        
-              status                <= LLKI_STATUS_KL_TILELINK_ERROR;
-              msg_len               <= 16'h0001;
-              srot_current_state    <= ST_SROT_C2_RESPONSE;
-            end
-          end // end if (host_gnt_o)
-        end // ST_SROT_KL_REQ_WAIT_FOR_GRANT
+            // Save the low pointer, as it will used to determine how many key
+            // words we will be sending as well as indexing the Key RAM
+            current_pointer           <= low_pointer;
+
+            // Header generation is message specific
+            case (msg_id)
+              LLKI_MID_C2LOADKEYREQ   : begin
+                host_wdata_i[7:0]       <= LLKI_MID_KLLOADKEYREQ;
+                // For the Load Key Request Message length is equal
+                // to the 2 + (high_pointer - low pointer).
+                host_wdata_i[31:16]     <= (high_pointer - low_pointer) + 2;
+                host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
+                // Assert write enable and req (indicates a TL PutFullData operation)
+                host_req_i              <= 1'b1;
+                host_we_i               <= 1'b1;
+              end
+              LLKI_MID_C2CLEARKEYREQ  : begin
+                host_wdata_i[7:0]       <= LLKI_MID_KLCLEARKEYREQ;
+                host_wdata_i[31:16]     <= 16'h01;
+                host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
+                // Assert write enable and req (indicates a TL PutFullData operation)
+                host_req_i              <= 1'b1;
+                host_we_i               <= 1'b1;
+              end
+              LLKI_MID_C2KEYSTATUSREQ : begin
+                host_wdata_i[7:0]       <= LLKI_MID_KLKEYSTATUSREQ;
+                host_wdata_i[31:16]     <= 16'h01;
+                host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
+                // Assert write enable and req (indicates a TL PutFullData operation)
+                host_req_i              <= 1'b1;
+                host_we_i               <= 1'b1;
+              end
+              // Since we already checked for valid message IDs,
+              // this truely is a trap condition
+              default                 : begin
+                llkic2_reqfifo_clr_i    <= 1'b1;
+                status                  <= LLKI_STATUS_BAD_CORE_INDEX;
+                srot_current_state      <= ST_SROT_C2_RESPONSE;
+              end
+            endcase
+          end  // if (~req_almost_full)
+        end   // ST_SROT_KL_CREATE_HEADER
         //------------------------------------------------------------------
         // Using the OpenTitan tlul_adapter_host module, even writes get
         // "acknowledged" through the assertion of the valid_o bit, which
@@ -1059,22 +1066,16 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           wait_state_counter        <= SROT_WAIT_STATE_COUNTER_INIT;
           srot_current_state        <= ST_SROT_KL_READ_READY_STATUS;
 
-          // We want to read the selected LLKI-PP Control/Status Register
-          host_addr_i               <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_CTRLSTS_OFFSET;
-          host_req_i                <= 1'b1;
+          // Does the Master TL-UL FIFO have space to issue a request?
+          if (~req_almost_full) begin
+            // We want to read the selected LLKI-PP Control/Status Register
+            host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_CTRLSTS_OFFSET;
+            host_req_i              <= 1'b1;
 
-          // Did an error get asserted?
-          if (host_err_o) begin
-            msg_id                  <= LLKI_MID_C2ERRORRESP;        
-            status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 16'h0001;
-            srot_current_state      <= ST_SROT_C2_RESPONSE;
-          // Wait until the request has been granted, then jump to
-          // the check status state
-          end else if (host_gnt_o) begin
             // Jump to next 
             srot_current_state      <= ST_SROT_KL_CHECK_READY_STATUS;
-          end
+
+          end // end if (~req_almost_full)
         end // ST_SROT_KL_READ_READY_STATUS
         //------------------------------------------------------------------
         // The Ready Status has been read, now time to check it
@@ -1094,22 +1095,15 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           // Valid data has been returned
           if (host_valid_o) begin
 
-          	// If a response is waiting at this point, the select LLKI PP block
-          	// has prematurely generated a response, likely due to an error condition.
-          	// Jump to fetching the response status
-          	if (host_rdata_o[LLKIKL_CTRLSTS_RESP_WAITING] == 1'b1) begin
+            // If a response is waiting at this point, the select LLKI PP block
+            // has prematurely generated a response, likely due to an error condition.
+            // Jump to fetching the response status
+            if (host_rdata_o[LLKIKL_CTRLSTS_RESP_WAITING] == 1'b1) begin
               
               srot_current_state        <= ST_SROT_KL_READ_RESP_STATUS;
 
-            // The select LLKI-PP is ready for a key
+            // The select LLKI-PP is ready for a word of key
             end else if (host_rdata_o[LLKIKL_CTRLSTS_READY_FOR_KEY] == 1'b1) begin
-              // Issue the key write, understanding that if host_gnt_o is
-              // already asserted, this will only be set for a single clock cycle
-              host_addr_i               <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
-              host_wdata_i              <= keyram_rdata_o;
-              host_req_i                <= 1'b1;
-              host_we_i                 <= 1'b1;
-
               srot_current_state        <= ST_SROT_KL_LOAD_KEY_WORD;
             // Response is NOT waiting, jump to wait state
             end else begin
@@ -1156,23 +1150,19 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           wait_state_counter        <= SROT_WAIT_STATE_COUNTER_INIT;
           srot_current_state        <= ST_SROT_KL_LOAD_KEY_WORD;
 
-          // Hold the signals, until host_gnt_o is issued
-          host_addr_i               <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
-          host_wdata_i              <= keyram_rdata_o;
-          host_req_i                <= 1'b1;
-          host_we_i                 <= 1'b1;
+          // Does the Master TL-UL FIFO have space to issue a request?
+          if (~req_almost_full) begin
 
-          // The write request has been granted
-          if (host_gnt_o) begin
-            // Clear up some signals
-            host_addr_i             <= '0;            
-            host_wdata_i            <= '0;
-            host_req_i              <= '0;
-            host_we_i               <= '0;
+            // Write the data
+            host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_SENDRECV_OFFSET;
+            host_wdata_i            <= keyram_rdata_o;
+            host_req_i              <= 1'b1;
+            host_we_i               <= 1'b1;
 
             // Jump to the next state
             srot_current_state      <= ST_SROT_KL_LOAD_KEY_WORD_WAIT_FOR_ACK;
-          end
+
+          end // end if (~req_almost_full)
         end // ST_SROT_KL_LOAD_KEY_WORD
         //------------------------------------------------------------------
         // The key word write has been issued, we need to wait until it
@@ -1223,21 +1213,13 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           wait_state_counter        <= SROT_WAIT_STATE_COUNTER_INIT;
           srot_current_state        <= ST_SROT_KL_READ_RESP_STATUS;
 
-          // We want to read the selected LLKI-PP Control/Status Register
-          host_addr_i               <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_CTRLSTS_OFFSET;
-          host_req_i                <= 1'b1;
-
-          // Did an error get asserted?
-          if (host_err_o) begin
-            msg_id                  <= LLKI_MID_C2ERRORRESP;        
-            status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
-            msg_len                 <= 16'h0001;
-            srot_current_state      <= ST_SROT_C2_RESPONSE;
-          // Wait until the request has been granted, then jump to
-          // the check status state
-          end else if (host_gnt_o) begin
+          // Does the Master TL-UL FIFO have space to issue a request?
+          if (~req_almost_full) begin
+            // We want to read the selected LLKI-PP Control/Status Register
+            host_addr_i             <= LLKI_CORE_INDEX_ARRAY[core_index] + LLKI_CTRLSTS_OFFSET;
+            host_req_i              <= 1'b1;
             srot_current_state      <= ST_SROT_KL_CHECK_RESP_STATUS;
-          end
+          end // end if (~req_almost_full)
         end // ST_SROT_KL_RESP_READ_STATUS
         //------------------------------------------------------------------
         // The read request has been issued and granted, but now we need
@@ -1275,7 +1257,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           end // end else if (host_err_o)
         end // ST_SROT_KL_RESP_CHECK_STATUS
         //------------------------------------------------------------------
-        // This wait state is used to avoid spaming the Host interface
+        // This wait state is used to avoid spaming the Host(Master) interface
         // while waiting for the select LLKI-PP block to process a message
         //------------------------------------------------------------------
         ST_SROT_KL_RESP_WAIT_STATE        : begin
@@ -1284,26 +1266,29 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           host_addr_i               <= '0;
           host_we_i                 <= '0;
           host_wdata_i              <= '0;
-          keyram_stm_addr_i           <= '0;
+          keyram_stm_addr_i         <= '0;
           llkic2_reqfifo_rready_i   <= '0;
           llkic2_respfifo_wvalid_i  <= '0;
           llkic2_respfifo_wdata_i   <= '0;
           current_pointer           <= '0;
           srot_current_state        <= ST_SROT_KL_RESP_WAIT_STATE;
 
-          // Decrement the wait state counter
-          wait_state_counter        <= wait_state_counter - 1;
-
+          // Decrement the Wait State Counter
+          if (wait_state_counter > 0) begin
+            wait_state_counter      <= wait_state_counter - 1;
+          end
+          
           // Did an error get asserted?
           if (host_err_o) begin
             msg_id                  <= LLKI_MID_C2ERRORRESP;        
             status                  <= LLKI_STATUS_KL_TILELINK_ERROR;
             msg_len                 <= 16'h0001;
             srot_current_state      <= ST_SROT_C2_RESPONSE;
-          end else if (wait_state_counter == 0) begin
+          // We have hit zero with the wait state count, but we really should ensure
+          // the request fifo has space
+          end else if (wait_state_counter == 0 && ~req_almost_full) begin
             srot_current_state      <= ST_SROT_KL_READ_RESP_STATUS;
-          end
-
+          end // if (host_err_o)
         end // ST_SROT_KL_RESP_WAIT_STATE
         //------------------------------------------------------------------
         // Read LLKI-PP Reponse
@@ -1411,7 +1396,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
             LLKI_STATUS_KL_TILELINK_ERROR,
             LLKI_STATUS_KL_LOSS_OF_SYNC,
             LLKI_STATUS_KL_BAD_KEY_LEN,
-            LLKI_STATUS_KL_KEY_OVERWRITE     	: begin
+            LLKI_STATUS_KL_KEY_OVERWRITE      : begin
               llkic2_respfifo_wdata_i[7:0]    <= LLKI_MID_C2ERRORRESP;
               llkic2_respfifo_wdata_i[15:8]   <= status;
               llkic2_respfifo_wdata_i[31:16]  <= 16'h01;
@@ -1441,8 +1426,8 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
           host_addr_i               <= '0;
           host_we_i                 <= '0;
           host_wdata_i              <= '0;
-          keyindexram_stm_addr_i      <= '0;
-          keyram_stm_addr_i           <= '0;
+          keyindexram_stm_addr_i    <= '0;
+          keyram_stm_addr_i         <= '0;
           llkic2_reqfifo_clr_i      <= '0;
           llkic2_reqfifo_rready_i   <= '0;
           llkic2_respfifo_wvalid_i  <= '0;
