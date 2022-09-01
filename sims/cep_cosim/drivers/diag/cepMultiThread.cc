@@ -166,7 +166,7 @@ int cepMultiThread_runThr(int thrId, uint64_t testLockPtr, int coreMask, int max
     cep_core_info_t core = cep_core_info[coreIndex];
     core_type_t type     = core.type;
 
-    if (IS_ON(coreIndex) && core.enabled && thrId == core.preferred_cpuId) {
+    if (IS_ON(coreIndex) && core.core_enabled && thrId == core.preferred_cpuId) {
       //if ( IS_ON(coreIndex) && core.enabled ) {
       switch (type) {
        

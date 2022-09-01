@@ -106,7 +106,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
     //  - Is the core enabled in the cep_core_info structure (from CEP.h)?
     //  - Is the current cpuId = to the preferred ID listed in the aforementioned structure?
     //  - Was the current cpuId enabled cepMacroMix_runTest was called?
-    if (CORE_ACTIVE(coreIndex) && core.enabled && cpuId == core.preferred_cpuId && CPU_ACTIVE(cpuId)) {
+    if (CORE_ACTIVE(coreIndex) && core.core_enabled && cpuId == core.preferred_cpuId && CPU_ACTIVE(cpuId)) {
 
       switch (type) {
       
@@ -188,7 +188,7 @@ int cepMacroMix_runTest(int cpuId, int cpuActiveMask, int coreMask, int seed, in
           break;
         }
       } // switch (cpuId)
-    } // if (IS_ON(coreIndex) && core.enabled && cpuId == core.preferred_cpuId)
+    } // if (IS_ON(coreIndex) && core.core_enabled && cpuId == core.preferred_cpuId)
   } // for (coreIndex)
 
 // else do nothing
@@ -234,7 +234,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
     //  - Is the core enabled in the cep_core_info structure (from CEP.h)?
     //  - Is the current cpuId = to the preferred ID listed in the aforementioned structure?
     //  - Was the current cpuId enabled cepMacroMix_runTest was called?
-    if (CORE_ACTIVE(coreIndex) && core.enabled && cpuId == core.preferred_cpuId && CPU_ACTIVE(cpuId)) {
+    if (CORE_ACTIVE(coreIndex) && core.core_enabled && cpuId == core.preferred_cpuId && CPU_ACTIVE(cpuId)) {
 
       switch (type) {
       
@@ -309,7 +309,7 @@ int cepMacroMix_runBadKeysTest(int cpuId, int cpuActiveMask, int coreMask, int s
           break;
         }
       } // switch (cpuId)
-    } // if (IS_ON(coreIndex) && core.enabled && cpuId == core.preferred_cpuId)
+    } // if (IS_ON(coreIndex) && core.core_enabled && cpuId == core.preferred_cpuId)
   } // for (coreIndex)
 
 srot.freeMe();

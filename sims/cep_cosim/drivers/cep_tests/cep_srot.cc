@@ -266,7 +266,7 @@ int cep_srot::LLKI_Setup(int cpuId) {
 
       core_type_t coreType = core.type;
       
-      if (IS_ON(coreIndex) && core.enabled) {
+      if (IS_ON(coreIndex) && core.core_enabled && core.llki_enabled) {
 
         // Load the appropriate key
         errCnt += LoadLLKIKey(
