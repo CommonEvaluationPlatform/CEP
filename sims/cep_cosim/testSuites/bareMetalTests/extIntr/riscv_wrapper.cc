@@ -100,8 +100,11 @@ void handle_trap(unsigned long long mcause, void *mepc, void *sp)
 //
 // Main
 //
-void thread_entry(int cid, int nc)
-{
+#ifdef VERILATOR
+  int main() {
+#else
+  void thread_entry(int cid, int nc) {
+#endif
   //
   int errCnt = 0;
   uint32_t offS;  
@@ -150,7 +153,18 @@ void thread_entry(int cid, int nc)
   // Stuck here forever...
   //
 
-  exit(errCnt);
+    // Exit with the error count
+#ifdef VERILATOR
+    if (errCnt)
+      LOGE("Test Failed\n");
+    else
+      LOGI("Test Passed\n");
+
+    return errCnt;
+#else    
+    exit(errCnt);
+#endif
+
 }
 
 #endif

@@ -24,7 +24,11 @@
   extern "C" {
   #endif
   
+#ifdef VERILATOR
+  int main() {
+#else
   void thread_entry(int cid, int nc) {
+#endif
     
     int errCnt    = 0;
     int testId[4] = {0x00, 0x11, 0x22, 0x33};
@@ -46,7 +50,16 @@
     set_status(errCnt, testId[coreId]);
 
     // Exit with the error count
+#ifdef VERILATOR
+    if (errCnt)
+      LOGE("Test Failed\n");
+    else
+      LOGI("Test Passed\n");
+
+    return errCnt;
+#else    
     exit(errCnt);
+#endif
   }
 
   #ifdef __cplusplus
