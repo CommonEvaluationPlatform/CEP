@@ -380,15 +380,19 @@ User controlled options: (0 = not set, 1 = set)
   DISABLE_CHISEL_PRINTF	  : Default, 1: When not set, enables instruction trace of the Rocket Cores (not applicable in BFM mode)
   BAREMETAL_PRINTF        : <libgloss | kputc | none>: When compiling bare metal executables (e.g., riscv_wrapper.cc), controls how console I/O is handled.
                             Options are:
-                            - libgloss : Use libgloss + UCB Host Target Interface.  Only applicable to simulating with Verilator.
-                            - kputc    : Use console (UART) I/O routines.  Naturally slow in simulation.  Must have for FPGA.
-                            - none     : Default.  Disable BAREMETAL I/O routines (any prints will effectively be routed to a /dev/null).
+                            - libgloss : (VERILATOR)  Use libgloss + UCB Host Target Interface.  Only applicable to simulating with Verilator.
+                            - kputc    : (FPGA/COSIM) Use console (UART) I/O routines.  Naturally slow in co-simulation.  Must have for FPGA.
+                            - none     : (ALL)        Default. Disable BAREMETAL I/O routines (any prints will effectively be routed to a /dev/null).
+  DISK                    : Specifies the target device for the riscv_wrapper_sd_write target (e.g., DISK=/dev/sdd1)
 
 Targets:
-  usage                   : Print this usage information.
+  default                 : Single test: run the test with default settings, Testsuite / CoSim: print usage steps
+  usage, help             : Print this usage information.
   sim_info                : Display the default/current environment/variable settings used by the cosim.
   summary                 : Defined at the testSuite and cosim level.  Aggregates test status into a single file.
   runAll                  : Run all the tests below the current level (cosim or testSuite)
+  riscv_wrapper           : Build the riscv_wrapper.elf/.img/.dump/.hex, but don't run the simulation
+  riscv_wrapper_sd_write  : Write the riscv_wrapper.img to the device specified by DISK.
 
 Unique isaTests Targets (recommend following instructions in $(COSIM_TOP_DIR)/README.md)  
   createISATests          : Create individual cosim tests from riscv-tests (Only ISA tests are supported).
@@ -402,7 +406,7 @@ Clean Targets:
   cleanDo                 : Clean any .do files within the current test directory.
   cleanAll                : Clean all tests, all suites, and libraries.
 
-Default make targets at the cosim and testSuite directory are "usage".  At the individual test level, the simulation will be run.
+Default make targets at the cosim and testSuite directory are "usage".  At the individual test level, the simulation will be run with default options.
 
 endef
 

@@ -58,9 +58,13 @@ SHARE_SRC       = $(wildcard ${SHARE_D}/*.cc)
 SIMDIAG_SRC     = $(wildcard ${SIMDIAG_D}/*.cc)
 PLI_SRC         = $(wildcard ${PLI_D}/*.cc)
 
-# Bare metal source includes both .c and .S files
+# When running with libgloss (Verilator), ingore all bare metal source EXCEPT bare_malloc.c
+ifeq ($(BAREMETAL_PRINTF),libgloss)
+BARE_SRC        = $(BARE_D)/bare_malloc.c
+else
 BARE_SRC        = $(wildcard ${BARE_D}/*.c)
 BARE_SRC        += $(wildcard ${BARE_D}/*.S)
+endif
 
 SRC_H           = $(wildcard ${SRC_D}/*.h)
 APIS_H          = $(wildcard ${APIS_D}/*.h)
@@ -374,11 +378,7 @@ ${VPP_LIB}: ${SHARE_OBJ_LIST} ${PLI_OBJ_LIST}
 	touch $@
 
 # riscv_lib.a: bare/apis/diag
-ifeq ($(BAREMETAL_PRINTF),libgloss)
-${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST}
-else
 ${RISCV_LIB}: ${APIS_BOBJ_LIST} ${DIAG_BOBJ_LIST} ${BARE_BOBJ_LIST}
-endif
 	$(RISCV_AR) rcuvs $@ $?
 	touch $@
 

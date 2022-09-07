@@ -26,9 +26,12 @@
   #define BLOCK_SIZE_BITS 6
   #define BLOCK_SIZE (1 << BLOCK_SIZE_BITS)
 
-  //int main(void)
+  #ifdef VERILATOR
+  int main() {
+#else
   void thread_entry(int cid, int nc) {
-    int errCnt = 0,i,to,b;
+#endif
+  int errCnt = 0,i,to,b;
     int testId[4] = {0x00,0x11,0x22,0x33};
     int coreId = read_csr(mhartid);
     int partnerId = (coreId + 1) % MAX_CORES;
@@ -109,7 +112,16 @@
     set_status(errCnt,stat);
   
     // Exit with the error count
+#ifdef VERILATOR
+    if (errCnt)
+      LOGE("Test Failed\n");
+    else
+      LOGI("Test Passed\n");
+
+    return errCnt;
+#else    
     exit(errCnt);
+#endif  
   }
 
   #ifdef __cplusplus

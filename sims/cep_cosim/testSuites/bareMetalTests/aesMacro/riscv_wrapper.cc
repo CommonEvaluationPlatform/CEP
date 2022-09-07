@@ -77,6 +77,11 @@ cleanup:
 
     // Exit with the error count
 #ifdef VERILATOR
+    if (errCnt)
+      LOGE("Test Failed\n");
+    else
+      LOGI("Test Passed\n");
+
     return errCnt;
 #else    
     exit(errCnt);
