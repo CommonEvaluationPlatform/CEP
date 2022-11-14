@@ -10,6 +10,7 @@
 
 ### Added
   - Add cep_verilator SUB_PROJECT to allow for Verilator-based CEP simulations
+  - Modified all bare-metal cosimulation tests to support execution on Verilator (However, not all tests pass)
 
 ### Changed
   - Removed all // synopsys full_case parallel_case synthesis directives

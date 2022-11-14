@@ -251,6 +251,33 @@ For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep
 
 Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).
 
+### Simulation using Verilator
+
+The cosimulation bare metal tests can be run on Verilator.
+
+Begin by building the Verilator executable:
+```
+cd <CEP_ROOT>/sims/verilator
+make SUB_PROJECT=cep_verilator
+```
+
+Once the verilator executable is built, code can be run using the following as an example:
+
+`./simulator-chipyard-CEPVerilatorRocketConfig ../../sims/cep_cosim/testSuites/bareMetalTests/regTest/riscv_wrapper.elf +loadmem=../../sims/cep_cosim/testSuites/bareMetalTests/regTest/riscv_wrapper.hex +loadmem_addr=80000000`
+
+
+The `+loadmem` and `+loadmem_addr` parameters support the fast loading of the executable, as described [here](https://chipyard.readthedocs.io/en/latest/Simulation/Software-RTL-Simulation.html#verilator-open-source).  Scroll down to Section 2.1.7.
+
+Is this case, the Co-simulation's bare metal register test has previously be built using the following commands:
+
+```
+cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
+make clean; make BAREMETAL_PRINTF=libgloss riscv_wrapper
+```
+
+The BAREMETAL_PRINTF=libgloss variable instructs the compiler to use libgloss / Host Target Interface for simplified printing through verilator.
+
+
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
 

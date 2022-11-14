@@ -345,7 +345,8 @@ ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_BARE_LFILE} ${COMMON_DEPENDE
 	$(RISCV_GCC) $(RISCV_BARE_CFLAGS) ${RISCV_BARE_LFLAGS} riscv_wrapper.cc ${RISCV_LIB} -o riscv_wrapper.elf
 	${RISCV_OBJDUMP} -S -C -d -l -x riscv_wrapper.elf > riscv_wrapper.dump
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img
-	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
+	$(REPO_TOP_DIR)/scripts/smartelf2hex.sh riscv_wrapper.elf > riscv_wrapper.hex
+
 endif
 
 .PHONY: riscv_wrapper riscv_wrapper_sd_write
