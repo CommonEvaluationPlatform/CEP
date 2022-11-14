@@ -6,7 +6,7 @@
 
 # CEP Changelog
 
-## [v4.30] - 2022-08-XX
+## [v4.30] - 2022-11-14
 
 ### Added
   - Add cep_verilator SUB_PROJECT to allow for Verilator-based CEP simulations
