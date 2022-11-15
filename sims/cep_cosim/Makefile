@@ -39,5 +39,11 @@ summary: .force
 		(cd ${COSIM_TOP_DIR}/testSuites/$${i}; make -s summary | sort | tee -a ${COSIM_TOP_DIR}/regressionSummary);	\
 	done
 
+# Allow for createISATests and removeISATests to be run from the root CEP sim directory
+createISATests:
+	make -C $(COSIM_TOP_DIR)/testSuites/isaTests $@
+removeISATests:
+	make -C $(COSIM_TOP_DIR)/testSuites/isaTests $@
+
 # Include the common makefile
 include $(COSIM_TOP_DIR)/common.make
