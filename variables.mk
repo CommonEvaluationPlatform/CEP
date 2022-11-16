@@ -164,6 +164,19 @@ ifeq ($(SUB_PROJECT),icenet)
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite
 endif
+# For Constellation developers
+ifeq ($(SUB_PROJECT),constellation)
+	SBT_PROJECT       ?= chipyard
+	MODEL             ?= TestHarness
+	VLOG_MODEL        ?= TestHarness
+	MODEL_PACKAGE     ?= constellation.test
+	CONFIG            ?= TestConfig00
+	CONFIG_PACKAGE    ?= constellation.test
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= TestDriver
+	TOP               ?= NoC
+endif
+
 
 ifeq ($(SBT_PROJECT),)
 $(error Invalid SUB_PROJECT)
@@ -239,7 +252,9 @@ SBT_CLIENT_FLAG = --client
 endif
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar $(SBT_OPTS)
+# Use java -jar approach by default so that SBT thin-client sees the JAVA flags
+# Workaround for behavior reported here: https://github.com/sbt/sbt/issues/6468
+SBT_BIN ?= java -jar $(ROCKETCHIP_DIR)/sbt-launch.jar
 SBT = $(SBT_BIN) $(SBT_CLIENT_FLAG)
 SBT_NON_THIN = $(subst $(SBT_CLIENT_FLAG),,$(SBT))
 

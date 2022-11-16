@@ -3,30 +3,33 @@
 set -e
 
 # this should be run from chipyard repo top
-TOPDIR=$(pwd)
+RDIR=$(git rev-parse --show-toplevel)
 
-cd generators/cva6/src/main/resources/vsrc
-git submodule deinit cva6
-
-cd $TOPDIR
-
-cd toolchains/qemu/roms/
-git submodule deinit edk2
-cd ../
-rm -rf build
-
-cd ../libgloss
-rm -rf build.log
-
-cd ../riscv-tools/riscv-isa-sim/
-rm -rf build.log
-
-cd ../riscv-pk
-rm -rf build.log
-
-cd ../riscv-tests
-rm -rf build.log
-
-cd $TOPDIR
-cd tools/api-config-chipsalliance
-git config --local status.showUntrackedFiles no
+rm -rf $RDIR/toolchains/libgloss/build.log
+rm -rf $RDIR/toolchains/riscv-tools/riscv-isa-sim/build.log
+rm -rf $RDIR/toolchains/riscv-tools/riscv-pk/build.log
+rm -rf $RDIR/toolchains/riscv-tools/riscv-tests/build.log
+rm -rf $RDIR/toolchains/esp-tools/riscv-isa-sim/build.log
+rm -rf $RDIR/toolchains/esp-tools/riscv-pk/build.log
+rm -rf $RDIR/toolchains/esp-tools/riscv-tests/build.log
+(
+    pushd $RDIR/generators/constellation
+    if [ -d espresso ]
+    then
+	git submodule deinit -f espresso
+    fi
+    popd
+)
+(
+    pushd $RDIR/tools/api-config-chipsalliance
+    git config --local status.showUntrackedFiles no
+    popd
+)
+(
+    pushd $RDIR/generators/cva6/src/main/resources/vsrc
+    if [ -d cva6 ]
+    then
+	git submodule deinit -f cva6
+    fi
+    popd
+)
