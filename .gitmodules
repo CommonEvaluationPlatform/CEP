@@ -112,9 +112,6 @@
 [submodule "toolchains/esp-tools/esp-tools-feedstock"]
 	path = toolchains/esp-tools/esp-tools-feedstock
 	url = https://github.com/ucb-bar/esp-tools-feedstock.git
-[submodule "toolchains/esp-tools/riscv-isa-sim"]
-	path = toolchains/esp-tools/riscv-isa-sim
-	url = https://github.com/ucb-bar/esp-isa-sim.git
 [submodule "toolchains/esp-tools/riscv-pk"]
 	path = toolchains/esp-tools/riscv-pk
 	url = https://github.com/riscv-software-src/riscv-pk.git
