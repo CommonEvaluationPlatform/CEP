@@ -220,8 +220,7 @@ $(TOP_TARGETS) $(HARNESS_TARGETS) &: $(FIRRTL_FILE) $(ANNO_FILE) $(VLOG_SOURCES)
 		--target-dir $(build_dir) \
 		--log-level $(FIRRTL_LOGLEVEL) \
 		$(EXTRA_FIRRTL_OPTIONS))
-# Force creation of the sim_harness_blackboxes file in the even that the harness is empty
-	touch $(sim_harness_blackboxes)
+	touch $(sim_top_blackboxes) $(sim_harness_blackboxes)
 # DOC include end: FirrtlCompiler
 
 # This file is for simulation only. VLSI flows should replace this file with one containing hard SRAMs

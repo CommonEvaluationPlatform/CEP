@@ -27,7 +27,7 @@ class AbstractCEPConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++            // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++           // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++  // no external interrupts
-  new chipyard.WithMulticlockCoherentBusTopology ++               // hierarchical buses including mbus+l2
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++   // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
   new freechips.rocketchip.system.BaseConfig                      // "base" rocketchip system
 )
 
@@ -76,7 +76,7 @@ class AbstractNoL2Config extends Config(
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++           // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++          // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++ // no external interrupts
-  new chipyard.WithMulticlockCoherentBusTopology ++              // hierarchical buses including mbus+l2
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++  // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
   new freechips.rocketchip.system.BaseConfig)                    // "base" rocketchip system
 
 
