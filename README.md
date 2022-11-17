@@ -42,30 +42,19 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 ## Setting up your environment
 
-To build the CEP, several packages and toolsets must be installed and built.  The typical steps are listed below.  Additional information can be found in the Chipyard Documentation [here](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/index.html).
+A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, conda, etc.
 
-A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, and sbt (Simple Build Tool for Scala)
+It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation.
+
+Following these steps will result initialization of all the CEP submodules.
+
+Following the installation of conda, it is recommended you execute the following commands
+```
+  conda config --set auto_activate_base false       <-- don't automatically run the base environent upon execution of .bashrc
+  conda init bash                                   <-- Be sure bash is correctly configured with conda (other base environ deactivation will hang)  
+```
 
 If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
-
-* Install git if not already present on your system
-  * Ubuntu - `sudo apt install git`
-  * RHEL7  - `sudo yum install git`
-* Clone the CEP repository, change to the directory of the clone
-  * `git clone https://github.com/mit-ll/CEP.git`
-* Install package dependencies.  Copies of these files can also be found in the Chipyard Documentation listed above
-  * Ubuntu - `./scripts/ubuntu-reqs.sh`
-  * RHEL7  - `./scripts/centos-reqs.sh`
-* Initialize all the git submodules (including FPGA-related submodules).  There may be a warning about this not being a true chipyard repository which you can answer yes to.
-  * `./scripts/init-submodules-no-riscv-tools.sh`
-  * `./scripts/init-fpga.sh`
-* Build the RISC-V Toolchain.  
-  * Depending on your available hardware, you can expedite the build by executing `export MAKEFLAGS=-jN` prior to running the build script.  N is the number of cores you can devote to the build.
-  * `./scripts/build-toolchains.sh riscv-tools`
-* RHEL7: The chipyard build needs make v4.x or later, which is not included in the default packages.  Recommend building from source (https://ftp.gnu.org/gnu/make/).  Once installed, you can force the version of make used using the following: `MAKE=/usr/local/bin/make ./scripts/build-toolchains.sh riscv-tools`
-* It is advisable to move the compiled toolchain outside of the current repo if you plan to have multiple CEP working directories.  Complete directions are beyond the scope of this document, but they do include moving the `riscv-tools-install` directory and `env-riscv-tools.sh` file.  Modification of the aforementioned file as well as `env.sh` will required for smooth operation
-* Sometimes the toolchain build may fail.  One may need to run the build several times.
-* Once the toolchain is built, your want to source the new environment script: `source <CEP_ROOT>/env.sh`.
 
 ## Repository Directory Structure
 Providing a complete directory structure is impractical, but some items are highlighted here.  It is worth noting that most of the structure is inherited from Chipyard.
@@ -89,6 +78,8 @@ Providing a complete directory structure is impractical, but some items are high
 ```
 
 ### Building the CEP FPGA
+Begin by initializing the fpga-shells submodule: `<CEP_ROOT>/scripts/init_fpga.sh`.
+
 Multiple Chipyard *SUB_PROJECTS* have been defined for the CEP when targetting FPGA Development boards.  All of these have been verified to boot linux.
 
 These subprojects define the system configuration and are as follows:
