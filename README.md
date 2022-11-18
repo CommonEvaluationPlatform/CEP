@@ -33,6 +33,7 @@ The following items describe the configuration of the system that CEP has been d
 * Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
 * Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
+  - Note: The sifive tcl scripts for running vivado are not currently compatible with Vivado versions 2021.1 and 2022.1
 * Terminal emulator (such as `minicom`)
 * bash
 
@@ -44,9 +45,9 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, conda, etc.
 
-It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation.
+It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation.  
 
-Following these steps will result initialization of all the CEP submodules.
+Following these steps will result in initialization of all the CEP submodules.
 
 Following the installation of conda, it is recommended you execute the following commands
 ```
