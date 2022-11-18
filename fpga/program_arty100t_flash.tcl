@@ -1,6 +1,6 @@
 #//--------------------------------------------------------------------------------------
 #// Copyright 2022 Massachusets Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
+#// SPDX short identifier: BSD-3-Clause
 #//
 #// File          : program_arty100t_flash.tcl
 #// Project       : Common Evaluation Platform (CEP)

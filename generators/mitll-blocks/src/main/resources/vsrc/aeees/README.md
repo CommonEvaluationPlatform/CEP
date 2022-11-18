@@ -1,5 +1,5 @@
 [//]: # (Copyright 2022 Massachusets Institute of Technology)
-[//]: # (SPDX short identifier: BSD-2-Clause)
+[//]: # (SPDX short identifier: BSD-3-Clause)
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)

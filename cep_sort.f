@@ -1,6 +1,6 @@
 //************************************************************************
 // Copyright 2021 Massachusetts Institute of Technology
-// SPDX short identifier: BSD-2-Clause
+// SPDX short identifier: BSD-3-Clause
 //
 // File Name:       cep_sort.f
 // Program:         Common Evaluation Platform (CEP)

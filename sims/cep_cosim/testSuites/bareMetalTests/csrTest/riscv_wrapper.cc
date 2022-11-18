@@ -1,5 +1,5 @@
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX short identifier: BSD-2-Clause
+// SPDX short identifier: BSD-3-Clause
 //
 // File Name:      riscv_wrapper.cc
 // Program:        Common Evaluation Platform (CEP)

@@ -4,7 +4,7 @@
 //
 //************************************************************************
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX short identifier: BSD-2-Clause
+// SPDX short identifier: BSD-3-Clause
 //
 // File Name:       tlul_adaptger_reg.sv
 // Program:         Common Evaluation Platform (CEP)
@@ -21,7 +21,7 @@
 //
 // Modifications:
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX short identifier: BSD-2-Clause
+// SPDX short identifier: BSD-3-Clause
 //
 // Module modified to allow for a delayed read-response (and avoid the live-decode problem)
 //

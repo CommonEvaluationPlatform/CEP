@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #//************************************************************************
 #// Copyright 2022 Massachusets Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
+#// SPDX short identifier: BSD-3-Clause
 #//
 #// File Name:      aeees_gen.py
 #// Program:        Common Evaluation Platform (CEP)

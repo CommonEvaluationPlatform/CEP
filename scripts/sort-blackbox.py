@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #//************************************************************************
 #// Copyright 2022 Massachusetts Institute of Technology
-#// SPDX short identifier: BSD-2-Clause
+#// SPDX short identifier: BSD-3-Clause
 #//
 #// File Name:      sort-blackbox.py
 #// Program:        Common Evaluation Platform (CEP)
