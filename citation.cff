@@ -12,9 +12,9 @@ authors:
     email: brendon.chetwynd@ll.mit.edu
     name-particle: Brendon
     family-names: Chetwynd
-  - name-particle: Kevin
-    family-names: Bush
-    email: kevin.bush@ll.mit.edu
+  - name-particle: Christopher
+    family-names: Connelly
+    email: connelly@ll.mit.edu
     affiliation: MIT Lincoln Laboratory
   - name-particle: Kyle
     family-names: Ingols
@@ -27,5 +27,5 @@ keywords:
     RISC-V, Rocket-Chip, Chipyard, Open Source
     Hardware, SoC Design, Semiconductor Security,
     Verification
-license: BSD-2-Clause
+license: BSD-3-Clause
 version: v4.0

@@ -1,10 +1,10 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
-[//]: # (SPDX short identifier: BSD-2-Clause)
+[//]: # (SPDX short identifier: BSD-3-Clause)
 
-# Common Evaluation Platform v4.3
+# Common Evaluation Platform v4.4
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
-[![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 <p align="center">
     <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
@@ -237,12 +237,12 @@ It is advisable to clean the buildroot build, should you change the configuratio
 
 If you ncurses-based gpiotest application crashes before cleanup, executing the `reset` command should restore terminal behavior.
 
-### CEP Co-Simulation
+### CEP Co-Simulation using QuestaSim or XCellium
 For simulation using the CEP Co-Simulation environment, the `cep_cosim` and `cep_cosim_asic` *SUB_PROJECTS* are defined in `<CEP_ROOT>/variables.mk`.  At this time, due to licensing constraints, the CEP ASIC build is not available as part of this repository.  As a result, any attempt to build it will fail given that a multitude of files are missing.  
 
 Instructions on the CEP Co-Simulation (including the Chipyard build) can be found [here](./sims/cep_cosim/README.md).
 
-### Simulation using Verilator
+### Chipyard-based simulation using Verilator
 
 The cosimulation bare metal tests can be run on Verilator.
 
@@ -268,7 +268,6 @@ make clean; make BAREMETAL_PRINTF=libgloss riscv_wrapper
 
 The BAREMETAL_PRINTF=libgloss variable instructs the compiler to use libgloss / Host Target Interface for simplified printing through verilator.
 
-
 ### Generated DSP code notes
 Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
 
@@ -281,15 +280,16 @@ Citation information is contained [here](./citation.cff)
 ## Licensing
 As the CEP has been developed with input from many sources, multiple licenses apply.  Please refer to the following files for licensing info. 
 * [CEP License](./LICENSE.md)
-* [CEP Components Licenses](./LICENSE.md)
-* [Chipyard License](./LICENSE.md)
+* [CEP Components Licenses](./LICENSE.Components.md)
+* [Chipyard License](./LICENSE.Chipyard.md)
 * [SiFive License](./LICENSE.SiFive.md)
 
 ## DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited.
-This material is based upon work supported by the Defense Advanced Research Projects Agency under Air Force Contract No. FA8702-15-D-0001. Any opinions, findings, conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Defense Advanced Research Projects Agency.
 
 © 2022 Massachusetts Institute of Technology
+•   Subject to FAR 52.227-11 – Patent Rights – Ownership by the Contractor (May 2014)
+•   SPDX-License-Identifier: BSD-2-Clause
 
-The software/firmware is provided to you on an As-Is basis.
+This material is based upon work supported by the Defense Advanced Research Projects Agency under Air Force Contract No. FA8702-15-D-0001. Any opinions, findings, conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Defense Advanced Research Projects Agency.
 
-Delivered to the U.S. Government with Unlimited Rights, as defined in DFARS Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice, U.S. Government rights in this work are defined by DFARS 252.227-7013 or DFARS 252.227-7014 as detailed above. Use of this work other than as specifically authorized by the U.S. Government may violate any copyrights that exist in this work
+The software/firmware is provided to you on an As-Is basis
