@@ -126,6 +126,8 @@ These subprojects define the system configuration and are as follows:
 - RSA Core
 - Surrogate Root of Trust
 
+In order to target the Arty100T, the Digilent vivado-boards support needs to be installed.  Instructions can be found [here](https://digilent.com/reference/programmable-logic/guides/installing-vivado-and-vitis).
+
 Assuming the Vivado environment scripts have been sourced within your current shell, the following commands can be used to build and program the FPGA *SUB_PROJECT*.  Programming requires that the digilent drivers have been installed and that you have a USB connection to the JTAG USB-port of you preffered FPGA board.
 
 Default CEP builds can be customized by following the instructions in the Chipyard documentation.
