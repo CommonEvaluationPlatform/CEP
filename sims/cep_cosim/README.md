@@ -4,7 +4,7 @@
 # Common Evaluation Platform - Co-Simulation Environment
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
-[![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 <p align="center">
    <img src="../../cep_docs/cep_architecture.jpg" width="1114" height="450">

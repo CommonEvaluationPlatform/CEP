@@ -33,8 +33,8 @@ The following items describe the configuration of the system that CEP has been d
 * Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
 * Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
-  - Note: The sifive tcl scripts for running vivado are not currently compatible with Vivado versions 2021.1 and 2022.1
-* Terminal emulator (such as `minicom`)
+  - *Note*: The sifive tcl scripts for running vivado are not currently compatible with Vivado versions 2021.1 and 2022.1
+* Terminal emulator (such as `minicom` or `screen`)
 * bash
 
 Other configurations may work, but they have not been explicitly verified.
@@ -163,10 +163,10 @@ Once released from reset, the CEP's bootrom will read the baremetal executable f
 
 An example UART output for the baremetal gpiotest follows:
 ```
----          Common Evaluation Platform v4.20            ---
+---          Common Evaluation Platform v4.40            ---
 ---         Based on the UCB Chipyard Framework          ---
 --- Copyright 2022 Massachusetts Institute of Technology ---
----     BootRom Image built on Aug  1 2022 12:41:36      ---
+---     BootRom Image built on Nov 18 2022 09:42:49      ---
 
 INIT
 CMD0
@@ -175,10 +175,8 @@ ACMD41
 CMD58
 CMD16
 CMD18
-LOADING 128kB PAYLOAD
-....
-BOOT
-
+LOADING 35840kB PAYLOAD
+......
 
 --------------------------
      RISC-V GPIO Test     
