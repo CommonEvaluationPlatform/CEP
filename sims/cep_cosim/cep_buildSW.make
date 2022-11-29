@@ -255,7 +255,11 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 							-DBIG_ENDIAN
 # The -B flag is to ensure g++ points to the correct version of LD (versus the one installed by conda)
 # Until libcrypto++ can be installed via conda, the g++ overrides are needed
-COMMON_LDFLAGS        	=	-B/usr/bin
+ifneq (, $(shell hostnamectl | grep "22.04"))
+	COMMON_LDFLAGS        	=	-B/usr/bin
+else
+	COMMON_LDFLAGS        	=
+endif
 
 # Flags for Hardware and Software simulation compilations
 SIM_HW_CFLAGS			:= 	${COMMON_CFLAGS} -DSIM_ENV_ONLY -D_SIM_HW_ENV
