@@ -29,7 +29,7 @@ Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the clo
 
 ## Pre-requisites (validated test/build configurations):
 The following items describe the configuration of the system that CEP has been developed and tested on:
-* Ubuntu 18.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
+* Ubuntu 18.04 or 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
 * Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
 * Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
@@ -45,6 +45,10 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 A note about proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, conda, etc.
 
+Prior to proceeding with the Chipyard setup, you'll need to install `libcrypto++-dev` package for your environment (as there is no conda recipe for libcrypto++).
+
+If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
+
 It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation.  
 
 Following these steps will result in initialization of all the CEP submodules.
@@ -54,11 +58,6 @@ Following the installation of conda, it is recommended you execute the following
   conda config --set auto_activate_base false       <-- don't automatically run the base environent upon execution of .bashrc
   conda init bash                                   <-- Be sure bash is correctly configured with conda (other base environ deactivation will hang)  
 ```
-
-If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
-
-After building the riscv-tools per the Chipyard instructions and sourcing the `<CEP_ROOT>/env.sh` script, you'll need to install `libcrypto++-dev` for your environment.  
-
 
 ## Repository Directory Structure
 Providing a complete directory structure is impractical, but some items are highlighted here.  It is worth noting that most of the structure is inherited from Chipyard.
