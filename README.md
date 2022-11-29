@@ -33,7 +33,7 @@ The following items describe the configuration of the system that CEP has been d
 * Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
 * Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
-  - *Note*: The sifive tcl scripts for running vivado are not currently compatible with Vivado versions 2021.1 and 2022.1
+  - *Note*: The sifive tcl scripts for running vivado are not currently compatible with later Vivado versions (2021.1 and 2022.1 tested)
 * Terminal emulator (such as `minicom` or `screen`)
 * bash
 
