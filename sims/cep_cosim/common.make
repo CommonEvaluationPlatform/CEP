@@ -138,6 +138,8 @@ ISA_TEST_TEMPLATE 			:= ${ISA_SUITE_DIR}/testTemplate
 RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/toolchains/riscv-tools/riscv-tests
 
 # Pointers to various binaries
+# With Chipyard 1.8+, which installs depdencies via conda, pointing these
+# binaries is needed until libcrypto++ can be installed via conda
 GCC     					= /usr/bin/g++
 AR 							= /usr/bin/ar
 RANLIB  					= /usr/bin/ranlib

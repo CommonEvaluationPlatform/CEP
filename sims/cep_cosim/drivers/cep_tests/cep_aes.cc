@@ -55,8 +55,13 @@ int cep_aes::cryptopp_aes192_ecb_encryption
 
   ECB_Mode< AES >::Encryption encryption;
   encryption.SetKey(&(mKEY[0]), GetKeySize());
+#if (CRYPTOPP_VERSION <= 600)
   encryption.ProcessLastBlock(output, input, GetBlockSize());
- 
+#else
+  encryption.ProcessLastBlock(output, GetBlockSize(), input, GetBlockSize());
+#endif
+
+
 #endif
   //
   return mErrCnt;

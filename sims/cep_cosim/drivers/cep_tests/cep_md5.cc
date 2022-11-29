@@ -10,8 +10,8 @@
 
 #if defined(BARE_MODE)
 #else
-#include <cryptopp/cryptlib.h>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#include <cryptopp/cryptlib.h>
 #include <cryptopp/md5.h>
 #include "simPio.h"
 
@@ -50,8 +50,14 @@ int cep_md5::prepare_md5_key_N_text
 
   CryptoPP::Weak::MD5 hash;
 
+#if (CRYPTOPP_VERSION <= 600)
   hash.Update((const byte *)input, length);
   hash.Final((byte *)&output[0]);
+#else
+  hash.Update((const CryptoPP::byte *)input, length);
+  hash.Final((CryptoPP::byte *)&output[0]);
+#endif
+
   *outlen = 64; // 64bytes
 
 #endif

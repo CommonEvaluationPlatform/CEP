@@ -57,6 +57,9 @@ Following the installation of conda, it is recommended you execute the following
 
 If using RHEL7, you need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
 
+After building the riscv-tools per the Chipyard instructions and sourcing the `<CEP_ROOT>/env.sh` script, you'll need to install `libcrypto++-dev` for your environment.  
+
+
 ## Repository Directory Structure
 Providing a complete directory structure is impractical, but some items are highlighted here.  It is worth noting that most of the structure is inherited from Chipyard.
 

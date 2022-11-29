@@ -9,6 +9,7 @@
 ## [v4.4] - 2022-11-XX
 
 ### Added
+  - Added support for Ubuntu 20.04 LTS w/libcrypto++8
 
 ### Changed
   - Updated Chipyard to v1.8.1

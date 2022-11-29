@@ -48,8 +48,14 @@ int cep_sha256::prepare_sha256_key_N_text
 
   CryptoPP::SHA256 hash;
 
+#if (CRYPTOPP_VERSION <= 600)
   hash.Update((const byte *)input, length);
   hash.Final((byte *)&output[0]);
+#else
+  hash.Update((const CryptoPP::byte *)input, length);
+  hash.Final((CryptoPP::byte *)&output[0]);
+#endif
+
   *outlen = 64; // 64bytes
 
 #endif
