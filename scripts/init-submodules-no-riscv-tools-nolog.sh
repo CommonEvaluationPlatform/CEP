@@ -109,7 +109,8 @@ cd "$RDIR"
             vlsi/hammer-cadence-plugins \
             vlsi/hammer-synopsys-plugins \
             vlsi/hammer-mentor-plugins \
-            fpga/fpga-shells
+            fpga/fpga-shells \
+            CEP_Chipyard_ASIC
         do
             "$1" "${name%/}"
         done
