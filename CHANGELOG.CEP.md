@@ -6,7 +6,7 @@
 
 # CEP Changelog
 
-## [v4.4] - 2022-11-XX
+## [v4.4] - 2022-12-01
 
 ### Added
   - Added support for Ubuntu 20.04 LTS w/libcrypto++8
