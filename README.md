@@ -1,8 +1,6 @@
 [//]: # (Copyright 2022 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
-# ---- ARCHIVED REPOSITORY ----
-## Main development nows resides [here](https://www.github.com/CommonEvaluationPlatform/CEP.git) in compliance with Revision B of the CEP Open Source Development Plan (Parrot Request #136347)
 # Common Evaluation Platform v4.4
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
