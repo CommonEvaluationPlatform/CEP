@@ -142,7 +142,7 @@ cep_preprocessing:
 	@echo "CEP:  Performing CEP Preprocessing step...."
 	@echo "CEP: ----------------------------------------------------------------------"
 ifeq "$(findstring cep_cosim_asic,${SUB_PROJECT})" "cep_cosim_asic"
-ifneq (, $(shell git submodule status $(base_dir)/CEP_Chipyard_ASIC | grep --quiet '^-'))
+ifneq (, $(shell git submodule status $(base_dir)/CEP_Chipyard_ASIC | grep '^-'))
 $(error CEP_Chipyard_ASIC submodule has not been initialized)
 endif
 	@echo "CEP:  Staging an ASIC build..."

@@ -1,3 +1,13 @@
+//************************************************************************
+// Copyright 2022 Massachusets Institute of Technology
+//
+// File Name:      build.sbt.nonasic
+// Program:        Common Evaluation Platform (CEP)
+// Description:    Non-ASIC variant of the standard Chipyard build.sbt
+// Notes:          
+//
+//************************************************************************
+
 import Tests._
 
 // This gives us a nicer handle to the root project instead of using the
