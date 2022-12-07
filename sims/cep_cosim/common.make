@@ -418,6 +418,8 @@ help:
 	@echo "$$MAKE_USAGE_HELP_BODY"
 usage:
 	@echo "$$MAKE_USAGE_HELP_BODY"
+info: 
+	@echo "$$MAKE_USAGE_HELP_BODY"
 #--------------------------------------------------------------------------------------
 
 # ifdef $(COMMON_MAKE_CALLED)

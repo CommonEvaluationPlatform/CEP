@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX License Identifier: BSD-3-Clause
 //
 // File Name:      cep_apis.cc
 // Program:        Common Evaluation Platform (CEP)
@@ -137,7 +137,7 @@ int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
     int       d         = 0;
     int       bCnt      = 0;  
     int       fileSize  = 0;
-
+    int       asicMode  = 0;
     // Open binary file
     fd = fopen(imageF, "rb");
 

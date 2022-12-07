@@ -1,6 +1,6 @@
 //************************************************************************
 // Copyright (C) 2021 Massachusetts Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX License Identifier: BSD-3-Clause
 //
 // File Name:      cep_dft/idft.cc/h
 // Program:        Common Evaluation Platform (CEP)

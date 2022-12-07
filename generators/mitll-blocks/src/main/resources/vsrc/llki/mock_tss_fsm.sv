@@ -1,6 +1,6 @@
 //************************************************************************
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX License Identifier: BSD-3-Clause
 //
 // File Name:       mock_tss_fsm.sv
 // Program:         Common Evaluation Platform (CEP)

@@ -288,7 +288,7 @@ As the CEP has been developed with input from many sources, multiple licenses ap
 
 © 2022 Massachusetts Institute of Technology
 •   Subject to FAR 52.227-11 – Patent Rights – Ownership by the Contractor (May 2014)
-•   SPDX-License-Identifier: BSD-2-Clause
+•   SPDX-License-Identifier: BSD-3-Clause
 
 This material is based upon work supported by the Defense Advanced Research Projects Agency under Air Force Contract No. FA8702-15-D-0001. Any opinions, findings, conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the Defense Advanced Research Projects Agency.
 

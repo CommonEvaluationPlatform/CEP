@@ -1,10 +1,10 @@
 //************************************************************************
 // Copyright 2022 Massachusets Institute of Technology
-// SPDX License Identifier: BSD-2-Clause
+// SPDX License Identifier: BSD-3-Clause
 //
-// File Name:      
+// File Name:      dpi_bitbang.cc
 // Program:        Common Evaluation Platform (CEP)
-// Description:    to be used with openocd
+// Description:    API functions for interfacing with OpenOCD
 // Notes:          
 //
 //************************************************************************
