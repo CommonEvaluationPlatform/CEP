@@ -6,6 +6,7 @@ import freechips.rocketchip.config.{Field, Parameters, Config}
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.tile._
+import freechips.rocketchip.devices.debug._
 
 import mitllBlocks.cep_addresses._
 import mitllBlocks.aes._
@@ -31,6 +32,16 @@ import chipyard._
 class WithSPI(address: BigInt = 0x64001000) extends Config((site, here, up) => {
   case PeripherySPIKey => Seq(
     SPIParams(rAddress = address))
+})
+
+// Add a JTAG Debug Module with CEP specific parameters
+class WithCEPJTAG extends Config((site, here, up) => {
+  case JtagDTMKey => new JtagDTMConfig (
+    idcodeVersion   = 2,
+    idcodePartNum   = 0x000,
+    idcodeManufId   = 0x489,
+    debugIdleCycles = 5)
+  case ExportDebug => up(ExportDebug, site).copy(protocols = Set(JTAG))
 })
 
 //

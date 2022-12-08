@@ -46,6 +46,11 @@ else ifeq "${DUT_SIM_MODE}" "BARE_MODE"
 COSIM_VLOG_ARGS         	+= +define+BARE_MODE
 endif
 
+# OpenOCD Enable
+ifeq (${OPENOCD_ENABLE},1)
+COSIM_VLOG_ARGS         	+= +define+OPENOCD_ENABLE
+endif
+
 # RISC-V Tests
 ifeq (${RISCV_TESTS},1)
 COSIM_VLOG_ARGS         	+= +define+RISCV_TESTS

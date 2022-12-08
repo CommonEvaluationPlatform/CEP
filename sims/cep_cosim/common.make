@@ -39,6 +39,7 @@ endif
 # The following flags / variables can be overridden by lower level makefiles or the command line
 NOWAVE          			?= 1
 TL_CAPTURE      			?= 0
+OPENOCD_ENABLE				?= 0
 BYPASS_PLL                  ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
 BAREMETAL_PRINTF			?= none
@@ -74,6 +75,15 @@ else ifeq "$(findstring kputc,${BAREMETAL_PRINTF})" "kputc"
 override BAREMETAL_PRINTF = kputc
 else
 override BAREMETAL_PRINTF = none
+endif
+
+# If OpenOCD is enabled, it should be installed
+ifeq (${OPENOCD_ENABLE},1)
+ifeq (,$(shell which openocd))
+$(error OpenOCD enabled in CEP Co-Simulation environment, but openocd is not installed)
+else
+OPENOCD_VERSION := $(shell openocd --version 2>&1 | head -1 | cut -d' ' -f4)
+endif
 endif
 
 # Validate the Chipyard verilog has been built by looking for the generated makefile
@@ -167,7 +177,7 @@ sim_info:
 	@echo "CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           "
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
 	@echo ""
-	@echo "CEP_COSIM:"$(shell hostnamectl | grep "Operating System")
+	@echo "CEP_COSIM: "$(shell hostnamectl | grep "Operating System")
 	@echo "CEP_COSIM: Running with the following variables:"
 	@echo "CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
@@ -190,6 +200,10 @@ endif
 	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
 	@echo "CEP_COSIM:   BAREMETAL_PRINTF       = ${BAREMETAL_PRINTF}"
+	@echo "CEP_COSIM:   OPENOCD_ENABLE         = ${OPENOCD_ENABLE}"
+ifeq (${OPENOCD_ENABLE},1)
+	@echo "CEP_COSIM:   OpenOCD Version        = $(OPENOCD_VERSION)"
+endif
 	@echo ""
 #--------------------------------------------------------------------------------------
 

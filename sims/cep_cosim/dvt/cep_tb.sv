@@ -31,10 +31,12 @@
 `endif
 
 // JTAG related DPI imports
-import "DPI-C" function int jtag_getSocketPortId();
-import "DPI-C" function int jtag_cmd(input int tdo_in, output int encode);   
-import "DPI-C" function int jtag_init();
-import "DPI-C" function int jtag_quit();   
+`ifdef OPENOCD_ENABLE
+  import "DPI-C" function int jtag_getSocketPortId();
+  import "DPI-C" function int jtag_cmd(input int tdo_in, output int encode);   
+  import "DPI-C" function int jtag_init();
+  import "DPI-C" function int jtag_quit();   
+`endif 
 
 // Top Level Testbench Module
 module `COSIM_TB_TOP_MODULE;
@@ -52,6 +54,14 @@ module `COSIM_TB_TOP_MODULE;
   wire                jtag_TDI; pullup (weak1) (jtag_TDI);
   wire                jtag_TRSTn; pullup (weak1) (jtag_TRSTn);
   wire                jtag_TDO;   
+
+`ifdef ASIC_MODE
+  wire                socjtag_TCK; pullup (weak1) (socjtag_TCK);
+  wire                socjtag_TMS; pullup (weak1) (socjtag_TMS);
+  wire                socjtag_TDI; pullup (weak1) (socjtag_TDI);
+  wire                socjtag_TRSTn; pullup (weak1) (socjtag_TRSTn);
+  wire                socjtag_TDO; pullup (weak1) (socjtag_TDO);
+`endif
 
   wire                uart_rxd; pullup (weak1) (uart_rxd);
   wire                uart_tb_rxd; pullup (weak1) (uart_tb_rxd);
@@ -244,11 +254,11 @@ module `COSIM_TB_TOP_MODULE;
     .test_io_13         (),
     .test_io_14         (),
     .test_io_15         (),
-    .socjtag_TCK        (),
-    .socjtag_TMS        (),
-    .socjtag_TDI        (),
-    .socjtag_TRSTn      (),
-    .socjtag_TDO        (),
+    .socjtag_TCK        (socjtag_TCK),
+    .socjtag_TMS        (socjtag_TMS),
+    .socjtag_TDI        (socjtag_TDI),
+    .socjtag_TRSTn      (socjtag_TRSTn),
+    .socjtag_TDO        (socjtag_TDO),
     .gpio_0_0           (gpio_0_0),
     .gpio_0_1           (gpio_0_1),
     .gpio_0_2           (gpio_0_2),
@@ -341,8 +351,12 @@ module `COSIM_TB_TOP_MODULE;
   reg [15:0]  clkCnt;
   int         junk;
   int         jtag_encode;
-  wire        dpi_jtag_tdo    = jtag_TDO;
    
+  reg         reg_jtag_TRSTn  = 0;
+  reg         reg_jtag_TDI    = 0;
+  reg         reg_jtag_TMS    = 0;
+  reg         reg_jtag_TCK    = 0;
+
   always @(posedge `DVT_FLAG[`DVTF_ENABLE_REMOTE_BITBANG_BIT]) begin
     enable_jtag = 1;
     @(negedge `DVT_FLAG[`DVTF_ENABLE_REMOTE_BITBANG_BIT]);
@@ -350,6 +364,12 @@ module `COSIM_TB_TOP_MODULE;
   end
 
   `ifdef OPENOCD_ENABLE
+    assign jtag_TCK           = reg_jtag_TCK;
+    assign jtag_TDI           = reg_jtag_TDI;
+    assign jtag_TMS           = reg_jtag_TMS;
+    assign jtag_TRSTn         = reg_jtag_TRSTn;
+
+
     always @(posedge passMask[3]) begin
       repeat (40000) @(posedge sys_clk);
       `logI("Initialting QUIT to close socket...");
@@ -358,11 +378,11 @@ module `COSIM_TB_TOP_MODULE;
 
     initial begin
       junk = jtag_init();
-      jtag_TRSTn = 0;
+      reg_jtag_TRSTn = 0;
       repeat (20) @(posedge sys_clk);
-      jtag_TRSTn = 1;
+      reg_jtag_TRSTn = 1;
       repeat (20) @(posedge sys_clk);
-      jtag_TRSTn = 0;
+      reg_jtag_TRSTn = 0;
     end
 
     always @(posedge sys_clk) begin
@@ -378,8 +398,8 @@ module `COSIM_TB_TOP_MODULE;
             clkCnt    <= 5;
         
             if (!quit_jtag) begin
-              junk                                    = jtag_cmd(dpi_jtag_tdo, jtag_encode);
-              {jtag_TRSTn,jtag_TCK,jtag_TMS,jtag_TDI} = jtag_encode ^ 'h8; // flip the TRSN
+              junk                                                    = jtag_cmd(jtag_TDO, jtag_encode);
+              {reg_jtag_TRSTn,reg_jtag_TCK,reg_jtag_TMS,reg_jtag_TDI} = jtag_encode ^ 'h8; // flip the TRSN
             end  // if (!quit_jtag)
           end // if (clkCnt == 0)
         end // if (enable && init_done_sticky)

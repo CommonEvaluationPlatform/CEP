@@ -101,7 +101,7 @@ static void dpi_bitbang_wait2accept(void)
                 }
             } else {
                 fcntl(jtag->openOcdFd, F_SETFL, O_NONBLOCK);
-                printf("%s: Accepted successfully.",__FUNCTION__);
+                printf("%s: Accepted successfully\n",__FUNCTION__);
                 again = 0;
             }
         }

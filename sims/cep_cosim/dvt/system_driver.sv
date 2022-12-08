@@ -15,6 +15,14 @@
 `include "v2c_cmds.incl"
 `include "v2c_top.incl"
 
+// JTAG related DPI imports
+`ifdef OPENOCD_ENABLE
+  import "DPI-C" function int jtag_getSocketPortId();
+  import "DPI-C" function int jtag_cmd(input int tdo_in, output int encode);   
+  import "DPI-C" function int jtag_init();
+  import "DPI-C" function int jtag_quit();   
+`endif 
+
 module system_driver (
   input               clk,
   input               enableMe

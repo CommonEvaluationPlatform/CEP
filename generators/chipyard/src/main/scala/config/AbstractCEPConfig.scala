@@ -23,7 +23,7 @@ class AbstractCEPConfig extends Config(
   new chipyard.config.WithPeripheryBusFrequencyAsDefault ++             // Unspecified frequencies with match the pbus frequency (which is always set)
   new chipyard.config.WithMemoryBusFrequency(200.0) ++                  // Default 200 MHz mbus
   new chipyard.config.WithPeripheryBusFrequency(200.0) ++               // Default 200 MHz pbus
-  new freechips.rocketchip.subsystem.WithJtagDTM ++                     // set the debug module to expose a JTAG port
+  new chipyard.config.WithCEPJTAG ++                                    // set the debug module to expose a JTAG port
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++                  // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++                 // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++        // no external interrupts
