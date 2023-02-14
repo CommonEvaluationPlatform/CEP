@@ -87,11 +87,13 @@ else
 	COSIM_VLOG_ARGS			+= +define+PRINTF_COND=\`SYSTEM_RESET
 endif
 COSIM_VLOG_ARGS				+= +define+STOP_COND=\`SYSTEM_RESET
-COSIM_VLOG_ARGS				+= +define+RANDOMIZE_MEM_INIT
 
-# The UART Receiver does not simulate properly without the following definition
-COSIM_VLOG_ARGS 			+= +define+RANDOMIZE_REG_INIT
-COSIM_VLOG_ARGS				+= +define+RANDOM="1'b0"
+
+# The following defines were borrowed from vcs.mk (targetting the CHISEL generated verilog)
+COSIM_VLOG_ARGS				+= 	+define+RANDOMIZE_MEM_INIT \
+								+define+RANDOMIZE_REG_INIT \
+								+define+RANDOMIZE_GARBAGE_ASSIGN \
+								+define+RANDOMIZE_INVALID_ASSIGN
 #--------------------------------------------------------------------------------------
 
 
