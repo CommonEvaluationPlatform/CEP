@@ -18,7 +18,7 @@
   #define _UART_CTRL_ADDR(UART_NUM) _CONCAT3(UART, UART_NUM, _CTRL_ADDR)
   #define UART_CTRL_ADDR _UART_CTRL_ADDR(UART_NUM)
 #endif
-static volatile uint32_t * const uart = (void *)(UART_CTRL_ADDR);
+static volatile uint32_t * const uart = (uint32_t *)(UART_CTRL_ADDR);
 
 
 void kputc(int c);
