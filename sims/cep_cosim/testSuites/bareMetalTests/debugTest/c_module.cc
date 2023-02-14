@@ -61,7 +61,7 @@ void *c_module(void *arg) {
   release_tile_reset(cpuId);
 
   // Check the status of the bare metal program
-  errCnt += check_bare_status(cpuId, 500);
+  errCnt += check_PassFail_status(cpuId, seed);
 
   pio.RunClk(100);
   //--------------------------------------------------------------------------------------

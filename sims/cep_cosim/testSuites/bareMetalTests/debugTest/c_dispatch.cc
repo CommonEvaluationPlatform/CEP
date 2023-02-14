@@ -1,3 +1,4 @@
+#define MAX_TIMEOUT 2000
 //--------------------------------------------------------------------------------------
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-3-Clause
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
   // spawn threads for each core
   for (int i = 0; i < maxHost; i++) {
     if ((long unsigned int)(1 << i) & mask) {
-      thr.ForkAThread(activeSlot, i, verbose, seed * (1+i), c_module);
+      thr.ForkAThread(activeSlot, i, verbose, MAX_TIMEOUT, c_module);
     }
   }
   

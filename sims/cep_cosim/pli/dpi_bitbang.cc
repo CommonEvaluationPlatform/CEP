@@ -130,27 +130,26 @@ static void dpi_bitbang_run(void)
         } else {
             again = 0;
         }
-    }
-        // see openocd's bitbang.h 's write interface
-        // openocd will send 1 character encoding {tck,tms,tdi} in the 3 LSB bits the character.. "0" <-> "7"
-        // will some others
-        //
+    }   // while (again)
+        
+    // see openocd's bitbang.h's write interface
+    // openocd will send 1 character encoding {tck,tms,tdi} in the 3 LSB bits the character.. "0" <-> "7"
+    // will some others
     switch (cmd) {
-        case '0': jtag->jtagEncode = 0;break;
-        case '1': jtag->jtagEncode = 1;break;
-        case '2': jtag->jtagEncode = 2;break;
-        case '3': jtag->jtagEncode = 3;break;
-        case '4': jtag->jtagEncode = 4;break;
-        case '5': jtag->jtagEncode = 5;break;
-        case '6': jtag->jtagEncode = 6;break;
-        case '7': jtag->jtagEncode = 7;break;
-        case 'r': jtag->jtagEncode = 0xf; break;// reset
-                //
+        case '0': jtag->jtagEncode = 0; break;
+        case '1': jtag->jtagEncode = 1; break;
+        case '2': jtag->jtagEncode = 2; break;
+        case '3': jtag->jtagEncode = 3; break;
+        case '4': jtag->jtagEncode = 4; break;
+        case '5': jtag->jtagEncode = 5; break;
+        case '6': jtag->jtagEncode = 6; break;
+        case '7': jtag->jtagEncode = 7; break;
+        // Reset
+        case 'r': jtag->jtagEncode = 0xf; break;
         case 'R': wrBack = 1; tdoChar = jtag->jtagTdo ? '1' : '0'; break;
         case 'Q': jtag->quit = 1; break;
         case 'B':
         case 'b': break; // do nothing
-                //
         default:
             printf("%s: unsupported command '%c'\n",__FUNCTION__,cmd);
     }

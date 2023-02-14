@@ -59,7 +59,6 @@ module `COSIM_TB_TOP_MODULE;
   wire                socjtag_TCK; pullup (weak1) (socjtag_TCK);
   wire                socjtag_TMS; pullup (weak1) (socjtag_TMS);
   wire                socjtag_TDI; pullup (weak1) (socjtag_TDI);
-  wire                socjtag_TRSTn; pullup (weak1) (socjtag_TRSTn);
   wire                socjtag_TDO; pullup (weak1) (socjtag_TDO);
 `endif
 
@@ -352,7 +351,6 @@ module `COSIM_TB_TOP_MODULE;
   int         junk;
   int         jtag_encode;
    
-  reg         reg_jtag_TRSTn  = 0;
   reg         reg_jtag_TDI    = 0;
   reg         reg_jtag_TMS    = 0;
   reg         reg_jtag_TCK    = 0;
@@ -367,22 +365,17 @@ module `COSIM_TB_TOP_MODULE;
     assign jtag_TCK           = reg_jtag_TCK;
     assign jtag_TDI           = reg_jtag_TDI;
     assign jtag_TMS           = reg_jtag_TMS;
-    assign jtag_TRSTn         = reg_jtag_TRSTn;
 
+    // Initialize the JTAG DPI socket
+    initial begin
+      junk = jtag_init();
+    end
 
+    // If a pass condition is detected, wait several clocks and then close the socket
     always @(posedge passMask[3]) begin
       repeat (40000) @(posedge sys_clk);
       `logI("Initialting QUIT to close socket...");
       junk = jtag_quit();
-    end
-
-    initial begin
-      junk = jtag_init();
-      reg_jtag_TRSTn = 0;
-      repeat (20) @(posedge sys_clk);
-      reg_jtag_TRSTn = 1;
-      repeat (20) @(posedge sys_clk);
-      reg_jtag_TRSTn = 0;
     end
 
     always @(posedge sys_clk) begin
@@ -399,7 +392,7 @@ module `COSIM_TB_TOP_MODULE;
         
             if (!quit_jtag) begin
               junk                                                    = jtag_cmd(jtag_TDO, jtag_encode);
-              {reg_jtag_TRSTn,reg_jtag_TCK,reg_jtag_TMS,reg_jtag_TDI} = jtag_encode ^ 'h8; // flip the TRSN
+              {reg_jtag_TCK,reg_jtag_TMS,reg_jtag_TDI}                = jtag_encode;
             end  // if (!quit_jtag)
           end // if (clkCnt == 0)
         end // if (enable && init_done_sticky)

@@ -169,7 +169,7 @@ module system_driver (
     // Automatically release the register when the core indicates it is running
     always @(`CEPREGS_PATH.core0_status) begin
       if (`CEPREGS_PATH.core0_status == `CEP_RUNNING_STATUS)
-        `logI("CEP_RUNNING_STATUS detected.  Releasing scratch_wor0[3:0]...");
+        `logI("CEP_RUNNING_STATUS detected.  Releasing scratch_word0[3:0]...");
         release `CEPREGS_PATH.scratch_word0[3:0];
     end
 
