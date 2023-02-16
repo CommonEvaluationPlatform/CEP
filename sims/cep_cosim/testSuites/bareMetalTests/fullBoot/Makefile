@@ -5,7 +5,8 @@
 #// File Name:      Makefile
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    
-#// Notes:          
+#// Notes:          For full-boot, BAREMETAL_PRINTF is set to
+#//					kputc by default
 #//
 #//************************************************************************
 
@@ -16,6 +17,8 @@ TEST_SUITE_DIR		= $(strip $(shell cd ..; pwd))
 TEST_SUITE_NAME		= $(shell cd ..; basename `pwd`)
 TEST_DIR			= $(strip $(shell cd .; pwd))
 TEST_NAME			= $(shell cd .; basename `pwd`)
+
+BAREMETAL_PRINTF	?= kputc
 
 # default target
 all: .vrun_flag
