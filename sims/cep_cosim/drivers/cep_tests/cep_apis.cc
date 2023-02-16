@@ -126,7 +126,7 @@ void dump_wave(int cycle2start, int cycle2capture, int enable)
 
 // Load a file into Main Memory or the SD Flash Model (must be called from the system thread)
 // mem_base is no longer used and it is assumed to be the start of the selected memory
-int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
+int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt) {
   int errCnt = 0;
 
   #ifdef SIM_ENV_ONLY  
@@ -166,11 +166,14 @@ int loadMemory(char *imageF, int fileOffset, int maxByteCnt) {
     // Which memory are we loading?
     DUT_WRITE_DVT(DVTF_GET_BACKDOOR_SELECT, DVTF_GET_BACKDOOR_SELECT, 1);
     if (DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO) == 1) {
-      LOGI("%s: Loading file %s to SD Flash with maxByteCnt of %0dB and fileOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset);  
+      LOGI("%s: Loading file %s to SD Flash with maxByteCnt of %0dB, fileOffset = %0dB, destOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset, destOffset);  
     } else {
-      LOGI("%s: Loading file %s to SCRATCHPAD RAM with maxByteCnt of %0dB and fileOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset);  
+      LOGI("%s: Loading file %s to SCRATCHPAD RAM with maxByteCntof %0dB , fileOffset = %0dB, destOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset, destOffset);  
     }
 
+    // Increment the destination pointer
+    while ((d * 8) < destOffset)
+    	d++;
 
     // Read from the file and load into the memory (via backdoor if enabled)
     while (!feof(fd)) {

@@ -73,13 +73,15 @@ int main(int argc, char *argv[])
   // Load the bare executable into scratchpad memory (from the system thread)
   //--------------------------------------------------------------------------------------
   int fileOffset    = 0;
+  int destOffset    = 34 * 512;     // Offset by the BBL_PARTITION_START_SECTOR as defined
+                                    // in the CEP Bootrom (sd.c, sectors are 512 bytes)
   
   // When booting from SD in simulation, the bootrom payload size is 16kB to make
   // simulation time more reasonable
   int maxByteCnt    = 0x4000;
 
   // Load memory
-  errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
+  errCnt += loadMemory(RISCV_WRAPPER, fileOffset, destOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;
   //--------------------------------------------------------------------------------------

@@ -10,7 +10,6 @@
 //
 //                - Updated ACMD41 processing to read all five bytes of the R3 response and check
 //                  the busy bit in the response per specification Figure 4-4 (Response bit 39)
-//                - Removed 34-byte BBL offset in sd_copy (now set to 0)
 //                - Increased default payload size to 35MB to accomodate larger Linux images
 //--------------------------------------------------------------------------------------
 
@@ -226,9 +225,16 @@ static int sd_copy(void)
   // overriden in simulation
   printf("LOADING %ldkB PAYLOAD\n", (i * SECTOR_SIZE_B)/1024);
 
-  // Begin a multi-cycle read.  Divider taked from default VCU118 Bootroml
+  // Begin a multi-cycle read.  Divider taken from default VCU118 Bootrom
   REG32(spi, SPI_REG_SCKDIV) = (F_CLK / 5000000UL);
-  
+
+  // By specifying BBL_PARTITION_START_SECTOR as the argument for CMD52,
+  // the copy will begin by starting that number of sectors (512-bytes each)  
+  // into the SD card.  This is per the setup instructions here:
+  // https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs
+  //
+  // Therefore, when simulating booting from the SD card, one will need to begin loading
+  // the executable this number of bytes into the card model
   if (sd_cmd(0x52, BBL_PARTITION_START_SECTOR, 0xE1) != 0x00) {
     sd_cmd_end();
     return 1;

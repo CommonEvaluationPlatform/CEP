@@ -5,11 +5,13 @@
 // File Name:      riscv_wrapper.cc
 // Program:        Common Evaluation Platform (CEP)
 // Description:    
-// Notes:          
+// Notes:          Due to the L1 Cache is the Rocket Chip, there will be
+//                 a delay between when the instructions are read from
+//                 from the SD card and when it gets written to memory
 //
 //--------------------------------------------------------------------------------------
 
-// For bareMetal mode ONLY
+// For bareMetal mode ONLY  
 #ifdef BARE_MODE
   #include <stdio.h>
   #include <stddef.h>
@@ -37,7 +39,7 @@
     
     // Print a hello to the console (UART) - Core0 only
     if (coreId == 0)
-    	LOGI("Baremetal - FullBoot Successfull\n");
+        LOGI("Baremetal - FullBoot Successfull\n");
     
     // Set the core status
     set_status(errCnt, testId[coreId]);

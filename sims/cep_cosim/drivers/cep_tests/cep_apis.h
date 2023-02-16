@@ -44,7 +44,7 @@ extern "C" {
   void dump_wave(int cycle2start, int cycle2capture, int enable);
   int is_program_loaded(int maxTimeOut);  
   int check_bare_status(int cpuId, int maxTimeOut);  
-  int loadMemory(char *imageF, int fileOffset, int maxByteCnt);
+  int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt);
   int set_status(int errCnt, int testId);
   void set_pass(void);
   void set_fail(void);

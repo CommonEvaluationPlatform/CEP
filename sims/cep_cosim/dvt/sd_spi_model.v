@@ -57,7 +57,7 @@ parameter tNDS = 0;
 parameter tNEC = 0;
 parameter tNRC = 1;
 
-parameter MEM_SIZE = 2048*1024; //2M 
+parameter MEM_SIZE = 2048*1024; // 2 MB
 
 
 // State Machine state definitions
@@ -127,7 +127,7 @@ wire stop_transmission = (cmd_in1 == 12); //for CMD25
 
 //Do not change the positions of these include files 
 // Also, ocr .v must be included before csd.v 
-wire CCS        = 1'b0;
+wire CCS        = 1'b1;
 wire CARD_UHSII = 1'b0;
 wire CARD_S18A  = 1'b0;
 wire [31:0] OCR = {init_done , CCS, CARD_UHSII, 4'b0000, CARD_S18A, 6'b111111, 18'd0}; //3.0~3.6V, no S18A 
@@ -602,7 +602,9 @@ always @(*) begin
           // Reset the CRC
           crc16_out = 0;
 
-          // Read from main memory
+          `logI("SD_MODEL: Multi-block read, start_addr = %0d, block count = %0d", start_addr, j);
+
+          // Read from a block from SD memory
           for (i = 0; i < block_len; i = i + 1) begin
             read_data = flash_mem[start_addr + block_len * j + i];
             DataOut(read_data);
@@ -611,8 +613,6 @@ always @(*) begin
 
           // Send CRC
           CRCOut(crc16_out);
-
-          `logI("SD_MODEL: Multi-block read, block count = %d", j + 1);
 
           // Check stop tranmission after every block
           if (stop_transmission) begin

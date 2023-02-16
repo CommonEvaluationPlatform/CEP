@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
   //--------------------------------------------------------------------------------------
   int verify        = 0;
   int fileOffset    = 0;
+  int destOffset    = 0;
   int maxByteCnt    = cep_max_program_size;
-  errCnt += loadMemory(RISCV_WRAPPER, fileOffset, maxByteCnt);
+  errCnt += loadMemory(RISCV_WRAPPER, fileOffset, destOffset, maxByteCnt);
   
   if (errCnt) goto cleanup;
   //--------------------------------------------------------------------------------------
