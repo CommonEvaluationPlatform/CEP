@@ -429,7 +429,7 @@ uint64_t cep_raw_read(uint64_t pAddress) {
     
 }
 
-static int inRange(uint64_t adr, uint64_t upperAdr,uint64_t lowerAdr) {
+static int inRange(uint64_t adr, uint64_t upperAdr, uint64_t lowerAdr) {
   return ((adr >= lowerAdr) && (adr < upperAdr)) ? 1 : 0;
 }
        
@@ -437,55 +437,106 @@ int cep_playback(uint64_t *cmdSeq, uint64_t upperAdr, uint64_t lowerAdr, int tot
   if (verbose) {
     LOGI("%s: playback command sequence totalCmds=%d\n",__FUNCTION__,totalCmds);
   }
+
   int errCnt = 0;
-  int i=0, TO;
+  int i = 0;
+  int TO = 0;
   uint64_t rdDat;
-  for (int c=1;c<=totalCmds;c++) {
-    // read the first item
-    if (cmdSeq[i] == WRITE__CMD) {
-      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {    
-  cep_raw_write(cmdSeq[i+1],cmdSeq[i+2]);
-      }
-      i += WRITE__CMD_SIZE;
-    }
-    else if (cmdSeq[i] == RDnCMP_CMD) {
-      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {     
-  rdDat = cep_raw_read(cmdSeq[i+1]);
-  if (rdDat != cmdSeq[i+2]) {
-    LOGE("%s: ERROR Mismatch at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-         c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
-    errCnt = c;
-    break;
-  } else if (verbose) {
-    LOGI("%s: OK at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-         c, cmdSeq[i+1],cmdSeq[i+2],rdDat); 
-  }
-      }
-      i += RDnCMP_CMD_SIZE;
-    }
-    else if (cmdSeq[i] == RDSPIN_CMD) {
-      if (inRange(cmdSeq[i+1],upperAdr,lowerAdr)) {     
-  TO = cmdSeq[i+4];
-  while (TO > 0) {
-    rdDat = cep_raw_read(cmdSeq[i+1]);
-    if (((rdDat ^ cmdSeq[i+2]) & cmdSeq[i+3]) == 0) {
+  
+  // Loop through all the commands
+  for (int c = 1; c <= totalCmds; c++) {
+  
+    // Act based on the command sequence
+    switch (cmdSeq[i]) {
+      // Perform a write
+      case WRITE__CMD:
+        // Check the address range
+        if (inRange(cmdSeq[i+1], upperAdr, lowerAdr)) {    
+          cep_raw_write(cmdSeq[i+1], cmdSeq[i+2]);
+        // An out of range write has been detected
+        } else {
+          errCnt++;
+        }
+
+        // Increment the cmdSeq index
+        i += WRITE__CMD_SIZE;
+
+        break;
+
+      // Read a value and compare to an expected value
+      case RDnCMP_CMD:
+        // Check the address range
+        if (inRange(cmdSeq[i + 1], upperAdr, lowerAdr)) {     
+          rdDat = cep_raw_read(cmdSeq[i + 1]);
+          if (rdDat != cmdSeq[i + 2]) {
+            LOGE("%s: ERROR Mismatch at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
+              c, cmdSeq[i + 1], cmdSeq[i + 2], rdDat);
+            errCnt++;
+          }
+        } else {
+          errCnt++;
+        }
+          
+        // Increment the cmdSeq index
+        i += RDnCMP_CMD_SIZE;
+
+        break;
+
+      // Read until a specific value is detected OR a timeout occurs
+      case RDSPIN_CMD:
+
+        // Check the address range
+        if (inRange(cmdSeq[i + 1], upperAdr, lowerAdr)) {     
+
+          // Capture the Timeout value
+          TO = cmdSeq[i + 4];
+
+          while (TO > 0) {
+
+            // Perform the tread
+            rdDat = cep_raw_read(cmdSeq[i + 1]);
+    
+            // Compare to expected value, considering the mask value too.
+            // Break if expected value is detected
+            if (((rdDat ^ cmdSeq[i + 2]) & cmdSeq[i + 3]) == 0)
+              break;
+
+            // Decrement the Timeout
+            TO--;
+
+            // A timeout has occurred
+            if (TO <= 0) {
+              LOGE("%s: timeout at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
+                  c, cmdSeq[i + 1], cmdSeq[i + 2], rdDat);
+              errCnt++;
+              break;
+            }
+
+          } // end while
+
+          // Increment the cmdSeq index
+          i += RDSPIN_CMD_SIZE;
+
+        } // end inRange check
+
+        break;
+
+      // Trap state, invalid command
+      defualt:
+        errCnt++;
+        break;
+
+    } // end switch
+
+    // if an error occurred while processing a command, break from the command processing loop
+    if (errCnt)
       break;
-    }
-    TO--;
-    if (TO <= 0) {
-      LOGE("%s: timeout at cmd=%d adr=0x%016lx exp=0x%016lx act=0x%016lx\n",__FUNCTION__,
-     c, cmdSeq[i+1],cmdSeq[i+2],rdDat);
-      errCnt = c;
-      break;
-    }
-  }
-      }
-      i += RDSPIN_CMD_SIZE;
-    }
-  }
+
+  } // end for loop
 
   return errCnt;
-}
+
+} // cep_playback
 
 //
 // Lock support

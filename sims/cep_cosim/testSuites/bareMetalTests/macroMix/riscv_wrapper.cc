@@ -9,9 +9,6 @@
 //
 //--------------------------------------------------------------------------------------
 
-
-
-
 //
 // For bareMetal mode ONLY
 //
@@ -74,8 +71,6 @@
     set_cur_status(CEP_RUNNING_STATUS);
 
     LOGI("Core %d initialized\n", coreId);
-
-    goto cleanup;
 
     // There is no Crypto++ support for RISC-V, so pre-recorded vectors will be used
     if (coreId == 0) {

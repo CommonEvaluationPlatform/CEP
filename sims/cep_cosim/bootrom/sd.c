@@ -301,6 +301,7 @@ int main(void)
   uint8_t  major_version = 0;
   uint8_t  minor_version = 0;
 
+  // Read the Scratch and Version registers
   scratch_reg = REG64(cepregs, CEPREGS_SCRATCH_W0);
   version_reg = REG64(cepregs, CEPREGS_VERSION);
   major_version = (version_reg >> 48) & 0xFF;
