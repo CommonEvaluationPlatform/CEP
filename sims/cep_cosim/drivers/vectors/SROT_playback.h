@@ -3,7 +3,7 @@
 //
 // This file is auto-generated for test: SROT. Do not modify!!!
 //
-// Generated on: Feb 14 2023 13:54:50
+// Generated on: Mar  1 2023 14:03:54
 //************************************************************************
 #ifndef SROT_playback_H
 #define SROT_playback_H
@@ -236,11 +236,10 @@ uint64_t SROT_playback[] = {
 	, WRITE__CMD, 0x70200008, 0xdeadbe0f00010000 // 210
 	, RDSPIN_CMD, 0x70200000, 0x0000000000000004, 0x4, 0x1770 // 211
 	, RDnCMP_CMD, 0x70200008, 0x00deadbe00010003 // 212
-	, WRITE__CMD, 0x700ffe20, 0x00000000aaaa5555 // 213
 };
 
 #define SROT_adrBase 0x0070200000
 #define SROT_adrSize 0x10000
 #define SROT_cmdCnt4Single 0
-#define SROT_totalCommands 213
+#define SROT_totalCommands 212
 #endif

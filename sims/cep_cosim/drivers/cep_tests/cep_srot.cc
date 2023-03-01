@@ -297,7 +297,8 @@ int cep_srot::LLKI_Setup(int cpuId) {
     } // for (int coreIndex = 0; coreIndex < CEP_LLKI_CORES; coreIndex ++) 
         
     // Write to the core0 status register indicating that the LLKI operations are complete
-    cep_writeNcapture(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+    // The cep_write64 function is used in order to ensure it is not captured in the SROT recorded vectors
+    cep_write64(mStatusIndex, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
       
   } else {  // else if (iAMMaster)
 
