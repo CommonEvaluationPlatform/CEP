@@ -67,7 +67,6 @@ Providing a complete directory structure is impractical, but some items are high
   |- ./generators/mitll-blocks/
   |   |- src/main/scala - Contains all the custom CEP Chisel code
   |   |- src/main/resources/vsrc/ - SystemVerilog / Verilog files associated with the CEP build
-  |       |- generated_dsp_code - Location to place the `dft_top.v` and `idft_top.v'
   |       |- opentitan  - Soft-link to the opentitan submodule located at ./opentitan
   |       |- aeees      - Challenge module.  Read the README.md in this directory for more information.
   |       |- auto-fir   - Challenge module.  Read the README.md in this directory for more information.
@@ -269,7 +268,7 @@ make clean; make BAREMETAL_PRINTF=libgloss riscv_wrapper
 The BAREMETAL_PRINTF=libgloss variable instructs the compiler to use libgloss / Host Target Interface for simplified printing through verilator.
 
 ### Generated DSP code notes
-Due to licensing contraints, two of the DSP cores used during CEP development cannot be included in our repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
+All the cores are now included in the CEP repository.  Instructions on generating all the cores can be found [here](./generators/mitll-blocks/src/main/resources/vsrc/dsp/README.md).
 
 ## Errors? Ommissions? Questions?
 Please feel free to file a github issue which the CEP developers check frequently.
