@@ -10,9 +10,7 @@
 
 # CEP-DSP: Core blocks
 
-The core DSP blocks (DFT/IDFT/IIR/FIR) were generated using the free online hardware generators provided by the [Spiral Project](http://www.spiral.net/). 
-
-Due to licensing restrictions, the generated DFT and IDFT cores cannot be directly included within the CEP repository.  
+The core DSP blocks (DFT/IDFT/IIR/FIR) were originally generated using the free online hardware generators provided by the [Spiral Project](http://www.spiral.net/). 
 
 ## Generator Websites
 * DFT/iDFT: [Spiral Project DFT Gen](http://www.spiral.net/hardware/dftgen.html)
@@ -37,7 +35,6 @@ radix|2|2
 streaming width|2|2
 data ordering|Natural in / natural out|Natural in / natural out
 BRAM budget|1000|1000
-Permutation Method|**`DATE'09 [4] (patent Free)`**|**`DATE'09 [4] (patent Free)`**
 
 * IIR/FIR
 

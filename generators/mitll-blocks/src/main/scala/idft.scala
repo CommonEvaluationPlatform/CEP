@@ -261,7 +261,7 @@ class idftTLModuleImp(coreparams: COREParams, outer: idftTLModule) extends LazyM
     // Add the SystemVerilog/Verilog associated with the module
     // Relative to /src/main/resources
     addResource("/vsrc/dsp/idft_top_mock_tss.sv")
-    addResource("/vsrc/generated_dsp_code/idft_top.v")
+    addResource("/vsrc/dsp/idft_top.v")
 
 	  // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
