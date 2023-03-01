@@ -84,7 +84,7 @@
 // Latency: 145
 // Gap: 32
 // module_name_is:dft_top
-module dft_top(clk, reset, next, next_out,
+module idft_top(clk, reset, next, next_out,
    X0, Y0,
    X1, Y1,
    X2, Y2,
