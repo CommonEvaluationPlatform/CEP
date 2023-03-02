@@ -6,6 +6,15 @@
 
 # CEP Changelog
 
+## [v4.41] - 2023-03-02
+
+### Added
+### Changed
+  - Issue #15: idft_top.v and dft_top.v added to repository due to less restrictive licenses
+### Fixed
+  - Issue #18: COSIM: bareMetal macro(n)Mix tests failing
+  - Issue #4:  COSIM: FullBoot needs to be updated with new BAREMETAL_PRINTF switches
+
 ## [v4.4] - 2022-12-01
 
 ### Added
