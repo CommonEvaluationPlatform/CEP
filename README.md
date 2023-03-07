@@ -1,7 +1,7 @@
-[//]: # (Copyright 2022 Massachusetts Institute of Technology)
+[//]: # (Copyright 2023 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
-# Common Evaluation Platform v4.4
+# Common Evaluation Platform v4.41
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
@@ -10,7 +10,7 @@
     <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
 </p>
 <p align="center">
-   Copyright 2022 Massachusetts Institute of Technology
+   Copyright 2023 Massachusetts Institute of Technology
 </p>
 <p align="center">
    <img src="./cep_docs/cep_architecture.jpg" width="1114" height="450">
@@ -285,7 +285,7 @@ As the CEP has been developed with input from many sources, multiple licenses ap
 
 ## DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited.
 
-© 2022 Massachusetts Institute of Technology
+© 2023 Massachusetts Institute of Technology
 •   Subject to FAR 52.227-11 – Patent Rights – Ownership by the Contractor (May 2014)
 •   SPDX-License-Identifier: BSD-3-Clause
 
