@@ -29,6 +29,7 @@
 // Private bare-metal printf pointer
 int __prIdx[MAX_CORES] = {0, 0, 0, 0};
 
+// Poll the GET_PROGRAM_LOADED flag
 int is_program_loaded(int maxTimeOut) {
   int errCnt = 0;
   int loaded = 0;
@@ -89,8 +90,8 @@ void set_spi_loopback(int loopback)
 void release_tile_reset(int cpuId)
 {
 #ifdef SIM_ENV_ONLY
-  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
-  DUT_WRITE_DVT(DVTF_RELEASE_TILE_RESET, DVTF_RELEASE_TILE_RESET, 1);
+//  DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, cpuId);
+//  DUT_WRITE_DVT(DVTF_RELEASE_TILE_RESET, DVTF_RELEASE_TILE_RESET, 1);
 #endif
 }
 
@@ -144,7 +145,7 @@ int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt) {
     if (fd == NULL) {
       LOGE("Can't open file %s\n",imageF);
       return 1;
-    }
+    } 
 
     // Determine if file size (minus fileOffset exceeds the maximum byte count)
     fseek(fd, 0, SEEK_END);
@@ -168,7 +169,7 @@ int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt) {
     if (DUT_READ_DVT(DVTF_PAT_HI, DVTF_PAT_LO) == 1) {
       LOGI("%s: Loading file %s to SD Flash with maxByteCnt of %0dB, fileOffset = %0dB, destOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset, destOffset);  
     } else {
-      LOGI("%s: Loading file %s to SCRATCHPAD RAM with maxByteCntof %0dB , fileOffset = %0dB, destOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset, destOffset);  
+      LOGI("%s: Loading file %s to SCRATCHPAD RAM with maxByteCnt of %0dB , fileOffset = %0dB, destOffset = %0dB\n",__FUNCTION__, imageF, maxByteCnt, fileOffset, destOffset);  
     }
 
     // Increment the destination pointer
@@ -210,10 +211,13 @@ int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt) {
 
     // Indicate that a program has been loaded (assuming there was no error)
     if (!errCnt) {
-      LOGI("%s: Setting program loaded flag\n", __FUNCTION__);
+      LOGI("%s: Setting program loaded flag AND releasing all tiles from reset...\n", __FUNCTION__);
       DUT_WRITE_DVT(DVTF_PAT_HI, DVTF_PAT_LO, 1);
       DUT_WRITE_DVT(DVTF_SET_PROGRAM_LOADED, DVTF_SET_PROGRAM_LOADED, 1);
+      DUT_WRITE_DVT(DVTF_RELEASE_ALL_TILES_RESET, DVTF_RELEASE_ALL_TILES_RESET, 1);
     }
+
+
 
   #endif // #ifdef SIM_ENV_ONLY
 
@@ -296,7 +300,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
         LOGI("%s: GOOD Status: cpuId = %0d, testId = %0d, i = %0d\n",__FUNCTION__, cpuId, testId, i);
         done = 1;
       } else if (d32 == CEP_BAD_STATUS) {
-        LOGI("%s: BAD Status: cpuId = %0d, testId = %0d, i = %0d\n",__FUNCTION__, cpuId, testId, i);
+        LOGE("%s: BAD Status: cpuId = %0d, testId = %0d, i = %0d\n",__FUNCTION__, cpuId, testId, i);
         done = 1;
         errCnt++;
       } // end if (d32 == CEP_GOOD_STATUS)
@@ -313,7 +317,7 @@ int check_bare_status(int cpuId, int maxTimeOut) {
   
   // Has a timeout occurred?
   if (i >= maxTimeOut) {
-      LOGI("%s: TIMEOUT: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
+      LOGE("%s: TIMEOUT: cpuId = %0d, i = %0d\n",__FUNCTION__, cpuId, i);
       errCnt++;    
   }
 

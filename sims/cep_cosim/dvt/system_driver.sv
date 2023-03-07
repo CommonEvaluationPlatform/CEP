@@ -281,6 +281,15 @@ module system_driver (
     `logI("DVTF_CONTROL_SPI_LOOPBACK - %0d", spi_loopback_enabled);
     `DVT_FLAG[`DVTF_CONTROL_SPI_LOOPBACK] = 0;
   end //posedge `DVT_FLAG[`DVTF_CONTROL_UART_LOOPBACK]) 
+
+  always @(posedge dvtFlags[`DVTF_RELEASE_ALL_TILES_RESET]) begin
+    `logI("Releasing all tiles from reset...");
+    release `TILE0_RESET;
+    release `TILE1_RESET;
+    release `TILE2_RESET;
+    release `TILE3_RESET;
+    dvtFlags[`DVTF_RELEASE_ALL_TILES_RESET] = 0;
+  end // end always
   //--------------------------------------------------------------------------------------
 
 

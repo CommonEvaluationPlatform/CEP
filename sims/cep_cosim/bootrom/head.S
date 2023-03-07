@@ -20,7 +20,7 @@ _prog_start:
   // Initialize the stack pointer
   li sp, (MEMORY_MEM_ADDR + MEMORY_MEM_SP_OFFSET)
 
-  // Call the main function witha single core
+  // Call the main function with a single core
   smp_pause(s1, s2)
   call main
   smp_resume(s1, s2)

@@ -39,7 +39,6 @@ module cpu_driver
   reg                 clear             = 0;
   integer             cnt;
   string              str;
-  reg                 program_loaded    = 0;
   
   //--------------------------------------------------------------------------------------
   // Define system driver supported DPI tasks prior to the inclusion of sys/driver_common.incl

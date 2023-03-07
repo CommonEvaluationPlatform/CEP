@@ -341,7 +341,7 @@ RISCV_WRAPPER_IMG = ${RISCV_WRAPPER}
 ifeq (${VIRTUAL_MODE},1)
 ${RISCV_WRAPPER_IMG}: ${LIB_DIR}/.buildLibs ${RISCV_VIRT_CFILES} ${COMMON_DEPENDENCIES} riscv_virt.S riscv_wrapper.cc 
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} -g ${RISCV_VIRT_INC} $^ -o riscv_withG.elf
-	${RISCV_OBJDUMP} -S -C -d -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
+	${RISCV_OBJDUMP} -S -C -D -l -x riscv_withG.elf > riscv_wrapper.dump; rm riscv_withG.elf;
 	$(RISCV_GCC) ${RISCV_VIRT_CFLAGS} ${RISCV_VIRT_LFLAGS} ${RISCV_VIRT_INC} $^ -o riscv_wrapper.elf
 	${RISCV_HEXDUMP} -C riscv_wrapper.elf > riscv_wrapper.hex
 	${RISCV_OBJCOPY} -O binary --change-addresses=-0x80000000 riscv_wrapper.elf riscv_wrapper.img

@@ -353,7 +353,9 @@ int printf(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
+#ifdef ENABLE_KPUTC
   vprintfmt((void*)kputc, 0, fmt, ap);
+#endif
   va_end(ap);
 
   return 0; // incorrect return value, but who cares, anyway?

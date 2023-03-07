@@ -54,9 +54,6 @@ void *c_module(void *arg) {
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;
 
-  // Release the tile reset
-  release_tile_reset(cpuId);
-
   // Check the status of the bare metal program (timeout is much greater to allow load via SD)
   errCnt += check_bare_status(cpuId, 10000);
 
