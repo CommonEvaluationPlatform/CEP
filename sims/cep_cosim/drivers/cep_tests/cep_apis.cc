@@ -232,22 +232,8 @@ int check_PassFail_status(int cpuId, int maxTimeOut) {
   int failMask        = 0;
   int inReset         = 0;
   int singleCoreOnly  = 0;
-  int wait4reset      = 1000;
   uint64_t d64;
   
-  while (wait4reset > 0) {
-    DUT_WRITE_DVT(DVTF_GET_CORE_RESET_STATUS, DVTF_GET_CORE_RESET_STATUS, 1);
-    inReset = DUT_READ_DVT(DVTF_PAT_LO, DVTF_PAT_LO);
-    if (inReset == 0) break;
-    wait4reset--;
-    if (wait4reset <= 0) {
-      LOGE("Timeout while waiting for release of reset\n");
-      errCnt++;
-      break;
-    }
-    DUT_RUNCLK(1000);    
-  }
-
   // Poll the Pass/Fail Status
   while ((errCnt == 0) && (maxTimeOut > 0)) {
     // only if I am out of reset

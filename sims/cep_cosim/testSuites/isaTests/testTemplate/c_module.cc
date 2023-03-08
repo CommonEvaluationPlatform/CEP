@@ -64,11 +64,7 @@ void *c_module(void *arg) {
   if (errCnt) goto cleanup;
 
   // Check the status of the bare metal program (only core #0 will do this if in SINGLE_CORE mode)
-#ifdef SINGLE_CORE_ONLY
-  if (cpuId == 0) {
-    errCnt += check_PassFail_status(cpuId, seed);
-  } // if (cpuId != 0)
-#endif 
+  errCnt += check_PassFail_status(cpuId, seed);
 
   pio.RunClk(100);
   //--------------------------------------------------------------------------------------
