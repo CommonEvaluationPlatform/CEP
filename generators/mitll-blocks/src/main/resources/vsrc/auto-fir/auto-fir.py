@@ -42,23 +42,8 @@ def get_sources(args):
 
         print(" Getting the tarball sources")
 
-        # Save the current working directory
-        cwd = os.path.dirname(os.path.realpath(sys.argv[0]))
-
-        # Capture the repo's root directory
-        repo_root = subprocess.run('git rev-parse --show-toplevel', check=True, shell=True, universal_newlines=True, stdout=subprocess.PIPE)
-
-        # Change to the repo's root directory
-        os.chdir(repo_root.stdout.rstrip())
-
-        # Excute the get_external_depencies script to fetch the FIR generator source
-        if args.verbose:
-            os.system("./get_external_dependencies.sh matching auto-fir yes")
-        else:
-            os.system("./get_external_dependencies.sh matching auto-fir yes >> /dev/null 2>&1")
-
-        # Return to the generared filter directory
-        os.chdir(cwd)
+        os.system("wget http://www.spiral.net/hardware/firgen.tgz")
+        os.system("wget http://spiral.ece.cmu.edu/mcm/dl/synth-jan-14-2009.tar.gz")
 
     print(" Extracting tarballs and building the acm executable")
 
@@ -220,7 +205,7 @@ def setup_parser():
 # Description   : Generate the filter based on the specied argument
 # -------------------------------------------------------------------------
 def run_build(args):
-    # Verify the presence of the iirGenn.pl and acm executables
+    # Verify the presence of the iirGen.pl and acm executables
     if not (os.path.isfile('./firgen/iirGen.pl') or os.path.isfile('./synth/acm')):
         get_sources(args)
 
