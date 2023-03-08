@@ -663,7 +663,7 @@ module cpu_driver
     // Take some action when a pass or failure is detected
     always @(posedge pcPass or posedge pcFail) begin
       if (~curPCReset) begin
-        `logI("C%0d Pass/Fail Detected!!!... Put it to sleep", MY_CPU_ID);
+        `logI("C%0d Pass/Fail Detected!!! %x/%x... Put it to sleep", MY_CPU_ID, pcPass, pcFail);
         
         repeat (20) @(posedge clk);
         case (MY_CPU_ID)
@@ -683,17 +683,19 @@ module cpu_driver
       if (pcStuck && ~DisableStuckChecker) begin
         `logE("PC seems to be stuck!!!! Terminating...");
         pcFail = 1;
+      // Is te current Program Counter valid?
       end else if (curPCValid) begin
         // Did the PassFail.hex load correctly?
         if (`RISCV_PASSFAILVALID) begin
           case (curPC)
-            `RISCV_PASSFAIL[0]  : pcPass = 1;
-            `RISCV_PASSFAIL[2]  : pcPass = 1;
-            `RISCV_PASSFAIL[3]  : pcPass = 1;
-            `RISCV_PASSFAIL[4]  : pcFail = 1;
-            `RISCV_PASSFAIL[1]  : pcFail = 1;
+            `RISCV_PASSFAIL[0]  : if (`RISCV_PASSFAIL[0] != 0) pcPass = 1; // pass
+            `RISCV_PASSFAIL[2]  : if (`RISCV_PASSFAIL[2] != 0) pcPass = 1; // finish
+            `RISCV_PASSFAIL[3]  : if (`RISCV_PASSFAIL[3] != 0) pcPass = 1; // write_tohost
+            `RISCV_PASSFAIL[4]  : if (`RISCV_PASSFAIL[4] != 0) pcFail = 1; // hangme
+            `RISCV_PASSFAIL[1]  : if (`RISCV_PASSFAIL[1] != 0) pcFail = 1; // fail
             default             : if (SingleCoreOnly && (MY_CPU_ID != 0)) pcPass = 1;
           endcase
+        // For some reason, the PC is valid, but we have not loaded PassFail.hex
         end else begin
           pcFail = 1;
         end // if (`RISCV_PASSFAILVALID)

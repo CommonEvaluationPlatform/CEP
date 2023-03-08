@@ -224,16 +224,17 @@ int loadMemory(char *imageF, int fileOffset, int destOffset, int maxByteCnt) {
   return errCnt;
 } // loadMemory
 
-// Check PassFail
+// Check PassFail (used by ISA tests)
 int check_PassFail_status(int cpuId, int maxTimeOut) {
   int errCnt      = 0;
 #ifdef SIM_ENV_ONLY  
-  int passMask    = 0;
-  int failMask    = 0;
-  int inReset;
+  int passMask        = 0;
+  int failMask        = 0;
+  int inReset         = 0;
+  int singleCoreOnly  = 0;
+  int wait4reset      = 1000;
   uint64_t d64;
-  int wait4reset  = 1000;
-  //
+  
   while (wait4reset > 0) {
     DUT_WRITE_DVT(DVTF_GET_CORE_RESET_STATUS, DVTF_GET_CORE_RESET_STATUS, 1);
     inReset = DUT_READ_DVT(DVTF_PAT_LO, DVTF_PAT_LO);

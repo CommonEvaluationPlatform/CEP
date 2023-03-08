@@ -63,11 +63,12 @@ void *c_module(void *arg) {
   // A timeout has occured, terminate the thread
   if (errCnt) goto cleanup;
 
-  // Release the tile reset
-  release_tile_reset(cpuId);
-
-  // Check the status of the bare metal program
-  errCnt += check_PassFail_status(cpuId, seed);
+  // Check the status of the bare metal program (only core #0 will do this if in SINGLE_CORE mode)
+#ifdef SINGLE_CORE_ONLY
+  if (cpuId == 0) {
+    errCnt += check_PassFail_status(cpuId, seed);
+  } // if (cpuId != 0)
+#endif 
 
   pio.RunClk(100);
   //--------------------------------------------------------------------------------------

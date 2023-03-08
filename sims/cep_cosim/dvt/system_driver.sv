@@ -419,7 +419,7 @@ module system_driver (
         $fclose(file);
         passFailValid = 1;
         $readmemh("PassFail.hex", passFail);
-        `logI("Reading from PassFail.hex: pass = 0x%0x, fail = 0x%0x, finish = 0x%0x, write_tohost = 0x%0x, hangme = 0x%0x",
+        `logI("Reading from PassFail.hex: pass = 0x%08x, fail = 0x%08x, finish = 0x%08x, write_tohost = 0x%08x, hangme = 0x%08x",
           passFail[0], passFail[1], passFail[2], passFail[3], passFail[4]);
       end
     end
