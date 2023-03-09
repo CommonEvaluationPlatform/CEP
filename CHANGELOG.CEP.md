@@ -6,6 +6,12 @@
 
 # CEP Changelog
 
+## [v4.42] - 2023-03-XX
+### Added
+### Changed
+### Fixed
+  - Issue #7: COSIM: XCellium *occasional* failures on RHEL7
+
 ## [v4.41] - 2023-03-02
 
 ### Added
