@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util.{log2Up}
 
 import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.devices.tilelink.{BootROMLocated}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey}
 import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI}
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.subsystem._
@@ -35,6 +35,14 @@ class WithGPIO(address: BigInt = 0x10012000L, width: Int = 4) extends Config((si
 class WithUART(address: BigInt = 0x54000000L, baudrate: BigInt = 115200) extends Config((site, here, up) => {
   case PeripheryUARTKey => Seq(
     UARTParams(address = address, nTxEntries = 256, nRxEntries = 256, initBaudRate = baudrate))
+})
+
+class WithNoUART extends Config((site, here, up) => {
+  case PeripheryUARTKey => Nil
+})
+
+class WithUARTFIFOEntries(txEntries: Int, rxEntries: Int) extends Config((site, here, up) => {
+  case PeripheryUARTKey => up(PeripheryUARTKey).map(_.copy(nTxEntries = txEntries, nRxEntries = rxEntries))
 })
 
 class WithSPIFlash(size: BigInt = 0x10000000) extends Config((site, here, up) => {
@@ -73,6 +81,9 @@ class WithSerialTLBackingMemory extends Config((site, here, up) => {
 })
 
 class WithExtMemIdBits(n: Int) extends Config((site, here, up) => {
-    case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(idBits = n)))
 })
 
+class WithNoPLIC extends Config((site, here, up) => {
+  case PLICKey => None
+})

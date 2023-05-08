@@ -17,41 +17,20 @@ import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem, DefaultClockFrequencyKey}
 
-class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey => List(
-    UARTParams(BigInt(0x64000000L)))
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    // invoke makefile for sdboot
-    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
-    require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
-  }
-  case DTSTimebase => BigInt((1e6).toLong)
-  case JtagDTMKey => new JtagDTMConfig (
-    idcodeVersion = 2,
-    idcodePartNum = 0x000,
-    idcodeManufId = 0x489,
-    debugIdleCycles = 5)
-  case SerialTLKey => None // remove serialized tl port
-})
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
   new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
-  new WithDefaultPeripherals ++
-  new freechips.rocketchip.subsystem.WithNBreakpoints(2))
+
+  new chipyard.config.WithDTSTimebase(32768) ++
+  new testchipip.WithNoSerialTL
+)
 
 class TinyRocketArtyConfig extends Config(
   new WithArtyTweaks ++
-  new chipyard.TinyRocketConfig)
-
-class TinyRocketArtySimConfig extends Config(
-  new WithFPGASimSerial ++
-  new testchipip.WithDefaultSerialTL ++
-  new chipyard.harness.WithSimSerial ++
-  new chipyard.harness.WithTiedOffDebug ++
-  new TinyRocketArtyConfig)
+  new freechips.rocketchip.subsystem.WithNBreakpoints(2) ++
+  new chipyard.TinyRocketConfig
+)
 // DOC include end: AbstractArty and Rocket

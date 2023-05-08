@@ -1,81 +1,37 @@
+// See LICENSE for license details.
 package chipyard.fpga.arty100t
 
-import sys.process._
-import math.min
+import freechips.rocketchip.config._
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.devices.debug._
+import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.system._
+import freechips.rocketchip.tile._
 
-import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithDTS}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
-import freechips.rocketchip.tile.{XLen}
-
-import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
-import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
-
+import sifive.blocks.devices.uart._
 import sifive.fpgashells.shell.{DesignKey}
-import sifive.fpgashells.shell.xilinx.{ArtyDDRSize}
-
-import mitllBlocks.cep_addresses._
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
+import chipyard.{BuildSystem}
 
-class WithDefaultPeripherals extends Config((site, here, up) => {
-  case PeripheryUARTKey   => List(UARTParams(address  = BigInt(0x64000000L)))
-  case PeripherySPIKey    => List(SPIParams(rAddress  = BigInt(0x64001000L)))
-  case PeripheryGPIOKey => {
-    if (Arty100TGPIOs.width > 0) {
-      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
-      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
-      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
-      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
-        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
-      })
-    }
-    else {
-      List.empty[GPIOParams]
-    }
-  }
+import mitllBlocks.cep_addresses._
+
+// don't use FPGAShell's DesignKey
+class WithNoDesignKey extends Config((site, here, up) => {
+  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
 })
 
-// Update to use the same bootrom as the CEP Cosimulation
-class WithCEPSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase  => BigInt((1e6).toLong)
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    // invoke makefile for sdboot
-    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
-    val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
-    require (make.! == 0, "Failed to build bootrom")
-    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
-  }
-  case ExtMem       => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(ArtyDDRSize)))) // set extmem to DDR size
-  case SerialTLKey  => None // remove serialized tl port
-})
-
-// DOC include start: AbstractArty100T and Rocket
-class WithArty100TCEPTweaks extends Config(
-  // harness binders
-  new WithUART ++
-  new WithSPISDCard ++
-  new WithDDRMem ++
-  new WithGPIO ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
-  new WithGPIOPassthrough ++
-  // other configuration
-  new WithDefaultPeripherals ++
-  new chipyard.config.WithTLBackingMemory ++      // use TL backing memory
-  new WithCEPSystemModifications ++               // setup busses, use sdboot bootrom, setup ext. mem. size
-  new chipyard.config.WithNoDebug ++              // remove debug module
-  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-  new WithFPGAFrequency(100)                      // default 100MHz freq
-)
+class WithArty100TTweaks extends Config(
+  new WithArty100TUARTTSI ++
+  new WithArty100TDDRTL ++
+  new WithNoDesignKey ++
+  new chipyard.config.WithNoDebug ++ // no jtag
+  new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
+  new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
+  new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
 class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers
@@ -86,25 +42,44 @@ class RocketArty100TCEPConfig extends Config(
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
-  // with reduced cache size, closes timing at 50 MHz
-  new WithFPGAFrequency(50) ++
-
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
-  new WithArty100TCEPTweaks ++
+  new WithArty100TTweaks ++
 
-  // Instantiate one big core
-  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
-  
-  // Default Chipyard AbstractConfig with L2 removed
-  new chipyard.config.AbstractNoL2Config
+  // with reduced cache size, closes timing at 50 MHz
+  new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
+
+  // Remove the L2 cache
+  new chipyard.config.WithBroadcastManager ++ // no l2
+
+  // Default Chipyard Rocket Config
+  new chipyard.RocketConfig
 )
 
-class WithFPGAFrequency(fMHz: Double) extends Config(
-  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
-  new chipyard.config.WithMemoryBusFrequency(fMHz)
-)
+class RocketArty100TConfig extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.RocketConfig)
 
-class WithFPGAFreq25MHz extends WithFPGAFrequency(25)
-class WithFPGAFreq50MHz extends WithFPGAFrequency(50)
-class WithFPGAFreq75MHz extends WithFPGAFrequency(75)
-class WithFPGAFreq100MHz extends WithFPGAFrequency(100)
+class UART230400RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 230400) ++
+  new RocketArty100TConfig)
+
+class UART460800RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 460800) ++
+  new RocketArty100TConfig)
+
+class UART921600RocketArty100TConfig extends Config(
+  new WithArty100TUARTTSI(uartBaudRate = 921600) ++
+  new RocketArty100TConfig)
+
+
+class NoCoresArty100TConfig extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.NoCoresConfig)
+

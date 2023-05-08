@@ -1,7 +1,7 @@
 [//]: # (Copyright 2023 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
-# Common Evaluation Platform v4.41
+# Common Evaluation Platform v4.5
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
@@ -163,7 +163,7 @@ Once released from reset, the CEP's bootrom will read the baremetal executable f
 
 An example UART output for the baremetal gpiotest follows:
 ```
----          Common Evaluation Platform v4.40            ---
+---          Common Evaluation Platform v4.50            ---
 ---         Based on the UCB Chipyard Framework          ---
 --- Copyright 2022 Massachusetts Institute of Technology ---
 ---     BootRom Image built on Nov 18 2022 09:42:49      ---

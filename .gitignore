@@ -29,6 +29,13 @@ v2c_cmds.h
 .conda-env/
 .#*
 first-clone-setup-fast-log
+.bloop/
+.metals/
+project/.bloop/
+project/metals.sbt
+project/project/
+.ivy2
+.sbt
 
 # The following exclusions ensure that ASIC-related files
 # do not get checked into the repository

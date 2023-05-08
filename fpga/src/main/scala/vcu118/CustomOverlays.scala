@@ -152,4 +152,3 @@ class DDR2VCU118ShellPlacer(shell: VCU118FPGATestHarness, val shellInput: DDRShe
   extends DDRShellPlacer[VCU118FPGATestHarness] {
   def place(designInput: DDRDesignInput) = new DDR2VCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }
-

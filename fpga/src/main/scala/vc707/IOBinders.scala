@@ -11,7 +11,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp}
 import sifive.blocks.devices.spi.{HasPeripherySPI, HasPeripherySPIModuleImp, MMCDevice}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
-
+import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp}
 import chipyard.{CanHaveMasterTLMemPort}
 import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
 
@@ -35,7 +35,7 @@ class WithGPIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
+class WithSPIIOPassthrough extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI
     ResourceBinding {

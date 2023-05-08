@@ -1,83 +1,60 @@
 package chipyard.fpga.arty100t
 
 import chisel3._
-import chisel3.experimental.{BaseModule}
-
-import freechips.rocketchip.util.{HeterogeneousBag}
+import freechips.rocketchip.devices.debug.{HasPeripheryDebug, HasPeripheryDebugModuleImp}
+import freechips.rocketchip.jtag.{JTAGIO}
+import freechips.rocketchip.subsystem.{PeripheryBusKey}
 import freechips.rocketchip.tilelink.{TLBundle}
+import freechips.rocketchip.util.{HeterogeneousBag}
 
-import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
-import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
-import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
+import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp, UARTParams}
+import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
+import sifive.blocks.devices.pinctrl.{BasePin}
 
-import chipyard.{HasHarnessSignalReferences, CanHaveMasterTLMemPort}
-import chipyard.harness.{OverrideHarnessBinder}
+import sifive.fpgashells.ip.xilinx.{IBUFG, IOBUF, PULLUP, PowerOnResetFPGAOnly}
+
+import chipyard._
+import chipyard.harness._
+import chipyard.iobinders.JTAGChipIO
 
 import testchipip._
 
-/*** UART ***/
-class WithUART extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[UARTPortIO]) => {
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      arty100tth.arty100tOuter.io_uart_bb.bundle <> ports.head
-    } }
-  }
-})
-
-/*** SPI ***/
-class WithSPISDCard extends OverrideHarnessBinder({
-  (system: HasPeripherySPI, th: BaseModule with HasHarnessSignalReferences, ports: Seq[SPIPortIO]) => {
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      arty100tth.arty100tOuter.io_spi_bb.bundle <> ports.head
-    } }
-  }
-})
-
-/*** GPIO ***/
-class WithGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      (arty100tth.arty100tOuter.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
-        bb_io.bundle <> dut_io
-      }
-    } }
-  }
-})
-
-/*** Experimental DDR ***/
-class WithDDRMem extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: BaseModule with HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      require(ports.size == 1)
-
-      val bundles = arty100tth.arty100tOuter.ddrClient.out.map(_._1)
-      val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
-      bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-      ddrClientBundle <> ports.head
-    } }
-  }
-})
-
-class WithFPGASimSerial extends OverrideHarnessBinder({
-  (system: CanHavePeripheryTLSerial, th: BaseModule with HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
+class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
+  (system: CanHavePeripheryTLSerial, th: HasHarnessSignalReferences, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
-    th match { case arty100tth: Arty100TFPGATestHarnessImp => {
-      ports.map({ port =>
-        val bits = SerialAdapter.asyncQueue(port, arty100tth.buildtopClock, arty100tth.buildtopReset)
-        withClockAndReset(arty100tth.buildtopClock, arty100tth.buildtopReset.asBool) {
-          val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, arty100tth.buildtopReset.asBool)
+    ports.map({ port =>
+      val ath = th.asInstanceOf[Arty100THarness]
+      val freq = p(PeripheryBusKey).dtsFrequency.get
+      val bits = SerialAdapter.asyncQueue(port, th.buildtopClock, th.buildtopReset)
+      withClockAndReset(th.buildtopClock, th.buildtopReset) {
+        val ram = SerialAdapter.connectHarnessRAM(system.serdesser.get, bits, th.buildtopReset)
+        val uart_to_serial = Module(new UARTToSerial(
+          freq, UARTParams(0, initBaudRate=uartBaudRate)))
+        val serial_width_adapter = Module(new SerialWidthAdapter(
+          narrowW = 8, wideW = SerialAdapter.SERIAL_TSI_WIDTH))
+        serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)
 
-          val success = {
-            val sim = Module(new SimSerial(ram.module.io.tsi_ser.w))
-            sim.io.clock := port.clock
-            sim.io.reset := arty100tth.buildtopReset.asBool
-            sim.io.serial <> ram.module.io.tsi_ser
-            sim.io.exit
-          }
+        ram.module.io.tsi_ser.flipConnect(serial_width_adapter.io.wide)
 
-          when (success) { arty100tth.success := true.B }
-        }
-      })
-    } }
+        ath.io_uart_bb.bundle <> uart_to_serial.io.uart
+        ath.other_leds(1) := uart_to_serial.io.dropped
+
+        ath.other_leds(9) := ram.module.io.adapter_state(0)
+        ath.other_leds(10) := ram.module.io.adapter_state(1)
+        ath.other_leds(11) := ram.module.io.adapter_state(2)
+        ath.other_leds(12) := ram.module.io.adapter_state(3)
+      }
+    })
+  }
+})
+
+class WithArty100TDDRTL extends OverrideHarnessBinder({
+  (system: CanHaveMasterTLMemPort, th: HasHarnessSignalReferences, ports: Seq[HeterogeneousBag[TLBundle]]) => {
+    require(ports.size == 1)
+    val artyTh = th.asInstanceOf[Arty100THarness]
+    val bundles = artyTh.ddrClient.out.map(_._1)
+    val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
+    bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+    ddrClientBundle <> ports.head
   }
 })
