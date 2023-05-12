@@ -10,7 +10,7 @@
 
 ### Added
 ### Changed
-  - Chipyard upgraded to v1.9.0
+  - Chipyard upgraded to v1.9.1
 ### Fixed
   - Issue #7: COSIM: XCellium *occasional* failures on RHEL7
 

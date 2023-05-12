@@ -70,9 +70,6 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
-[submodule "tools/api-config-chipsalliance"]
-	path = tools/api-config-chipsalliance
-	url = https://github.com/chipsalliance/api-config-chipsalliance.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils
@@ -100,6 +97,9 @@
 [submodule "toolchains/esp-tools/esp-tools-feedstock"]
 	path = toolchains/esp-tools/esp-tools-feedstock
 	url = https://github.com/ucb-bar/esp-tools-feedstock.git
+[submodule "toolchains/esp-tools/riscv-isa-sim"]
+	path = toolchains/esp-tools/riscv-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
 [submodule "toolchains/esp-tools/riscv-pk"]
 	path = toolchains/esp-tools/riscv-pk
 	url = https://github.com/riscv-software-src/riscv-pk.git
@@ -121,6 +121,6 @@
 [submodule "CEP_Chipyard_ASIC"]
 	path = CEP_Chipyard_ASIC
 	url = ssh://git@llcad-github/HSS/CEP_Chipyard_ASIC.git
-[submodule "toolchains/esp-tools/riscv-isa-sim"]
-	path = toolchains/esp-tools/riscv-isa-sim
-	url = https://github.com/ucb-bar/esp-isa-sim.git
+[submodule "tools/cde"]
+	path = tools/cde
+	url = https://github.com/chipsalliance/cde.git

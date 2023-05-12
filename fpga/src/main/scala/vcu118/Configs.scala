@@ -3,8 +3,8 @@ package chipyard.fpga.vcu118
 import sys.process._
 import math.min
 
-import freechips.rocketchip.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem, WithDTS}
+import org.chipsalliance.cde.config.{Config, Parameters}
+import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
 import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
 import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
 import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}

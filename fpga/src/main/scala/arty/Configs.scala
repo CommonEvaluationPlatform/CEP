@@ -1,9 +1,7 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty
 
-import sys.process._
-
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
@@ -19,9 +17,9 @@ import chipyard.{BuildSystem, DefaultClockFrequencyKey}
 
 // DOC include start: AbstractArty and Rocket
 class WithArtyTweaks extends Config(
+  new WithArtyResetHarnessBinder ++
   new WithArtyJTAGHarnessBinder ++
   new WithArtyUARTHarnessBinder ++
-  new WithArtyResetHarnessBinder ++
   new WithDebugResetPassthrough ++
 
   new chipyard.config.WithDTSTimebase(32768) ++
