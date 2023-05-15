@@ -125,7 +125,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
-$(build_dir): cep_preprocessing
+$(build_dir): 
 	mkdir -p $@
 
 # Bootrom is forced to rebuild every time, in the event a different build target is selected
@@ -363,7 +363,7 @@ endif
 # helper rule to just make verilog files
 #########################################################################################
 .PHONY: verilog
-verilog: $(sim_common_files)
+verilog: cep_preprocessing $(sim_common_files)
 
 #########################################################################################
 # helper rules to run simulations

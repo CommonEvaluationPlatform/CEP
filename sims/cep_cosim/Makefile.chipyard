@@ -26,9 +26,12 @@ sim_name := cep_cosim
 SUB_PROJECT = cep_cosim
 
 #########################################################################################
-# include shared variables
+# include shared variables (after SUB_PROJECT is defined)
 #########################################################################################
 include $(base_dir)/variables.mk
+
+# Include common simulation flags
+include $(base_dir)/sims/common-sim-flags.mk
 
 .PHONY: default debug
 default: verilog
@@ -36,18 +39,19 @@ default: verilog
 #########################################################################################
 # simulaton requirements
 #########################################################################################
+# The following isn't needed by the CEP cosim, but is included to avoid
+# break the $(sim_files) rule (which does not like a null $(SIM_FILE_REQS)
+SIM_FILE_REQS += \
+	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc
 
-# Include common simulation flags
-include $(base_dir)/sims/common-sim-flags.mk
-
-# copy files but ignore *.h files in *.f since vcs has +incdir+$(build_dir)
-$(sim_files): $(SIM_FILE_REQS) | $(build_dir)
-	cp -f $^ $(build_dir)
+# copy files and add -FI for *.h files in *.f
+$(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
+	cp -f $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
 	$(foreach file,\
-		$^,\
+		$(SIM_FILE_REQS),\
 		$(if $(filter %.h,$(file)),\
-			,\
-			echo "$(addprefix $(build_dir)/, $(notdir $(file)))" >> $@;))
+			echo "-FI $(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;,\
+			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
 #########################################################################################
 # import other necessary rules and variables
@@ -60,4 +64,4 @@ include $(base_dir)/common.mk
 .PHONY: clean
 clean: cep_clean
 	make -C ${BOOTROM_SRC_DIR} clean
-	-rm -rf $(gen_dir)/*
+	-rm -rf $(gen_dir)

@@ -1,7 +1,6 @@
 package chipyard.config
 
-import freechips.rocketchip.config.{Config}
-import freechips.rocketchip.subsystem._
+import org.chipsalliance.cde.config.{Config}
 
 // The following defines the abstract configuration for non-FPGA based CEP build targets
 class AbstractCEPConfig extends Config(
@@ -15,7 +14,11 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSPIGPIOCells ++
-  new chipyard.iobinders.WithDividerOnlyClockGenerator ++
+  
+  // Default behavior is to use a divider-only clock-generator
+  // This works in VCS, Verilator, and FireSim/
+  // This should get replaced with a PLL-like config instead
+  new chipyard.clocking.WithDividerOnlyClockGenerator ++
   
   // Additional chip configuration items
   new chipyard.config.WithNoSubsystemDrivenClocks ++                    // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
@@ -28,6 +31,6 @@ class AbstractCEPConfig extends Config(
   new freechips.rocketchip.subsystem.WithNoSlavePort ++                 // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNExtTopInterrupts(0) ++        // no external interrupts
   new freechips.rocketchip.subsystem.WithDontDriveBusClocksFromSBus ++  // leave the bus clocks undriven by sbus
-  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++         // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2
+  new freechips.rocketchip.subsystem.WithCoherentBusTopology ++         // hierarchical buses including sbus/mbus/pbus/fbus/cbus/l2  
   new freechips.rocketchip.system.BaseConfig                            // "base" rocketchip system
 )

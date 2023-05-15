@@ -2,7 +2,7 @@ package chipyard.config
 
 import chisel3._
 
-import freechips.rocketchip.config.{Field, Parameters, Config}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.stage.phases.TargetDirKey
 import freechips.rocketchip.tile._

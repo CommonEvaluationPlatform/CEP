@@ -12,9 +12,8 @@ package mitllBlocks.gps
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
-import freechips.rocketchip.config.Field
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey}
-import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._

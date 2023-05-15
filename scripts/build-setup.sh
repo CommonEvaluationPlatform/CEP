@@ -52,7 +52,7 @@ FORCE_FLAG=""
 VERBOSE=false
 VERBOSE_FLAG=""
 USE_UNPINNED_DEPS=false
-SKIP_LIST=()
+SKIP_LIST=(5 6 7 8 9)
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
