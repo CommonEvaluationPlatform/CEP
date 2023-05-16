@@ -52,7 +52,7 @@ FORCE_FLAG=""
 VERBOSE=false
 VERBOSE_FLAG=""
 USE_UNPINNED_DEPS=false
-SKIP_LIST=()
+SKIP_LIST=(5 6 7 8 9)
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -162,6 +162,7 @@ fi
 
 # precompile chipyard scala sources
 if run_step "5"; then
+    cp $CYDIR/build.sbt.nonasic $CYDIR/build.sbt
     pushd $CYDIR/sims/verilator
     make launch-sbt SBT_COMMAND=";project chipyard; compile"
     make launch-sbt SBT_COMMAND=";project tapeout; compile"

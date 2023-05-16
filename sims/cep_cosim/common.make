@@ -151,7 +151,7 @@ RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/toolchains/riscv-tools/riscv-tests
 # With Chipyard 1.8+, which installs depdencies via conda, pointing these
 # binaries is needed until libcrypto++ can be installed via conda
 # g++ is taken from the conda environment
-GCC     					= g++
+GCC     					= /usr/bin/g++
 AR 							= /usr/bin/ar
 RANLIB  					= /usr/bin/ranlib
 LD 							= ${GCC}
