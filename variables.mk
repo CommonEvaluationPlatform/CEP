@@ -200,6 +200,9 @@ ifeq ($(GENERATOR_PACKAGE),hwacha)
 	long_name=$(MODEL_PACKAGE).$(CONFIG)
 endif
 
+# The following variables are still used by the CEP co-simulation environment
+TOP_FILE       ?= $(GEN_COLLATERAL_DIR)/$(long_name).top.v
+
 # chisel generated outputs
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json

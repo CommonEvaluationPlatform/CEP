@@ -115,11 +115,7 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $@
 	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $@
 	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $@
-	@echo "CHIPYARD_HARNESS_FILE = $(HARNESS_FILE)" >> $@
 	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $@
-	@echo "CHIPYARD_HARNESS_SMEMS_FILE = $(HARNESS_SMEMS_FILE)" >> $@
-	@echo "CHIPYARD_SIM_HARNESS_BLACKBOXES = ${sim_harness_blackboxes}" >> $@
-	@echo "CHIPYARD_SIM_TOP_BLACKBOXES = ${sim_top_blackboxes}" >> $@
 	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $@
 	@echo "CHIPYARD_SIM_COMMON_FILES = ${sim_common_files}" >> $@
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@

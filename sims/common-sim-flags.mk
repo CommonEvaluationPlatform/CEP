@@ -26,7 +26,7 @@ SIM_CXXFLAGS = \
 SIM_LDFLAGS = \
 	$(LDFLAGS) \
 	-L$(RISCV)/lib \
-	-Wl,--no-as-needed,-rpath,$(RISCV)/lib \
+	-Wl,-rpath,$(RISCV)/lib \
 	-L$(sim_dir) \
 	-L$(dramsim_dir) \
 	$(LRISCV) \
