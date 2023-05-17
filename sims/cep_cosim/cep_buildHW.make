@@ -94,7 +94,7 @@ COSIM_VLOG_ARGS				+= 	+define+RANDOMIZE_MEM_INIT \
 								+define+RANDOMIZE_REG_INIT \
 								+define+RANDOMIZE_GARBAGE_ASSIGN \
 								+define+RANDOMIZE_INVALID_ASSIGN \
-								+define+RANDOM="1'b0" \
+								+define+RANDOM="1'b0"
 #--------------------------------------------------------------------------------------
 
 
@@ -231,7 +231,9 @@ ${VSIM_DO_FILE}:
 	fi
 
 # The VERILATOR define is related to the INIT_RANDOM_PROLOG_ define in the chisel-generated verilog
-# Questasim seems to have a similar restriction as to the define format
+# Questasim seems to have a similar restriction as to the define format.. This is seperate to
+# the VERILATOR define passed to the software allowing for proper compilation when actually targetting
+# verilator
 COSIM_VLOG_ARGS 			+= +acc -64 -incr +define+MODELSIM +define+VERILATOR
 COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630 -cpppath ${GCC}
 COSIM_VOPT_ARGS	  			+= +acc -64 +nolibcell +nospecify +notimingchecks

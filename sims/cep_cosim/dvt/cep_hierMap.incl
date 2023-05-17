@@ -79,14 +79,14 @@
 
 // Paths to RocketTile constructs in Bare Metal Mode 
 `ifdef BARE_MODE
-  `define CORE0_PC                 `TILE0_PATH.core.coreMonitorBundle_pc
-  `define CORE1_PC                 `TILE1_PATH.core.coreMonitorBundle_pc
-  `define CORE2_PC                 `TILE2_PATH.core.coreMonitorBundle_pc
-  `define CORE3_PC                 `TILE3_PATH.core.coreMonitorBundle_pc
-  `define CORE0_VALID              `TILE0_PATH.core.coreMonitorBundle_valid
-  `define CORE1_VALID              `TILE1_PATH.core.coreMonitorBundle_valid
-  `define CORE2_VALID              `TILE2_PATH.core.coreMonitorBundle_valid
-  `define CORE3_VALID              `TILE3_PATH.core.coreMonitorBundle_valid
+  `define CORE0_PC                 {`TILE0_PATH.core._csr_io_trace_0_iaddr[39] ? 24'hffffff : 24'h0, `TILE0_PATH.core._csr_io_trace_0_iaddr}
+  `define CORE1_PC                 {`TILE1_PATH.core._csr_io_trace_0_iaddr[39] ? 24'hffffff : 24'h0, `TILE1_PATH.core._csr_io_trace_0_iaddr}
+  `define CORE2_PC                 {`TILE2_PATH.core._csr_io_trace_0_iaddr[39] ? 24'hffffff : 24'h0, `TILE2_PATH.core._csr_io_trace_0_iaddr}
+  `define CORE3_PC                 {`TILE3_PATH.core._csr_io_trace_0_iaddr[39] ? 24'hffffff : 24'h0, `TILE3_PATH.core._csr_io_trace_0_iaddr}
+  `define CORE0_VALID              `TILE0_PATH.core._csr_io_trace_0_valid & ~`TILE0_PATH.core._csr_io_trace_0_exception
+  `define CORE1_VALID              `TILE1_PATH.core._csr_io_trace_0_valid & ~`TILE1_PATH.core._csr_io_trace_0_exception
+  `define CORE2_VALID              `TILE2_PATH.core._csr_io_trace_0_valid & ~`TILE2_PATH.core._csr_io_trace_0_exception
+  `define CORE3_VALID              `TILE3_PATH.core._csr_io_trace_0_valid & ~`TILE3_PATH.core._csr_io_trace_0_exception
   `define CORE0_RESET              `TILE0_PATH.core.reset
   `define CORE1_RESET              `TILE1_PATH.core.reset
   `define CORE2_RESET              `TILE2_PATH.core.reset
