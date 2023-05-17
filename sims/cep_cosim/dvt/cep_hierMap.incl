@@ -60,10 +60,10 @@
 `define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
 `define SDCARD_PATH               `COSIM_TB_TOP_MODULE.spi_sd_model_inst
 
-`define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain.tile
-`define TILE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain.tile
-`define TILE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain.tile
-`define TILE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain.tile
+`define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain_tile
+`define TILE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain_tile
+`define TILE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain_tile
+`define TILE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain_tile
 `define TILE0_RESET               `TILE0_PATH.reset
 `define TILE1_RESET               `TILE1_PATH.reset
 `define TILE2_RESET               `TILE2_PATH.reset
@@ -94,8 +94,8 @@
 `endif
 
 // Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
-`define PBUS_RESET                `DUT_TOP_LEVEL.system.subsystem_pbus_clock
-`define PBUS_CLOCK                `DUT_TOP_LEVEL.system.subsystem_pbus_reset
+`define PBUS_RESET                `DUT_TOP_LEVEL.system._subsystem_pbus_clock
+`define PBUS_CLOCK                `DUT_TOP_LEVEL.system._subsystem_pbus_reset
 `define DEBUG_NDRESET             `DUT_TOP_LEVEL.system.debug_systemjtag_reset
 
 `endif // CEP_HIERMAP_INCL

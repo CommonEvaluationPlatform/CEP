@@ -92,9 +92,9 @@ COSIM_VLOG_ARGS				+= +define+STOP_COND=\`SYSTEM_RESET
 # The following defines were borrowed from vcs.mk (targetting the CHISEL generated verilog)
 COSIM_VLOG_ARGS				+= 	+define+RANDOMIZE_MEM_INIT \
 								+define+RANDOMIZE_REG_INIT \
-								+define+RANDOM="1'b0" \
 								+define+RANDOMIZE_GARBAGE_ASSIGN \
-								+define+RANDOMIZE_INVALID_ASSIGN
+								+define+RANDOMIZE_INVALID_ASSIGN \
+								+define+RANDOM="1'b0" \
 #--------------------------------------------------------------------------------------
 
 
@@ -123,60 +123,7 @@ COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
 								${CHIPYARD_BLD_DIR}
 
-CHIPYARD_TOP_FILE_bfm		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bfm.v
-CHIPYARD_TOP_FILE_bare		:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}_bare.v
-CHIPYARD_TOP_SMEMS_FILE_sim	:= ${CHIPYARD_BLD_DIR}/${CHIPYARD_LONG_NAME}.mems_sim.v
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
-
-
-# Create a BFM compatible verion of the CHIPYARD_TOP_SMEMS_FILE
-# Includes some additional substitutions to the PRINTF_CMDS to
-# make them more friendly with the CEP co-simulation environment
-${CHIPYARD_TOP_SMEMS_FILE_sim}: ${CHIPYARD_TOP_SMEMS_FILE}
-	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > $@
-	@echo "\`include \"cep_hierMap.incl\"" >> $@
-	@echo "\`include \"v2c_top.incl\"" >> $@
-	@echo "" >> $@
-	@cat ${CHIPYARD_TOP_SMEMS_FILE} >> $@
-	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
-	@sed -i.bak -e 's/%d/%0d/g' $@
-	@sed -i.bak -e 's/\\n"/"/g' $@
-	@rm -f $@.bak
-	@touch $@
-
-# Create a BFM compatible verion of the CHIPYARD_TOP_FILE
-# Includes some additional substitutions to the PRINTF_CMDS to
-# make them more friendly with the CEP co-simulation environment
-${CHIPYARD_TOP_FILE_bfm}: ${CHIPYARD_TOP_FILE} 
-	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > $@
-	@echo "\`include \"cep_hierMap.incl\"" >> $@
-	@echo "\`include \"v2c_top.incl\"" >>$@
-	@echo "" >> $@
-	@cat ${CHIPYARD_TOP_FILE} >> $@
-	@sed -i.bak -e 's/RocketTile tile/RocketTile_beh tile/g' $@
-	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
-	@sed -i.bak -e 's/%d/%0d/g' $@
-	@sed -i.bak -e 's/\\n"/"/g' $@
-	@rm -f $@.bak
-	@touch $@
-
-# Create a BARE compatible version of the CHIPYARD_TOP_FILE
-# Includes some additional substitutions to the PRINTF_CMDS to
-# make them more friendly with the CEP co-simulation environment
-${CHIPYARD_TOP_FILE_bare}: ${CHIPYARD_TOP_FILE}
-	@rm -f $@
-	@echo "\`include \"suite_config.v\"" > $@
-	@echo "\`include \"cep_hierMap.incl\"" >> $@
-	@echo "\`include \"v2c_top.incl\"" >> $@
-	@echo "" >> $@
-	@cat ${CHIPYARD_TOP_FILE} >> $@
-	@sed -i.bak -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $@
-	@sed -i.bak -e 's/%d/%0d/g' $@
-	@sed -i.bak -e 's/\\n"/"/g' $@
-	@rm -f $@.bak
-	@touch $@
 
 # Create an ordered list of SystemVerilog/Verilog files to compile
 #
@@ -198,10 +145,7 @@ ${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@grep "\.v\|\.sv" ${CHIPYARD_SIM_COMMON_FILES}  >> ${COSIM_BUILD_LIST}
-	@echo "" >> ${COSIM_BUILD_LIST}
-	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_FILE_bfm} >> ${COSIM_BUILD_LIST}
+	@sed -i.bak -e 's/TilePRCIDomain.sv/TilePRCIDomain_bfm.sv/g' ${COSIM_BUILD_LIST}
 else
 # Bare Metal Mode
 ${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
@@ -216,10 +160,6 @@ ${COSIM_BUILD_LIST}: $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 		echo $${i} >> ${COSIM_BUILD_LIST}; \
 	done
 	@grep "\.v\|\.sv" ${CHIPYARD_SIM_COMMON_FILES}  >> ${COSIM_BUILD_LIST}
-	@echo "" >> ${COSIM_BUILD_LIST}
-	@cat ${CHIPYARD_SIM_FILES} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_SMEMS_FILE_sim} >> ${COSIM_BUILD_LIST}
-	@echo ${CHIPYARD_TOP_FILE_bare} >> ${COSIM_BUILD_LIST}
 endif
 
 ifneq (,$(wildcard ${COSIM_BUILD_LIST}))
@@ -290,7 +230,9 @@ ${VSIM_DO_FILE}:
 	echo "$$VSIM_DO_BODY" > $@; \
 	fi
 
-COSIM_VLOG_ARGS 			+= +acc -64 -incr +define+MODELSIM
+# The VERILATOR define is related to the INIT_RANDOM_PROLOG_ define in the chisel-generated verilog
+# Questasim seems to have a similar restriction as to the define format
+COSIM_VLOG_ARGS 			+= +acc -64 -incr +define+MODELSIM +define+VERILATOR
 COSIM_VSIM_ARGS				+= -64 -warning 3363 -warning 3053 -warning 8630 -cpppath ${GCC}
 COSIM_VOPT_ARGS	  			+= +acc -64 +nolibcell +nospecify +notimingchecks
 
@@ -307,7 +249,7 @@ COSIM_VSIM_ARGS				+= -autoprofile=${TEST_NAME}_profile
 endif
 
 # Compile all the Verilog and SystemVerilog for the CEP
-${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
+${TEST_SUITE_DIR}/.buildVlog : ${CHIPYARD_TILE_FILE_bfm} ${CHIPYARD_TILE_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
 	${VLOG_CMD} -work ${WORK_DIR} -l ${COMPILE_LOGFILE} ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST}
 	touch $@
 

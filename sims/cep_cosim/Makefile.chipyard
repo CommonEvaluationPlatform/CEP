@@ -25,6 +25,7 @@ sim_name := cep_cosim
 #########################################################################################
 SUB_PROJECT = cep_cosim
 
+
 #########################################################################################
 # include shared variables (after SUB_PROJECT is defined)
 #########################################################################################
@@ -34,15 +35,14 @@ include $(base_dir)/variables.mk
 include $(base_dir)/sims/common-sim-flags.mk
 
 .PHONY: default debug
-default: verilog
+default: verilog cosim_postprocessing
+
 
 #########################################################################################
 # simulaton requirements
 #########################################################################################
-# The following isn't needed by the CEP cosim, but is included to avoid
-# break the $(sim_files) rule (which does not like a null $(SIM_FILE_REQS)
 SIM_FILE_REQS += \
-	$(CHIPYARD_RSRCS_DIR)/csrc/emulator.cc
+	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
 
 # copy files and add -FI for *.h files in *.f
 $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
@@ -53,10 +53,37 @@ $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
 			echo "-FI $(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;,\
 			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
+
 #########################################################################################
 # import other necessary rules and variables
 #########################################################################################
 include $(base_dir)/common.mk
+
+
+#########################################################################################
+# Perform post-processing on the CEP SystemVerilog/Verilog needed to run with the
+# co-simulation.
+# 1) Add the cep_cosim includes
+# 2) Tweak the print routines to use the CEP cosim macros
+# 3) Create the TilePRCIDomain_bfm.sv file for Bus Functional Model simulations
+#########################################################################################
+cosim_postprocessing:
+	@echo ""
+	@echo "CEP: ----------------------------------------------------------------------"
+	@echo "CEP:  Performing CEP Co-simulation post-processing step...."
+	@echo "CEP: ----------------------------------------------------------------------"
+	@for i in $(shell ls -x {${GEN_COLLATERAL_DIR}/*.sv,${GEN_COLLATERAL_DIR}/*.v} 2>/dev/null); do \
+		sed -i '1i\`include \"suite_config.v\"' $${i}; \
+		sed -i '2i\`include \"cep_hierMap.incl\"' $${i}; \
+		sed -i '3i\`include \"v2c_top.incl\"' $${i}; \
+		sed -i -e 's/$$fwrite(32'\''h80000002,/`logI(,/g' $${i}; \
+		sed -i -e 's/%d/%0d/g' $${i}; \
+		sed -i -e 's/\\n"/"/g' $${i}; \
+	done
+	@cp ${GEN_COLLATERAL_DIR}/TilePRCIDomain.sv ${GEN_COLLATERAL_DIR}/TilePRCIDomain_bfm.sv
+	@sed -i -e 's/RocketTile/RocketTile_beh/g' ${GEN_COLLATERAL_DIR}/TilePRCIDomain_bfm.sv
+#########################################################################################
+
 
 #########################################################################################
 # general cleanup rules
@@ -65,3 +92,5 @@ include $(base_dir)/common.mk
 clean: cep_clean
 	make -C ${BOOTROM_SRC_DIR} clean
 	-rm -rf $(gen_dir)
+
+

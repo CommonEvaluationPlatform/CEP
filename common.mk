@@ -5,6 +5,8 @@ SED ?= sed
 .NOTPARALLEL:
 
 ifeq "$(findstring clean,${MAKECMDGOALS})" ""
+$(info )
+$(info ----------------------------------------------------------------------)
 ifndef RISCV
 $(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
 else
@@ -18,6 +20,8 @@ $(error SUB_PROJECT is unset.)
 else
 $(info Running with SUB_PROJECT = $(SUB_PROJECT))
 endif 
+$(info ----------------------------------------------------------------------)
+$(info )
 endif
 
 #########################################################################################
@@ -113,6 +117,7 @@ $(CHIPYARD_BUILD_INFO):
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f $@
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $@
+	@echo "CHIPYARD_COLLATERAL_DIR = $(GEN_COLLATERAL_DIR)" >> $@
 	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $@
 	@echo "CHIPYARD_TOP_FILE = $(TOP_FILE)" >> $@
 	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $@

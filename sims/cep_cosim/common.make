@@ -379,9 +379,6 @@ else
 endif
 
 cleanLib:
-	-rm -f ${CHIPYARD_TOP_FILE_bfm}
-	-rm -f ${CHIPYARD_TOP_FILE_bare}
-	-rm -f ${CHIPYARD_TOP_SMEMS_FILE_sim}
 	-rm -f ${V2C_H_FILE_LIST}
 	-rm -rf ${LIB_DIR}/*
 	-rm -rf ${LIB_DIR}/.buildLibs
