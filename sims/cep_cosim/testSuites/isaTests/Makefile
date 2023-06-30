@@ -10,12 +10,6 @@
 #                     to the thread via the seed parameter.  Used both
 #                     in checking if the program is loaded and if it has
 #                     completed execution.
-#                   SINGLE_CORE_ONLY	- 
-#					SINGLE_THREAD_ONLY	-
-#					PASS_WRITETOHOST	- Somes tests are considered
-#                     passed when they reach the write_tohost function
-#					VIRTUAL_MODE		- Affects both compilation and
-#					  runtime behavior.
 #
 #************************************************************************
 
@@ -32,7 +26,7 @@ default: usage
 # Include current test suite common.make
 include ./common.make
 
-ISA_SINGLE_CORE_LIST =			\
+TEST_LIST =						\
 	rv64mi-p-access				\
 	rv64mi-p-breakpoint			\
 	rv64mi-p-csr				\
@@ -155,9 +149,7 @@ ISA_SINGLE_CORE_LIST =			\
 	rv64ud-p-ldst				\
 	rv64ud-p-move				\
 	rv64ud-p-recoding			\
-	rv64ud-p-structural
-
-ISA_VIRTUAL_TEST_LIST = 		\
+	rv64ud-p-structural			\
 	rv64ui-v-add 				\
 	rv64ui-v-addi 				\
 	rv64ui-v-addiw 				\
@@ -266,8 +258,6 @@ ISA_VIRTUAL_TEST_LIST = 		\
 	rv64uf-v-move 				\
 	rv64uf-v-recoding 
 
-TEST_LIST 	= ${ISA_SINGLE_CORE_LIST} ${ISA_VIRTUAL_TEST_LIST}
-
 # Special Debug Module test (temporarily removed)
 #OPENOCD_CHECK := $(filter Debugger, $(shell openocd --version 2>&1 | grep Debugger))
 #ifeq "$(OPENOCD_CHECK)" "Debugger"
@@ -290,9 +280,6 @@ makeIsaTest: ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump
 	@echo "Done"
 
 # Default parameter values, override at commandine ONLY!!!
-SINGLE_CORE_ONLY 	?= 0
-VIRTUAL_MODE 		?= 0
-PASS_WRITETOHOST 	?= 0
 MAX_TIMEOUT 		?= 200
 
 ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/isa/${TEST_NAME}
@@ -303,11 +290,7 @@ ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/${TEST_NAME}${SFX}.dump : ${RISCV_TEST_DIR}/
 	@cp -f ${ISA_TEST_TEMPLATE}/*.h             ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/.
 	@rm -f ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 
-	@echo "#define MAX_TIMEOUT 100"    						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
-
-ifneq (${SINGLE_CORE_ONLY},)
-	@echo "#define SINGLE_CORE_ONLY" 						>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_module.cc
-endif
+	@echo "#define MAX_TIMEOUT ${MAX_TIMEOUT}" 				>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 
 	@cat ${ISA_TEST_TEMPLATE}/c_dispatch.cc 				>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_dispatch.cc
 	@cat ${ISA_TEST_TEMPLATE}/c_module.cc 					>> ${ISA_SUITE_DIR}/${TEST_NAME}${SFX}/c_module.cc
@@ -320,13 +303,8 @@ endif
 # Given differing test requirements, they are called with different arguments.
 .PHONY: createISATests removeISATests
 createISATests: removeISATests
-	@for i in ${ISA_SINGLE_CORE_LIST}; do 											\
-		echo "== Generating Single Core test directory for $${i}";					\
-		make TEST_NAME=$${i} SINGLE_CORE_ONLY=1 makeIsaTest; 						\
-	done
-
-	@for i in ${ISA_VIRTUAL_TEST_LIST}; do 											\
-		echo "== Generating Virtual test directory for $${i}";						\
+	@for i in ${TEST_LIST}; do 														\
+		echo "== Generating test directory for $${i}";								\
 		make TEST_NAME=$${i} makeIsaTest; 											\
 	done
 

@@ -607,9 +607,7 @@ module cpu_driver
 
     wire [63:0]   curPC;
     wire          curPCValid;
-    wire          curPCReset;
     reg           DisableStuckChecker = 0;
-    reg           SingleCoreOnly      = 0;
     int           stuckCnt            = 0;
     reg [63:0]    lastPc              = 0;
     wire          pcStuck             = (stuckCnt >= 500);
@@ -627,54 +625,28 @@ module cpu_driver
       dvtFlags[`DVTF_DISABLE_STUCKCHECKER]  = 0; // self-clear
     end   
 
-    always @(posedge dvtFlags[`DVTF_SINGLE_CORE_ONLY]) begin
-      `logI("SingleCoreOnly = 1");
-      SingleCoreOnly                    = 1;
-      DisableStuckChecker               = 1;
-      dvtFlags[`DVTF_SINGLE_CORE_ONLY]  = 0; // self-clear
-    end   
-
     // Generate per-CPU items
     generate
       case (MY_CPU_ID)
         0: begin
           assign curPC          = `CORE0_PC;
           assign curPCValid     = `CORE0_VALID;
-          assign curPCReset     = `CORE0_RESET;
         end
         1: begin
           assign curPC          = `CORE1_PC;
           assign curPCValid     = `CORE1_VALID;
-          assign curPCReset     = `CORE1_RESET;
         end
         2: begin
           assign curPC          = `CORE2_PC;
           assign curPCValid     = `CORE2_VALID;
-          assign curPCReset     = `CORE2_RESET;
         end
         default: begin
           assign curPC          = `CORE3_PC;
           assign curPCValid     = `CORE3_VALID;
-          assign curPCReset     = `CORE3_RESET;
         end
       endcase
     endgenerate
 
-    // Take some action when a pass or failure is detected
-    always @(posedge pcPass or posedge pcFail) begin
-      if (~curPCReset) begin
-        `logI("C%0d Pass/Fail Detected!!! %x/%x... Put it to sleep", MY_CPU_ID, pcPass, pcFail);
-        
-        repeat (20) @(posedge clk);
-        case (MY_CPU_ID)
-          0       : force `CORE0_RESET = 1;
-          1       : force `CORE1_RESET = 1;
-          2       : force `CORE2_RESET = 1;
-          default : force `CORE3_RESET = 1;
-        endcase          
-      end
-    end // end always
-   
     // Pass / Fail based on program counting reaching a particular location in the test 
     // Pass Condition - <test_pass> || <pass> || <finish> || <write_tohost>
     // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
@@ -693,7 +665,7 @@ module cpu_driver
             `RISCV_PASSFAIL[3]  : if (`RISCV_PASSFAIL[3] != 0) pcPass = 1; // write_tohost
             `RISCV_PASSFAIL[4]  : if (`RISCV_PASSFAIL[4] != 0) pcFail = 1; // hangme
             `RISCV_PASSFAIL[1]  : if (`RISCV_PASSFAIL[1] != 0) pcFail = 1; // fail
-            default             : if (SingleCoreOnly && (MY_CPU_ID != 0)) pcPass = 1;
+            default             : ;
           endcase
         // For some reason, the PC is valid, but we have not loaded PassFail.hex
         end else begin
