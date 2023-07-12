@@ -6,11 +6,11 @@
 
 # CEP Changelog
 
-## [v4.50] - 2023-04-26
+## [v4.50] - 2023-07-XX
 
 ### Added
 ### Changed
-  - Chipyard upgraded to v1.9.1
+  - Chipyard upgraded to v1.10.0
 ### Fixed
   - Issue #7: COSIM: XCellium *occasional* failures on RHEL7
 

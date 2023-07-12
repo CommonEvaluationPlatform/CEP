@@ -58,7 +58,7 @@ class LBWIFRocketConfig extends Config(
 
 // DOC include start: DmiRocket
 class dmiRocketConfig extends Config(
-  new chipyard.harness.WithSerialAdapterTiedOff ++               // don't attach an external SimSerial
+  new chipyard.harness.WithSerialTLTiedOff ++                    // don't attach anything to serial-tl
   new chipyard.config.WithDMIDTM ++                              // have debug module expose a clocked DMI port
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
@@ -73,5 +73,10 @@ class ManyPeripheralsRocketConfig extends Config(
   new testchipip.WithBlockDevice ++                          // add block-device module to peripherybus
   new testchipip.WithSerialTLMem(isMainMemory=true) ++       // set lbwif memory base to DRAM_BASE, use as main memory
   new freechips.rocketchip.subsystem.WithNoMemPort ++        // remove AXI4 backing memory
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+
+class QuadChannelRocketConfig extends Config(
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(4) ++      // 4 AXI4 channels
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)

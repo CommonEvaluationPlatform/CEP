@@ -134,7 +134,7 @@ $(SYN_CONF): $(VLSI_RTL)
 #########################################################################################
 # simulation and power input configuration
 #########################################################################################
-include $(base_dir)/vcs.mk
+include $(base_dir)/sims/vcs/vcs.mk
 
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/TestDriver.v
@@ -171,4 +171,4 @@ $(OBJ_DIR)/hammer.d: $(HAMMER_D_DEPS)
 #########################################################################################
 .PHONY: clean
 clean:
-	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF) $(POWER_CONF)
+	rm -rf $(VLSI_OBJ_DIR) hammer-vlsi*.log __pycache__ output.json $(GENERATED_CONFS) $(CLASSPATH_CACHE) $(gen_dir) $(SIM_CONF) $(SIM_DEBUG_CONF) $(SIM_TIMING_CONF) $(POWER_CONF)

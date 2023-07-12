@@ -21,7 +21,8 @@ import mitllBlocks.cep_addresses._
 
 import testchipip.{SerialTLKey}
 
-import chipyard.{BuildSystem, ExtTLMem, DefaultClockFrequencyKey}
+import chipyard._
+import chipyard.harness._
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -46,7 +47,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
-    val freqMHz = (site(DefaultClockFrequencyKey) * 1e6).toLong
+    val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
     val make = s"make -C fpga/src/main/resources/vcu118/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/cep_sdboot/build/sdboot.bin")
@@ -55,7 +56,16 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case SerialTLKey => None // remove serialized tl port
 })
 
+// DOC include start: AbstractVCU118 and Rocket
 class WithVCU118CEPTweaks extends Config(
+  // clocking
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  new chipyard.config.WithMemoryBusFrequency(100) ++
+  new chipyard.config.WithSystemBusFrequency(100) ++
+  new chipyard.config.WithPeripheryBusFrequency(100) ++
+  new WithFPGAFrequency(100) ++ // default 100MHz freq
+
   // harness binders
   new WithUART ++
   new WithSPISDCard ++
@@ -72,8 +82,7 @@ class WithVCU118CEPTweaks extends Config(
   new WithCEPSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
-  new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++
-  new WithFPGAFrequency(100) // default 100MHz freq
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )
 
 class RocketVCU118CEPConfig extends Config(
