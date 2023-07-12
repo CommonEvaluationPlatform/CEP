@@ -156,7 +156,7 @@ class RocketVC707CEPConfig extends Config(
   new WithDTS("mit-ll,cep-vc707", Nil) ++
 
   // Override the FPGA Requence
-  new WithFPGAFrequency(75)
+  new WithFPGAFrequency(75) ++
 
   // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithVC707CEPTweaks ++

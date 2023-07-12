@@ -49,8 +49,8 @@ class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
 class WithGPIO extends OverrideHarnessBinder({
   (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
     th match { case vc707th: VC707FPGATestHarnessImp => {
-      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
-        bb_io.bundle <> dut_io
-      }
-    } }
+      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
+    }}
+  }
+})
 

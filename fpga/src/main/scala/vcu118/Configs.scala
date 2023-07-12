@@ -175,6 +175,7 @@ class RocketVCU118CEPConfig extends Config(
   
   // Default Chipyard AbstractConfig
   new chipyard.config.AbstractConfig
+)
 
 class WithFPGAFrequency(fMHz: Double) extends Config(
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.

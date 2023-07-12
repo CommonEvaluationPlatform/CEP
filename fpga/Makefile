@@ -74,7 +74,6 @@ ifeq ($(SUB_PROJECT),cep_arty100t)
 	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_TARGETS	  :=
 endif
-<<<<<<< HEAD
 
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
