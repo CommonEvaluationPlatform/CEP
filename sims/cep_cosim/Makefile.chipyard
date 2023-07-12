@@ -31,12 +31,8 @@ SUB_PROJECT = cep_cosim
 #########################################################################################
 include $(base_dir)/variables.mk
 
-# Include common simulation flags
-include $(base_dir)/sims/common-sim-flags.mk
-
 .PHONY: default debug
 default: verilog cosim_postprocessing
-
 
 #########################################################################################
 # simulaton requirements
@@ -44,13 +40,13 @@ default: verilog cosim_postprocessing
 SIM_FILE_REQS += \
 	$(ROCKETCHIP_RSRCS_DIR)/vsrc/EICG_wrapper.v
 
-# copy files and add -FI for *.h files in *.f
+# copy files but ignore *.h files in *.f since xcelium has -Wcxx include
 $(sim_files): $(SIM_FILE_REQS) $(ALL_MODS_FILELIST) | $(GEN_COLLATERAL_DIR)
 	cp -f $(SIM_FILE_REQS) $(GEN_COLLATERAL_DIR)
 	$(foreach file,\
 		$(SIM_FILE_REQS),\
 		$(if $(filter %.h,$(file)),\
-			echo "-FI $(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;,\
+			,\
 			echo "$(addprefix $(GEN_COLLATERAL_DIR)/, $(notdir $(file)))" >> $@;))
 
 

@@ -72,8 +72,8 @@ SUB_PROJECT ?= chipyard
 ifeq ($(SUB_PROJECT),cep_cosim_asic)
 	SBT_PROJECT       	?= chipyard
 	MODEL             	?= TestHarness
-	VLOG_MODEL        	?= TestHarness
-	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	VLOG_MODEL        	?= $(MODEL)
+	MODEL_PACKAGE     	?= chipyard.harness
 	CONFIG            	?= CEPASICRocketConfig
 	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)
@@ -90,8 +90,8 @@ endif
 ifeq ($(SUB_PROJECT),cep_cosim)
 	SBT_PROJECT       	?= chipyard
 	MODEL             	?= TestHarness
-	VLOG_MODEL        	?= TestHarness
-	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	VLOG_MODEL        	?= $(MODEL)
+	MODEL_PACKAGE     	?= chipyard.harness
 	CONFIG            	?= CEPRocketConfig
 	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)
@@ -107,9 +107,9 @@ endif
 
 ifeq ($(SUB_PROJECT),cep_verilator)
 	SBT_PROJECT       	?= chipyard
-	MODEL             	?= TestHarness
+	VLOG_MODEL        	?= $(MODEL)
 	VLOG_MODEL        	?= TestHarness
-	MODEL_PACKAGE     	?= $(SBT_PROJECT)
+	MODEL_PACKAGE     	?= chipyard.harness
 	CONFIG            	?= CEPVerilatorRocketConfig
 	CONFIG_PACKAGE    	?= $(SBT_PROJECT)
 	GENERATOR_PACKAGE 	?= $(SBT_PROJECT)

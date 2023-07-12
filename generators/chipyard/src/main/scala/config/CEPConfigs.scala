@@ -95,6 +95,7 @@ class CEPRocketConfig extends Config(
       dev_name            = s"sha256_3")
     )) ++
 
+  // Instantiation of the CEP registers
   new chipyard.config.WithCEPRegisters ++
 
   // Instantiation of the RSA core with or w/o the ARM compiled memories
@@ -117,10 +118,13 @@ class CEPRocketConfig extends Config(
   new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
   new chipyard.config.WithSPI (address = 0x64001000L) ++
 
-  // These configuration items have been inherited from the default configuration of the Freedom U500
+  // Four Big Rocket-Cores
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++
-  new WithNMemoryChannels(1) ++
+
+  // Override the default device tree chip name
   new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
+  // Do NOT instantiate the Tilelink monitors
   new WithoutTLMonitors ++ 
 
   // The default CEP configuration has no external memory
