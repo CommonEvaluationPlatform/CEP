@@ -49,13 +49,13 @@ module RocketTile_beh(
   input  [1:0]  auto_buffer_out_d_bits_param,
   input  [3:0]  auto_buffer_out_d_bits_size,
   input  [1:0]  auto_buffer_out_d_bits_source,
-  input  [1:0]  auto_buffer_out_d_bits_sink,
+  input  [2:0]  auto_buffer_out_d_bits_sink,
   input         auto_buffer_out_d_bits_denied,
   input  [63:0] auto_buffer_out_d_bits_data,
   input         auto_buffer_out_d_bits_corrupt,
   input         auto_buffer_out_e_ready,
   output        auto_buffer_out_e_valid,
-  output [1:0]  auto_buffer_out_e_bits_sink
+  output [2:0]  auto_buffer_out_e_bits_sink
 );
  
   // Tie-off unused outputs
