@@ -295,8 +295,8 @@ module `COSIM_TB_TOP_MODULE;
     .gpio_0_7           (gpio_0_7),
     .uart_0_txd         (uart_txd),
     .uart_0_rxd         (uart_rxd),
-    .reset              (sys_rst),
-    .clock_clock        (sys_clk_pad)
+    .reset_io           (sys_rst),
+    .clock_uncore_clock (sys_clk_pad)
   );
   `endif
   //--------------------------------------------------------------------------------------
