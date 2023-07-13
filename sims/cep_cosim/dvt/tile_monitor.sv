@@ -56,13 +56,13 @@ module tile_monitor (
   input  [1:0]  d_bits_param,
   input  [3:0]  d_bits_size,
   input  [1:0]  d_bits_source,
-  input  [1:0]  d_bits_sink,
+  input  [2:0]  d_bits_sink,
   input         d_bits_denied,
   input  [63:0] d_bits_data,
   input         d_bits_corrupt,
   input         e_ready,
   input         e_valid,
-  input [1:0]   e_bits_sink
+  input [2:0]   e_bits_sink
 );
 
   always @(posedge clock && enable) begin
