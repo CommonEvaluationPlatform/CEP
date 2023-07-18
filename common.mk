@@ -163,7 +163,8 @@ endif
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/build.sbt.asic ${base_dir}/build.sbt
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/DigitalTop.scala $(base_dir)/generators/chipyard/src/main/scala
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/System.scala $(base_dir)/generators/chipyard/src/main/scala
-	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/IOBinders.scala $(base_dir)/generators/chipyard/src/main/scala
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/IOBinders.scala $(base_dir)/generators/chipyard/src/main/scala/
+	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/clocking/ClockBinders.scala $(base_dir)/generators/chipyard/src/main/scala/clocking
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/CEPASICConfig.scala $(base_dir)/generators/chipyard/src/main/scala/config
 	-cp $(base_dir)/CEP_Chipyard_ASIC/chipyard_tobecopied/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala $(base_dir)/generators/chipyard/src/main/scala/config/fragments
@@ -173,6 +174,7 @@ else
 	-cp $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
 	-cp $(base_dir)/generators/chipyard/src/main/scala/System.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/System.scala
 	-cp $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala
+		-cp $(base_dir)/generators/chipyard/src/main/scala/clock/ClockBinders.scala.nonasic $(base_dir)/generators/chipyard/src/main/scala/clocking/ClockBinders.scala
 endif
 	@echo "CEP: ----------------------------------------------------------------------"
 	@echo ""
@@ -184,6 +186,7 @@ cep_clean:
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/System.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/IOBinders.scala
+	-rm -f $(base_dir)/generators/chipyard/src/main/scala/clocking/ClockBinders.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
