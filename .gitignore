@@ -43,7 +43,6 @@ project/project/
 build.sbt
 /generators/chipyard/src/main/scala/DigitalTop.scala
 /generators/chipyard/src/main/scala/System.scala
-/generators/chipyard/src/main/scala/IOBinders.scala
 /generators/chipyard/src/main/scala/clocking/ClockBinders.scala
 /generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
 /generators/chipyard/src/main/scala/config/CEPASICConfig.scala
