@@ -32,7 +32,7 @@ SUB_PROJECT = cep_cosim
 include $(base_dir)/variables.mk
 
 .PHONY: default debug
-default: verilog cosim_postprocessing
+default: clean verilog cosim_postprocessing
 
 #########################################################################################
 # simulaton requirements

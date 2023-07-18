@@ -179,6 +179,7 @@ endif
 
 PHONY: cep_clean
 cep_clean:
+	@echo "CEP:  Performing CEP clean..."
 	-rm -f $(CHIPYARD_BUILD_INFO)
 	-rm -f $(base_dir)/build.sbt
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/DigitalTop.scala
