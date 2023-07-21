@@ -193,8 +193,8 @@ class WithUARTIOCells extends OverrideIOBinder({
 
 // Class to support GPIO Instantiation for the UART Interface
 class UARTChipGPIO extends Bundle {
-  val txd = Analog(1.W)
-  val rxd = Analog(1.W)
+  val txd     = Analog(1.W)
+  val rxd     = Analog(1.W)
 }
 
 // Variant of the UART Binder that forces the instantiation of GPIO cells for ALL pins
@@ -225,8 +225,10 @@ class WithUARTGPIOCells extends OverrideIOBinder({
         iocell.io.pad <> port.rxd
         Seq(iocell)
       }
+
       (port, txdIOs ++ rxdIOs)
     }).unzip
+
     (ports, cells2d.flatten)
   }
 })
@@ -407,19 +409,19 @@ class WithTestIOStubs extends OverrideIOBinder({
 
     val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
       val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testio_${i}")
-      iocell.io.pad <> pin
       iocell.io.o  := false.B
-      iocell.io.ie := false.B
       iocell.io.oe := true.B
+      iocell.io.ie := false.B
+      iocell.io.pad <> pin
       iocell
     }
 
     val modecells = ports.mode.zipWithIndex.map { case (pin, i) =>
       val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testmode_${i}")
-      modecell.io.pad <> pin
       modecell.io.o  := false.B
       modecell.io.ie := false.B
       modecell.io.oe := true.B
+      modecell.io.pad <> pin
       modecell
     }
 
@@ -472,7 +474,7 @@ class WithTestIOStubs extends OverrideIOBinder({
       Seq(iocell)
     }
 
-    (Nil, iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_TRSTnIO ++ jtag_tdoIO)
+    (Seq(ports) ++ Seq(socjtag_wire), iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_TRSTnIO ++ jtag_tdoIO)
   }
 })
 
