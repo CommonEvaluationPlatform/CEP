@@ -94,15 +94,14 @@ int cepRegTest_runTest(int cpuId, int accessSize, int revCheck, int seed, int ve
     (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_KEY_BASE, (uint64_t)(-1));
     (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch1_reg, (uint64_t)(-1));                
     (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch5_reg, (uint64_t)(-1));            
-
     (*regp->AddAReg_p)(regp, SROT_BASE_ADDR + SROT_LLKIC2_SCRATCHPAD0_ADDR, (uint64_t)(-1));
-    (*regp->AddAReg_p)(regp, SROT_BASE_ADDR + SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
     break;
   }    
   case 2: {
     (*regp->AddAReg_p)(regp, AES_BASE_ADDR + AES_KEY_BASE + 8, (uint64_t)(-1));
     (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch2_reg, (uint64_t)(-1));                
     (*regp->AddAReg_p)(regp, CEPREGS_BASE_ADDR + cep_scratch6_reg, (uint64_t)(-1));            
+    (*regp->AddAReg_p)(regp, SROT_BASE_ADDR + SROT_LLKIC2_SCRATCHPAD1_ADDR, (uint64_t)(-1));
     break;
   }
   case 3: {

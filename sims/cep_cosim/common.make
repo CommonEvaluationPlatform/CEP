@@ -179,7 +179,11 @@ sim_info:
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
 	@echo ""
 	@echo "CEP_COSIM: "$(shell hostnamectl | grep "Operating System")
-	@echo "CEP_COSIM: Running with the following variables:"
+ifeq (${ASIC_MODE}, 1)
+	@echo "CEP_COSIM: Running AISC test with the following variables:"
+else
+	@echo "CEP_COSIM: Running non-ASIC test with the following variables:"
+endif
 	@echo "CEP_COSIM:   RISCV                  = $(RISCV))"
 ifeq (${MODELSIM},1)
 	@echo "CEP_COSIM:   QUESTASIM_PATH         = ${QUESTASIM_PATH}"
@@ -198,7 +202,6 @@ endif
 	@echo "CEP_COSIM:   TL_CAPTURE             = ${TL_CAPTURE}"
 	@echo "CEP_COSIM:   VIRTUAL_MODE           = ${VIRTUAL_MODE}"
 	@echo "CEP_COSIM:   BYPASS_PLL             = ${BYPASS_PLL}"
-	@echo "CEP_COSIM:   ASIC_MODE              = ${ASIC_MODE}"
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
 	@echo "CEP_COSIM:   BAREMETAL_PRINTF       = ${BAREMETAL_PRINTF}"
 	@echo "CEP_COSIM:   OPENOCD_ENABLE         = ${OPENOCD_ENABLE}"
