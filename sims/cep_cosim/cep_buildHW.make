@@ -121,7 +121,7 @@ COSIM_VLOG_ARGS				+= 	-sv \
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
-								${CHIPYARD_BLD_DIR}
+								${CHIPYARD_BLD_DIR}/gen-collateral
 
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
 
