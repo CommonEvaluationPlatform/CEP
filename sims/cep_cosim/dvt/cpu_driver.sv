@@ -652,7 +652,7 @@ module cpu_driver
     // Fail Condition - pcStuck || <test_fail> || <fail> || <hangme>
     always @(*) begin
       // A PC Stuck condition has been detected
-      if (pcStuck && ~DisableStuckChecker) begin
+      if (pcStuck && ~DisableStuckChecker && ~pcFail) begin
         `logE("PC seems to be stuck!!!! Terminating...");
         pcFail = 1;
       // Is te current Program Counter valid?
