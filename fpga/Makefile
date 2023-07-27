@@ -8,6 +8,9 @@
 base_dir=$(abspath ..)
 sim_dir=$(abspath .)
 
+# do not generate simulation files
+sim_name := none
+
 #########################################################################################
 # include shared variables
 #########################################################################################
@@ -25,18 +28,23 @@ endif
 # Set default SUB_PROJECT
 SUB_PROJECT ?= cep_arty100t
 
-ifeq ($(SUB_PROJECT),vc707)
+# Bootrom targets are "cleared" for CEP FPGA targets, since
+# build is controlled from within the chisel configuration
+ifeq ($(SUB_PROJECT),cep_vc707)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VC707FPGATestHarness
 	VLOG_MODEL        ?= VC707FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc707
-	CONFIG            ?= RocketVC707Config
+	CONFIG            ?= RocketVC707CEPConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vc707
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT		  	:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
+	BOOTROM_TARGETS	  :=
 endif
 
 # Bootrom targets are "cleared" for CEP FPGA targets, since
@@ -49,6 +57,7 @@ ifeq ($(SUB_PROJECT),cep_vcu118)
 	CONFIG            ?= RocketVCU118CEPConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118
 	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
@@ -67,26 +76,9 @@ ifeq ($(SUB_PROJECT),cep_arty100t)
 	CONFIG            ?= RocketArty100TCEPConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty100t
 	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
 	TOP               ?= ChipTop
 	BOARD             ?= arty_a7_100
-	FPGA_BRAND        ?= xilinx
-	SORT_SCRIPT		  	:= $(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         := $(base_dir)/cep_sort.f
-	BOOTROM_TARGETS	  :=
-endif
-
-# Bootrom targets are "cleared" for CEP FPGA targets, since
-# build is controlled from within the chisel configuration
-ifeq ($(SUB_PROJECT),cep_vc707)
-	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= VC707FPGATestHarness
-	VLOG_MODEL        ?= VC707FPGATestHarness
-	MODEL_PACKAGE     ?= chipyard.fpga.vc707
-	CONFIG            ?= RocketVC707CEPConfig
-	CONFIG_PACKAGE    ?= chipyard.fpga.vc707
-	GENERATOR_PACKAGE ?= chipyard
-	TOP               ?= ChipTop
-	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
 	SORT_SCRIPT		  	:= $(base_dir)/scripts/sort-blackbox.py
 	SORT_FILE         := $(base_dir)/cep_sort.f
@@ -103,7 +95,7 @@ include $(base_dir)/variables.mk
 # setup the board to use
 
 .PHONY: default
-default: bitstream
+default: $(mcs)
 
 #########################################################################################
 # misc. directories
@@ -143,11 +135,6 @@ synth_list_f := $(build_dir)/$(long_name).vsrcs.f
 $(synth_list_f): $(sim_common_files) $(all_vsrcs)
 	$(foreach file,$(all_vsrcs),echo "$(file)" >> $@;)
 	cat $(sim_common_files) >> $@
-# These steps are only relevant when building CEP-related targets
-ifneq (,$(findstring cep,$(SUB_PROJECT)))
-	@# Call the blackbox sorting script
-	@${SORT_SCRIPT} ${synth_list_f} ${SORT_FILE}
-endif
 
 BIT_FILE := $(build_dir)/obj/$(MODEL).bit
 $(BIT_FILE): $(synth_list_f)
@@ -173,87 +160,6 @@ debug-bitstream: $(build_dir)/obj/post_synth.dcp
 			$(BOARD) \
 			$(build_dir)/debug_obj \
 			$(fpga_common_script_dir)
-
-#########################################################################################
-# sim rules
-#########################################################################################
-
-project-creation-script := $(sim_dir)/scripts/create_project.tcl
-
-# generate the vivado project and add all sources
-vivado-project := $(build_dir)/$(MODEL).xpr
-$(vivado-project): $(synth_list_f) $(project-creation-script)
-	cd $(build_dir); vivado \
-		-nojournal -mode batch \
-		-source  $(project-creation-script) \
-		-tclargs \
-			-top-module "$(MODEL)" \
-			-F "$(synth_list_f)" \
-			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')" \
-			-board "$(BOARD)"
-
-fpga_sim_verilog_sources = $(build_dir)/fpga_sim_verilog_sources.f
-fpga_sim_vhdl_sources = $(build_dir)/fpga_sim_vhdl_sources.f
-fpga_sim_cc_sources = $(build_dir)/fpga_sim_cc_sources.f
-
-# generate vcs collateral
-vivado-vcs-collateral := $(fpga_sim_verilog_sources) $(fpga_sim_vhdl_sources) $(fpga_sim_cc_sources)
-$(vivado-vcs-collateral): $(sim_dir)/scripts/generate_vcs_collateral.tcl $(vivado-project)
-	cd $(build_dir); vivado $(vivado-project) \
-		-nojournal -mode batch \
-		-source $(sim_dir)/scripts/generate_vcs_collateral.tcl \
-		-tclargs \
-			$(FPGA_FAMILY) \
-			$(build_dir) \
-			$(MODEL) \
-			$(TB)
-
-include $(base_dir)/vcs.mk
-
-sim_prefix = simv
-sim = $(build_dir)/$(sim_prefix)-$(MODEL_PACKAGE)-$(CONFIG)
-
-xilinx_lib = xil_defaultlib
-
-VCS = vcs -full64
-VLOGAN = vlogan -full64
-VHDLAN = vhdlan -full64
-
-# todo: deduplication between this and other VCS sim makefile
-VLOGAN_OPTS = \
-	-notice \
-	-line \
-	+lint=all,noVCDE,noONGS,noUI \
-	-error=PCWM-L \
-	-error=noZMMCM \
-	-timescale=1ns/10ps \
-	-quiet \
-	-q \
-	+rad \
-	+vcs+lic+wait \
-	+vc+list \
-	-sverilog +systemverilogext+.sv+.svi+.svh+.svt -assert svaext +libext+.sv \
-	+v2k +verilog2001ext+.v95+.vt+.vp +libext+.v \
-	-debug_pp \
-	+incdir+$(build_dir) \
-	$(PREPROC_DEFINES)
-
-# vcs-mx flow
-$(sim): $(vivado-vcs-collateral)
-	mkdir -p $(build_dir)/vcs_lib/xil_defaultlib
-	if [ -s $(fpga_sim_vhdl_sources) ]; \
-		then \
-			cd $(build_dir); $(VHDLAN) -work $(xilinx_lib) -f $(fpga_sim_vhdl_sources) -l vhdlan.log; \
-			fi; \
-	if [ -s $(fpga_sim_verilog_sources) ]; then \
-		cd $(build_dir); $(VLOGAN) $(VLOGAN_OPTS) +define+DEBUG -work $(xilinx_lib) -f $(fpga_sim_verilog_sources) -l vlogan.log; \
-	fi; \
-	if [ -s $(fpga_sim_cc_sources) ]; then \
-		cd $(build_dir); $(VCS) $(VCS_CC_OPTS) $(xilinx_lib).$(TB) $(xilinx_lib).glbl -file $(fpga_sim_cc_sources) -o $@ -Mdir=$(build_dir)/$(long_name) -l vcs.log -debug_access+all; \
-	fi
-
-.PHONY: sim-fpga
-sim-fpga: $(sim)
 
 #########################################################################################
 # general cleanup rules
