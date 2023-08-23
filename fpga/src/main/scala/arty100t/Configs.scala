@@ -24,12 +24,14 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 class WithArty100TTweaks extends Config(
-  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
+  new testchipip.WithUARTTSIClient ++
+  new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
+  new chipyard.config.WithFrontBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
@@ -51,10 +53,6 @@ class RocketArty100TCEPConfig extends Config(
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithArty100TTweaks ++
-
-  // with reduced cache size, closes timing at 50 MHz
-  new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(50.0) ++  // Match the sbus and pbus frequency
 
   // Remove the L2 cache
   new chipyard.config.WithBroadcastManager ++ // no l2

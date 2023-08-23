@@ -95,13 +95,14 @@ include $(base_dir)/variables.mk
 # setup the board to use
 
 .PHONY: default
-default: $(mcs)
+default: cep_preprocessing bitstream
 
 #########################################################################################
 # misc. directories
 #########################################################################################
 fpga_dir := $(base_dir)/fpga/fpga-shells/$(FPGA_BRAND)
 fpga_common_script_dir := $(fpga_dir)/common/tcl
+
 
 #########################################################################################
 # setup misc. sim files
@@ -169,3 +170,4 @@ clean: cep_clean
 	rm -rf $(gen_dir)
 	rm -f *.log
 	rm -f *.jou
+

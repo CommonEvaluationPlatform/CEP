@@ -11,6 +11,7 @@
 package chipyard.fpga.arty100t
 
 import chisel3._
+import chisel3.experimental.{attach}
 
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters, Field}
