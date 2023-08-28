@@ -8,10 +8,11 @@ import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp, XilinxVC707PCIeX1IO}
 
-import chipyard.{CanHaveMasterTLMemPort}
-import chipyard.harness.{OverrideHarnessBinder}
+import chipyard._
+import chipyard.harness._
 
 /*** UART ***/
 class WithVC707UARTHarnessBinder extends OverrideHarnessBinder({
@@ -47,7 +48,7 @@ class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
 
 /*** GPIO ***/
 class WithGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
     th match { case vc707th: VC707FPGATestHarnessImp => {
       (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
     }}

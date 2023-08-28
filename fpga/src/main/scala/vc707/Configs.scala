@@ -11,6 +11,7 @@ import freechips.rocketchip.tile.{XLen}
 
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VC7071GDDRSize}
@@ -19,6 +20,8 @@ import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._
+
+import math.min
 
 import mitllBlocks.cep_addresses._
 
@@ -49,7 +52,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/cep_sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VC7071GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => None // remove serialized tl port
 })
 
@@ -164,7 +167,7 @@ class RocketVC707CEPConfig extends Config(
   new chipyard.config.WithCEPRegisters ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,cep-vc707", Nil) ++
+  new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vc707", Nil) ++
 
   // Override the FPGA Requence
   new WithFPGAFrequency(75) ++

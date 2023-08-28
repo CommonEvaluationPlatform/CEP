@@ -27,7 +27,7 @@ class WithUART extends OverrideHarnessBinder({
 
 /*** GPIO ***/
 class WithGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessSignalReferences, ports: Seq[GPIOPortIO]) => {
+  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       (vcu118th.vcu118Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
         bb_io.bundle <> dut_io

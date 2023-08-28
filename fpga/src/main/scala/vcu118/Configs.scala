@@ -28,6 +28,12 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
   case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
   case VCU118ShellPMOD => "SDIO"
+})
+
+class WithCEPDefaultPeripherals extends Config((site, here, up) => {
+  case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
+  case PeripherySPIKey => List(SPIParams(rAddress = BigInt(0x64001000L)))
+  case VCU118ShellPMOD => "SDIO"
   case PeripheryGPIOKey => {
     if (VCU118GPIOs.width > 0) {
       require(VCU118GPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
@@ -43,6 +49,19 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
   }
 })
 
+class WithSystemModifications extends Config((site, here, up) => {
+  case DTSTimebase => BigInt((1e6).toLong)
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+    // invoke makefile for sdboot
+    val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
+    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
+    require (make.! == 0, "Failed to build bootrom")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
+  }
+  case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
+  case SerialTLKey => None // remove serialized tl port
+})
+
 class WithCEPSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
@@ -55,6 +74,31 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case ExtMem => up(ExtMem, site).map(x => x.copy(master = x.master.copy(size = site(VCU118DDRSize)))) // set extmem to DDR size
   case SerialTLKey => None // remove serialized tl port
 })
+
+// DOC include start: AbstractVCU118 and Rocket
+class WithVCU118Tweaks extends Config(
+  // clocking
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  new chipyard.config.WithMemoryBusFrequency(100) ++
+  new chipyard.config.WithSystemBusFrequency(100) ++
+  new chipyard.config.WithPeripheryBusFrequency(100) ++
+  new WithFPGAFrequency(100) ++ // default 100MHz freq
+  // harness binders
+  new WithUART ++
+  new WithSPISDCard ++
+  new WithDDRMem ++
+  // io binders
+  new WithUARTIOPassthrough ++
+  new WithSPIIOPassthrough ++
+  // other configuration
+  new WithDefaultPeripherals ++
+  new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
+  new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++ // remove debug module
+  new freechips.rocketchip.subsystem.WithoutTLMonitors ++
+  new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
+)
 
 // DOC include start: AbstractVCU118 and Rocket
 class WithVCU118CEPTweaks extends Config(
@@ -74,10 +118,9 @@ class WithVCU118CEPTweaks extends Config(
   // io binders
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
   new WithGPIOIOPassthrough ++
   // other configuration
-  new WithDefaultPeripherals ++
+  new WithCEPDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithCEPSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
   new chipyard.config.WithNoDebug ++ // remove debug module
@@ -171,7 +214,7 @@ class RocketVCU118CEPConfig extends Config(
   new chipyard.config.WithSROT ++
 
   // Overide the chip info 
-  new WithDTS("mit-ll,cep-vcu118", Nil) ++
+  new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vcu118", Nil) ++
 
   // VCU118 closes timing @ 125MHz
   new WithFPGAFrequency(125) ++

@@ -16,6 +16,7 @@ import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 
 import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
 import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
+import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOPortIO}
 
 import chipyard._
 import chipyard.iobinders.{HasIOBinders}
@@ -63,6 +64,18 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
+  /*** GPIO ***/
+  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
+    val maxGPIOSupport = 32 // max gpio per gpio chip
+    val names = VC707GPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
+    Overlay(GPIOOverlayKey, new CustomGPIOVC707ShellPlacer(this, GPIOShellInput(), names))
+  })
+
+  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
+  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
+    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
+  }
+
   /*** SPI ***/
   // 1st SPI goes to the VC707 SDIO port
   val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
@@ -85,7 +98,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
   val vc707Outer = _outer
 
-  val reset = IO(Input(Bool()))
+  val reset = IO(Input(Bool())).suggestName("reset")
   _outer.xdc.addBoardPin(reset, "reset")
 
   val resetIBUF = Module(new IBUF)
@@ -102,6 +115,8 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+
+  _outer.ledModule.foreach(_ := DontCare)
 
   // reset setup
   val hReset = Wire(Reset())
