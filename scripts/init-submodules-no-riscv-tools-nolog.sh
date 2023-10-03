@@ -108,7 +108,6 @@ cd "$RDIR"
             software/firemarshal \
             software/spec2017 \
             vlsi/hammer-mentor-plugins \
-            fpga/fpga-shells \
             CEP_Chipyard_ASIC
         do
             "$1" "${name%/}"
