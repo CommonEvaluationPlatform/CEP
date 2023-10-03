@@ -52,7 +52,7 @@ FORCE_FLAG=""
 VERBOSE=false
 VERBOSE_FLAG=""
 USE_UNPINNED_DEPS=false
-SKIP_LIST=(5 6 7 8 9)
+SKIP_LIST=()
 
 # getopts does not support long options, and is inflexible
 while [ "$1" != "" ];
@@ -162,7 +162,12 @@ fi
 
 # precompile chipyard scala sources
 if run_step "5"; then
+    # This steps are the CEP pre-processing steps, which are needed to allow for a valid build
     cp $CYDIR/build.sbt.nonasic $CYDIR/build.sbt
+    cp $CYDIR/generators/chipyard/src/main/scala/DigitalTop.scala.nonasic $CYDIR/generators/chipyard/src/main/scala/DigitalTop.scala
+    cp $CYDIR/generators/chipyard/src/main/scala/System.scala.nonasic $CYDIR/generators/chipyard/src/main/scala/System.scala
+    cp $CYDIR/generators/chipyard/src/main/scala/clocking/ClockBinders.scala.nonasic $CYDIR/generators/chipyard/src/main/scala/clocking/ClockBinders.scala
+
     pushd $CYDIR/sims/verilator
     make launch-sbt SBT_COMMAND=";project chipyard; compile"
     make launch-sbt SBT_COMMAND=";project tapeout; compile"
