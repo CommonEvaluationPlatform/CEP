@@ -48,7 +48,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -C fpga/src/main/resources/vc707/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/cep_sdboot/build/sdboot.bin")
   }
@@ -60,12 +60,11 @@ class WithVC707CEPTweaks extends Config (
   // clocking
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithSystemBusFrequency(50.0) ++
-  new chipyard.config.WithPeripheryBusFrequency(50.0) ++
-
-  new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
-  new WithFPGAFrequency(50) ++ // default 50MHz freq
+  new chipyard.config.WithMemoryBusFrequency(75.0) ++
+  new chipyard.config.WithSystemBusFrequency(75.0) ++
+  new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(75) ++
+  new WithFPGAFrequency(75) ++
 
   // harness binders
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
@@ -168,9 +167,6 @@ class RocketVC707CEPConfig extends Config(
 
   // Overide the chip info 
   new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vc707", Nil) ++
-
-  // Override the FPGA Requence
-  new WithFPGAFrequency(75) ++
 
   // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithVC707CEPTweaks ++

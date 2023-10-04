@@ -1,6 +1,8 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty100t
 
+import sys.process._
+
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.devices.debug._
@@ -23,15 +25,22 @@ class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
 })
 
+class WithCEPBootrom extends Config((site, here, up) => {
+  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+    val freqMHz = ((up(PeripheryBusKey, site).dtsFrequency.get).toDouble * 1e6).toLong
+    val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
+    require (make.! == 0, "Failed to build bootrom")
+    p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
+  }
+})
+
 class WithArty100TTweaks extends Config(
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithArty100TUARTTSI ++
   new WithArty100TDDRTL ++
   new WithNoDesignKey ++
-  new testchipip.WithUARTTSIClient ++
-  new chipyard.harness.WithSerialTLTiedOff ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
-  new chipyard.config.WithFrontBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
@@ -47,6 +56,9 @@ class RocketArty100TCEPConfig extends Config(
   new chipyard.config.WithCEPRegisters ++
   new chipyard.config.WithAES ++
   new chipyard.config.WithSROTFPGAAESOnly ++
+
+  // Insert with CEP bootrom
+  new WithCEPBootrom ++
 
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
