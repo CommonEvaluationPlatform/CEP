@@ -63,7 +63,7 @@ class RocketArty100TCEPConfig extends Config(
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
-  // Add GPIO (LEDs have been explicitly removed from the Arty100T)
+  // Add GPIO (LEDs have been explicitly removed from the Arty100T test harness)
   new WithArty100TGPIO ++
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
