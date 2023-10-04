@@ -26,8 +26,8 @@ class WithNoDesignKey extends Config((site, here, up) => {
 })
 
 class WithCEPBootrom extends Config((site, here, up) => {
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
-    val freqMHz = ((up(PeripheryBusKey, site).dtsFrequency.get).toDouble * 1e6).toLong
+  case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
+    val freqMHz = ((up(PeripheryBusKey).dtsFrequency.get).toDouble * 1e6).toLong
     val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
@@ -62,6 +62,9 @@ class RocketArty100TCEPConfig extends Config(
 
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
+
+  // Add GPIO (LEDs have been explicitly removed from the Arty100T)
+  new WithArty100TGPIO ++
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithArty100TTweaks ++

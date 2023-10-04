@@ -14,6 +14,7 @@ import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, Reset
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.gpio._
 
 import chipyard._
 import chipyard.harness._
@@ -45,11 +46,17 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
 
-  val ledOverlays = dp(LEDOverlayKey).map(_.place(LEDDesignInput()))
-  val all_leds = ledOverlays.map(_.overlayOutput.led)
-  val status_leds = all_leds.take(3)
-  val other_leds = all_leds.drop(3)
+  /*** GPIO ***/
+  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
+    val maxGPIOSupport = 32 // max gpio per gpio chip
+    val names = Arty100TGPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
+    Overlay(GPIOOverlayKey, new CustomGPIOArty100TShellPlacer(this, GPIOShellInput(), names))
+  })
 
+  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
+  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
+    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
+  }
 
   override lazy val module = new HarnessLikeImpl
 
@@ -57,20 +64,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
-
-    // Blink the status LEDs for sanity
-    withClockAndReset(clk_100mhz, dutClock.in.head._1.reset) {
-      val period = (BigInt(100) << 20) / status_leds.size
-      val counter = RegInit(0.U(log2Ceil(period).W))
-      val on = RegInit(0.U(log2Ceil(status_leds.size).W))
-      status_leds.zipWithIndex.map { case (o,s) => o := on === s.U }
-      counter := Mux(counter === (period-1).U, 0.U, counter + 1.U)
-      when (counter === 0.U) {
-        on := Mux(on === (status_leds.size-1).U, 0.U, on + 1.U)
-      }
-    }
-
-    other_leds(0) := resetPin
 
     harnessSysPLL.plls.foreach(_._1.getReset.get := pllReset)
 
@@ -83,8 +76,6 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     ddrOverlay.mig.module.reset := harnessBinderReset
     ddrBlockDuringReset.module.clock := harnessBinderClock
     ddrBlockDuringReset.module.reset := harnessBinderReset.asBool || !ddrOverlay.mig.module.io.port.init_calib_complete
-
-    other_leds(6) := ddrOverlay.mig.module.io.port.init_calib_complete
 
     instantiateChipTops()
   }
