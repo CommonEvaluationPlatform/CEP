@@ -57,7 +57,7 @@ class WithArty100TDDRTL extends OverrideHarnessBinder({
 })
 
 /*** GPIO ***/
-class WithArty100TGPIO extends OverrideHarnessBinder({
+class WithArty100TGPIOBinder extends OverrideHarnessBinder({
   (system: HasPeripheryGPIOModuleImp, th: HasHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     (artyTh.io_gpio_bb zip ports).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}

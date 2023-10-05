@@ -1,7 +1,10 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty100t
 
+import chisel3._
+
 import sys.process._
+import math.min
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
@@ -12,17 +15,45 @@ import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.gpio._
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem}
+import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
 
 import mitllBlocks.cep_addresses._
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+})
+
+class WithGPIOIOPassthrough extends OverrideIOBinder({
+  (system: HasPeripheryGPIOModuleImp) => {
+    val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
+    (io_gpio_pins_temp zip system.gpio).map { case (io, sysio) =>
+      io <> sysio
+    }
+    (io_gpio_pins_temp, Nil)
+  }
+})
+
+class WithArty100TGPIO extends Config((site, here, up) => {
+  case PeripheryGPIOKey => {
+    if (Arty100TGPIOs.width > 0) {
+      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
+  }
 })
 
 class WithCEPBootrom extends Config((site, here, up) => {
@@ -64,6 +95,8 @@ class RocketArty100TCEPConfig extends Config(
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
   // Add GPIO (LEDs have been explicitly removed from the Arty100T test harness)
+  new WithArty100TGPIOBinder ++
+  new WithGPIOIOPassthrough ++
   new WithArty100TGPIO ++
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)

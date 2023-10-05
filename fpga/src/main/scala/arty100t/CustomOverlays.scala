@@ -44,7 +44,7 @@ class CustomGPIOArty100TPlacedOverlay(val shell: Arty100TShellBasicOverlays, nam
    extends GPIOXilinxPlacedOverlay(name, designInput, shellInput)
 {
   shell { InModuleBody {
-    require(gpioNames.length == io.gpio.length)
+    require(gpioNames.length == io.gpio.length, "gpioNames & gpioLength mismatch")
 
     val packagePinsWithIOStdWithPackageIOs = (gpioNames zip io.gpio).map { case (name, io) =>
       val (pin, iostd, pullupEnable) = Arty100TGPIOs.pinMapping(name)
