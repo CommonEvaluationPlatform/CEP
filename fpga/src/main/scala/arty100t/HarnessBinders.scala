@@ -22,7 +22,7 @@ import chipyard.iobinders.JTAGChipIO
 
 import testchipip._
 
-class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
+class WithArty100TUARTTSI(address: BigInt = 0x64000000L, uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
     ports.map({ port =>
@@ -32,7 +32,7 @@ class WithArty100TUARTTSI(uartBaudRate: BigInt = 115200) extends OverrideHarness
       port.clock := th.harnessBinderClock
       val ram = TSIHarness.connectRAM(system.serdesser.get, bits, th.harnessBinderReset)
       val uart_to_serial = Module(new UARTToSerial(
-        freq, UARTParams(0, initBaudRate=uartBaudRate)))
+        freq, UARTParams(address=address, initBaudRate=uartBaudRate)))
       val serial_width_adapter = Module(new SerialWidthAdapter(
         narrowW = 8, wideW = TSI.WIDTH))
       serial_width_adapter.io.narrow.flipConnect(uart_to_serial.io.serial)

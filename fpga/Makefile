@@ -148,7 +148,7 @@ include $(base_dir)/variables.mk
 # setup the board to use
 
 .PHONY: default
-default: cep_preprocessing bitstream
+default: bitstream
 
 #########################################################################################
 # misc. directories
@@ -202,10 +202,10 @@ $(BIT_FILE): $(synth_list_f)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
 
 .PHONY: bitstream
-bitstream: $(BIT_FILE)
+bitstream: cep_preprocessing $(BIT_FILE)
 
 .PHONY: debug-bitstream
-debug-bitstream: $(build_dir)/obj/post_synth.dcp
+debug-bitstream: cep_preprocessing $(build_dir)/obj/post_synth.dcp
 	cd $(build_dir); vivado \
 		-nojournal -mode batch \
 		-source $(sim_dir)/scripts/run_impl_bitstream.tcl \

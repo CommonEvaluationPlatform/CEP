@@ -32,6 +32,17 @@ class WithVC707SPISDCardHarnessBinder extends OverrideHarnessBinder({
   }
 })
 
+/*** GPIO ***/
+class WithVC707GPIOHarnessBinder extends OverrideHarnessBinder({
+  (system: HasPeripheryGPIOModuleImp, th: BaseModule, ports: Seq[GPIOPortIO]) => {
+    th match { case vc707th: VC707FPGATestHarnessImp => {
+      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
+        bb_io.bundle <> dut_io
+      }
+    } }
+  }
+})
+
 /*** Experimental DDR ***/
 class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
   (system: CanHaveMasterTLMemPort, th: BaseModule, ports: Seq[HeterogeneousBag[TLBundle]]) => {
@@ -46,11 +57,3 @@ class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
   }
 })
 
-/*** GPIO ***/
-class WithGPIO extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule with HasHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
-    th match { case vc707th: VC707FPGATestHarnessImp => {
-      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
-    }}
-  }
-})

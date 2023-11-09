@@ -30,6 +30,15 @@ class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
 })
 
+class WithUARTIOPassthrough extends OverrideIOBinder({
+  (system: HasPeripheryUARTModuleImp) => {
+    val io_uart_pins_temp = system.uart.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"uart_$i") }
+    (io_uart_pins_temp zip system.uart).map { case (io, sysio) =>
+      io <> sysio
+    }
+    (io_uart_pins_temp, Nil)
+  }
+})
 class WithGPIOIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
@@ -82,11 +91,12 @@ class WithArty100TTweaks extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
+
 class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers
   new chipyard.config.WithCEPRegisters ++
-  new chipyard.config.WithAES ++
-  new chipyard.config.WithSROTFPGAAESOnly ++
+//  new chipyard.config.WithAES ++
+//  new chipyard.config.WithSROTFPGAAESOnly ++
 
   // Insert with CEP bootrom
   new WithCEPBootrom ++
@@ -95,9 +105,9 @@ class RocketArty100TCEPConfig extends Config(
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
   // Add GPIO (LEDs have been explicitly removed from the Arty100T test harness)
-  new WithArty100TGPIOBinder ++
-  new WithGPIOIOPassthrough ++
-  new WithArty100TGPIO ++
+//  new WithArty100TGPIOBinder ++
+//  new WithGPIOIOPassthrough ++
+//  new WithArty100TGPIO ++
 
   // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
   new WithArty100TTweaks ++
@@ -105,9 +115,7 @@ class RocketArty100TCEPConfig extends Config(
   // Remove the L2 cache
   new chipyard.config.WithBroadcastManager ++ // no l2
 
-  // Default Chipyard Rocket Config
-  new chipyard.RocketConfig
-)
+  new chipyard.RocketConfig)
 
 class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
@@ -125,7 +133,6 @@ class UART460800RocketArty100TConfig extends Config(
 class UART921600RocketArty100TConfig extends Config(
   new WithArty100TUARTTSI(uartBaudRate = 921600) ++
   new RocketArty100TConfig)
-
 
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++
