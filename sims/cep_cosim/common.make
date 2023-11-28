@@ -43,10 +43,10 @@ OPENOCD_ENABLE				?= 0
 BYPASS_PLL                  ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
 BAREMETAL_PRINTF			?= none
+COVERAGE					?= 0
 
 # The following flags are defined here to support the eventual enablement of legacy functionality
 override PROFILE   			= 0
-override COVERAGE  			= 0
 override USE_GDB  			= 0
 
 # Currently only MODELSIM (Questasim) and CADENCE (XCellium) are supported

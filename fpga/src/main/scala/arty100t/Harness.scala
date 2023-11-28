@@ -15,6 +15,7 @@ import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.spi._
 
 import chipyard._
 import chipyard.harness._
@@ -35,9 +36,11 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
 
+  /*** UART ***/
   val io_uart_bb = BundleBridgeSource(() => new UARTPortIO(dp(PeripheryUARTKey).headOption.getOrElse(UARTParams(0))))
   val uartOverlay = dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
+  /*** DDR ***/
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
@@ -45,6 +48,10 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   )))))
   val ddrBlockDuringReset = LazyModule(new TLBlockDuringReset(4))
   ddrOverlay.overlayOutput.ddr := ddrBlockDuringReset.node := ddrClient
+
+  /*** SPI ***/
+  val io_spi_bb   = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
+  dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** GPIO ***/
   val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {

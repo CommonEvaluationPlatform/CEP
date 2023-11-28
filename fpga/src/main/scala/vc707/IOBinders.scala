@@ -1,7 +1,7 @@
 package chipyard.fpga.vc707
 
 import chisel3._
-import chisel3.experimental.{IO, DataMirror}
+import chisel3.experimental.{DataMirror}
 
 import freechips.rocketchip.diplomacy.{ResourceBinding, Resource, ResourceAddress, InModuleBody}
 import freechips.rocketchip.subsystem.{BaseSubsystem}
@@ -25,7 +25,7 @@ class WithUARTIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithGPIOPassthrough extends OverrideIOBinder({
+class WithGPIOIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
     (io_gpio_pins_temp zip system.gpio).map { case (io, sysio) =>

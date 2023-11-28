@@ -314,8 +314,8 @@ int main(void)
   if ((scratch_reg & 0x3) != 0x3) {
     printf("\n");
     printf("---          Common Evaluation Platform v%x.%x            ---\n", major_version, minor_version);
-    printf("---         Based on the UCB Chipyard Framework          ---\n");
-    printf("--- Copyright 2022 Massachusetts Institute of Technology ---\n");
+    printf("--- Based on the UCB Chipyard Framework (1.10.0 release) ---\n");
+    printf("--- Copyright 2023 Massachusetts Institute of Technology ---\n");
     printf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
     printf("\n");
   } // if ((scratch_reg & 0x3) != 0x3)

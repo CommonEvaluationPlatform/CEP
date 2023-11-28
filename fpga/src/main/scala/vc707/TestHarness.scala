@@ -1,25 +1,23 @@
 package chipyard.fpga.vc707
+
 import chisel3._
-import chisel3.experimental.{IO}
 
-import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
-import org.chipsalliance.cde.config.{Parameters}
+import freechips.rocketchip.diplomacy._
+import org.chipsalliance.cde.config._
+import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.subsystem.{SystemBusKey}
-import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 
-import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
-import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
+import sifive.fpgashells.shell.xilinx._
+import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
-import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
+import sifive.fpgashells.clocks._
 
-import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
-import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
-import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOPortIO}
+import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
+import sifive.blocks.devices.i2c._
+import sifive.blocks.devices.gpio._
 
 import chipyard._
-import chipyard.iobinders.{HasIOBinders}
 import chipyard.harness._
 
 class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707Shell { outer =>

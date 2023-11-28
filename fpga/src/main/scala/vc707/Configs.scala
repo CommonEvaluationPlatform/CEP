@@ -33,19 +33,19 @@ class WithDefaultPeripherals extends Config((site, here, up) => {
 class WithCEPDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey   => List(UARTParams(address  = BigInt(0x64000000L)))
   case PeripherySPIKey    => List(SPIParams(rAddress  = BigInt(0x64001000L)))
-  // case PeripheryGPIOKey   => {
-  //   if (VC707GPIOs.width > 0) {
-  //     require(VC707GPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
-  //     val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
-  //     val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
-  //     List.tabulate(((VC707GPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
-  //       GPIOParams(address = gpioAddrs(n), width = min(VC707GPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
-  //     })
-  //   }
-  //   else {
-  //     List.empty[GPIOParams]
-  //   }
-  // }
+  case PeripheryGPIOKey   => {
+     if (VC707GPIOs.width > 0) {
+       require(VC707GPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+       val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+       val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+       List.tabulate(((VC707GPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+         GPIOParams(address = gpioAddrs(n), width = min(VC707GPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+       })
+     }
+     else {
+       List.empty[GPIOParams]
+     }
+   }
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
@@ -113,7 +113,7 @@ class WithVC707CEPTweaks extends Config (
   new WithFPGAFrequency(75) ++
   // harness binders
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
-//  new WithVC707GPIOHarnessBinder ++
+  new WithVC707GPIOHarnessBinder ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
@@ -121,7 +121,7 @@ class WithVC707CEPTweaks extends Config (
   new WithUARTIOPassthrough ++
   new WithSPIIOPassthrough ++
   new WithTLIOPassthrough ++
-//  new WithGPIOPassthrough ++
+  new WithGPIOIOPassthrough ++
   // other configuration
   new WithCEPDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory

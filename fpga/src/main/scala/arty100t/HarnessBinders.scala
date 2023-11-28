@@ -11,6 +11,7 @@ import freechips.rocketchip.diplomacy.{LazyRawModuleImp}
 
 import sifive.blocks.devices.uart.{UARTPortIO, HasPeripheryUARTModuleImp, UARTParams}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
+import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import sifive.blocks.devices.jtag.{JTAGPins, JTAGPinsFromPort}
 import sifive.blocks.devices.pinctrl.{BasePin}
 
@@ -61,5 +62,21 @@ class WithArty100TGPIOBinder extends OverrideHarnessBinder({
   (system: HasPeripheryGPIOModuleImp, th: HasHarnessInstantiators, ports: Seq[GPIOPortIO]) => {
     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
     (artyTh.io_gpio_bb zip ports).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
+  }
+})
+
+/*** SPI ***/
+class WithSPISDCardBinder extends OverrideHarnessBinder({
+  (system: HasPeripherySPI, th: HasHarnessInstantiators, ports: Seq[SPIPortIO]) => {
+    val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+    artyTh.io_spi_bb.bundle <> ports.head
+  }
+})
+
+/*** UART ***/
+class WithUARTBinder extends OverrideHarnessBinder({
+  (system: HasPeripheryUARTModuleImp, th: HasHarnessInstantiators, ports: Seq[UARTPortIO]) => {
+    val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+      artyTh.io_uart_bb.bundle <> ports.head
   }
 })

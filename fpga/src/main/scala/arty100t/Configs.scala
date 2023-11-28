@@ -16,12 +16,14 @@ import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.spi._
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.{SerialTLKey}
 
 import chipyard.{BuildSystem}
 import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
+import chipyard.config.{WithSPI, WithUART}
 
 import mitllBlocks.cep_addresses._
 
@@ -39,6 +41,7 @@ class WithUARTIOPassthrough extends OverrideIOBinder({
     (io_uart_pins_temp, Nil)
   }
 })
+
 class WithGPIOIOPassthrough extends OverrideIOBinder({
   (system: HasPeripheryGPIOModuleImp) => {
     val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
@@ -61,6 +64,25 @@ class WithArty100TGPIO extends Config((site, here, up) => {
     }
     else {
       List.empty[GPIOParams]
+    }
+  }
+})
+
+class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
+  (system: HasPeripherySPI) => {
+    // attach resource to 1st SPI
+    ResourceBinding {
+      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
+    }
+
+    InModuleBody {
+      system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+        val io_spi_pins_temp = system.spi.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"spi_$i") }
+        (io_spi_pins_temp zip system.spi).map { case (io, sysio) =>
+          io <> sysio
+        }
+        (io_spi_pins_temp, Nil)
+      } }
     }
   }
 })
@@ -109,12 +131,23 @@ class RocketArty100TCEPConfig extends Config(
 //  new WithGPIOIOPassthrough ++
 //  new WithArty100TGPIO ++
 
-  // Include the Arty100T Tweaks with CEP Registers enabled (passed to the bootrom build)
+  // Add SD interface (MMC Device added by WithSPIIOPassthrough)
+  new WithSPISDCardBinder ++
+  new WithSPIIOPassthrough ++
+  new WithSPI ++
+
+  // Restore default UART (UART TSI does not seem to properly enumerate on the device tree)
+  new WithUARTBinder ++
+  new WithUARTIOPassthrough ++
+  new WithUART(address = 0x64000000L) ++
+  
+  // Include the Arty100T Tweaks
   new WithArty100TTweaks ++
 
   // Remove the L2 cache
   new chipyard.config.WithBroadcastManager ++ // no l2
 
+  // Include the standard Rocket Config
   new chipyard.RocketConfig)
 
 class RocketArty100TConfig extends Config(
