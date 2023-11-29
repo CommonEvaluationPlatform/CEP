@@ -23,6 +23,7 @@ import chipyard.iobinders.JTAGChipIO
 
 import testchipip._
 
+// Tethered Serial Interface (for debugging - https://chipyard.readthedocs.io/en/stable/Advanced-Concepts/Chip-Communication.html)
 class WithArty100TUARTTSI(address: BigInt = 0x64000000L, uartBaudRate: BigInt = 115200) extends OverrideHarnessBinder({
   (system: CanHavePeripheryTLSerial, th: HasHarnessInstantiators, ports: Seq[ClockedIO[SerialIO]]) => {
     implicit val p = chipyard.iobinders.GetSystemParameters(system)
@@ -46,6 +47,7 @@ class WithArty100TUARTTSI(address: BigInt = 0x64000000L, uartBaudRate: BigInt = 
   }
 })
 
+/*** DDR ***/
 class WithArty100TDDRTL extends OverrideHarnessBinder({
   (system: CanHaveMasterTLMemPort, th: HasHarnessInstantiators, ports: Seq[HeterogeneousBag[TLBundle]]) => {
     require(ports.size == 1)

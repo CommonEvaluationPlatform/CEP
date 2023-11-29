@@ -127,9 +127,9 @@ class RocketArty100TCEPConfig extends Config(
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
   // Add GPIO (LEDs have been explicitly removed from the Arty100T test harness)
-//  new WithArty100TGPIOBinder ++
-//  new WithGPIOIOPassthrough ++
-//  new WithArty100TGPIO ++
+  new WithArty100TGPIOBinder ++
+  new WithGPIOIOPassthrough ++
+  new WithArty100TGPIO ++
 
   // Add SD interface (MMC Device added by WithSPIIOPassthrough)
   new WithSPISDCardBinder ++
