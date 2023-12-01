@@ -51,7 +51,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
   /*** SPI ***/
   val io_spi_bb   = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
-  dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
+  val spiOverlay = dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** GPIO ***/
   val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
@@ -79,6 +79,8 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
     def referenceReset = dutClock.in.head._1.reset
     def success = { require(false, "Unused"); false.B }
 
+    childClock := harnessBinderClock
+    childReset := harnessBinderReset
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset
     ddrBlockDuringReset.module.clock := harnessBinderClock

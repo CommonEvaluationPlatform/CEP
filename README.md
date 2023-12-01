@@ -85,10 +85,10 @@ These subprojects define the system configuration and are as follows:
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
-- 98% LUT Utilization
+- XX% LUT Utilization
 - 1x WithNBigCore
 - CEP Registers
-- AES Core
+- MD5 Core
 - Surrogate Root of Trust (SRoT)
 
 `cep_vc707` - VC707 Development Board
@@ -220,6 +220,8 @@ make DISK=/dev/sdd1 sd_write                    <-- copies gpiotest.img to parti
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
+
+When booting bare metal software, it is useful to not have to wait for the bootrom to load a linux-sized payload.  When powering the FPGA board, a *fast-boot* can be enabled by holding BTN N on the VC707/VCU118 or BTN0 on the Arty100T.
 
 ### Booting Linux
 The CEP Arty100T/VC707/VCU118 builds has been verified to support a firemarshall-based linux build by following the default workload instructions [here](https://chipyard.readthedocs.io/en/latest/Prototyping/VCU118.html#running-linux-on-vcu118-designs).

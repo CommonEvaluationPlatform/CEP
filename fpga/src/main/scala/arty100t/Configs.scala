@@ -89,7 +89,8 @@ class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
 
 class WithCEPBootrom extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
-    val freqMHz = ((up(PeripheryBusKey).dtsFrequency.get).toDouble * 1e6).toLong
+    val freqMHz = (up(PeripheryBusKey).dtsFrequency.get).toLong
+    // Forcing rebuild every time (-B) is critical as the clean process does NOT touch the bootrom
     val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
@@ -107,18 +108,20 @@ class WithArty100TTweaks extends Config(
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new chipyard.clocking.WithPassthroughClockGenerator ++
-  new chipyard.config.WithNoDebug ++ // no jtag
-  new chipyard.config.WithNoUART ++ // use UART for the UART-TSI thing instad
-  new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
+  new chipyard.config.WithNoDebug ++          // no jtag
+  new chipyard.config.WithNoUART ++           // use UART for the UART-TSI thing instad
+  new chipyard.config.WithTLBackingMemory ++  // FPGA-shells converts the AXI to TL for us
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
-
 class RocketArty100TCEPConfig extends Config(
-  // Add the CEP registers
+  // Add the CEP registers (required)
   new chipyard.config.WithCEPRegisters ++
-//  new chipyard.config.WithAES ++
-//  new chipyard.config.WithSROTFPGAAESOnly ++
+
+  // Resources in the Arty100T are limited, so we add one of the smaller cores (MD5)
+  // and a variant of the Surrogate Root of Trust
+  new chipyard.config.WithMD5 ++
+  new chipyard.config.WithSROTFPGAMD5Only ++
 
   // Insert with CEP bootrom
   new WithCEPBootrom ++
@@ -136,7 +139,7 @@ class RocketArty100TCEPConfig extends Config(
   new WithSPIIOPassthrough ++
   new WithSPI ++
 
-  // Restore default UART (UART TSI does not seem to properly enumerate on the device tree)
+  // Restore default UART
   new WithUARTBinder ++
   new WithUARTIOPassthrough ++
   new WithUART(address = 0x64000000L) ++

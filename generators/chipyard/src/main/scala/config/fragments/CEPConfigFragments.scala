@@ -229,7 +229,8 @@ class WithSROT extends Config((site, here, up) => {
     ))
 })
 
-class WithSROTFPGAAESOnly extends Config((site, here, up) => {
+// The MD5 Only version of the SROT is allow targetting of the Arty100T, which was limited resources
+class WithSROTFPGAMD5Only extends Config((site, here, up) => {
   case SROTKey => List(
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
@@ -239,7 +240,7 @@ class WithSROTFPGAAESOnly extends Config((site, here, up) => {
       // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
       // The SRoT uses these indicies for routing keys to the appropriate core
       llki_cores_array    = Array(
-        CEPBaseAddresses.aes_llki_base_addr       // Core Index 0 
+        CEPBaseAddresses.md5_base_addr       // Core Index 0 
       )
     ))
 })
