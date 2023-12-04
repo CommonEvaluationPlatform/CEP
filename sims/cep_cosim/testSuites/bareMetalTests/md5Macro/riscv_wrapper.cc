@@ -60,28 +60,31 @@
     // Set the current core's status to running
     set_cur_status(CEP_RUNNING_STATUS);
 
+    LOGI("Baremetal MD5Macro test\n");
+    
     // There is no Crypto++ support for RISC-V, so pre-recorded vectors will be used
     if (coreId == 0) {
       upper = SROT_adrBase + SROT_adrSize;
       lower = SROT_adrBase;
       errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, verbose);
       cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
-//      upper = MD5_adrBase + MD5_adrSize;
-//      lower = MD5_adrBase;
-//      errCnt += cep_playback(MD5_playback, upper, lower, MD5_totalCommands, verbose);    
+      upper = MD5_adrBase + MD5_adrSize;
+      lower = MD5_adrBase;
+      errCnt += cep_playback(MD5_playback, upper, lower, MD5_totalCommands, verbose);    
     }
 
     // Set the core status
 cleanup:
     set_status(errCnt, testId[coreId]);
 
-    // Exit with the error count
-#ifdef VERILATOR
+    // Print status
     if (errCnt)
       LOGE("Test Failed\n");
     else
       LOGI("Test Passed\n");
 
+    // Exit with the error count
+#ifdef VERILATOR
     return errCnt;
 #else    
     exit(errCnt);
