@@ -16,6 +16,49 @@ import freechips.rocketchip.subsystem._
 
 import mitllBlocks.cep_addresses._
 
+
+// Create a "mimic" of the Arty100T functionality
+class CEPArtyMimicRocketConfig extends Config(
+  // Add the CEP Accelerator Cores
+  new chipyard.config.WithMD5 ++
+
+  // Instantiation of the CEP registers
+  new chipyard.config.WithCEPRegisters ++
+
+  // Instantiation of the Surrogate Root of Trust (with or w/o the ARM compiled memories)
+  new chipyard.config.WithSROTFPGAMD5Only ++
+
+  // Instantiantion of the CEP BootROM with default parameter overrides
+  // The hang parameter sets the system-wide reset vector for ALL RocketTiles
+  new chipyard.config.WithCEPBootROM(address = 0x10000L, size = 0x8000, hang = 0x10000L) ++
+
+  // CEP Scratchpad memory @ the typical external memory base address
+  // Address & Size are in terms of *bytes* even though the memory is
+  // 64-bits wide.  
+  new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
+
+  // Moved IO declerations from AbstractCEPConfig to here for readability
+  new chipyard.config.WithUART(address = 0x64000000L) ++
+  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+  new chipyard.config.WithSPI (address = 0x64001000L) ++
+
+  // Four Big Rocket-Cores
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
+
+  // Override the default device tree chip name
+  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
+  // Do NOT instantiate the Tilelink monitors
+  new WithoutTLMonitors ++ 
+
+  // The default CEP configuration has no external memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+
+  // Set the remainder of the configuration items
+  new chipyard.config.AbstractCEPConfig
+
+)
+
 // Chipyard Configuration for the non-ASIC simulation version of the CEP
 class CEPRocketConfig extends Config(
   // Add the CEP Accelerator Cores

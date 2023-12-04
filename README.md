@@ -206,8 +206,7 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
-make DISABLE_KPRINTF=0 riscv_wrapper            <-- builds riscv_wrapper.img with console printf enabled
-make DISK=/dev/sdd1 riscv_wrapper_sd_write      <-- copies riscv_wrapper.img to partition /dev/sdd1 (subsitute with your partition name)
+make DISABLE_KPRINTF=0 BAREMETAL_PRINTF=kputc DISK=/dev/sdd1 riscv_wrapper_sd_write  <-- builds code with console enabled and copies image to your SD card
 ```
 
 In the above example, the bare metal regTest is built with the console printf function enabled.

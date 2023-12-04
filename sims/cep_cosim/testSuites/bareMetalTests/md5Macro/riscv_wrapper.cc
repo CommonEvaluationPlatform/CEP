@@ -66,9 +66,9 @@
       lower = SROT_adrBase;
       errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, verbose);
       cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
-      upper = MD5_adrBase + MD5_adrSize;
-      lower = MD5_adrBase;
-      errCnt += cep_playback(MD5_playback, upper, lower, MD5_totalCommands, verbose);    
+//      upper = MD5_adrBase + MD5_adrSize;
+//      lower = MD5_adrBase;
+//      errCnt += cep_playback(MD5_playback, upper, lower, MD5_totalCommands, verbose);    
     }
 
     // Set the core status

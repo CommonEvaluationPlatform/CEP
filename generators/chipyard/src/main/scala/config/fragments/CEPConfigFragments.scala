@@ -240,7 +240,7 @@ class WithSROTFPGAMD5Only extends Config((site, here, up) => {
       // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
       // The SRoT uses these indicies for routing keys to the appropriate core
       llki_cores_array    = Array(
-        CEPBaseAddresses.md5_base_addr       // Core Index 0 
+        CEPBaseAddresses.md5_llki_base_addr       // Core Index 0 
       )
     ))
 })
