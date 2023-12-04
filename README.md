@@ -85,15 +85,15 @@ These subprojects define the system configuration and are as follows:
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
-- XX% LUT Utilization
+- 49487/63400 (78%) LUT Utilization
 - 1x WithNBigCore
 - CEP Registers
 - MD5 Core
 - Surrogate Root of Trust (SRoT)
 
 `cep_vc707` - VC707 Development Board
-- 100 MHz Core Frequency
-- 70% LUT Utilization
+- 75 MHz Core Frequency
+- XX% LUT Utilization
 - 4x WithNBigCores
 - CEP Registers
 - AES Core
@@ -110,7 +110,7 @@ These subprojects define the system configuration and are as follows:
 
 `cep_vcu118` - 
 - 125 MHz Core Frequency
-- 17% LUT Utilization
+- XX% LUT Utilization
 - 4x WithNBigCores
 - CEP Registers
 - AES Core
@@ -164,9 +164,9 @@ Once released from reset, the CEP's bootrom will read the baremetal executable f
 An example UART output for the baremetal gpiotest follows:
 ```
 ---          Common Evaluation Platform v4.50            ---
----         Based on the UCB Chipyard Framework          ---
---- Copyright 2022 Massachusetts Institute of Technology ---
----     BootRom Image built on Nov 18 2022 09:42:49      ---
+--- Based on the UCB Chipyard Framework (1.10.0 release) ---
+--- Copyright 2023 Massachusetts Institute of Technology ---
+---     BootRom Image built on Dec  4 2023 10:15:50      ---
 
 INIT
 CMD0
@@ -175,8 +175,8 @@ ACMD41
 CMD58
 CMD16
 CMD18
-LOADING 35840kB PAYLOAD
-......
+LOADING 128kB PAYLOAD
+....
 
 --------------------------
      RISC-V GPIO Test     
@@ -220,6 +220,7 @@ make DISK=/dev/sdd1 sd_write                    <-- copies gpiotest.img to parti
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.
 
+### FPGA Fast-Boot
 When booting bare metal software, it is useful to not have to wait for the bootrom to load a linux-sized payload.  When powering the FPGA board, a *fast-boot* can be enabled by holding BTN N on the VC707/VCU118 or BTN0 on the Arty100T.
 
 ### Booting Linux

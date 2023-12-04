@@ -218,9 +218,18 @@ debug-bitstream: cep_preprocessing $(build_dir)/obj/post_synth.dcp
 #########################################################################################
 # general cleanup rules
 #########################################################################################
-.PHONY: clean
-clean: cep_clean
+.PHONY: clean cleanall
+
+# Clean ALL the builds
+cleanall: cep_clean
 	rm -rf $(gen_dir)
 	rm -f *.log
 	rm -f *.jou
+
+# Clean just the current subproject
+clean:
+	rm -rf $(build_dir)
+	rm -f *.log
+	rm -f *.jou
+
 
