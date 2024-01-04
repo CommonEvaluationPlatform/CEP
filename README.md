@@ -85,7 +85,7 @@ These subprojects define the system configuration and are as follows:
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
-- 49487/63400 (78%) LUT Utilization
+- 78% LUT Utilization
 - 1x WithNBigCore
 - CEP Registers
 - MD5 Core
@@ -93,7 +93,7 @@ These subprojects define the system configuration and are as follows:
 
 `cep_vc707` - VC707 Development Board
 - 75 MHz Core Frequency
-- XX% LUT Utilization
+- 75% LUT Utilization
 - 4x WithNBigCores
 - CEP Registers
 - AES Core
@@ -206,7 +206,7 @@ Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, th
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest
-make DISABLE_KPRINTF=0 BAREMETAL_PRINTF=kputc DISK=/dev/sdd1 riscv_wrapper_sd_write  <-- builds code with console enabled and copies image to your SD card
+make BAREMETAL_PRINTF=kputc DISK=/dev/sdd1 riscv_wrapper_sd_write       <-- builds code with console enabled and copies image to your SD card
 ```
 
 In the above example, the bare metal regTest is built with the console printf function enabled.
@@ -215,7 +215,7 @@ The steps in `<CEP_ROOT>/software/baremetal/gpiotest` are slight different.
 
 ```
 cd <CEP_ROOT>/software/baremetal/gpiotest
-make DISK=/dev/sdd1 sd_write                    <-- copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
+make BOARD=<arty_a7_100 | vc707 | vcu118> DISK=/dev/sdd1 sd_write     <-- Builds for the selected board and copies gpiotest.img to partition /dev/sdd1 (subsitute with your device name)
 ```
 
 It is worth noting that the examples in `<CEP_ROOT>/software/baremetal` do not require the compilation of the all the cosimulation libraries, but as a result, will not have access to those support functions.

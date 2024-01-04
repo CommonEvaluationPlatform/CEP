@@ -2,7 +2,7 @@
 // Copyright 2022 Massachusets Institute of Technology
 // SPDX short identifier: BSD-3-Clause
 //
-// File Name:      arty100t_gpio.h
+// File Name:      vc707_gpio.h
 // Program:        Common Evaluation Platform
 // Description:    Bit mappings for the CEP's Arty100T GPIO
 // Notes:          
@@ -35,8 +35,8 @@
 #define LED6_MASK       (0x00080000)
 #define LED7_MASK       (0x00100000)
 
-#define SWtoLED_SHIFT	13
-#define SWtoLED_MASK	(0x000000FF)
+#define SWtoLED_SHIFT	5
+#define SWtoLED_MASK	(0x00000F00)
 
 #endif /* _VC707_GPIO_H */
 #endif /* VC707_TARGET */

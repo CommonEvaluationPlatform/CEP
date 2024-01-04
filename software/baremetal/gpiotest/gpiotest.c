@@ -102,7 +102,7 @@ int main() {
       gpio_old = gpio_new;
     }
 
-    // A simple tty echo routine where CR and LF are converted to CR+LF (getchar, which mapps to kgetc in baremetal, is non-blocking)
+    // A simple tty echo routine where CR and LF are converted to CR+LF (getchar, which maps to kgetc in baremetal, is non-blocking)
     c = getchar();
     if (c == '\r' || c == '\n') {
       putchar('\r');
