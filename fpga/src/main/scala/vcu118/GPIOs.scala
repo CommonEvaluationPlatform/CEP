@@ -1,9 +1,20 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      GPIOs.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Pin mappings for GPIO on the vcu118
+//# Notes:          Modified from the Chipyard VCU118 BringupGPIOs.scala
+//#************************************************************************
+
 package chipyard.fpga.vcu118
 
 import scala.collection.mutable.{LinkedHashMap}
 
 object VCU118GPIOs {
     // map of the pin name (akin to die pin name) to (fpga package pin, IOSTANDARD, add pullup resistor?)
+
     val pinMapping = LinkedHashMap(
         // these connect to LEDs and switches on the VCU118 (and use 1.2V)
         "sw0"   -> ("B17",  "LVCMOS12", false), // Bit0  - 4-Pole DIP Bit 0

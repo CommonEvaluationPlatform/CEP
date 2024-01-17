@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      TestHarness.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Test Harness for VC707
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vc707
 
 import chisel3._
@@ -49,7 +59,6 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
   /*** UART ***/
-  // 1st UART goes to the VC707 dedicated UART
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
@@ -71,7 +80,6 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** DDR ***/
-  // Modify the last field of `DDRDesignInput` for 1GB RAM size
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",

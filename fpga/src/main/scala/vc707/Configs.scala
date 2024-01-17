@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      Configs.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Configuration file for VC707
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vc707
 
 import sys.process._
@@ -111,8 +121,8 @@ class WithVC707CEPTweaks extends Config (
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(75) ++
   new WithFPGAFrequency(75) ++
+
   // harness binders
-  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithVC707GPIOHarnessBinder ++
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
@@ -214,7 +224,7 @@ class RocketVC707CEPConfig extends Config(
   // Overide the chip info 
   new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vc707", Nil) ++
 
-  // Include the VC707 Tweaks with CEP Registers enabled (passed to the bootrom build)
+  // Include the VC707 Tweaks
   new WithVC707CEPTweaks ++
 
   // Instantiate four big cores

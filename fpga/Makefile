@@ -227,7 +227,7 @@ cleanall: cep_clean
 	rm -f *.jou
 
 # Clean just the current subproject
-clean:
+clean: cep_clean
 	rm -rf $(build_dir)
 	rm -f *.log
 	rm -f *.jou

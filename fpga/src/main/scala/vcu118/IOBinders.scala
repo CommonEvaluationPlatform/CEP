@@ -1,7 +1,17 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      IOBinders.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    IO Binders file for VCU118
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vcu118
 
 import chisel3._
-import chisel3.experimental.{IO, DataMirror}
+import chisel3.experimental.{DataMirror}
 
 import freechips.rocketchip.diplomacy.{ResourceBinding, Resource, ResourceAddress, InModuleBody}
 import freechips.rocketchip.subsystem.{BaseSubsystem}
@@ -9,8 +19,8 @@ import freechips.rocketchip.util.{HeterogeneousBag}
 import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp}
-import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 import sifive.blocks.devices.spi.{HasPeripherySPI, HasPeripherySPIModuleImp, MMCDevice}
+import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
 
 import chipyard.{CanHaveMasterTLMemPort}
 import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
@@ -35,7 +45,7 @@ class WithGPIOIOPassthrough extends OverrideIOBinder({
   }
 })
 
-class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
+class WithSPIIOPassthrough extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI
     ResourceBinding {

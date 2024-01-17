@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      HarnessBinders.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Harness Binders file for VC707
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vc707
 
 import chisel3._
@@ -9,7 +19,6 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp, UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
-import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp, XilinxVC707PCIeX1IO}
 
 import chipyard._
 import chipyard.harness._
@@ -56,4 +65,3 @@ class WithVC707DDRMemHarnessBinder extends OverrideHarnessBinder({
     }}
   }
 })
-

@@ -74,22 +74,22 @@
 
     // There is no Crypto++ support for RISC-V, so pre-recorded vectors will be used
     if (coreId == 0) {
-      upper = SROT_adrBase + SROT_adrSize;
-      lower = SROT_adrBase;
-      errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, verbose);
-      cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
-      LOGI("Core %d running test\n", coreId);
-      upper = AES_adrBase + AES_adrSize;
-      lower = AES_adrBase;
-      errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, verbose);    
+       upper = SROT_adrBase + SROT_adrSize;
+       lower = SROT_adrBase;
+       errCnt += cep_playback(SROT_playback, upper, lower, SROT_totalCommands, verbose);
+       cep_write64(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE);
+       LOGI("Core %d running test\n", coreId);
+       upper = AES_adrBase + AES_adrSize;
+       lower = AES_adrBase;
+       errCnt += cep_playback(AES_playback, upper, lower, AES_totalCommands, verbose);    
     }
     else if (coreId == 1) {
-      errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
-      if (errCnt) goto cleanup;
-      LOGI("Core %d running test\n", coreId);
-      upper = SHA256_1_adrBase + SHA256_1_adrSize;
-      lower = SHA256_1_adrBase;
-      errCnt += cep_playback(SHA256_1_playback, upper, lower, SHA256_1_totalCommands, verbose);    
+       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
+       if (errCnt) goto cleanup;
+       LOGI("Core %d running test\n", coreId);
+       upper = SHA256_1_adrBase + SHA256_1_adrSize;
+       lower = SHA256_1_adrBase;
+       errCnt += cep_playback(SHA256_1_playback, upper, lower, SHA256_1_totalCommands, verbose);    
     }
     else if (coreId == 2) {
       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
@@ -100,12 +100,12 @@
       errCnt += cep_playback(IIR_playback, upper, lower, IIR_totalCommands, verbose);    
     }
     else if (coreId == 3) {
-      errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
-      if (errCnt) goto cleanup;
-      LOGI("Core %d running test\n", coreId);
-      upper = FIR_adrBase + FIR_adrSize;
-      lower = FIR_adrBase;
-      errCnt += cep_playback(FIR_playback, upper, lower, FIR_totalCommands, verbose);    
+       errCnt += cep_readNspin(CEP_VERSION_REG_INDEX, cep_scratch4_reg, CEP_OK2RUN_SIGNATURE, 0xFFFFFFFF, maxTO); 
+       if (errCnt) goto cleanup;
+       LOGI("Core %d running test\n", coreId);
+       upper = FIR_adrBase + FIR_adrSize;
+       lower = FIR_adrBase;
+       errCnt += cep_playback(FIR_playback, upper, lower, FIR_totalCommands, verbose);    
     }  
 
     // Set the core status

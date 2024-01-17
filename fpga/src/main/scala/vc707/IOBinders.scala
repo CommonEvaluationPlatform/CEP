@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2022 Massachusets Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      IOBinders.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    IO Binders file for VC707
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vc707
 
 import chisel3._
@@ -11,7 +21,7 @@ import freechips.rocketchip.tilelink.{TLBundle}
 import sifive.blocks.devices.uart.{HasPeripheryUARTModuleImp}
 import sifive.blocks.devices.spi.{HasPeripherySPI, HasPeripherySPIModuleImp, MMCDevice}
 import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp}
-import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp}
+
 import chipyard.{CanHaveMasterTLMemPort}
 import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
 
