@@ -11,20 +11,20 @@
 package chipyard.fpga.vcu118
 
 import sys.process._
-import math.min
 
-import org.chipsalliance.cde.config.{Config, Parameters}
-import freechips.rocketchip.subsystem.{SystemBusKey, PeripheryBusKey, ControlBusKey, ExtMem}
-import freechips.rocketchip.devices.debug.{DebugModuleKey, ExportDebug, JTAG}
-import freechips.rocketchip.devices.tilelink.{DevNullParams, BootROMLocated}
-import freechips.rocketchip.diplomacy.{DTSModel, DTSTimebase, RegionType, AddressSet}
-import freechips.rocketchip.tile.{XLen}
+import org.chipsalliance.cde.config._
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.devices.debug._
+import freechips.rocketchip.devices.tilelink._
+import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.system._
+import freechips.rocketchip.tile._
 
-import sifive.blocks.devices.spi.{PeripherySPIKey, SPIParams}
-import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTParams}
-import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
-
+import sifive.blocks.devices.uart._
+import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.spi._
 import sifive.fpgashells.shell.{DesignKey}
+
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
 import testchipip.{SerialTLKey}
@@ -35,6 +35,10 @@ import chipyard.harness._
 import math.min
 
 import mitllBlocks.cep_addresses._
+
+class WithNoDesignKey extends Config((site, here, up) => {
+  case DesignKey => (p: Parameters) => new SimpleLazyModule()(p)
+})
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
@@ -62,7 +66,7 @@ class WithCEPDefaultPeripherals extends Config((site, here, up) => {
 })
 
 class WithSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase => BigInt((1e6).toLong)
+  case DTSTimebase => BigInt{(1e6).toLong}
   case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
@@ -75,7 +79,7 @@ class WithSystemModifications extends Config((site, here, up) => {
 })
 
 class WithCEPSystemModifications extends Config((site, here, up) => {
-  case DTSTimebase => BigInt((1e6).toLong)
+  case DTSTimebase => BigInt{(1e6).toLong}
   case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
@@ -96,6 +100,7 @@ class WithVCU118Tweaks extends Config(
   new chipyard.config.WithSystemBusFrequency(100) ++
   new chipyard.config.WithPeripheryBusFrequency(100) ++
   new WithFPGAFrequency(100) ++ // default 100MHz freq
+  new WithNoDesignKey ++
   // harness binders
   new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithVCU118UARTHarnessBinder ++
@@ -122,6 +127,7 @@ class WithVCU118CEPTweaks extends Config(
   new chipyard.config.WithPeripheryBusFrequency(125) ++
   new chipyard.harness.WithHarnessBinderClockFreqMHz(125) ++
   new WithFPGAFrequency(125) ++ // default 125MHz freq
+  new WithNoDesignKey ++
 
   // harness binders
   new WithVCU118GPIOHarnessBinder ++
@@ -239,7 +245,7 @@ class RocketVCU118Config extends Config (
   new chipyard.RocketConfig
 )
 
-class WithFPGAFrequency(fMHz: Double) extends Config(
+class WithFPGAFrequency(fMHz: Double) extends Config (
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )

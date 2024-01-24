@@ -62,6 +62,6 @@ class WithVCU118DDRMemHarnessBinder extends OverrideHarnessBinder({
       val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
       bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
       ddrClientBundle <> ports.head
-    } }
+    }}
   }
 })
