@@ -1,11 +1,11 @@
-[//]: # (Copyright 2022 Massachusets Institute of Technology)
+[//]: # (Copyright 2024 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 <p align="center">
-   Copyright 2022 Massachusets Institute of Technology
+   Copyright 2024 Massachusetts Institute of Technology
 </p>
 
 ## Auto-FIR Script

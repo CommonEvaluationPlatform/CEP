@@ -1,5 +1,5 @@
 #************************************************************************
-# Copyright 2022 Massachusets Institute of Technology
+# Copyright 2024 Massachusetts Institute of Technology
 #
 # File Name:      Makefile
 # Program:        Common Evaluation Platform (CEP)

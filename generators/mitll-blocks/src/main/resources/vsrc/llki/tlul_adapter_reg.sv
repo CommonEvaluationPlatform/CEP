@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //************************************************************************
-// Copyright 2022 Massachusets Institute of Technology
+// Copyright 2024 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-3-Clause
 //
 // File Name:       tlul_adaptger_reg.sv
@@ -20,7 +20,7 @@
 
 //
 // Modifications:
-// Copyright 2022 Massachusets Institute of Technology
+// Copyright 2024 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-3-Clause
 //
 // Module modified to allow for a delayed read-response (and avoid the live-decode problem)

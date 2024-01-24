@@ -1,4 +1,4 @@
-[//]: # (Copyright 2022 Massachusetts Institute of Technology)
+[//]: # (Copyright 2024 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
 # Common Evaluation Platform - Co-Simulation Environment

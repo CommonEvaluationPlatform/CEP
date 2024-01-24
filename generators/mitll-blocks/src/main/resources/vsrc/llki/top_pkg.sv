@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //************************************************************************
-// Copyright 2022 Massachusets Institute of Technology
+// Copyright 2024 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-3-Clause
 //
 // File Name:       top_pkg.sv

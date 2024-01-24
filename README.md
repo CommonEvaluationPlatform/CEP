@@ -1,4 +1,4 @@
-[//]: # (Copyright 2023 Massachusetts Institute of Technology)
+[//]: # (Copyright 2024 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
 # Common Evaluation Platform v4.5
@@ -10,7 +10,7 @@
     <img src="./cep_docs/cep_logo.jpg" width="375" height="159">
 </p>
 <p align="center">
-   Copyright 2023 Massachusetts Institute of Technology
+   Copyright 2024 Massachusetts Institute of Technology
 </p>
 <p align="center">
    <img src="./cep_docs/cep_architecture.jpg" width="1114" height="450">
@@ -165,7 +165,7 @@ An example UART output for the baremetal gpiotest follows:
 ```
 ---          Common Evaluation Platform v4.50            ---
 --- Based on the UCB Chipyard Framework (1.10.0 release) ---
---- Copyright 2023 Massachusetts Institute of Technology ---
+--- Copyright 2024 Massachusetts Institute of Technology ---
 ---     BootRom Image built on Dec  4 2023 10:15:50      ---
 
 INIT

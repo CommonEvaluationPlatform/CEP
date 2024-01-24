@@ -1,5 +1,5 @@
 //************************************************************************
-// Copyright 2022 Massachusets Institute of Technology
+// Copyright 2024 Massachusetts Institute of Technology
 // SPDX License Identifier: BSD-3-Clause
 //
 // File Name:      
@@ -165,7 +165,7 @@ void cep_crypto::SetCaptureMode(int mode, const char *path, const char *testName
       LOGI("%s: Opening file %s for sequence capturing\n",__FUNCTION__,fName);
       // print CopyRigth
       fprintf(mFd,"//************************************************************************\n");
-      fprintf(mFd,"// Copyright 2022 Massachusetts Institute of Technology\n");
+      fprintf(mFd,"// Copyright 2024 Massachusetts Institute of Technology\n");
       fprintf(mFd,"//\n");
       fprintf(mFd,"// This file is auto-generated for test: %s. Do not modify!!!\n", testName);
       fprintf(mFd,"//\n");      

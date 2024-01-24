@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------------
-// Copyright 2022 Massachusets Institute of Technology
+// Copyright 2024 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-3-Clause
 //
 // File Name:     sd.c
@@ -254,7 +254,7 @@ int main(void)
   REG32(uart, UART_REG_TXCTRL)  = UART_TXEN;
 
   kprintf("---    Common Evaluation Platform v%x.%x     ---\n", major_version, minor_version);
-  kputs("--- Copyright 2022 Massachusetts Institute of Technology ---");
+  kputs("--- Copyright 2024 Massachusetts Institute of Technology ---");
   kprintf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
 
     kputs("INIT");

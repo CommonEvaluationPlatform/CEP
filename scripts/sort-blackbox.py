@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #//************************************************************************
-#// Copyright 2022 Massachusetts Institute of Technology
+#// Copyright 2024 Massachusetts Institute of Technology
 #// SPDX short identifier: BSD-3-Clause
 #//
 #// File Name:      sort-blackbox.py

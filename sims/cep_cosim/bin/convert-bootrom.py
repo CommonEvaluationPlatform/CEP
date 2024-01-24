@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #//************************************************************************
-#// Copyright 2022 Massachusets Institute of Technology
+#// Copyright 2024 Massachusetts Institute of Technology
 #//
 #// File Name:      convert-bootrom.py
 #// Program:        Common Evaluation Platform (CEP)
