@@ -109,21 +109,7 @@ These subprojects define the system configuration and are as follows:
 - Surrogate Root of Trust
 
 `cep_vcu118` - 
-- 125 MHz Core Frequency
-- XX% LUT Utilization
-- 4x WithNBigCores
-- CEP Registers
-- AES Core
-- DES3 Core
-- FIR Core
-- IIR Core
-- DFT Core
-- IDFT Core
-- MD5 Core
-- 4x GPS Cores
-- 4x SHA-256 Cores
-- RSA Core
-- Surrogate Root of Trust
+- TBD
 
 In order to target the Arty100T, the Digilent vivado-boards support needs to be installed.  Instructions can be found [here](https://digilent.com/reference/programmable-logic/guides/installing-vivado-and-vitis).
 

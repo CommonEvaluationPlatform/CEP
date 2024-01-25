@@ -97,7 +97,7 @@ Remove/comment out these 2 lines and save the file.
 
 Next edit is **OPTIONAL** (only do it if you know what you are doing :-): this edit is to add switches to the build process to including source information in the object dump file for PC's tracing. It is helpful in debugging failed test(s). Be aware, the ELF/dump files will be much bigger!! Only do this if you intend to include the source codes in the object dump file. In addition, RISCV-core will behave differently due to GDB is not supported in simulation when it taking a page fault (dud!). So only do this **edit**  to obtain the object dump file for tracing.
 
-Edit file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/isa/Makefile`, look for the lines as such:
+Edit file `<CEP_ROOT>/toolchains/riscv-tools/riscv-tests/isa/Makefile`, look for the lines as such:n
 
 ```
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
