@@ -27,7 +27,7 @@ import sifive.fpgashells.shell.{DesignKey}
 
 import sifive.fpgashells.shell.xilinx.{VCU118ShellPMOD, VCU118DDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._
@@ -98,7 +98,9 @@ class WithVCU118Tweaks extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++
   new chipyard.config.WithMemoryBusFrequency(100) ++
   new chipyard.config.WithSystemBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
   new chipyard.config.WithPeripheryBusFrequency(100) ++
+  new chipyard.config.WithControlBusFrequency(100) ++
   new WithFPGAFrequency(100) ++ // default 100MHz freq
   new WithNoDesignKey ++
   // harness binders
@@ -245,8 +247,18 @@ class RocketVCU118Config extends Config (
   new chipyard.RocketConfig
 )
 
-class WithFPGAFrequency(fMHz: Double) extends Config (
-  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
+class BoomVCU118Config extends Config(
+  new WithFPGAFrequency(50) ++
+  new WithVCU118Tweaks ++
+  new chipyard.MegaBoomConfig
+)
+
+class WithFPGAFrequency(fMHz: Double) extends Config(
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(fMHz) ++
+  new chipyard.config.WithSystemBusFrequency(fMHz) ++
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
+  new chipyard.config.WithControlBusFrequency(fMHz) ++
+  new chipyard.config.WithFrontBusFrequency(fMHz) ++
   new chipyard.config.WithMemoryBusFrequency(fMHz)
 )
 

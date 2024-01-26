@@ -16,6 +16,7 @@ import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.prci._
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
@@ -92,6 +93,7 @@ class VCU118FPGATestHarness(override implicit val p: Parameters) extends VCU118S
 }
 
 class VCU118FPGATestHarnessImp(_outer: VCU118FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
+  override def provideImplicitClockToLazyChildren = true
   val vcu118Outer = _outer
 
   val reset = IO(Input(Bool())).suggestName("reset")

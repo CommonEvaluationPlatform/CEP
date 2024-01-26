@@ -5,8 +5,9 @@ ifndef GCC
 $(error GCC is not defined)
 endif
 
-REPO_ROOT_DIR		:= $(shell git rev-parse --show-toplevel)
-
+ifndef TARGET
+$(error TARGET is not defined)
+endif
 
 libgloss_specs := htif_nano.specs
 

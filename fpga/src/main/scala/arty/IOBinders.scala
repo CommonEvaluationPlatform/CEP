@@ -4,7 +4,7 @@ import chisel3._
 
 import freechips.rocketchip.devices.debug.{HasPeripheryDebug}
 
-import chipyard.iobinders.{ComposeIOBinder}
+import chipyard.iobinders.{ComposeIOBinder, DebugResetPort, JTAGResetPort}
 
 class WithDebugResetPassthrough extends ComposeIOBinder({
   (system: HasPeripheryDebug) => {
@@ -17,6 +17,6 @@ class WithDebugResetPassthrough extends ComposeIOBinder({
     val io_sjtag_reset: Bool = IO(Input(Bool())).suggestName("sjtag_reset")
     sjtag.reset := io_sjtag_reset
 
-    (Seq(io_ndreset, io_sjtag_reset), Nil)
+    (Seq(DebugResetPort(() => io_ndreset), JTAGResetPort(() => io_sjtag_reset)), Nil)
   }
 })

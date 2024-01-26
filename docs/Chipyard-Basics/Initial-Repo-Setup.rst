@@ -9,7 +9,7 @@ Chipyard is developed and tested on Linux-based systems.
 .. Warning:: It is possible to use this on macOS or other BSD-based systems, although GNU tools will need to be installed;
     it is also recommended to install the RISC-V toolchain from ``brew``.
 
-.. Warning:: Working under Windows is not recommended.
+.. Warning:: If using Windows, it is recommended that you use `Windows Subsystem for Linux <https://learn.microsoft.com/en-us/windows/wsl/> (WSL)`.
 
 Running on AWS EC2 with FireSim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,15 +34,21 @@ After Conda is installed and is on your ``PATH``, we need to install a version o
 For this you can use the system package manager like ``yum`` or ``apt`` to install ``git``.
 This ``git`` is only used to first checkout the repository, we will later install a newer version of ``git`` with Conda.
 
+Next, we install `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving when initially setting up the repository.
+
+.. code-block:: shell
+
+    conda install -n base conda-libmamba-solver
+    conda config --set solver libmamba
+
 Finally we need to install ``conda-lock`` into the ``base`` conda environment.
 This is done by the following:
 
 .. code-block:: shell
 
-    conda install -n base conda-lock=1.4
+    conda install -n base conda-lock==1.4.0
     conda activate base
 
-.. Note:: We also recommended switching to `libmamba <https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community>`__ for much faster dependency solving.
 
 Setting up the Chipyard Repo
 -------------------------------------------

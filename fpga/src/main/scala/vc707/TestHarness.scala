@@ -16,11 +16,13 @@ import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.prci._
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks._
+import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
@@ -93,6 +95,7 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
 }
 
 class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModuleImp(_outer) with HasHarnessInstantiators {
+  override def provideImplicitClockToLazyChildren = true
   val vc707Outer = _outer
 
   val reset = IO(Input(Bool())).suggestName("reset")
@@ -112,6 +115,8 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
+
+  _outer.ledModule.foreach(_ := DontCare)
 
   // reset setup
   val hReset = Wire(Reset())

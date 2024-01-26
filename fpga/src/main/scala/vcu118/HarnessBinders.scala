@@ -22,27 +22,22 @@ import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
 import chipyard._
 import chipyard.harness._
+import chipyard.iobinders._
 
 /*** UART ***/
-class WithVCU118UARTHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryUARTModuleImp, th: BaseModule, ports: Seq[UARTPortIO]) => {
-    th match { case vcu118th: VCU118FPGATestHarnessImp => {
-      vcu118th.vcu118Outer.io_uart_bb.bundle <> ports.head
-    }}
+class WithUART extends HarnessBinder({
+  case (th: VCU118FPGATestHarnessImp, port: UARTPort, chipId: Int) => {
+    th.vcu118Outer.io_uart_bb.bundle <> port.io
   }
 })
 
 /*** SPI ***/
-class WithVCU118SPISDCardHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripherySPI, th: BaseModule, ports: Seq[SPIPortIO]) => {
-    th match { case vcu118th: VCU118FPGATestHarnessImp => {
-      vcu118th.vcu118Outer.io_spi_bb.bundle <> ports.head
-    }}
-  }
-})
+class WithSPISDCard extends HarnessBinder({
+  case (th: VCU118FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
+    th.vcu118Outer.io_spi_bb.bundle <> port.io
 
 /*** GPIO ***/
-class WithVCU118GPIOHarnessBinder extends OverrideHarnessBinder({
+class WithGPIO extends HarnessBinder({
   (system: HasPeripheryGPIOModuleImp, th: BaseModule, ports: Seq[GPIOPortIO]) => {
     th match { case vcu118th: VCU118FPGATestHarnessImp => {
       (vcu118th.vcu118Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
@@ -53,15 +48,11 @@ class WithVCU118GPIOHarnessBinder extends OverrideHarnessBinder({
 })
 
 /*** Experimental DDR ***/
-class WithVCU118DDRMemHarnessBinder extends OverrideHarnessBinder({
-  (system: CanHaveMasterTLMemPort, th: BaseModule, ports: Seq[HeterogeneousBag[TLBundle]]) => {
-    th match { case vcu118th: VCU118FPGATestHarnessImp => {
-      require(ports.size == 1)
-
-      val bundles = vcu118th.vcu118Outer.ddrClient.out.map(_._1)
-      val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
-      bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-      ddrClientBundle <> ports.head
-    }}
+class WithDDRMem extends HarnessBinder({
+  case (th: VCU118FPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
+    val bundles = th.vcu118Outer.ddrClient.out.map(_._1)
+    val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
+    bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+    ddrClientBundle <> port.io
   }
 })

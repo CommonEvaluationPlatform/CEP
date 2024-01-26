@@ -37,6 +37,7 @@ project/project/
 .ivy2
 .sbt
 .classpath_cache/
+.vscode/
 
 # The following exclusions ensure that ASIC-related files
 # do not get checked into the repository

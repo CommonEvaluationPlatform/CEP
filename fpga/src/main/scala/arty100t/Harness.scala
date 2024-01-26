@@ -5,12 +5,12 @@ import chisel3.util._
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
-import freechips.rocketchip.prci.{ClockBundle, ClockBundleParameters}
+import freechips.rocketchip.prci._
 import freechips.rocketchip.subsystem.{SystemBusKey}
 
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks.{ClockGroup, ClockSinkNode, PLLFactoryKey, ResetWrangler}
+import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
@@ -19,7 +19,6 @@ import sifive.blocks.devices.spi._
 
 import chipyard._
 import chipyard.harness._
-import chipyard.iobinders.{HasIOBinders}
 
 class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell {
   def dp = designParameters
@@ -68,6 +67,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   override lazy val module = new HarnessLikeImpl
 
   class HarnessLikeImpl extends Impl with HasHarnessInstantiators {
+    all_leds.foreach(_ := DontCare)
     clockOverlay.overlayOutput.node.out(0)._1.reset := ~resetPin
 
     val clk_100mhz = clockOverlay.overlayOutput.node.out.head._1.clock
@@ -81,6 +81,7 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
 
     childClock := harnessBinderClock
     childReset := harnessBinderReset
+
     ddrOverlay.mig.module.clock := harnessBinderClock
     ddrOverlay.mig.module.reset := harnessBinderReset
     ddrBlockDuringReset.module.clock := harnessBinderClock

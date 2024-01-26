@@ -26,7 +26,7 @@ import sifive.blocks.devices.gpio.{PeripheryGPIOKey, GPIOParams}
 import sifive.fpgashells.shell.{DesignKey}
 import sifive.fpgashells.shell.xilinx.{VC7071GDDRSize}
 
-import testchipip.{SerialTLKey}
+import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem, ExtTLMem}
 import chipyard.harness._
@@ -91,6 +91,8 @@ class WithVC707Tweaks extends Config (
   new chipyard.config.WithMemoryBusFrequency(50.0) ++
   new chipyard.config.WithSystemBusFrequency(50.0) ++
   new chipyard.config.WithPeripheryBusFrequency(50.0) ++
+  new chipyard.config.WithControlBusFrequency(50.0) ++
+  new chipyard.config.WithFrontBusFrequency(50.0) ++
 
   new chipyard.harness.WithHarnessBinderClockFreqMHz(50) ++
   new WithFPGAFrequency(50) ++ // default 50MHz freq
@@ -99,10 +101,6 @@ class WithVC707Tweaks extends Config (
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
-  // io binders
-  new WithUARTIOPassthrough ++
-  new WithSPIIOPassthrough ++
-  new WithTLIOPassthrough ++
   // other configuration
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
@@ -240,8 +238,11 @@ class RocketVC707Config extends Config (
 )
 
 class WithFPGAFrequency(fMHz: Double) extends Config (
-  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++ // assumes using PBUS as default freq.
-  new chipyard.config.WithMemoryBusFrequency(fMHz)
+  new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
+  new chipyard.config.WithMemoryBusFrequency(fMHz) ++
+  new chipyard.config.WithSystemBusFrequency(fMHz) ++
+  new chipyard.config.WithControlBusFrequency(fMHz) ++
+  new chipyard.config.WithFrontBusFrequency(fMHz)
 )
 
 class WithFPGAFreq25MHz extends WithFPGAFrequency(25)

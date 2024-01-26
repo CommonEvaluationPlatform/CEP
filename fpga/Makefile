@@ -54,11 +54,40 @@ ifeq ($(SUB_PROJECT),vcu118)
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
 endif
-ifeq ($(SUB_PROJECT),arty)
+
+ifeq ($(SUB_PROJECT),bringup)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= BringupVCU118FPGATestHarness
+	VLOG_MODEL        ?= BringupVCU118FPGATestHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.vcu118.bringup
+	CONFIG            ?= RocketBringupConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.vcu118.bringup
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= vcu118
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),nexysvideo)
+	SBT_PROJECT       ?= fpga_platforms
+	MODEL             ?= NexysVideoHarness
+	VLOG_MODEL        ?= NexysVideoHarness
+	MODEL_PACKAGE     ?= chipyard.fpga.nexysvideo
+	CONFIG            ?= RocketNexysVideoConfig
+	CONFIG_PACKAGE    ?= chipyard.fpga.nexysvideo
+	GENERATOR_PACKAGE ?= chipyard
+	TB                ?= none # unused
+	TOP               ?= ChipTop
+	BOARD             ?= nexys_video
+	FPGA_BRAND        ?= xilinx
+endif
+
+ifeq ($(SUB_PROJECT),arty35t)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= ArtyFPGATestHarness
-	VLOG_MODEL        ?= ArtyFPGATestHarness
+	MODEL             ?= Arty35THarness
+	VLOG_MODEL        ?= Arty35THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty
 	CONFIG            ?= TinyRocketArtyConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.arty
@@ -68,6 +97,7 @@ ifeq ($(SUB_PROJECT),arty)
 	BOARD             ?= arty
 	FPGA_BRAND        ?= xilinx
 endif
+
 ifeq ($(SUB_PROJECT),arty100t)
 	# TODO: Fix with Arty
 	SBT_PROJECT       ?= fpga_platforms
@@ -179,7 +209,7 @@ include $(base_dir)/common.mk
 # copy from other directory
 #########################################################################################
 all_vsrcs := \
-	$(base_dir)/generators/sifive-blocks/vsrc/SRLatch.v
+	$(base_dir)/generators/rocket-chip-blocks/vsrc/SRLatch.v
 
 #########################################################################################
 # vivado rules
