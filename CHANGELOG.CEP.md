@@ -6,13 +6,19 @@
 
 # CEP Changelog
 
-## [v4.50] - 2023-07-XX
+## [v4.50] - 2024-01-25
 
 ### Added
 ### Changed
   - Chipyard upgraded to v1.10.0
 ### Fixed
   - Issue #7: COSIM: XCellium *occasional* failures on RHEL7
+### Issues
+  - cep_vcu118 SUB_PROJECT currently does not build
+  - cep_cosim on QuestaSim: 
+    - isaTests: Virtual mode support not implemented, rv64u*-v-* tests fail
+    - isaTests: rv64u* tests failing
+    - bareMetalTests: macro4mix and macroMix tests failing
 
 ## [v4.41] - 2023-03-02
 
