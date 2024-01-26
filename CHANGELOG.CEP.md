@@ -6,6 +6,14 @@
 
 # CEP Changelog
 
+## [v4.60] - 2024-XX-XX
+
+### Added
+### Changed
+  - Chipyard upgraded to v1.11.0
+### Fixed
+### Issues
+
 ## [v4.50] - 2024-01-25
 
 ### Added
