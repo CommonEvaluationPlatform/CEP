@@ -12,6 +12,9 @@
 # Without the following, RHEL7 does not execute the simulation process properly
 .NOTPARALLEL:
 
+# Capture the operating system for some downstream decisions
+OPERATING_SYSTEM 			:= $(shell hostnamectl | grep Operating | xargs)
+
 # Avoid redundant inclusions of common.make
 ifndef $(COMMON_MAKE_CALLED)
 COMMON_MAKE_CALLED			= 1
@@ -151,9 +154,16 @@ RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/toolchains/riscv-tools/riscv-tests
 # With Chipyard 1.8+, which installs depdencies via conda, pointing these
 # binaries is needed until libcrypto++ can be installed via conda
 # g++ is taken from the conda environment
-GCC     					= /usr/bin/g++
-AR 							= /usr/bin/ar
-RANLIB  					= /usr/bin/ranlib
+ifneq (, $(shell hostnamectl | grep "Red Hat"))
+	DEVTOOLSET				= /opt/rh/devtoolset-7/root/usr/bin
+	GCC     				= ${DEVTOOLSET}/g++
+	AR 						= ${DEVTOOLSET}/ar
+	RANLIB  				= ${DEVTOOLSET}/ranlib
+else
+	GCC     				= /usr/bin/g++
+	AR 						= /usr/bin/ar
+	RANLIB  				= /usr/bin/ranlib
+endif
 LD 							= ${GCC}
 VPP_CMD						= ${BIN_DIR}/vpp.pl
 V2C_CMD						= ${BIN_DIR}/v2c.pl
@@ -177,8 +187,8 @@ sim_info:
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
 	@echo "CEP_COSIM:        Common Evaluation Platform Co-Simulation Environment           "
 	@echo "CEP_COSIM: ----------------------------------------------------------------------"
-	@echo ""
-	@echo "CEP_COSIM: "$(shell hostnamectl | grep "Operating System")
+	@echo "CEP_COSIM:"
+	@echo "CEP_COSIM: ${OPERATING_SYSTEM}"
 ifeq (${ASIC_MODE}, 1)
 	@echo "CEP_COSIM: Running AISC test with the following variables:"
 else

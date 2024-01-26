@@ -258,7 +258,7 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 ifneq (, $(shell hostnamectl | grep "22.04"))
 	COMMON_LDFLAGS        	=	-B/usr/bin
 else
-	COMMON_LDFLAGS        	=
+	COMMON_LDFLAGS        	=	-B/usr/bin
 endif
 
 # Flags for Hardware and Software simulation compilations

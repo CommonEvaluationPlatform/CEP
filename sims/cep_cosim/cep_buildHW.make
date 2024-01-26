@@ -274,8 +274,8 @@ endif
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
 XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
-VMGR_PATH 						?= /brewhouse/cad4/x86_64/Cadence/${VMGR_VERSION}
-XCELIUM_INSTALL					?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
+VMGR_PATH 						?= /cad4/Cadence/${VMGR_VERSION}
+XCELIUM_INSTALL					?= /cad4/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
 MDV_XLM_HOME 					:= ${XCELIUM_INSTALL}
 XRUN_CMD 						:= ${XCELIUM_INSTALL}/tools/bin/xrun

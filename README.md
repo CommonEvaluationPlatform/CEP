@@ -45,8 +45,16 @@ Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of thi
 
 First, the following items should be considered:
 * Proxies: If your system is behind a proxy, you'll want to ensure your environment is properly configured.  Exact details vary by system, but the proxy needs to be available to apt / yum, curl, conda, etc.
+
 * Ubuntu: Install `libcrypto++-dev`.  On 22.04, `libncurses5` will also be required to run Vivado 2020.1
-* RHEL7:   You need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++`.  Once installed, you want to run `scl enable devtoolset-7 bash` (or whatever version you have installed) to ensure g++ maps to the new version.
+
+* RHEL7:   You need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription
+    dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++ devtoolset-7-libstdc++-devel.i686`. 
+
+    Once installed, you want to run `scl enable devtoolset-7 bash` to ensure g++ maps to the correct version within your currently active shell.  The CEP Co-Simulation makefile will
+    automatically look for g++ and related tools in /opt/rh/devtoolset-7/root/usr/bin.
+    
+    Libcrytpo++ will need to be built from source.  It can be downloaded from [here](https://www.cryptopp.com).  It is receommended you select a version >= 8.6.
 
 It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation and submodule initialization.
 
