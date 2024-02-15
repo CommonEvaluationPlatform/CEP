@@ -258,6 +258,9 @@ class WithUARTGPIOCells extends OverrideIOBinder({
     }).unzip
 
     (ports, cells2d.flatten)
+  }
+})
+
 class WithSPIIOPunchthrough extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     // attach resource to 1st SPI
@@ -523,17 +526,15 @@ class WithTestIOStubs extends OverrideIOBinder({
   }
 })
 
-class WithDebugIOCells(enableJtagGPIO: Boolean = false) extends OverrideLazyIOBinder({
 // WARNING: Don't disable syncReset unless you are trying to
 // get around bugs in RTL simulators
-class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
+class WithDebugIOCells(syncReset: Boolean = true, enableJtagGPIO: Boolean = false) extends OverrideLazyIOBinder({
   (system: HasPeripheryDebug) => {
     implicit val p = GetSystemParameters(system)
     val tlbus = system.asInstanceOf[BaseSubsystem].locateTLBusWrapper(p(ExportDebug).slaveWhere)
     val clockSinkNode = system.debugOpt.map(_ => ClockSinkNode(Seq(ClockSinkParameters())))
     clockSinkNode.map(_ := tlbus.fixedClockNode)
     def clockBundle = clockSinkNode.get.in.head._1
-
 
     InModuleBody { system.asInstanceOf[BaseSubsystem] match { case system: HasPeripheryDebug => {
       system.debug.map({ debug =>
@@ -612,21 +613,15 @@ class WithDebugIOCells(syncReset: Boolean = true) extends OverrideLazyIOBinder({
             }
             (jtag_wire, jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_tdoIO)
           } else {
-            val jtag_wire = Wire(new JTAGChipIO)
-            j.jtag.TCK    := jtag_wire.TCK
-            j.jtag.TMS    := jtag_wire.TMS
-            j.jtag.TDI    := jtag_wire.TDI
-            jtag_wire.TDO := j.jtag.TDO.data
-            IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)           
-          }
-        } // end jtagTuple
-          val jtag_wire = Wire(new JTAGChipIO)
-          j.jtag.TCK := jtag_wire.TCK
-          j.jtag.TMS := jtag_wire.TMS
-          j.jtag.TDI := jtag_wire.TDI
-          jtag_wire.TDO := j.jtag.TDO.data
-          val (port, cells) = IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
-          (JTAGPort(() => port), cells)
+            val jtagTuple = debug.systemjtag.map { j =>
+              val jtag_wire = Wire(new JTAGChipIO)
+              j.jtag.TCK := jtag_wire.TCK
+              j.jtag.TMS := jtag_wire.TMS
+              j.jtag.TDI := jtag_wire.TDI
+              jtag_wire.TDO := j.jtag.TDO.data
+              val (port, cells) = IOCell.generateIOFromSignal(jtag_wire, "jtag", p(IOCellKey), abstractResetAsAsync = true)
+              (JTAGPort(() => port), cells)
+          }}
         }
 
         require(!debug.apb.isDefined)
@@ -808,7 +803,6 @@ class WithTLMemPunchthrough extends OverrideIOBinder({
     (Seq(TLMemPort(() => io_tl_mem_pins_temp)), Nil)
   }
 })
-
 
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)

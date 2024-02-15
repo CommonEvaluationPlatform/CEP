@@ -27,13 +27,6 @@ import sifive.blocks.devices.spi._
 
 import chipyard._
 
-// For adding a SPI Core to the CEP
-// WithSPIIOCells in IOBinders.scala esnures the MMCDevice resource is added to this core (for the CEP)
-class WithSPI(address: BigInt = 0x64001000) extends Config((site, here, up) => {
-  case PeripherySPIKey => Seq(
-    SPIParams(rAddress = address))
-})
-
 // Add a JTAG Debug Module with CEP specific parameters
 class WithCEPJTAG extends Config((site, here, up) => {
   case JtagDTMKey => new JtagDTMConfig (
