@@ -1,12 +1,25 @@
 package chipyard.config
 
+import scala.util.matching.Regex
 import chisel3._
+import chisel3.util.{log2Up}
 
-import org.chipsalliance.cde.config.{Field, Parameters, Config}
-import freechips.rocketchip.devices.tilelink._
-import freechips.rocketchip.stage.phases.TargetDirKey
-import freechips.rocketchip.tile._
-import freechips.rocketchip.devices.debug._
+import org.chipsalliance.cde.config.{Config}
+import freechips.rocketchip.devices.tilelink.{BootROMLocated, PLICKey, CLINTKey}
+import freechips.rocketchip.devices.debug.{Debug, ExportDebug, DebugModuleKey, DMI, JtagDTMKey, JtagDTMConfig}
+import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
+import chipyard.stage.phases.TargetDirKey
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tile.{XLen}
+
+import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
+import sifive.blocks.devices.i2c._
+
+import testchipip._
+
+import chipyard.{ExtTLMem}
 
 import mitllBlocks.cep_addresses._
 import mitllBlocks.aes._
@@ -22,20 +35,6 @@ import mitllBlocks.rsa._
 import mitllBlocks.cep_registers._
 import mitllBlocks.cep_scratchpad._
 import mitllBlocks.srot._
-
-import sifive.blocks.devices.spi._
-
-import chipyard._
-
-// Add a JTAG Debug Module with CEP specific parameters
-class WithCEPJTAG extends Config((site, here, up) => {
-  case JtagDTMKey => new JtagDTMConfig (
-    idcodeVersion   = 2,
-    idcodePartNum   = 0x000,
-    idcodeManufId   = 0x489,
-    debugIdleCycles = 5)
-  case ExportDebug => up(ExportDebug, site).copy(protocols = Set(JTAG))
-})
 
 //
 // CEP Specific Configuration Fragments

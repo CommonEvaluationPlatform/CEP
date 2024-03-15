@@ -42,11 +42,17 @@ case class I2CPort         (val getIO: () => sifive.blocks.devices.i2c.I2CPort)
 case class UARTPort        (val getIO: () => UARTPortIO, val uartNo: Int, val freqMHz: Int)
     extends Port[UARTPortIO]
 
+case class UARTPortGPIO    (val getIO: () => UARTChipGPIO, val uartNo: Int, val freqMHz: Int)
+    extends Port[UARTChipGPIO]
+
 case class SPIFlashPort    (val getIO: () => SPIChipIO, val params: SPIFlashParams, val spiId: Int)
     extends Port[SPIChipIO]
 
 case class SPIPort         (val getIO: () => SPIPortIO)
     extends Port[SPIPortIO]
+
+case class SPIPortGPIO     (val getIO: () => SPIChipGPIO)
+    extends Port[SPIChipGPIO]
 
 case class BlockDevicePort (val getIO: () => ClockedIO[BlockDeviceIO], val params: BlockDeviceConfig)
     extends Port[ClockedIO[BlockDeviceIO]]
@@ -71,6 +77,9 @@ case class DMIPort         (val getIO: () => ClockedDMIIO)
 
 case class JTAGPort        (val getIO: () => JTAGChipIO)
     extends Port[JTAGChipIO]
+
+case class JTAGPortGPIO    (val getIO: () => JTAGChipRstGPIO)
+    extends Port[JTAGChipRstGPIO]
 
 // Lack of nice union types in scala-2 means we have to set this type as Data
 case class SerialTLPort    (val getIO: () => Data, val params: SerialTLParams, val serdesser: TLSerdesser, val portId: Int)
