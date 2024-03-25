@@ -78,8 +78,14 @@ case class DMIPort         (val getIO: () => ClockedDMIIO)
 case class JTAGPort        (val getIO: () => JTAGChipIO)
     extends Port[JTAGChipIO]
 
-case class JTAGPortGPIO    (val getIO: () => JTAGChipRstGPIO)
+case class JTAGGPIOPort    (val getIO: () => JTAGChipGPIO)
+    extends Port[JTAGChipGPIO]
+
+case class JTAGGPIORstPort (val getIO: () => JTAGChipRstGPIO)
     extends Port[JTAGChipRstGPIO]
+
+case class TestStubGPIOPort(val getIO: () => TestChipStubGPIO)
+    extends Port[TestChipStubGPIO]
 
 // Lack of nice union types in scala-2 means we have to set this type as Data
 case class SerialTLPort    (val getIO: () => Data, val params: SerialTLParams, val serdesser: TLSerdesser, val portId: Int)

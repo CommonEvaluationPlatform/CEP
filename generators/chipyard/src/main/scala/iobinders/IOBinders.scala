@@ -447,15 +447,17 @@ class JTAGChipRstGPIO extends Bundle {
   val TDO     = Analog(1.W)
 }
 
-// Class to insert internally unconnected pads
-class WithTestIOStubs extends OverrideIOBinder({
-  (system: DontTouch) => {
-    val ports = IO(new Bundle {
-      val io      = Vec(16, Analog(1.W))
-      val mode    = Vec(4, Analog(1.W))
-    }).suggestName(s"test")
+class TestChipStubGPIO extends Bundle {
+  val io      = Vec(16, Analog(1.W))
+  val mode    = Vec(4, Analog(1.W))
+}
 
-    val iocells = ports.io.zipWithIndex.map { case (pin, i) =>
+// Class to insert internally unconnected pads
+class WithTestIOStubs extends OverrideLazyIOBinder({
+  (system: DontTouch) => {
+
+    val testPorts_port = TestStubGPIOPort
+    val iocells = testPorts_port.io.zipWithIndex.map { case (pin, i) =>
       val iocell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testio_${i}")
       iocell.io.o  := false.B
       iocell.io.oe := true.B
@@ -464,7 +466,7 @@ class WithTestIOStubs extends OverrideIOBinder({
       iocell
     }
 
-    val modecells = ports.mode.zipWithIndex.map { case (pin, i) =>
+    val modecells = testPorts_port.mode.zipWithIndex.map { case (pin, i) =>
       val modecell = Module(new GenericDigitalGPIOCell).suggestName(s"iocell_testmode_${i}")
       modecell.io.o  := false.B
       modecell.io.ie := false.B
@@ -474,7 +476,7 @@ class WithTestIOStubs extends OverrideIOBinder({
     }
 
     val name          = s"socjtag"  
-    val socjtag_wire  = IO(new JTAGPortGPIO).suggestName(s"${name}")
+    val socjtag_wire  = IO(new JTAGChipRstGPIO).suggestName(s"${name}")
     val iocellBase    = s"iocell_${name}"
          
     val jtag_tckIO = {
@@ -522,7 +524,7 @@ class WithTestIOStubs extends OverrideIOBinder({
       Seq(iocell)
     }
 
-    (Seq(ports) ++ Seq(socjtag_wire), iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_TRSTnIO ++ jtag_tdoIO)
+    (Seq(testPorts_port) ++ Seq(socjtag_wire), iocells ++ modecells ++ jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_TRSTnIO ++ jtag_tdoIO)
   }
 })
 
@@ -568,50 +570,51 @@ class WithDebugIOCells(syncReset: Boolean = true, enableJtagGPIO: Boolean = fals
         // Selectively insert GenericDigitalGPIO Cells
         val jtagTuple = debug.systemjtag.map { j =>
           if (enableJtagGPIO) {
-            val jtag_wire   = IO(new JTAGChipGPIO).suggestName(s"jtag")
             val name        = s"jtag"
+            val port        = IO(new JTAGChipGPIO).suggestName(name)
             val iocellBase  = s"iocell_${name}"
-            
-            val jtag_tckIO = {
+
+            val jtag_tckIO_cell = {
               val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tck")
               j.jtag.TCK    := (iocell.io.i).asClock
               iocell.io.o   := false.B
               iocell.io.oe  := false.B
               iocell.io.ie  := true.B 
-              iocell.io.pad <> jtag_wire.TCK
+              iocell.io.pad <> port.TCK
               Seq(iocell)
             }
 
-            val jtag_tmsIO = {
+            val jtag_tmsIO_cell = {
               val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tms")
               j.jtag.TMS    := iocell.io.i
               iocell.io.o   := false.B
               iocell.io.oe  := false.B
               iocell.io.ie  := true.B
-              iocell.io.pad <> jtag_wire.TMS
+              iocell.io.pad <> port.TMS
               Seq(iocell)
             }
 
-            val jtag_tdiIO = {
+            val jtag_tdiIO_cell = {
               val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tdi")
               j.jtag.TDI    := iocell.io.i
               iocell.io.o   := false.B
               iocell.io.oe  := false.B
               iocell.io.ie  := true.B
-              iocell.io.pad <> jtag_wire.TDI
+              iocell.io.pad <> port.TDI
               Seq(iocell)
             }
 
-            val jtag_tdoIO = {
+            val jtag_tdoIO_cell = {
               val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_tdo")
               iocell.io.o   := j.jtag.TDO.data
               iocell.io.oe  := true.B   // TDO uses the tristate() data type (JtagTap.scala) 
                                         // This could be set to j.jtag.TDO.driven
               iocell.io.ie  := false.B
-              iocell.io.pad <> jtag_wire.TDO
+              iocell.io.pad <> port.TDO
               Seq(iocell)
             }
-            (jtag_wire, jtag_tckIO ++ jtag_tmsIO ++ jtag_tdiIO ++ jtag_tdoIO)
+
+            (JTAGGPIOPort(() => port), jtag_tckIO_cell ++ jtag_tmsIO_cell ++ jtag_tdiIO_cell ++ jtag_tdoIO_cell)
           } else {
             val jtagTuple = debug.systemjtag.map { j =>
               val jtag_wire = Wire(new JTAGChipIO)
@@ -628,6 +631,7 @@ class WithDebugIOCells(syncReset: Boolean = true, enableJtagGPIO: Boolean = fals
 
         val allTuples = (dmiTuple ++ jtagTuple).toSeq
         (allTuples.map(_._1).toSeq, allTuples.flatMap(_._2).toSeq)
+
       }).getOrElse((Nil, Nil))
     }}}
   }
