@@ -42,7 +42,7 @@ case class I2CPort         (val getIO: () => sifive.blocks.devices.i2c.I2CPort)
 case class UARTPort        (val getIO: () => UARTPortIO, val uartNo: Int, val freqMHz: Int)
     extends Port[UARTPortIO]
 
-case class UARTPortGPIO    (val getIO: () => UARTChipGPIO, val uartNo: Int, val freqMHz: Int)
+case class UARTGPIOPort    (val getIO: () => UARTChipGPIO, val uartNo: Int, val freqMHz: Int)
     extends Port[UARTChipGPIO]
 
 case class SPIFlashPort    (val getIO: () => SPIChipIO, val params: SPIFlashParams, val spiId: Int)
@@ -51,7 +51,7 @@ case class SPIFlashPort    (val getIO: () => SPIChipIO, val params: SPIFlashPara
 case class SPIPort         (val getIO: () => SPIPortIO)
     extends Port[SPIPortIO]
 
-case class SPIPortGPIO     (val getIO: () => SPIChipGPIO)
+case class SPIGPIOPort     (val getIO: () => SPIChipGPIO)
     extends Port[SPIChipGPIO]
 
 case class BlockDevicePort (val getIO: () => ClockedIO[BlockDeviceIO], val params: BlockDeviceConfig)
@@ -84,8 +84,9 @@ case class JTAGGPIOPort    (val getIO: () => JTAGChipGPIO)
 case class JTAGGPIORstPort (val getIO: () => JTAGChipRstGPIO)
     extends Port[JTAGChipRstGPIO]
 
-case class TestStubGPIOPort(val getIO: () => TestChipStubGPIO)
-    extends Port[TestChipStubGPIO]
+case class TestStubGPIOPort(val getIO: () => TestStubGPIO)
+    extends Port[TestStubGPIO]
+
 
 // Lack of nice union types in scala-2 means we have to set this type as Data
 case class SerialTLPort    (val getIO: () => Data, val params: SerialTLParams, val serdesser: TLSerdesser, val portId: Int)
