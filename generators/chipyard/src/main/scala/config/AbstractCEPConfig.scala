@@ -46,13 +46,13 @@ class AbstractCEPConfig extends Config(
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",    // Default merge all the bus clocks
     Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), Seq("tile"))) ++
-  new chipyard.config.WithPeripheryBusFrequency(500.0) ++           // Default 500 MHz pbus
-  new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
-  new chipyard.config.WithMemoryBusFrequency(500.0) ++              // Default 500 MHz mbus
-  new chipyard.config.WithControlBusFrequency(500.0) ++             // Default 500 MHz cbus
-  new chipyard.config.WithSystemBusFrequency(500.0) ++              // Default 500 MHz sbus
-  new chipyard.config.WithFrontBusFrequency(500.0) ++               // Default 500 MHz fbus
-  new chipyard.config.WithOffchipBusFrequency(500.0) ++             // Default 500 MHz obus
+  new chipyard.config.WithPeripheryBusFrequency(200.0) ++           // Default 200 MHz pbus
+  new chipyard.config.WithControlBusFrequency(200.0) ++             // Default 200 MHz cbus
+  new chipyard.config.WithMemoryBusFrequency(200.0) ++              // Default 200 MHz mbus
+  new chipyard.config.WithControlBusFrequency(200.0) ++             // Default 200 MHz cbus
+  new chipyard.config.WithSystemBusFrequency(200.0) ++              // Default 200 MHz sbus
+  new chipyard.config.WithFrontBusFrequency(200.0) ++               // Default 200 MHz fbus
+  new chipyard.config.WithOffchipBusFrequency(200.0) ++             // Default 200 MHz obus
 
   new testchipip.boot.WithCustomBootPin ++                          // add a custom-boot-pin to support pin-driven boot address
   new testchipip.boot.WithBootAddrReg ++                            // add a boot-addr-reg for configurable boot address
