@@ -154,7 +154,7 @@ class CEPRocketConfig extends Config(
   // CEP Scratchpad memory @ the typical external memory base address
   // Address & Size are in terms of *bytes* even though the memory is
   // 64-bits wide.  
-  //new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
+  new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
   new chipyard.config.WithUART(address = 0x64000000L) ++

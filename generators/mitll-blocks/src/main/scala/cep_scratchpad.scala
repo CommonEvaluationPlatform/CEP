@@ -39,19 +39,20 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
       slave_bus         = mbus    // The scratchpad is connected to the Memory Bus
     )
 
+    // Generate the clock domain for this module
+    val scratchpadDomain = scratchpadattachparams.slave_bus.generateSynchronousDomain
+
     // Define the SRoT Tilelink module
-    val scratchpadmodule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
+    scratchpadDomain {
+      val scratchpadmodule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
 
-    // Perform the slave "attachments" to the specified bus... fragment as required
-    scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {
-      scratchpadmodule.slave_node :*=
-      TLSourceShrinker(16) :*=
-      TLFragmenter(scratchpadattachparams.slave_bus) :*=_
+      // Perform the slave "attachments" to the specified bus... fragment as required
+      scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {
+        scratchpadmodule.slave_node :*=
+        TLSourceShrinker(16) :*=
+        TLFragmenter(scratchpadattachparams.slave_bus) :*=_
+      }
     }
-
-    // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { scratchpadmodule.module.clock := scratchpadattachparams.slave_bus.module.clock }
-    InModuleBody { scratchpadmodule.module.reset := scratchpadattachparams.slave_bus.module.reset }
 
 }}
 

@@ -31,7 +31,7 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithExtInterruptIOCells ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
-  new chipyard.iobinders.WithAXI4MemPunchthrough ++
+  //new chipyard.iobinders.WithAXI4MemPunchthrough ++
   
   new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
@@ -53,6 +53,7 @@ class AbstractCEPConfig extends Config(
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1) ++      // Default 1 memory channels
   new freechips.rocketchip.subsystem.WithClockGateModel ++          // add default EICG_wrapper clock gate model
   new freechips.rocketchip.subsystem.WithJtagDTM ++                 // set the debug module to expose a JTAG port
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
   new freechips.rocketchip.subsystem.WithNoMMIOPort ++              // no top-level MMIO master port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithNoSlavePort ++             // no top-level MMIO slave port (overrides default set in rocketchip)
   new freechips.rocketchip.subsystem.WithInclusiveCache ++          // use Sifive L2 cache
