@@ -47,6 +47,12 @@ class WithGPIOTiedOff extends HarnessBinder({
   }
 })
 
+class WithUARTTiedOff extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
+    port.io <> AnalogConst(0)
+  }
+})
+
 // DOC include start: WithUARTAdapter
 class WithUARTAdapter extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTPort, chipId: Int) => {
@@ -193,6 +199,18 @@ class WithTiedOffJTAG extends HarnessBinder({
     port.io.TDI := true.B
   }
 })
+
+class WithTiedOffSPIGPIO extends HarnessBinder ({
+  case (th: HasHarnessInstantiators, port: SPIGPIOPort, chipId: Int) => {
+    port.io.sck <> AnalogConst(0)
+    port.io.dq(0) <> AnalogConst(0)
+    port.io.dq(1) <> AnalogConst(0)
+    port.io.dq(2) <> AnalogConst(0)
+    port.io.dq(3) <> AnalogConst(0)
+    port.io.cs(0) <> AnalogConst(0)
+  }
+})
+
 
 class WithTiedOffDMI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: DMIPort, chipId: Int) => {

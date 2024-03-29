@@ -232,6 +232,9 @@ class WithUARTGPIOCells extends OverrideIOBinder({
       val name        = s"uart_${i}"
       val port        = IO(new UARTChipGPIO).suggestName(name)
       val iocellBase  = s"iocell_${name}"
+      val where = PBUS // TODO fix
+      val bus = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
+      val freqMHz = bus.dtsFrequency.get / 1000000
 
       // txd is unidirectional, but is being mapped to a GPIO Cell
       val txdIOs = {
@@ -254,7 +257,7 @@ class WithUARTGPIOCells extends OverrideIOBinder({
         Seq(iocell)
       }
 
-      (port, txdIOs ++ rxdIOs)
+      (UARTGPIOPort(() => port, i, freqMHz.toInt), txdIOs ++ rxdIOs)
     }).unzip
 
     (ports, cells2d.flatten)
@@ -349,16 +352,16 @@ class WithSPIIOCells extends OverrideLazyIOBinder({
 }) // WithSPIIOCells
 
 // Class to support GPIO Instantiation for the SPI Interface
-class SPIChipGPIO(val csWidth: Int = 1) extends Bundle {
+class SPIChipGPIO(c: SPIParamsBase) extends Bundle {
   val sck   = Analog(1.W)
-  val cs    = Vec(csWidth, Analog(1.W))
   val dq    = Vec(4, Analog(1.W)) // Not using Analog(4.W) because we can't connect these to IO cells
+  val cs    = Vec(c.csWidth, Analog(1.W))
 }
 
 // Class to support the instantiation of a SDIO/MMC capable interface
 // Generated based on WithSPIFlashIOCells and WithSPIIOPassThrough from VCU118 implementation
 // This variant forces the instantiation of GPIO cells for ALL pins
-class WithSPIGPIOCells extends OverrideLazyIOBinder({
+class WithSDIOGPIOCells extends OverrideLazyIOBinder({
   (system: HasPeripherySPI) => {
     
     // attach resource to 1st SPI
@@ -369,7 +372,7 @@ class WithSPIGPIOCells extends OverrideLazyIOBinder({
     InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
       val (ports: Seq[SPIGPIOPort], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
         val name = s"spi_${i}"
-        val port = IO(new SPIChipGPIO(s.c.csWidth)).suggestName(name)
+        val port = IO(new SPIChipGPIO(s.c)).suggestName(name)
         val iocellBase = s"iocell_${name}"
 
         // CS is unidirectional, but is being mapped to a GPIO Cell
@@ -402,8 +405,8 @@ class WithSPIGPIOCells extends OverrideLazyIOBinder({
           iocell.io.pad <> ana
           iocell
         } // val dqIOs
-        
-        (port, dqIOs ++ csIOs ++ sckIOs)
+
+        (SPIGPIOPort(() => port), dqIOs ++ csIOs ++ sckIOs)
       }).unzip // system.spi.zipWithIndex.map
       
       (ports, cells2d.flatten)

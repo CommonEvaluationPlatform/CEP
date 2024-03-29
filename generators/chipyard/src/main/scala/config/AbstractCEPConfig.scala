@@ -12,36 +12,28 @@ import org.chipsalliance.cde.config.{Config}
 
 class AbstractCEPConfig extends Config(
   // The HarnessBinders control generation of hardware in the TestHarness
+  //new chipyard.harness.WithUARTAdapter ++                          // add UART adapter to display UART on stdout, if uart is present
+  //new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
+  new chipyard.harness.WithTiedOffSPIGPIO ++
+  new chipyard.harness.WithUARTTiedOff ++
+  new chipyard.harness.WithGPIOTiedOff ++                          // tie-off chiptop GPIOs, if GPIOs are present
   new chipyard.harness.WithClockFromHarness ++                     // all Clock I/O in ChipTop should be driven by harnessClockInstantiator
   new chipyard.harness.WithResetFromHarness ++                     // reset controlled by harness
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs
-  new chipyard.iobinders.WithSerialTLIOCells ++
   new chipyard.iobinders.WithDebugIOCells(enableJtagGPIO = true) ++
-  new chipyard.iobinders.WithUARTIOCells ++
+  new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithSPIFlashIOCells ++
-  new chipyard.iobinders.WithExtInterruptIOCells ++
-  new chipyard.iobinders.WithChipIdIOCells ++
-  new chipyard.iobinders.WithCustomBootPin ++
+  new chipyard.iobinders.WithSDIOGPIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
   new chipyard.iobinders.WithTestJtagStubs ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
-  new chipyard.iobinders.WithI2CPunchthrough ++
-  new chipyard.iobinders.WithSPIIOPunchthrough ++
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
-  new chipyard.iobinders.WithAXI4MMIOPunchthrough ++
-  new chipyard.iobinders.WithTLMemPunchthrough ++
-  new chipyard.iobinders.WithL2FBusAXI4Punchthrough ++
-  new chipyard.iobinders.WithBlockDeviceIOPunchthrough ++
-  new chipyard.iobinders.WithNICIOPunchthrough ++
-  new chipyard.iobinders.WithTraceIOPunchthrough ++
-  new chipyard.iobinders.WithUARTTSIPunchthrough ++
-  new chipyard.iobinders.WithNMITiedOff ++
-
+  new chipyard.iobinders.WithSPIIOPunchthrough ++
+  
   new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",    // Default merge all the bus clocks
@@ -54,19 +46,8 @@ class AbstractCEPConfig extends Config(
   new chipyard.config.WithFrontBusFrequency(200.0) ++               // Default 200 MHz fbus
   new chipyard.config.WithOffchipBusFrequency(200.0) ++             // Default 200 MHz obus
 
-  new testchipip.boot.WithCustomBootPin ++                          // add a custom-boot-pin to support pin-driven boot address
-  new testchipip.boot.WithBootAddrReg ++                            // add a boot-addr-reg for configurable boot address
-  new testchipip.serdes.WithSerialTL(Seq(                           // add a serial-tilelink interface
-    testchipip.serdes.SerialTLParams(
-      client = Some(testchipip.serdes.SerialTLClientParams()),      // serial-tilelink interface will master the FBUS, and support 4 idBits
-      phyParams = testchipip.serdes.ExternalSyncSerialParams(width=32) // serial-tilelink interface with 32 lanes
-    )
-  )) ++
-  new testchipip.soc.WithMbusScratchpad(base = 0x08000000,          // add 64 KiB on-chip scratchpad
-                                        size = 64 * 1024) ++
   new chipyard.config.WithDebugModuleAbstractDataWords(8) ++        // increase debug module data capacity
   new chipyard.config.WithBootROM ++                                // use default bootrom
-  new chipyard.config.WithUART ++                                   // add a UART
   new chipyard.config.WithL2TLBs(1024) ++                           // use L2 TLBs
   new chipyard.config.WithNoSubsystemClockIO ++                     // drive the subsystem diplomatic clocks from ChipTop instead of using implicit clocks
   new chipyard.config.WithInheritBusFrequencyAssignments ++         // Unspecified clocks within a bus will receive the bus frequency if set

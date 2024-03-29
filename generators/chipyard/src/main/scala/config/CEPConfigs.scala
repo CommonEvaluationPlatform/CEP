@@ -62,7 +62,7 @@ class CEPArtyMimicRocketConfig extends Config(
 // Chipyard Configuration for the non-ASIC simulation version of the CEP
 class CEPRocketConfig extends Config(
   // Add the CEP Accelerator Cores
-  new chipyard.config.WithAES ++
+/*   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithFIR ++
   new chipyard.config.WithIIR ++
@@ -137,15 +137,15 @@ class CEPRocketConfig extends Config(
       llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_3_llki_sendrecv_addr),
       dev_name            = s"sha256_3")
     )) ++
-
+ */
   // Instantiation of the CEP registers
-  new chipyard.config.WithCEPRegisters ++
+//  new chipyard.config.WithCEPRegisters ++
 
   // Instantiation of the RSA core with or w/o the ARM compiled memories
-  new chipyard.config.WithRSA ++
+//  new chipyard.config.WithRSA ++
 
   // Instantiation of the Surrogate Root of Trust (with or w/o the ARM compiled memories)
-  new chipyard.config.WithSROT ++
+//  new chipyard.config.WithSROT ++
 
   // Instantiantion of the CEP BootROM with default parameter overrides
   // The hang parameter sets the system-wide reset vector for ALL RocketTiles
@@ -154,11 +154,11 @@ class CEPRocketConfig extends Config(
   // CEP Scratchpad memory @ the typical external memory base address
   // Address & Size are in terms of *bytes* even though the memory is
   // 64-bits wide.  
-  new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
+  //new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
   new chipyard.config.WithUART(address = 0x64000000L) ++
-  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+  //new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
   new chipyard.config.WithSPI (address = 0x64001000L) ++
 
   // Four Big Rocket-Cores
@@ -171,7 +171,7 @@ class CEPRocketConfig extends Config(
   new WithoutTLMonitors ++ 
 
   // The default CEP configuration has no external memory
-  new freechips.rocketchip.subsystem.WithNoMemPort ++
+  //new freechips.rocketchip.subsystem.WithNoMemPort ++
 
   // Set the remainder of the configuration items
   new chipyard.config.AbstractCEPConfig
