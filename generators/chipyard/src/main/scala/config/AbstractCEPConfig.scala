@@ -12,8 +12,7 @@ import org.chipsalliance.cde.config.{Config}
 
 class AbstractCEPConfig extends Config(
   // The HarnessBinders control generation of hardware in the TestHarness
-  //new chipyard.harness.WithUARTAdapter ++                          // add UART adapter to display UART on stdout, if uart is present
-  //new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
+  new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
   new chipyard.harness.WithTiedOffSPIGPIO ++
   new chipyard.harness.WithUARTTiedOff ++
   new chipyard.harness.WithGPIOTiedOff ++                          // tie-off chiptop GPIOs, if GPIOs are present
@@ -29,10 +28,10 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithSDIOGPIOCells ++
   new chipyard.iobinders.WithTestIOStubs ++
   new chipyard.iobinders.WithTestJtagStubs ++
+  new chipyard.iobinders.WithExtInterruptIOCells ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
   new chipyard.iobinders.WithAXI4MemPunchthrough ++
-  new chipyard.iobinders.WithSPIIOPunchthrough ++
   
   new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
