@@ -325,10 +325,10 @@ object LLKITilelinkParameters {
 case class COREParams(
   slave_base_addr     : BigInt,
   slave_depth         : BigInt,
-  llki_base_addr      : BigInt,
-  llki_depth          : BigInt,
-  llki_ctrlsts_addr   : BigInt,
-  llki_sendrecv_addr  : BigInt,
+  llki_base_addr      : Option[BigInt] = None,
+  llki_depth          : Option[BigInt] = None,
+  llki_ctrlsts_addr   : Option[BigInt] = None,
+  llki_sendrecv_addr  : Option[BigInt] = None,
   dev_name            : String,					// Device name as it will appear in the Device Tree
   verilog_module_name : Option[String] = None	// Allows for override of the Blackbox module & instantiation name
 )
