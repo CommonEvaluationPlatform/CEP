@@ -25,7 +25,7 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the core
-case object PeripheryCEPRegistersKey extends Field[Seq[CEPREGSParams]](Nil)
+case object PeripheryCEPRegistersKey extends Field[Seq[COREParams]](Nil)
 
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
 // to the instantiation
@@ -33,24 +33,25 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
   val cepregsnode = p(PeripheryCEPRegistersKey).map { params =>
 
     // Initialize the attachment parameters
-    val cepregsattachparams = CEPREGSAttachParams(
-      cepregsparams = params,
-      slave_bus     = pbus
+    val coreattachparams = COREAttachParams(
+      coreparams    = params,
+      slave_bus     = pbus,
+      llki_bus      = pbus
     )
 
     // Generate the clock domain for this module
-    val coreDomain = cepregsattachparams.slave_bus.generateSynchronousDomain
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
     // Define the Tilelink module 
     coreDomain {
       // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
-      val module = LazyModule(new cepregsTLModule(cepregsattachparams)(p)).suggestName(cepregsattachparams.cepregsparams.dev_name+"module")
+      val module = LazyModule(new cepregsTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the slave bus
-      cepregsattachparams.slave_bus.coupleTo(cepregsattachparams.cepregsparams.dev_name + "_slave") {
+      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
         module.slave_node :*=
-        TLFragmenter(cepregsattachparams.slave_bus.beatBytes, cepregsattachparams.slave_bus.blockBytes) :*= _
+        TLFragmenter(coreattachparams.slave_bus.beatBytes, coreattachparams.slave_bus.blockBytes) :*= _
       }
 
   } // coreDomain
@@ -65,20 +66,20 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
-class cepregsTLModule(cepregsattachparams: CEPREGSAttachParams)(implicit p: Parameters) extends LazyModule {
+class cepregsTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
     address     = Seq(AddressSet(
-                    cepregsattachparams.cepregsparams.slave_base_addr, 
-                    cepregsattachparams.cepregsparams.slave_depth)),
-    device      = new SimpleDevice(cepregsattachparams.cepregsparams.dev_name + "-slave", 
-                    Seq("mitll," + cepregsattachparams.cepregsparams.dev_name + "-slave")),
-    beatBytes   = cepregsattachparams.slave_bus.beatBytes
+                    coreattachparams.coreparams.slave_base_addr, 
+                    coreattachparams.coreparams.slave_depth)),
+    device      = new SimpleDevice(coreattachparams.coreparams.dev_name + "-slave", 
+                    Seq("mitll," + coreattachparams.coreparams.dev_name + "-slave")),
+    beatBytes   = coreattachparams.slave_bus.beatBytes
   )
 
   // Instantiate the implementation
-  lazy val module = new TLModuleImp(cepregsattachparams.cepregsparams, this)
+  lazy val module = new TLModuleImp(coreattachparams.coreparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ class cepregsTLModule(cepregsattachparams: CEPREGSAttachParams)(implicit p: Para
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class TLModuleImp(cepregsparams: CEPREGSParams, outer: cepregsTLModule) extends LazyModuleImp(outer) {
+class TLModuleImp(coreparams: COREParams, outer: cepregsTLModule) extends LazyModuleImp(outer) {
 
   // The following class is used to import all the miscellaneous black-box resources
   // that previously resided in srot.scala.  This effectively creates a dummy module with

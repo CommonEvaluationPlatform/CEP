@@ -325,45 +325,19 @@ object LLKITilelinkParameters {
 case class COREParams(
   slave_base_addr     : BigInt,
   slave_depth         : BigInt,
-  llki_base_addr      : Option[BigInt] = None,
-  llki_depth          : Option[BigInt] = None,
-  llki_ctrlsts_addr   : Option[BigInt] = None,
-  llki_sendrecv_addr  : Option[BigInt] = None,
-  dev_name            : String,					// Device name as it will appear in the Device Tree
+  dev_name            : String,					        // Used for Device Tree and module chisel-generated module name
+  llki_base_addr      : BigInt = 0,
+  llki_depth          : BigInt = 0,
+  llki_ctrlsts_addr   : BigInt = 0,
+  llki_sendrecv_addr  : BigInt = 0,
   verilog_module_name : Option[String] = None	// Allows for override of the Blackbox module & instantiation name
 )
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
 case class COREAttachParams(
   coreparams          : COREParams,
-  llki_bus            : TLBusWrapper,
-  slave_bus           : TLBusWrapper
-)
-
-// The following class is used to pass paramaters down into the CEP Registers
-case class CEPREGSParams(
-  slave_base_addr     : BigInt,
-  slave_depth         : BigInt,
-  dev_name            : String
-)
-
-// The following parameter pass attachment info to the lower level objects/classes/etc.
-case class CEPREGSAttachParams(
-  cepregsparams       : CEPREGSParams,
-  slave_bus           : TLBusWrapper
-)
-
-// The following class is used to pass paramaters down into the Scratchpad
-case class CEPScratchpadParams(
-  slave_address       : BigInt,
-  slave_depth         : BigInt,
-  dev_name            : String
-)
-
-// The following parameter pass attachment info to the lower level objects/classes/etc.
-case class CEPScratchpadAttachParams(
-  scratchpadparams    : CEPScratchpadParams,
-  slave_bus           : TLBusWrapper
+  slave_bus           : TLBusWrapper,
+  llki_bus            : TLBusWrapper
 )
 
 // The following class is used to pass paramaters down into the SROT

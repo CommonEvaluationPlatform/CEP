@@ -161,7 +161,7 @@ class WithRSA ( params  : Seq[COREParams] = Seq(
 
 class WithCEPRegisters extends Config((site, here, up) => {
   case PeripheryCEPRegistersKey => List(
-    CEPREGSParams(
+    COREParams(
       slave_base_addr     = BigInt(CEPBaseAddresses.cepregs_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.cepregs_base_depth),
       dev_name            = s"cepregs"
@@ -172,8 +172,8 @@ class WithCEPRegisters extends Config((site, here, up) => {
 class WithCEPScratchpad (address:   BigInt = CEPBaseAddresses.scratchpad_base_addr,
                          size:      BigInt = CEPBaseAddresses.scratchpad_depth) extends Config((site, here, up) => {
   case CEPScratchpadKey => List(
-    CEPScratchpadParams(
-      slave_address       = address,
+    COREParams(
+      slave_base_addr     = address,
       slave_depth         = size,
       dev_name            = s"scratchpad"
     ))

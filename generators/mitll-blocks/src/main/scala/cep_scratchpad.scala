@@ -26,7 +26,7 @@ import mitllBlocks.cep_addresses._
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the Scratchpad
-case object CEPScratchpadKey extends Field[Seq[CEPScratchpadParams]](Nil)
+case object CEPScratchpadKey extends Field[Seq[COREParams]](Nil)
 
 // This trait "connects" the Scratchpad to the Rocket Chip and passes the parameters down
 // to the instantiation
@@ -34,23 +34,24 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
   val ScratchpadNodes = p(CEPScratchpadKey).map { params =>
 
     // Initialize the attachment parameters
-    val scratchpadattachparams = CEPScratchpadAttachParams(
-      scratchpadparams  = params,
-      slave_bus         = mbus    // The scratchpad is connected to the Memory Bus
+    val coreattachparams = COREAttachParams(
+      coreparams      = params,
+      slave_bus       = mbus,    // The scratchpad is connected to the Memory Bus
+      llki_bus        = pbus
     )
 
     // Generate the clock domain for this module
-    val scratchpadDomain = scratchpadattachparams.slave_bus.generateSynchronousDomain
+    val scratchpadDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
     // Define the Tilelink module
     scratchpadDomain {
-      val module = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p)).suggestName(scratchpadattachparams.scratchpadparams.dev_name+"module")
+      val module = LazyModule(new scratchpadTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the specified bus... fragment as required
-      scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {
+      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name) {
         module.slave_node :*=
         TLSourceShrinker(16) :*=
-        TLFragmenter(scratchpadattachparams.slave_bus) :*=_
+        TLFragmenter(coreattachparams.slave_bus) :*=_
       }
 
     } // scratchpadDomain
@@ -71,17 +72,17 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
 //   "kicked off" because of the inclusion of diplomacy widgets will result in the A
 //   channel data bus being tied to ZERO.
 //--------------------------------------------------------------------------------------
-class scratchpadTLModule(scratchpadattachparams: CEPScratchpadAttachParams)(implicit p: Parameters) extends LazyModule {
+class scratchpadTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create a Manager / Slave / Sink node
   // These parameters have been copied from SRAM.scala
   val slave_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
     Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
-                              scratchpadattachparams.scratchpadparams.slave_address, 
-                              scratchpadattachparams.scratchpadparams.slave_depth)),
-      resources           = new SimpleDevice(scratchpadattachparams.scratchpadparams.dev_name, 
-                              Seq("mitll," + scratchpadattachparams.scratchpadparams.dev_name)).reg("mem"),
+                              coreattachparams.coreparams.slave_base_addr, 
+                              coreattachparams.coreparams.slave_depth)),
+      resources           = new SimpleDevice(coreattachparams.coreparams.dev_name, 
+                              Seq("mitll," + coreattachparams.coreparams.dev_name)).reg("mem"),
       regionType          = RegionType.UNCACHED,
       executable          = true,
       supportsGet         = TransferSizes(1, 8),
@@ -94,11 +95,11 @@ class scratchpadTLModule(scratchpadattachparams: CEPScratchpadAttachParams)(impl
     minLatency  = 1)))
     
     // Instantiate the implementation
-    lazy val module = new scratchpadTLModuleImp(scratchpadattachparams.scratchpadparams, this)
+    lazy val module = new scratchpadTLModuleImp(coreattachparams.coreparams, this)
 
 } // end scratchpadTLModule
 
-class scratchpadTLModuleImp(scratchpadparams: CEPScratchpadParams, outer: scratchpadTLModule) extends LazyModuleImp(outer) {
+class scratchpadTLModuleImp(coreparams: COREParams, outer: scratchpadTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to Slave Node's signals and parameters
   val (slave, slaveEdge)    = outer.slave_node.in(0)
@@ -170,8 +171,8 @@ class scratchpadTLModuleImp(scratchpadparams: CEPScratchpadParams, outer: scratc
   // As the depth parameter is being used to define the size of the instantiated memory, it must be incremented by +1 before
   // passing it down to the scratchpad_wrapper
   val scratchpad_wrapper_inst = Module(new scratchpad_wrapper(
-    scratchpadparams.slave_address, 
-    scratchpadparams.slave_depth + 1,
+    coreparams.slave_base_addr, 
+    coreparams.slave_depth + 1,
     slaveEdge.bundle.sizeBits,
     slaveEdge.bundle.sourceBits,
     slaveEdge.bundle.addressBits,
