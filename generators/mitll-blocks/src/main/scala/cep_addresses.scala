@@ -330,14 +330,14 @@ case class COREParams(
   llki_depth          : BigInt = 0,
   llki_ctrlsts_addr   : BigInt = 0,
   llki_sendrecv_addr  : BigInt = 0,
-  verilog_module_name : Option[String] = None	// Allows for override of the Blackbox module & instantiation name
+  verilog_module_name : Option[String] = None	  // Allows for override of the Blackbox module & instantiation name
 )
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
 case class COREAttachParams(
   coreparams          : COREParams,
   slave_bus           : TLBusWrapper,
-  llki_bus            : TLBusWrapper
+  llki_bus            : Option[TLBusWrapper] = None
 )
 
 // The following class is used to pass paramaters down into the SROT
