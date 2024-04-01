@@ -38,19 +38,23 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
       slave_bus     = pbus
     )
 
-    // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
-    // and thus should be unique to this core and NOT a verilog reserved keyword
-    val cepregsmodule = LazyModule(new cepregsTLModule(cepregsattachparams)(p))
+    // Generate the clock domain for this module
+    val coreDomain = cepregsattachparams.slave_bus.generateSynchronousDomain
 
-    // Perform the slave "attachments" to the slave bus
-    cepregsattachparams.slave_bus.coupleTo(cepregsattachparams.cepregsparams.dev_name + "_slave") {
-      cepregsmodule.slave_node :*=
-      TLFragmenter(cepregsattachparams.slave_bus.beatBytes, cepregsattachparams.slave_bus.blockBytes) :*= _
-    }
+    // Define the Tilelink module 
+    coreDomain {
+      // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
+      // and thus should be unique to this core and NOT a verilog reserved keyword
+      val cepregsmodule = LazyModule(new cepregsTLModule(cepregsattachparams)(p))
 
-    // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { cepregsmodule.module.reset := cepregsattachparams.slave_bus.module.reset }
-    InModuleBody { cepregsmodule.module.clock := cepregsattachparams.slave_bus.module.clock }
+      // Perform the slave "attachments" to the slave bus
+      cepregsattachparams.slave_bus.coupleTo(cepregsattachparams.cepregsparams.dev_name + "_slave") {
+        cepregsmodule.slave_node :*=
+        TLFragmenter(cepregsattachparams.slave_bus.beatBytes, cepregsattachparams.slave_bus.blockBytes) :*= _
+      }
+
+  } // coreDomain
+
 
 }}
 //--------------------------------------------------------------------------------------

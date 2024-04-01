@@ -42,7 +42,7 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
     // Generate the clock domain for this module
     val scratchpadDomain = scratchpadattachparams.slave_bus.generateSynchronousDomain
 
-    // Define the SRoT Tilelink module
+    // Define the Tilelink module
     scratchpadDomain {
       val scratchpadmodule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
 
@@ -52,7 +52,8 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
         TLSourceShrinker(16) :*=
         TLFragmenter(scratchpadattachparams.slave_bus) :*=_
       }
-    }
+
+    } // scratchpadDomain
 
 }}
 

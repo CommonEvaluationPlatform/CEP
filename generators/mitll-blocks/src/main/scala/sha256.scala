@@ -39,29 +39,30 @@ trait CanHavePeripherySHA256 { this: BaseSubsystem =>
       slave_bus   = pbus
     )
 
-    // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
-    // and thus should be unique to this core and NOT a verilog reserved keyword
-    val sha256module = LazyModule(new sha256TLModule(coreattachparams)(p))
+    // Generate the clock domain for this module
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
-    // Perform the slave "attachments" to the slave bus
-    coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
-      sha256module.slave_node :*=
-      TLFragmenter(coreattachparams.slave_bus.beatBytes, coreattachparams.slave_bus.blockBytes) :*= _
-    }
+    // Define the Tilelink module 
+    coreDomain {
+      // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
+      // and thus should be unique to this core and NOT a verilog reserved keyword
+      val sha256module = LazyModule(new sha256TLModule(coreattachparams)(p))
 
-    // Perform the slave "attachments" to the llki bus
-    coreattachparams.llki_bus.coupleTo(coreattachparams.coreparams.dev_name + "_llki_slave") {
-      sha256module.llki_node :*= 
-      TLSourceShrinker(16) :*=
-      TLFragmenter(coreattachparams.llki_bus) :*=_
-    }
+      // Perform the slave "attachments" to the slave bus
+      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
+        sha256module.slave_node :*=
+        TLFragmenter(coreattachparams.slave_bus) :*= _
+      }
 
-    // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { sha256module.module.reset := coreattachparams.slave_bus.module.reset }
-    InModuleBody { sha256module.module.clock := coreattachparams.slave_bus.module.clock }
+      // Perform the slave "attachments" to the llki bus
+      coreattachparams.llki_bus.coupleTo(coreattachparams.coreparams.dev_name + "_llki_slave") {
+        sha256module.llki_node :*= 
+        TLSourceShrinker(16) :*=
+        TLFragmenter(coreattachparams.llki_bus) :*=_
+      }
+    } // coreDomain
 
 }}
-
 //--------------------------------------------------------------------------------------
 // END: Module "Periphery" connections
 //--------------------------------------------------------------------------------------

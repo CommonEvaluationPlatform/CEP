@@ -40,25 +40,27 @@ trait CanHaveSROT { this: BaseSubsystem =>
       master_bus  = fbus
     )
 
-    // Define the SRoT Tilelink module
-    val srotmodule = LazyModule(new srotTLModule(srotattachparams)(p))
+    // Generate the clock domain for this module
+    val coreDomain = srotattachparams.slave_bus.generateSynchronousDomain
 
-    // Perform the slave "attachments" to the periphery bus
-    srotattachparams.slave_bus.coupleTo("srot_slave") {
-      srotmodule.slave_node :*= 
-      TLSourceShrinker(16) :*=
-      TLFragmenter(srotattachparams.slave_bus) :*=_
-   }
+    // Define the Tilelink module 
+    coreDomain {
+      // Define the SRoT Tilelink module
+      val srotmodule = LazyModule(new srotTLModule(srotattachparams)(p))
 
-    // Perform the master "attachments" to the front bus
-    srotattachparams.master_bus.coupleFrom("srot_master") {
-      _ := 
-      srotmodule.master_node  
-    }
+      // Perform the slave "attachments" to the periphery bus
+      srotattachparams.slave_bus.coupleTo("srot_slave") {
+        srotmodule.slave_node :*= 
+        TLSourceShrinker(16) :*=
+        TLFragmenter(srotattachparams.slave_bus) :*=_
+      }
 
-    // Explicitly connect the clock and reset (the module will be clocked off of the slave bus)
-    InModuleBody { srotmodule.module.clock := srotattachparams.slave_bus.module.clock }
-    InModuleBody { srotmodule.module.reset := srotattachparams.slave_bus.module.reset }
+      // Perform the master "attachments" to the front bus
+      srotattachparams.master_bus.coupleFrom("srot_master") {
+        _ := 
+        srotmodule.master_node  
+      }
+    } // coreDomain
 
 }}
 
