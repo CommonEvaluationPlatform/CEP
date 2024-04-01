@@ -196,6 +196,7 @@ class WithSROT extends Config((site, here, up) => {
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
+      dev_name            = s"srot",
       cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),
       cep_cores_depth     = BigInt(CEPBaseAddresses.cep_cores_depth),
       // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv
@@ -227,6 +228,7 @@ class WithSROTFPGAMD5Only extends Config((site, here, up) => {
     SROTParams(
       slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
+      dev_name            = s"srot",
       cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),
       cep_cores_depth     = BigInt(CEPBaseAddresses.cep_cores_depth),
       // The following array results in the creation of LLKI_CORE_INDEX_ARRAY in srot_wrapper.sv

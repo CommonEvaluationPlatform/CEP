@@ -45,16 +45,15 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
     coreDomain {
       // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
-      val cepregsmodule = LazyModule(new cepregsTLModule(cepregsattachparams)(p))
+      val module = LazyModule(new cepregsTLModule(cepregsattachparams)(p)).suggestName(cepregsattachparams.cepregsparams.dev_name+"module")
 
       // Perform the slave "attachments" to the slave bus
       cepregsattachparams.slave_bus.coupleTo(cepregsattachparams.cepregsparams.dev_name + "_slave") {
-        cepregsmodule.slave_node :*=
+        module.slave_node :*=
         TLFragmenter(cepregsattachparams.slave_bus.beatBytes, cepregsattachparams.slave_bus.blockBytes) :*= _
       }
 
   } // coreDomain
-
 
 }}
 //--------------------------------------------------------------------------------------

@@ -46,11 +46,11 @@ trait CanHaveSROT { this: BaseSubsystem =>
     // Define the Tilelink module 
     coreDomain {
       // Define the SRoT Tilelink module
-      val srotmodule = LazyModule(new srotTLModule(srotattachparams)(p))
+      val module = LazyModule(new srotTLModule(srotattachparams)(p)).suggestName(srotattachparams.srotparams.dev_name+"module")
 
       // Perform the slave "attachments" to the periphery bus
       srotattachparams.slave_bus.coupleTo("srot_slave") {
-        srotmodule.slave_node :*= 
+        module.slave_node :*= 
         TLSourceShrinker(16) :*=
         TLFragmenter(srotattachparams.slave_bus) :*=_
       }
@@ -58,7 +58,7 @@ trait CanHaveSROT { this: BaseSubsystem =>
       // Perform the master "attachments" to the front bus
       srotattachparams.master_bus.coupleFrom("srot_master") {
         _ := 
-        srotmodule.master_node  
+        module.master_node  
       }
     } // coreDomain
 

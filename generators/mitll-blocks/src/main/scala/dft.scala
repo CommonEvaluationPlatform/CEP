@@ -50,21 +50,22 @@ trait CanHavePeripheryDFT { this: BaseSubsystem =>
     coreDomain {
       // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
-      val dftmodule = LazyModule(new dftTLModule(coreattachparams)(p))
+      val module = LazyModule(new dftTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the slave bus
       coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
-        dftmodule.slave_node :*=
+        module.slave_node :*=
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
       // Perform the slave "attachments" to the llki bus
       coreattachparams.llki_bus.coupleTo(coreattachparams.coreparams.dev_name + "_llki_slave") {
-        dftmodule.llki_node :*= 
+        module.llki_node :*= 
         TLSourceShrinker(16) :*=
         TLFragmenter(coreattachparams.llki_bus) :*=_
       }
     } // coreDomain
+
 
 }}
 //--------------------------------------------------------------------------------------

@@ -44,11 +44,11 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
 
     // Define the Tilelink module
     scratchpadDomain {
-      val scratchpadmodule = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p))
+      val module = LazyModule(new scratchpadTLModule(scratchpadattachparams)(p)).suggestName(scratchpadattachparams.scratchpadparams.dev_name+"module")
 
       // Perform the slave "attachments" to the specified bus... fragment as required
       scratchpadattachparams.slave_bus.coupleTo(scratchpadattachparams.scratchpadparams.dev_name) {
-        scratchpadmodule.slave_node :*=
+        module.slave_node :*=
         TLSourceShrinker(16) :*=
         TLFragmenter(scratchpadattachparams.slave_bus) :*=_
       }

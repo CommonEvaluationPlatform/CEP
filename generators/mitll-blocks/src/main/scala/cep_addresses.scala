@@ -370,6 +370,7 @@ case class CEPScratchpadAttachParams(
 case class SROTParams(
   slave_address       : BigInt,
   slave_depth         : BigInt,
+  dev_name            : String,
   cep_cores_base_addr : BigInt,
   cep_cores_depth     : BigInt,
   llki_cores_array    : Array[BigInt]
