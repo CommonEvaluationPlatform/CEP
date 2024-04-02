@@ -32,11 +32,13 @@ case object PeripheryAESKey extends Field[Seq[COREParams]](Nil)
 trait CanHavePeripheryAES { this: BaseSubsystem =>
   val aesnode = p(PeripheryAESKey).map { params =>
 
+    // Map the core parameters
+    val coreparams : COREParams = params
+
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      coreparams  = params,
-      llki_bus    = pbus, // The LLKI connects to the periphery bus
-      slave_bus   = pbus
+      slave_bus   = pbus,
+      llki_bus    = pbus
     )
 
     // Generate the clock domain for this module
@@ -46,16 +48,16 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
     coreDomain {
       // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
-      val module = LazyModule(new aesTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
+      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the slave bus
-      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
+      coreattachparams.slave_bus.coupleTo(coreparams.dev_name + "_slave") {
         module.slave_node :*=
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
       // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.coupleTo(coreattachparams.coreparams.dev_name + "_llki_slave") {
+      coreattachparams.llki_bus.coupleTo(coreparams.dev_name + "_llki_slave") {
         module.llki_node :*= 
         TLSourceShrinker(16) :*=
         TLFragmenter(coreattachparams.llki_bus) :*=_
@@ -72,17 +74,17 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
-class aesTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
   val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
     Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
-                              coreattachparams.coreparams.llki_base_addr, 
-                              coreattachparams.coreparams.llki_depth)),
-      resources           = new SimpleDevice(coreattachparams.coreparams.dev_name + "-llki-slave", 
-                              Seq("mitll," + coreattachparams.coreparams.dev_name + "-llki-slave")).reg,
+                              coreparams.llki_base_addr, 
+                              coreparams.llki_depth)),
+      resources           = new SimpleDevice(coreparams.dev_name + "-llki-slave", 
+                              Seq("mitll," + coreparams.dev_name + "-llki-slave")).reg,
       regionType          = RegionType.IDEMPOTENT,
       supportsGet         = TransferSizes(1, 8),
       supportsPutFull     = TransferSizes(1, 8),
@@ -95,15 +97,15 @@ class aesTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) ex
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
     address     = Seq(AddressSet(
-                    coreattachparams.coreparams.slave_base_addr, 
-                    coreattachparams.coreparams.slave_depth)),
-    device      = new SimpleDevice(coreattachparams.coreparams.dev_name + "-slave", 
-                    Seq("mitll," + coreattachparams.coreparams.dev_name + "-slave")),
+                    coreparams.slave_base_addr, 
+                    coreparams.slave_depth)),
+    device      = new SimpleDevice(coreparams.dev_name + "-slave", 
+                    Seq("mitll," + coreparams.dev_name + "-slave")),
     beatBytes   = coreattachparams.slave_bus.beatBytes
   )
 
   // Instantiate the implementation
-  lazy val module = new aesTLModuleImp(coreattachparams.coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -114,7 +116,7 @@ class aesTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) ex
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to llki node's signals and parameters
   val (llki, llkiEdge)    = outer.llki_node.in(0)
@@ -257,7 +259,7 @@ class aesTLModuleImp(coreparams: COREParams, outer: aesTLModule) extends LazyMod
 
     //Common Resources used by all modules (LLKI, Opentitan, etc.)
 
-      // Provide an optional override of the Blackbox module name
+    // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)
     }

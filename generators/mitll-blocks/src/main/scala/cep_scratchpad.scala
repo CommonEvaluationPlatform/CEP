@@ -22,7 +22,7 @@ import freechips.rocketchip.tilelink._
 import mitllBlocks.cep_addresses._
 
 //--------------------------------------------------------------------------------------
-// BEGIN: Scratchpad "Periphery" connections
+// BEGIN: Module "Periphery" connections
 //--------------------------------------------------------------------------------------
 
 // Parameters associated with the Scratchpad
@@ -31,58 +31,55 @@ case object CEPScratchpadKey extends Field[Seq[COREParams]](Nil)
 // This trait "connects" the Scratchpad to the Rocket Chip and passes the parameters down
 // to the instantiation
 trait CanHaveCEPScratchpad { this: BaseSubsystem =>
-  val ScratchpadNodes = p(CEPScratchpadKey).map { params =>
+  val scratchpadNode = p(CEPScratchpadKey).map { params =>
+
+    // Map the core parameters
+    val coreparams : COREParams = params
 
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      coreparams      = params,
-      slave_bus       = mbus,    // The scratchpad is connected to the Memory Bus
-      llki_bus        = pbus
+      slave_bus   = mbus,
+      llki_bus    = mbus
     )
 
     // Generate the clock domain for this module
-    val scratchpadDomain = coreattachparams.slave_bus.generateSynchronousDomain
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
-    // Define the Tilelink module
-    scratchpadDomain {
-      val module = LazyModule(new scratchpadTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
+    // Define the Tilelink module 
+    coreDomain {
+      // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
+      // and thus should be unique to this core and NOT a verilog reserved keyword
+      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
 
-      // Perform the slave "attachments" to the specified bus... fragment as required
-      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name) {
+      // Perform the slave "attachments" to the slave bus
+      coreattachparams.slave_bus.coupleTo(coreparams.dev_name + "_slave") {
         module.slave_node :*=
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.slave_bus) :*=_
+        TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-    } // scratchpadDomain
+    } // coreDomain
 
 }}
+//--------------------------------------------------------------------------------------
+// END: Module "Periphery" connections
+//--------------------------------------------------------------------------------------
+ 
+
 
 //--------------------------------------------------------------------------------------
-// END: Scratchpad "Periphery" connections
+// BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
-
-
-//--------------------------------------------------------------------------------------
-// BEGIN: Tilelink Scratchpad Module and Module Implementation Declerations
-//
-// Note: If one does not explicitly put "supportsPutFull" and/or "supportsPutPartial"
-//   in the slave parameters, the manager will be instantiated as Read Only (and will
-//   show up as such in the device tree.  Also, the chisel optimization that gets
-//   "kicked off" because of the inclusion of diplomacy widgets will result in the A
-//   channel data bus being tied to ZERO.
-//--------------------------------------------------------------------------------------
-class scratchpadTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create a Manager / Slave / Sink node
   // These parameters have been copied from SRAM.scala
   val slave_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
     Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
-                              coreattachparams.coreparams.slave_base_addr, 
-                              coreattachparams.coreparams.slave_depth)),
-      resources           = new SimpleDevice(coreattachparams.coreparams.dev_name, 
-                              Seq("mitll," + coreattachparams.coreparams.dev_name)).reg("mem"),
+                              coreparams.slave_base_addr, 
+                              coreparams.slave_depth)),
+      resources           = new SimpleDevice(coreparams.dev_name, 
+                              Seq("mitll," + coreparams.dev_name)).reg("mem"),
       regionType          = RegionType.UNCACHED,
       executable          = true,
       supportsGet         = TransferSizes(1, 8),
@@ -94,12 +91,20 @@ class scratchpadTLModule(coreattachparams: COREAttachParams)(implicit p: Paramet
     beatBytes   = 8,                    // Scratchpad width is fixed at 8 bytes
     minLatency  = 1)))
     
-    // Instantiate the implementation
-    lazy val module = new scratchpadTLModuleImp(coreattachparams.coreparams, this)
+  // Instantiate the implementation
+  lazy val module = new coreTLModuleImp(coreparams, this)    
 
-} // end scratchpadTLModule
+}
+//--------------------------------------------------------------------------------------
+// END: TileLink Module
+//--------------------------------------------------------------------------------------
 
-class scratchpadTLModuleImp(coreparams: COREParams, outer: scratchpadTLModule) extends LazyModuleImp(outer) {
+
+
+//--------------------------------------------------------------------------------------
+// BEGIN: TileLink Module Implementation
+//--------------------------------------------------------------------------------------
+class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to Slave Node's signals and parameters
   val (slave, slaveEdge)    = outer.slave_node.in(0)

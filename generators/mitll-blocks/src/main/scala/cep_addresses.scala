@@ -26,10 +26,10 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import org.chipsalliance.cde.config.{Field, Parameters}
-import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.subsystem._
 
 object CEPVersion {
   val CEP_MAJOR_VERSION             = 0x04
@@ -335,10 +335,10 @@ case class COREParams(
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
 case class COREAttachParams(
-  coreparams          : COREParams,
   slave_bus           : TLBusWrapper,
-  llki_bus            : Option[TLBusWrapper] = None
+  llki_bus            : TLBusWrapper
 )
+
 
 // The following class is used to pass paramaters down into the SROT
 case class SROTParams(

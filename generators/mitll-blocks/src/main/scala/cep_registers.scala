@@ -32,11 +32,13 @@ case object PeripheryCEPRegistersKey extends Field[Seq[COREParams]](Nil)
 trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
   val cepregsnode = p(PeripheryCEPRegistersKey).map { params =>
 
+    // Map the core parameters
+    val coreparams : COREParams = params
+
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      coreparams    = params,
-      slave_bus     = pbus,
-      llki_bus      = pbus
+      slave_bus   = pbus,
+      llki_bus    = pbus
     )
 
     // Generate the clock domain for this module
@@ -44,17 +46,17 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
 
     // Define the Tilelink module 
     coreDomain {
-      // Instantiate th TL module.  Note: This name shows up in the generated verilog hiearchy
+      // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
-      val module = LazyModule(new cepregsTLModule(coreattachparams)(p)).suggestName(coreattachparams.coreparams.dev_name+"module")
+      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the slave bus
-      coreattachparams.slave_bus.coupleTo(coreattachparams.coreparams.dev_name + "_slave") {
+      coreattachparams.slave_bus.coupleTo(coreparams.dev_name + "_slave") {
         module.slave_node :*=
-        TLFragmenter(coreattachparams.slave_bus.beatBytes, coreattachparams.slave_bus.blockBytes) :*= _
+        TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-  } // coreDomain
+    } // coreDomain
 
 }}
 //--------------------------------------------------------------------------------------
@@ -66,20 +68,20 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
-class cepregsTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
     address     = Seq(AddressSet(
-                    coreattachparams.coreparams.slave_base_addr, 
-                    coreattachparams.coreparams.slave_depth)),
-    device      = new SimpleDevice(coreattachparams.coreparams.dev_name + "-slave", 
-                    Seq("mitll," + coreattachparams.coreparams.dev_name + "-slave")),
+                    coreparams.slave_base_addr, 
+                    coreparams.slave_depth)),
+    device      = new SimpleDevice(coreparams.dev_name + "-slave", 
+                    Seq("mitll," + coreparams.dev_name + "-slave")),
     beatBytes   = coreattachparams.slave_bus.beatBytes
   )
 
   // Instantiate the implementation
-  lazy val module = new TLModuleImp(coreattachparams.coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -87,11 +89,10 @@ class cepregsTLModule(coreattachparams: COREAttachParams)(implicit p: Parameters
 //--------------------------------------------------------------------------------------
 
 
-
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class TLModuleImp(coreparams: COREParams, outer: cepregsTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // The following class is used to import all the miscellaneous black-box resources
   // that previously resided in srot.scala.  This effectively creates a dummy module with

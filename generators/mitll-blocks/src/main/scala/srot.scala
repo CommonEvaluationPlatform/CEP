@@ -46,7 +46,7 @@ trait CanHaveSROT { this: BaseSubsystem =>
     // Define the Tilelink module 
     coreDomain {
       // Define the SRoT Tilelink module
-      val module = LazyModule(new srotTLModule(srotattachparams)(p)).suggestName(srotattachparams.srotparams.dev_name+"module")
+      val module = LazyModule(new coreTLModule(srotattachparams)(p)).suggestName(srotattachparams.srotparams.dev_name+"module")
 
       // Perform the slave "attachments" to the periphery bus
       srotattachparams.slave_bus.coupleTo("srot_slave") {
@@ -78,7 +78,7 @@ trait CanHaveSROT { this: BaseSubsystem =>
 //   "kicked off" because of the inclusion of diplomacy widgets will result in the A
 //   channel data bus being tied to ZERO.
 //--------------------------------------------------------------------------------------
-class srotTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) extends LazyModule {
+class coreTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create a Manager / Slave / Sink node
   val slave_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
@@ -112,11 +112,11 @@ class srotTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) e
     )))
     
     // Instantiate the implementation
-    lazy val module = new srotTLModuleImp(srotattachparams.srotparams, this)
+    lazy val module = new coreTLModuleImp(srotattachparams.srotparams, this)
 
 } // end TLSROTModule
  
-class srotTLModuleImp(srotparams: SROTParams, outer: srotTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(srotparams: SROTParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to Slave Node's signals and parameters
   val (slave, slaveEdge)    = outer.slave_node.in(0)

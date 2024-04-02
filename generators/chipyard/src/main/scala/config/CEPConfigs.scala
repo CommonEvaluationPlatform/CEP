@@ -62,7 +62,7 @@ class CEPArtyMimicRocketConfig extends Config(
 // Chipyard Configuration for the non-ASIC simulation version of the CEP
 class CEPRocketConfig extends Config(
   // Add the CEP Accelerator Cores
-  new chipyard.config.WithAES ++
+   new chipyard.config.WithAES ++
   new chipyard.config.WithDES3 ++
   new chipyard.config.WithFIR ++
   new chipyard.config.WithIIR ++
@@ -137,6 +137,7 @@ class CEPRocketConfig extends Config(
       llki_sendrecv_addr  = BigInt(CEPBaseAddresses.sha256_3_llki_sendrecv_addr),
       dev_name            = s"sha256_3")
     )) ++
+
 
   // Instantiation of the CEP registers
   new chipyard.config.WithCEPRegisters ++
