@@ -38,7 +38,7 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
       slave_bus   = pbus,
-      llki_bus    = pbus
+      llki_bus    = Some(pbus)
     )
 
     // Generate the clock domain for this module
@@ -55,12 +55,11 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
         module.slave_node :*=
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
-
       // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.coupleTo(coreparams.dev_name + "_llki_slave") {
+      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
         module.llki_node :*= 
         TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus) :*=_
+        TLFragmenter(coreattachparams.llki_bus.get) :*=_
       }
     } // coreDomain
 
@@ -92,7 +91,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsArithmetic  = TransferSizes.none,
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
-    beatBytes = coreattachparams.llki_bus.beatBytes)))
+    beatBytes = coreattachparams.llki_bus.get.beatBytes)))
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(

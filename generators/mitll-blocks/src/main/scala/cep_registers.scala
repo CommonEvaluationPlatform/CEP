@@ -37,8 +37,7 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
 
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = pbus
+      slave_bus   = pbus
     )
 
     // Generate the clock domain for this module

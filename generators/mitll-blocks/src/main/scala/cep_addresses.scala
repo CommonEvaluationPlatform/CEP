@@ -336,7 +336,7 @@ case class COREParams(
 // The following parameter pass attachment info to the lower level objects/classes/etc.
 case class COREAttachParams(
   slave_bus           : TLBusWrapper,
-  llki_bus            : TLBusWrapper
+  llki_bus            : Option[TLBusWrapper] = None
 )
 
 

@@ -38,8 +38,7 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
 
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      slave_bus   = mbus,
-      llki_bus    = mbus
+      slave_bus   = mbus
     )
 
     // Generate the clock domain for this module
