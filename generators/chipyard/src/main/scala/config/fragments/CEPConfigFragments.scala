@@ -194,7 +194,7 @@ class WithCEPBootROM    (address  : BigInt   = 0x10000,
 class WithSROT extends Config((site, here, up) => {
   case SROTKey => List(
     SROTParams(
-      slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
+      slave_base_addr     = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
       dev_name            = s"srot",
       cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),
@@ -226,7 +226,7 @@ class WithSROT extends Config((site, here, up) => {
 class WithSROTFPGAMD5Only extends Config((site, here, up) => {
   case SROTKey => List(
     SROTParams(
-      slave_address       = BigInt(CEPBaseAddresses.srot_base_addr),
+      slave_base_addr     = BigInt(CEPBaseAddresses.srot_base_addr),
       slave_depth         = BigInt(CEPBaseAddresses.srot_base_depth),
       dev_name            = s"srot",
       cep_cores_base_addr = BigInt(CEPBaseAddresses.cep_cores_base_addr),

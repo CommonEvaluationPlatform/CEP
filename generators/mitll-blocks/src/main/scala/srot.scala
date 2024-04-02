@@ -33,30 +33,32 @@ case object SROTKey extends Field[Seq[SROTParams]](Nil)
 trait CanHaveSROT { this: BaseSubsystem =>
   val SROTNodes = p(SROTKey).map { params =>
 
+    // Map the core parameters
+    val coreparams : SROTParams = params
+
     // Initialize the attachment parameters
-    val srotattachparams = SROTAttachParams(
-      srotparams  = params,
+    val coreattachparams = COREAttachParams(
       slave_bus   = pbus,
-      master_bus  = fbus
+      master_bus  = Some(fbus)
     )
 
     // Generate the clock domain for this module
-    val coreDomain = srotattachparams.slave_bus.generateSynchronousDomain
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
     // Define the Tilelink module 
     coreDomain {
       // Define the SRoT Tilelink module
-      val module = LazyModule(new coreTLModule(srotattachparams)(p)).suggestName(srotattachparams.srotparams.dev_name+"module")
+      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
 
       // Perform the slave "attachments" to the periphery bus
-      srotattachparams.slave_bus.coupleTo("srot_slave") {
+      coreattachparams.slave_bus.coupleTo("srot_slave") {
         module.slave_node :*= 
         TLSourceShrinker(16) :*=
-        TLFragmenter(srotattachparams.slave_bus) :*=_
+        TLFragmenter(coreattachparams.slave_bus) :*=_
       }
 
       // Perform the master "attachments" to the front bus
-      srotattachparams.master_bus.coupleFrom("srot_master") {
+      coreattachparams.master_bus.get.coupleFrom("srot_master") {
         _ := 
         module.master_node  
       }
@@ -78,14 +80,14 @@ trait CanHaveSROT { this: BaseSubsystem =>
 //   "kicked off" because of the inclusion of diplomacy widgets will result in the A
 //   channel data bus being tied to ZERO.
 //--------------------------------------------------------------------------------------
-class coreTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) extends LazyModule {
+class coreTLModule(coreparams: SROTParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
 
   // Create a Manager / Slave / Sink node
   val slave_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
     Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
-                              srotattachparams.srotparams.slave_address, 
-                              srotattachparams.srotparams.slave_depth)),
+                              coreparams.slave_base_addr, 
+                              coreparams.slave_depth)),
       resources           = new SimpleDevice("srot-slave", Seq("mitll,srot-slave")).reg,
       regionType          = RegionType.IDEMPOTENT,
       supportsGet         = TransferSizes(1, 8),
@@ -94,7 +96,7 @@ class coreTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) e
       supportsArithmetic  = TransferSizes.none,
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
-    beatBytes = LLKITilelinkParameters.BeatBytes)))
+    beatBytes = coreattachparams.slave_bus.beatBytes)))
 
     // Create a Client / Master / Source node
     // The sourceID paramater assumes there are two masters on the fbus (Debug Module, SRoT)
@@ -106,17 +108,17 @@ class coreTLModule(srotattachparams: SROTAttachParams)(implicit p: Parameters) e
         sourceId          = IdRange(0, 15), 
         requestFifo       = true,
         visibility        = Seq(AddressSet(
-          srotattachparams.srotparams.cep_cores_base_addr,
-          srotattachparams.srotparams.cep_cores_depth))
+          coreparams.cep_cores_base_addr,
+          coreparams.cep_cores_depth))
       ))
     )))
     
     // Instantiate the implementation
-    lazy val module = new coreTLModuleImp(srotattachparams.srotparams, this)
+    lazy val module = new coreTLModuleImp(coreparams, this)
 
 } // end TLSROTModule
  
-class coreTLModuleImp(srotparams: SROTParams, outer: coreTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: SROTParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to Slave Node's signals and parameters
   val (slave, slaveEdge)    = outer.slave_node.in(0)
@@ -230,9 +232,9 @@ class coreTLModuleImp(srotparams: SROTParams, outer: coreTLModule) extends LazyM
   } // end class srot_wrapper
 
   // Pack core index array
-  val core_index_array_packed = srotparams.llki_cores_array.foldLeft(BigInt(0)) { 
+  val core_index_array_packed = coreparams.llki_cores_array.foldLeft(BigInt(0)) { 
     (packed, addr) => ((packed << 32) | addr)  }
-  val num_cores = srotparams.llki_cores_array.length
+  val num_cores = coreparams.llki_cores_array.length
 
   // Instantiate the srot_wrapper
   val srot_wrapper_inst = Module(new srot_wrapper(

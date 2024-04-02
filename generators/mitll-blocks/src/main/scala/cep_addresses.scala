@@ -334,15 +334,17 @@ case class COREParams(
 )
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.
+// All cores require at least a slave bus connection
 case class COREAttachParams(
   slave_bus           : TLBusWrapper,
-  llki_bus            : Option[TLBusWrapper] = None
+  llki_bus            : Option[TLBusWrapper] = None,
+  master_bus          : Option[TLBusWrapper] = None
 )
 
 
 // The following class is used to pass paramaters down into the SROT
 case class SROTParams(
-  slave_address       : BigInt,
+  slave_base_addr     : BigInt,
   slave_depth         : BigInt,
   dev_name            : String,
   cep_cores_base_addr : BigInt,
