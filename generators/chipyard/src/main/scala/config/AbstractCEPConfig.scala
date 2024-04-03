@@ -26,8 +26,8 @@ class AbstractCEPConfig extends Config(
   new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
   new chipyard.iobinders.WithSDIOGPIOCells ++
-  new chipyard.iobinders.WithTestIOStubs ++
-  new chipyard.iobinders.WithTestJtagStubs ++
+//  new chipyard.iobinders.WithTestIOStubs ++
+//  new chipyard.iobinders.WithTestJtagStubs ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop

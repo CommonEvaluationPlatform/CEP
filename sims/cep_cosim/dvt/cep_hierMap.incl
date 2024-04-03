@@ -39,31 +39,31 @@
 `endif 
 
 // Paths to CEP-specific modules
-`define SROT_PATH                 `DUT_TOP_LEVEL.system.srotmodule
-`define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256module
-`define RSA_PATH                  `DUT_TOP_LEVEL.system.rsamodule
-`define MD5_PATH                  `DUT_TOP_LEVEL.system.md5module
-`define IIR_PATH                  `DUT_TOP_LEVEL.system.iirmodule
-`define IDFT_PATH                 `DUT_TOP_LEVEL.system.idftmodule
-`define GPS_PATH                  `DUT_TOP_LEVEL.system.gpsmodule
-`define FIR_PATH                  `DUT_TOP_LEVEL.system.firmodule
-`define DFT_PATH                  `DUT_TOP_LEVEL.system.dftmodule
-`define DES3_PATH                 `DUT_TOP_LEVEL.system.des3module
-`define AES_PATH                  `DUT_TOP_LEVEL.system.aesmodule
+`define SROT_PATH                 `DUT_TOP_LEVEL.system.srotdomain.srotmodule
+`define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256domain.sha256module
+`define RSA_PATH                  `DUT_TOP_LEVEL.system.rsadomain.rsamodule
+`define MD5_PATH                  `DUT_TOP_LEVEL.system.md5domain.md5module
+`define IIR_PATH                  `DUT_TOP_LEVEL.system.iirdomain.iirmodule
+`define IDFT_PATH                 `DUT_TOP_LEVEL.system.idftdomain.idftmodule
+`define GPS_PATH                  `DUT_TOP_LEVEL.system.gpsdomain.gpsmodule
+`define FIR_PATH                  `DUT_TOP_LEVEL.system.firdomain.firmodule
+`define DFT_PATH                  `DUT_TOP_LEVEL.system.dftdomain.dftmodule
+`define DES3_PATH                 `DUT_TOP_LEVEL.system.des3domain.des3module
+`define AES_PATH                  `DUT_TOP_LEVEL.system.aesdomain.aesmodule
 `ifdef ASIC_MODE
-  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadasicmodule
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadasicdomain.scratchpadasicmodule
   `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_asic_wrapper_inst
 `else
-  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadmodule
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpaddomain.scratchpadmodule
   `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_wrapper_inst
 `endif 
-`define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsmodule
+`define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsdomain.cepregsmodule
 `define SDCARD_PATH               `COSIM_TB_TOP_MODULE.spi_sd_model_inst
 
-`define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.tile_reset_domain_tile
-`define TILE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.tile_reset_domain_tile
-`define TILE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.tile_reset_domain_tile
-`define TILE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.tile_reset_domain_tile
+`define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.element_reset_domain_rockettile
+`define TILE1_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_1.element_reset_domain_rockettile
+`define TILE2_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_2.element_reset_domain_rockettile
+`define TILE3_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain_3.element_reset_domain_rockettile
 `define TILE0_RESET               `TILE0_PATH.reset
 `define TILE1_RESET               `TILE1_PATH.reset
 `define TILE2_RESET               `TILE2_PATH.reset
@@ -94,8 +94,8 @@
 `endif
 
 // Used by the testbench when operating in BFM mode to point to the Tilelink Master Behavioral model
-`define PBUS_RESET                `DUT_TOP_LEVEL.system._subsystem_pbus_clock
-`define PBUS_CLOCK                `DUT_TOP_LEVEL.system._subsystem_pbus_reset
+`define PBUS_RESET                `DUT_TOP_LEVEL.system._clockNamePrefixer_auto_clock_name_prefixer_out_1_member_pbus_0_clock
+`define PBUS_CLOCK                `DUT_TOP_LEVEL.system._clockNamePrefixer_auto_clock_name_prefixer_out_1_member_pbus_0_reset
 `define DEBUG_NDRESET             `DUT_TOP_LEVEL.system.debug_systemjtag_reset
 
 `endif // CEP_HIERMAP_INCL

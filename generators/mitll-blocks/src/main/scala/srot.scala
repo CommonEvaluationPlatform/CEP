@@ -46,7 +46,7 @@ trait CanHaveSROT { this: BaseSubsystem =>
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
     // Define the Tilelink module 
-    coreDomain {
+    coreDomain.suggestName(coreparams.dev_name+"domain") {
       // Define the SRoT Tilelink module
       val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
 

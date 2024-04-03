@@ -45,7 +45,7 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
 
     // Define the Tilelink module 
-    coreDomain {
+    coreDomain.suggestName(coreparams.dev_name+"domain") {
       // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
       // and thus should be unique to this core and NOT a verilog reserved keyword
       val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
