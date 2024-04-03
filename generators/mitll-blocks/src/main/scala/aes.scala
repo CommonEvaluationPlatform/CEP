@@ -55,6 +55,8 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
         module.slave_node :*=
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
+
+      // Attach the LLKI if it is defined
       // Perform the slave "attachments" to the llki bus
       coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
         module.llki_node :*= 
@@ -77,8 +79,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node =
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -104,7 +107,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -115,7 +118,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // "Connect" to llki node's signals and parameters
   val (llki, llkiEdge)    = outer.llki_node.in(0)

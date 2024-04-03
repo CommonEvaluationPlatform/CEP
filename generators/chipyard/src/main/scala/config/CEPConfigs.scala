@@ -159,7 +159,7 @@ class CEPRocketConfig extends Config(
 
   // Moved IO declerations from AbstractCEPConfig to here for readability
   new chipyard.config.WithUART(address = 0x64000000L) ++
-  //new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
   new chipyard.config.WithSPI (address = 0x64001000L) ++
 
   // Four Big Rocket-Cores
