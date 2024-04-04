@@ -237,6 +237,12 @@ class RocketVC707Config extends Config (
   new chipyard.RocketConfig
 )
 
+class BoomVC707Config extends Config (
+  new WithFPGAFrequency(50) ++
+  new WithVC707Tweaks ++
+  new chipyard.MegaBoomV3Config
+)
+
 class WithFPGAFrequency(fMHz: Double) extends Config (
   new chipyard.config.WithPeripheryBusFrequency(fMHz) ++
   new chipyard.config.WithMemoryBusFrequency(fMHz) ++
