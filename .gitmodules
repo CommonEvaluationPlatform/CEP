@@ -154,6 +154,9 @@
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
+[submodule "opentitan"]
+	path = opentitan
+	url = https://github.com/lowRISC/opentitan
 [submodule "CEP_Chipyard_ASIC"]
 	path = CEP_Chipyard_ASIC
 	url = ssh://git@llcad-github/HSS/CEP_Chipyard_ASIC.git
