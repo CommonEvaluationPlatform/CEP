@@ -37,8 +37,8 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
 
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      slave_bus   = pbus
-//      llki_bus    = Some(pbus)
+      slave_bus   = pbus,
+      llki_bus    = Some(pbus)
     )
 
     // Generate the clock domain for this module
@@ -193,15 +193,15 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
 
   } // aes_192_mock_tss()
 
-  val aes_192_inst   = Module(new aes_192())
-//  val aes_192_inst   = Module(new aes_192_mock_tss())
-
-
-  // val aes_192_inst = if (coreattachparams.llki_bus.isDefined) {
-  //   Module(new aes_192_mock_tss())
-  // } else {
-  //   Module(new aes_192())
-  // }
+//  val aes_192_inst   = Module(new aes_192())
+  val aes_192_inst   = Module(new aes_192_mock_tss())
+  // val aes_192_inst   = Module(
+  //   if (coreattachparams.llki_bus.isDefined) {
+  //     new aes_192_mock_tss()
+  //   } else {
+  //     new aes_192()
+  //   }
+  // )
 
   // Provide an optional override of the Blackbox module instantiation name
   aes_192_inst.suggestName(aes_192_inst.desiredName()+"_inst")
