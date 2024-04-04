@@ -37,8 +37,8 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
 
     // Initialize the attachment parameters
     val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
+      slave_bus   = pbus
+//      llki_bus    = Some(pbus)
     )
 
     // Generate the clock domain for this module
@@ -57,12 +57,13 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
       }
 
       // Attach the LLKI if it is defined
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
@@ -79,7 +80,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node =
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
     TLManagerNode(Seq(TLSlavePortParameters.v1(
       Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
@@ -95,6 +96,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -120,112 +122,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Define the LLKI Protocol Processing blackbox and its associated IO
-  class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
-                          llki_sendrecv_addr    : BigInt,
-                          slave_tl_szw          : Int,
-                          slave_tl_aiw          : Int,
-                          slave_tl_aw           : Int,
-                          slave_tl_dbw          : Int,
-                          slave_tl_dw           : Int,
-                          slave_tl_diw          : Int) extends BlackBox (
-
-      Map(
-        "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
-        "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
-        "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
-        "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
-        "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
-        "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
-        "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
-        "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
-      )
-  ) {
-
-    val io = IO(new Bundle {
-      // Clock and Reset
-      val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
-
-      // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_a_opcode      = Input(UInt(3.W))
-      val slave_a_param       = Input(UInt(3.W))
-      val slave_a_size        = Input(UInt(slave_tl_szw.W))
-      val slave_a_source      = Input(UInt(slave_tl_aiw.W))
-      val slave_a_address     = Input(UInt(slave_tl_aw.W))
-      val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
-      val slave_a_data        = Input(UInt(slave_tl_dw.W))
-      val slave_a_corrupt     = Input(Bool())
-      val slave_a_valid       = Input(Bool())
-      val slave_a_ready       = Output(Bool())
-
-      // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_d_opcode      = Output(UInt(3.W))
-      val slave_d_param       = Output(UInt(3.W))
-      val slave_d_size        = Output(UInt(slave_tl_szw.W))
-      val slave_d_source      = Output(UInt(slave_tl_aiw.W))
-      val slave_d_sink        = Output(UInt(slave_tl_diw.W))
-      val slave_d_denied      = Output(Bool())
-      val slave_d_data        = Output(UInt(slave_tl_dw.W))
-      val slave_d_corrupt     = Output(Bool())
-      val slave_d_valid       = Output(Bool())
-      val slave_d_ready       = Input(Bool())
-
-      // LLKI discrete interface
-      val llkid_key_data      = Output(UInt(64.W))
-      val llkid_key_valid     = Output(Bool())
-      val llkid_key_ready     = Input(Bool())
-      val llkid_key_complete  = Input(Bool())
-      val llkid_clear_key     = Output(Bool())
-      val llkid_clear_key_ack = Input(Bool())
-
-    })
-  } // end class llki_pp_wrapper
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Define blackbox and its associated IO
+  // Define blackbox and its associated IO (with LLKI)
   class aes_192_mock_tss() extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
@@ -249,7 +146,6 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
       val llkid_key_complete  = Output(Bool())
       val llkid_clear_key     = Input(Bool())
       val llkid_clear_key_ack = Output(Bool())
-
     })
 
     // Add the SystemVerilog/Verilog files associated with the BlackBox
@@ -259,27 +155,171 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     addResource("/vsrc/aes/round.v")
     addResource("/vsrc/aes/table.v")
 
-    //Common Resources used by all modules (LLKI, Opentitan, etc.)
+    // Provide an optional override of the Blackbox module name
+    override def desiredName(): String = {
+      return coreparams.verilog_module_name.getOrElse(super.desiredName)
+    }
+
+  } // aes_192_mock_tss()
+
+  // Define blackbox and its associated IO (without LLKI)
+  class aes_192() extends BlackBox with HasBlackBoxResource {
+
+    val io = IO(new Bundle {
+      // Clock and Reset
+      val clk                 = Input(Clock())
+      val rst                 = Input(Reset())
+
+      // Inputs
+      val start               = Input(Bool())
+      val state               = Input(UInt(128.W))
+      val key                 = Input(UInt(192.W))
+
+      // Outputs
+      val out                 = Output(UInt(128.W))
+      val out_valid           = Output(Bool())
+    })
+
+    // Add the SystemVerilog/Verilog files associated with the BlackBox
+    // Relative to ./src/main/resources
+    addResource("/vsrc/aes/aes_192.v")
+    addResource("/vsrc/aes/round.v")
+    addResource("/vsrc/aes/table.v")
 
     // Provide an optional override of the Blackbox module name
     override def desiredName(): String = {
       return coreparams.verilog_module_name.getOrElse(super.desiredName)
     }
-  }
 
-  // Instantiate the blackbox
-  val aes_192_inst   = Module(new aes_192_mock_tss())
+  } // aes_192_mock_tss()
+
+  val aes_192_inst   = Module(new aes_192())
+//  val aes_192_inst   = Module(new aes_192_mock_tss())
+
+
+  // val aes_192_inst = if (coreattachparams.llki_bus.isDefined) {
+  //   Module(new aes_192_mock_tss())
+  // } else {
+  //   Module(new aes_192())
+  // }
 
   // Provide an optional override of the Blackbox module instantiation name
   aes_192_inst.suggestName(aes_192_inst.desiredName()+"_inst")
 
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  aes_192_inst.io.llkid_key_data      := llki_pp_inst.io.llkid_key_data
-  aes_192_inst.io.llkid_key_valid     := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready     := aes_192_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete  := aes_192_inst.io.llkid_key_complete
-  aes_192_inst.io.llkid_clear_key     := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack := aes_192_inst.io.llkid_clear_key_ack
+  // "Connect" to llki node's signals and parameters
+  if (coreattachparams.llki_bus.isDefined) {
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
+
+    // Define the LLKI Protocol Processing blackbox and its associated IO
+    class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
+                            llki_sendrecv_addr    : BigInt,
+                            slave_tl_szw          : Int,
+                            slave_tl_aiw          : Int,
+                            slave_tl_aw           : Int,
+                            slave_tl_dbw          : Int,
+                            slave_tl_dw           : Int,
+                            slave_tl_diw          : Int) extends BlackBox (
+
+        Map(
+          "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
+          "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
+          "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
+          "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
+          "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
+          "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
+          "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
+          "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
+        )
+    ) {
+
+      val io = IO(new Bundle {
+
+        // Clock and Reset
+        val clk                 = Input(Clock())
+        val rst                 = Input(Reset())
+
+        // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_a_opcode      = Input(UInt(3.W))
+        val slave_a_param       = Input(UInt(3.W))
+        val slave_a_size        = Input(UInt(slave_tl_szw.W))
+        val slave_a_source      = Input(UInt(slave_tl_aiw.W))
+        val slave_a_address     = Input(UInt(slave_tl_aw.W))
+        val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
+        val slave_a_data        = Input(UInt(slave_tl_dw.W))
+        val slave_a_corrupt     = Input(Bool())
+        val slave_a_valid       = Input(Bool())
+        val slave_a_ready       = Output(Bool())
+
+        // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_d_opcode      = Output(UInt(3.W))
+        val slave_d_param       = Output(UInt(3.W))
+        val slave_d_size        = Output(UInt(slave_tl_szw.W))
+        val slave_d_source      = Output(UInt(slave_tl_aiw.W))
+        val slave_d_sink        = Output(UInt(slave_tl_diw.W))
+        val slave_d_denied      = Output(Bool())
+        val slave_d_data        = Output(UInt(slave_tl_dw.W))
+        val slave_d_corrupt     = Output(Bool())
+        val slave_d_valid       = Output(Bool())
+        val slave_d_ready       = Input(Bool())
+
+        // LLKI discrete interface
+        val llkid_key_data      = Output(UInt(64.W))
+        val llkid_key_valid     = Output(Bool())
+        val llkid_key_ready     = Input(Bool())
+        val llkid_key_complete  = Input(Bool())
+        val llkid_clear_key     = Output(Bool())
+        val llkid_clear_key_ack = Input(Bool())
+
+      })
+    } // end class llki_pp_wrapper
+
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
+
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
+
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
+
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
+
+    aes_192_inst.io.llkid_key_data      := llki_pp_inst.io.llkid_key_data
+    aes_192_inst.io.llkid_key_valid     := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := aes_192_inst.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := aes_192_inst.io.llkid_key_complete
+    aes_192_inst.io.llkid_clear_key     := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := aes_192_inst.io.llkid_clear_key_ack
+  }
 
   // Instantiate registers for the blackbox inputs
   val start               = RegInit(0.U(1.W))
