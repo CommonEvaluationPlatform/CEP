@@ -235,18 +235,19 @@ class UARTChipGPIO extends Bundle {
 
 // Variant of the UART Binder that forces the instantiation of GPIO cells for ALL pins
 class WithUARTGPIOCells extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) => {
+  (system: HasPeripheryUART) => {
     val (ports: Seq[UARTGPIOPort], cells2d) = system.uart.zipWithIndex.map({ case (u, i) =>
+      val p           = system.asInstanceOf[BaseSubsystem].p
       val name        = s"uart_${i}"
       val port        = IO(new UARTChipGPIO).suggestName(name)
       val iocellBase  = s"iocell_${name}"
       val where = PBUS // TODO fix
-      val bus = system.outer.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
+      val bus = system.asInstanceOf[HasTileLinkLocations].locateTLBusWrapper(where)
       val freqMHz = bus.dtsFrequency.get / 1000000
 
       // txd is unidirectional, but is being mapped to a GPIO Cell
       val txdIOs = {
-        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_txd")
+        val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_txd")
         iocell.io.o := u.txd
         iocell.io.oe := true.B
         iocell.io.ie := false.B
@@ -256,7 +257,7 @@ class WithUARTGPIOCells extends OverrideIOBinder({
 
       // txd is unidirectional, but is being mapped to a GPIO Cell
       val rxdIOs = {
-        val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_rxd")
+        val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_rxd")
         iocell.io.o   := false.B
         iocell.io.oe  := false.B
         iocell.io.ie  := true.B
@@ -329,7 +330,7 @@ class WithSPIIOCells extends OverrideLazyIOBinder({
       Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
     }
 
-    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
+    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPI => {
       val (ports: Seq[SPIPort], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
         val name = s"spi_${i}"
         val port = IO(new SPIPortIO(s.c)).suggestName(name)
@@ -377,15 +378,17 @@ class WithSDIOGPIOCells extends OverrideLazyIOBinder({
       Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
     }
 
-    InModuleBody {system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
-      val (ports: Seq[SPIGPIOPort], cells2d) = system.spi.zipWithIndex.map({ case (s, i) =>
+    InModuleBody {
+      val p       = system.asInstanceOf[BaseSubsystem].p
+      val spi     = system.spi
+      val (ports: Seq[SPIGPIOPort], cells2d) = spi.zipWithIndex.map({ case (s, i) =>
         val name = s"spi_${i}"
         val port = IO(new SPIChipGPIO(s.c)).suggestName(name)
         val iocellBase = s"iocell_${name}"
 
         // CS is unidirectional, but is being mapped to a GPIO Cell
         val sckIOs = {
-          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_sck")
+          val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_sck")
           iocell.io.o := s.sck
           iocell.io.oe := true.B
           iocell.io.ie := false.B
@@ -395,7 +398,7 @@ class WithSDIOGPIOCells extends OverrideLazyIOBinder({
 
         // CS is unidirectional, but is being mapped to a GPIO Cell
         val csIOs = s.cs.zip(port.cs).zipWithIndex.map { case ((pin, ana), j) =>
-          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_cs_${j}")
+          val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_cs_${j}")
           iocell.io.o := pin
           iocell.io.oe := true.B
           iocell.io.ie := false.B
@@ -405,7 +408,7 @@ class WithSDIOGPIOCells extends OverrideLazyIOBinder({
 
         // DQ are bidirectional, so then need special treatment
         val dqIOs = s.dq.zip(port.dq).zipWithIndex.map { case ((pin, ana), j) =>
-          val iocell = system.p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
+          val iocell = p(IOCellKey).gpio().suggestName(s"${iocellBase}_dq_${j}")
           iocell.io.o := pin.o
           iocell.io.oe := pin.oe
           iocell.io.ie := true.B
@@ -419,7 +422,7 @@ class WithSDIOGPIOCells extends OverrideLazyIOBinder({
       
       (ports, cells2d.flatten)
 
-    }}} // InModuleBody 
+    } // InModuleBody 
   }  // system: HasPeripherySPI
 }) // WithSPIIOCells
 

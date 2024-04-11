@@ -17,7 +17,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
 import org.chipsalliance.cde.config.{Field, Parameters}
-import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey}
+import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey, PBUS, MBUS, FBUS}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
@@ -35,6 +35,11 @@ case object PeripheryFIRKey extends Field[Seq[COREParams]](Nil)
 // to the instantiation
 trait CanHavePeripheryFIR { this: BaseSubsystem =>
   val firnode = p(PeripheryFIRKey).map { params =>
+
+    // Pull in the rocket-chip bus references
+    val pbus = locateTLBusWrapper(PBUS)
+    val mbus = locateTLBusWrapper(MBUS)
+    val fbus = locateTLBusWrapper(FBUS)
 
     // Map the core parameters
     val coreparams : COREParams = params
