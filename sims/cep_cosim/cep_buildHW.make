@@ -116,8 +116,7 @@ COSIM_VLOG_ARGS				+= 	-sv \
 								+define+CLOCK_PERIOD=${COSIM_TB_CLOCK_PERIOD} \
 								+define+RESET_DELAY=${COSIM_TB_RESET_DELAY} \
 								+define+COSIM_TB_TOP_MODULE=${COSIM_TB_TOP_MODULE} \
-								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE} \
-								+define+CHIPYARD_BLD_DIR="\"${CHIPYARD_BLD_DIR}\""
+								+define+CHIPYARD_TOP_MODULE=${CHIPYARD_TOP_MODULE}
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
@@ -173,7 +172,7 @@ endif
 # Questasim only related items
 #--------------------------------------------------------------------------------------
 ifeq (${MODELSIM}, 1)
-QUESTASIM_PATH				?= /opt/questa-2019.1/questasim/bin
+QUESTASIM_PATH				?= /opt/questa-2023.4/questasim/bin
 VLOG_CMD					= ${QUESTASIM_PATH}/vlog
 VCOM_CMD					= ${QUESTASIM_PATH}/vcom
 VOPT_CMD					= ${QUESTASIM_PATH}/vopt
@@ -317,7 +316,7 @@ CAD_TOP_COVERAGE				?= ${COSIM_TOP_DIR}/cad_coverage
 override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
-${TEST_SUITE_DIR}/.cadenceBuild : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${CHIPYARD_TOP_FILE_bfm} ${CHIPYARD_TOP_FILE_bare} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
+${TEST_SUITE_DIR}/.cadenceBuild : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
 	${XRUN_CMD} -input ${COSIM_TOP_DIR}/vmanager/assertions.tcl ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -dpiimpheader imp.h -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE}
 	touch $@
 

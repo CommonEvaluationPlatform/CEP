@@ -340,7 +340,7 @@ void set_cur_status(int status) {
   
   // which core???
   coreId = read_csr(mhartid);
-  d64 = ((u_int64_t)coreId << 32) | (u_int64_t)status;
+  d64 = ((uint64_t)coreId << 32) | (uint64_t)status;
   offS = CEPREGS_BASE_ADDR + cep_core0_status + (coreId * 8);
   *(volatile uint64_t *)(offS) = d64;
 #endif
@@ -376,9 +376,9 @@ int set_status(int errCnt, int testId) {
 
     coreId = read_csr(mhartid);
     if (errCnt) {
-      d64 = ((u_int64_t)testId << 32) | CEP_BAD_STATUS;
+      d64 = ((uint64_t)testId << 32) | CEP_BAD_STATUS;
     } else {
-      d64 = ((u_int64_t)testId << 32) | CEP_GOOD_STATUS;
+      d64 = ((uint64_t)testId << 32) | CEP_GOOD_STATUS;
     }
 
     // Write status to the current core's status register
