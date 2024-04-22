@@ -102,7 +102,7 @@ COSIM_VLOG_ARGS				+= 	+define+RANDOMIZE_MEM_INIT \
 #--------------------------------------------------------------------------------------
 # Common steps and settings regardless of simulator
 #--------------------------------------------------------------------------------------
-COSIM_VLOG_ARGS 			+= +libext+.v +libext+.sv
+COSIM_VLOG_ARGS 			+= +libext+.sv+.v
 
 # CEP Testbench related defines
 COSIM_TB_TOP_MODULE			:= cep_tb
@@ -120,8 +120,8 @@ COSIM_VLOG_ARGS				+= 	-sv \
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
-								${CHIPYARD_BLD_DIR}/gen-collateral
-
+								${GEN_COLLATERAL_DIR}
+								
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
 
 # Create an ordered list of SystemVerilog/Verilog files to compile

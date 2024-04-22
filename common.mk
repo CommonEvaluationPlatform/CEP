@@ -397,6 +397,9 @@ else
 	rm -f $@
 endif
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
+ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
+	@${SORT_SCRIPT} ${sim_common_files} $(SORT_FILE)
+endif
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@
 

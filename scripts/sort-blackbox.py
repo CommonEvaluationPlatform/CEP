@@ -34,8 +34,12 @@ fileToSort    = sys.argv[1]
 sortFile      = sys.argv[2]
 
 # DO some error checking
-if (not os.path.exists(fileToSort)) or (not os.path.exists(sortFile)) or (fileToSort == sortFile):
-  sys.exit("[ERROR] Specified files don't exist or they are the same.")
+if (not os.path.exists(fileToSort)):
+  sys.exit("[ERROR] fileToSort doesn't exist.")
+if (not os.path.exists(sortFile)):
+  sys.exit("[ERROR] sortFile doesn't exist.")
+if (fileToSort == sortFile):
+  sys.exit("[ERROR] fileToSort and sortFile cannot be the same.")
 
 # Read input file into a list (we will be writing back to the file)
 fileToSort_fd = open(fileToSort, "r+")
