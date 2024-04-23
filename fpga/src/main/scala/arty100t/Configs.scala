@@ -1,10 +1,7 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty100t
 
-import chisel3._
-
 import sys.process._
-import math.min
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
@@ -16,76 +13,15 @@ import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
-import sifive.blocks.devices.gpio._
-import sifive.blocks.devices.spi._
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
-import chipyard.iobinders.{OverrideIOBinder, OverrideLazyIOBinder}
-import chipyard.config.{WithSPI, WithUART}
-
-import mitllBlocks.cep_addresses._
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
-})
-
-class WithUARTIOPassthrough extends OverrideIOBinder({
-  (system: HasPeripheryUARTModuleImp) => {
-    val io_uart_pins_temp = system.uart.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"uart_$i") }
-    (io_uart_pins_temp zip system.uart).map { case (io, sysio) =>
-      io <> sysio
-    }
-    (io_uart_pins_temp, Nil)
-  }
-})
-
-class WithGPIOIOPassthrough extends OverrideIOBinder({
-  (system: HasPeripheryGPIOModuleImp) => {
-    val io_gpio_pins_temp = system.gpio.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"gpio_$i") }
-    (io_gpio_pins_temp zip system.gpio).map { case (io, sysio) =>
-      io <> sysio
-    }
-    (io_gpio_pins_temp, Nil)
-  }
-})
-
-class WithArty100TGPIO extends Config((site, here, up) => {
-  case PeripheryGPIOKey => {
-    if (Arty100TGPIOs.width > 0) {
-      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
-      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
-      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
-      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
-        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
-      })
-    }
-    else {
-      List.empty[GPIOParams]
-    }
-  }
-})
-
-class WithSPIIOPassthrough  extends OverrideLazyIOBinder({
-  (system: HasPeripherySPI) => {
-    // attach resource to 1st SPI
-    ResourceBinding {
-      Resource(new MMCDevice(system.tlSpiNodes.head.device, 1), "reg").bind(ResourceAddress(0))
-    }
-
-    InModuleBody {
-      system.asInstanceOf[BaseSubsystem].module match { case system: HasPeripherySPIModuleImp => {
-        val io_spi_pins_temp = system.spi.zipWithIndex.map { case (dio, i) => IO(dio.cloneType).suggestName(s"spi_$i") }
-        (io_spi_pins_temp zip system.spi).map { case (io, sysio) =>
-          io <> sysio
-        }
-        (io_spi_pins_temp, Nil)
-      } }
-    }
-  }
 })
 
 class WithCEPBootrom extends Config((site, here, up) => {
@@ -98,8 +34,6 @@ class WithCEPBootrom extends Config((site, here, up) => {
   }
 })
 
-class WithArty100TTweaks extends Config(
-  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
 // By default, this uses the on-board USB-UART for the TSI-over-UART link
 // The PMODUART HarnessBinder maps the actual UART device to JD pin
 class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
@@ -123,6 +57,11 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
+class RocketArty100TConfig extends Config(
+  new WithArty100TTweaks ++
+  new chipyard.config.WithBroadcastManager ++ // no l2
+  new chipyard.RocketConfig)
+
 class RocketArty100TCEPConfig extends Config(
   // Add the CEP registers (required)
   new chipyard.config.WithCEPRegisters ++
@@ -132,40 +71,23 @@ class RocketArty100TCEPConfig extends Config(
   new chipyard.config.WithMD5 ++
   new chipyard.config.WithSROTFPGAMD5Only ++
 
-  // Insert with CEP bootrom
-  new WithCEPBootrom ++
-
   // Overide the chip info 
   new WithDTS("mit-ll,cep-arty100t", Nil) ++
 
-  // Add GPIO (LEDs have been explicitly removed from the Arty100T test harness)
-  new WithArty100TGPIOBinder ++
-  new WithGPIOIOPassthrough ++
-  new WithArty100TGPIO ++
+  // Insert with CEP bootrom
+  new WithCEPBootrom ++
 
-  // Add SD interface (MMC Device added by WithSPIIOPassthrough)
-  new WithSPISDCardBinder ++
-  new WithSPIIOPassthrough ++
-  new WithSPI ++
-
-  // Restore default UART
-  new WithUARTBinder ++
-  new WithUARTIOPassthrough ++
-  new WithUART(address = 0x64000000L) ++
-  
-  // Include the Arty100T Tweaks
-  new WithArty100TTweaks ++
-
-  // Remove the L2 cache
+  // No L2 cache
   new chipyard.config.WithBroadcastManager ++ // no l2
 
-  // Include the standard Rocket Config
+  // Add the Arty100TTweaks
+  new WithArty100TTweaks ++
+
+  // Standard RocketConfig
   new chipyard.RocketConfig)
 
-class RocketArty100TConfig extends Config(
-  new WithArty100TTweaks ++
-  new chipyard.config.WithBroadcastManager ++ // no l2
-  new chipyard.RocketConfig)
+
+
 
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++

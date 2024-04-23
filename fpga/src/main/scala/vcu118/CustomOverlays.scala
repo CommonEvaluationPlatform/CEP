@@ -1,17 +1,6 @@
-//#************************************************************************
-//# Copyright 2024 Massachusetts Institute of Technology
-//# SPDX short identifier: BSD-3-Clause
-//#
-//# File Name:      CustomOverlays.scala
-//# Program:        Common Evaluation Platform (CEP)
-//# Description:    Custom FPGA Shell overlays for VCU118
-//# Notes:          Modified from the Chipyard VCU118 CustomOverlays.scala
-//#************************************************************************
-
 package chipyard.fpga.vcu118
 
 import chisel3._
-import chisel3.experimental.{attach}
 
 import freechips.rocketchip.diplomacy._
 import org.chipsalliance.cde.config.{Parameters, Field}
@@ -21,35 +10,68 @@ import sifive.fpgashells.shell._
 import sifive.fpgashells.ip.xilinx._
 import sifive.fpgashells.shell.xilinx._
 import sifive.fpgashells.clocks._
+import sifive.fpgashells.devices.xilinx.xilinxvcu118mig.{XilinxVCU118MIGPads, XilinxVCU118MIGParams, XilinxVCU118MIG}
 
-/* Connect GPIOs to FPGA I/Os */
-abstract class GPIOXilinxPlacedOverlay(name: String, di: GPIODesignInput, si: GPIOShellInput)
-  extends GPIOPlacedOverlay(name, di, si)
+class SysClock2VCU118PlacedOverlay(val shell: VCU118ShellBasicOverlays, name: String, val designInput: ClockInputDesignInput, val shellInput: ClockInputShellInput)
+  extends LVDSClockInputXilinxPlacedOverlay(name, designInput, shellInput)
 {
-  def shell: XilinxShell
+  val node = shell { ClockSourceNode(freqMHz = 250, jitterPS = 50)(ValName(name)) }
 
   shell { InModuleBody {
-    (io.gpio zip tlgpioSink.bundle.pins).map { case (ioPin, sinkPin) =>
-      val iobuf = Module(new IOBUF)
-      iobuf.suggestName(s"gpio_iobuf")
-      attach(ioPin, iobuf.io.IO)
-      sinkPin.i.ival := iobuf.io.O
-      iobuf.io.T := !sinkPin.o.oe
-      iobuf.io.I := sinkPin.o.oval
-    }
+    shell.xdc.addPackagePin(io.p, "AW26")
+    shell.xdc.addPackagePin(io.n, "AW27")
+    shell.xdc.addIOStandard(io.p, "DIFF_SSTL12")
+    shell.xdc.addIOStandard(io.n, "DIFF_SSTL12")
   } }
 }
-
-class CustomGPIOVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val designInput: GPIODesignInput, val shellInput: GPIOShellInput, gpioNames: Seq[String])
-   extends GPIOXilinxPlacedOverlay(name, designInput, shellInput)
+class SysClock2VCU118ShellPlacer(shell: VCU118ShellBasicOverlays, val shellInput: ClockInputShellInput)(implicit val valName: ValName)
+  extends ClockInputShellPlacer[VCU118ShellBasicOverlays]
 {
-  shell { InModuleBody {
-    require(gpioNames.length == io.gpio.length)
+    def place(designInput: ClockInputDesignInput) = new SysClock2VCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
+}
 
-    val packagePinsWithIOStdWithPackageIOs = (gpioNames zip io.gpio).map { case (name, io) =>
-      val (pin, iostd, pullupEnable) = VCU118GPIOs.pinMapping(name)
-      (pin, iostd, pullupEnable, IOPin(io))
-    }
+case object VCU118DDR2Size extends Field[BigInt](0x40000000L * 2) // 2GB
+class DDR2VCU118PlacedOverlay(val shell: VCU118FPGATestHarness, name: String, val designInput: DDRDesignInput, val shellInput: DDRShellInput)
+  extends DDRPlacedOverlay[XilinxVCU118MIGPads](name, designInput, shellInput)
+{
+  val size = p(VCU118DDRSize)
+
+  val migParams = XilinxVCU118MIGParams(address = AddressSet.misaligned(di.baseAddress, size))
+  val mig = LazyModule(new XilinxVCU118MIG(migParams))
+  val ioNode = BundleBridgeSource(() => mig.module.io.cloneType)
+  val topIONode = shell { ioNode.makeSink() }
+  val ddrUI     = shell { ClockSourceNode(freqMHz = 200) }
+  val areset    = shell { ClockSinkNode(Seq(ClockSinkParameters())) }
+  areset := designInput.wrangler := ddrUI
+
+  // since this uses a separate clk/rst need to put an async crossing
+  val asyncSink = LazyModule(new TLAsyncCrossingSink())
+  val migClkRstNode = BundleBridgeSource(() => new Bundle {
+    val clock = Output(Clock())
+    val reset = Output(Bool())
+  })
+  val topMigClkRstIONode = shell { migClkRstNode.makeSink() }
+
+  def overlayOutput = DDROverlayOutput(ddr = mig.node)
+  def ioFactory = new XilinxVCU118MIGPads(size)
+
+  InModuleBody {
+    ioNode.bundle <> mig.module.io
+
+    // setup async crossing
+    asyncSink.module.clock := migClkRstNode.bundle.clock
+    asyncSink.module.reset := migClkRstNode.bundle.reset
+  }
+
+  shell { InModuleBody {
+    require (shell.sys_clock2.get.isDefined, "Use of DDRVCU118Overlay depends on SysClock2VCU118Overlay")
+    val (sys, _) = shell.sys_clock2.get.get.overlayOutput.node.out(0)
+    val (ui, _) = ddrUI.out(0)
+    val (ar, _) = areset.in(0)
+
+    // connect the async fifo sync to sys_clock2
+    topMigClkRstIONode.bundle.clock := sys.clock
+    topMigClkRstIONode.bundle.reset := sys.reset
 
     val port = topIONode.bundle.port
     io <> port
@@ -77,9 +99,11 @@ class CustomGPIOVCU118PlacedOverlay(val shell: VCU118Shell, name: String, val de
 
     (IOPin.of(io) zip allddrpins) foreach { case (io, pin) => shell.xdc.addPackagePin(io, pin) }
   } }
+
+  shell.sdc.addGroup(pins = Seq(mig.island.module.blackbox.io.c0_ddr4_ui_clk))
 }
 
-class CustomGPIOVCU118ShellPlacer(shell: VCU118Shell, val shellInput: GPIOShellInput, gpioNames: Seq[String])(implicit val valName: ValName)
-  extends GPIOShellPlacer[VCU118Shell] {
-  def place(designInput: GPIODesignInput) = new CustomGPIOVCU118PlacedOverlay(shell, valName.name, designInput, shellInput, gpioNames)
+class DDR2VCU118ShellPlacer(shell: VCU118FPGATestHarness, val shellInput: DDRShellInput)(implicit val valName: ValName)
+  extends DDRShellPlacer[VCU118FPGATestHarness] {
+  def place(designInput: DDRDesignInput) = new DDR2VCU118PlacedOverlay(shell, valName.name, designInput, shellInput)
 }

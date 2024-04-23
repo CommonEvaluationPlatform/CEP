@@ -1,33 +1,22 @@
-//#************************************************************************
-//# Copyright 2024 Massachusetts Institute of Technology
-//# SPDX short identifier: BSD-3-Clause
-//#
-//# File Name:      TestHarness.scala
-//# Program:        Common Evaluation Platform (CEP)
-//# Description:    Test Harness for VC707
-//# Notes:          
-//#************************************************************************
-
 package chipyard.fpga.vc707
-
 import chisel3._
+import chisel3.experimental.{IO}
 
-import freechips.rocketchip.diplomacy._
-import org.chipsalliance.cde.config._
-import freechips.rocketchip.subsystem._
+import freechips.rocketchip.diplomacy.{LazyModule, LazyRawModuleImp, BundleBridgeSource}
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.subsystem.{SystemBusKey}
+import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 import freechips.rocketchip.prci._
 
-import sifive.fpgashells.shell.xilinx._
-import sifive.fpgashells.ip.xilinx._
+import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
+import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 import sifive.fpgashells.shell._
-import sifive.fpgashells.clocks._
+import sifive.fpgashells.clocks.{PLLFactoryKey}
 import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{XilinxVC707PCIeX1IO}
 
-import sifive.blocks.devices.uart._
-import sifive.blocks.devices.spi._
-import sifive.blocks.devices.i2c._
-import sifive.blocks.devices.gpio._
+import sifive.blocks.devices.uart.{PeripheryUARTKey, UARTPortIO}
+import sifive.blocks.devices.spi.{PeripherySPIKey, SPIPortIO}
 
 import chipyard._
 import chipyard.harness._
@@ -57,31 +46,35 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
 
+  /*** LED ***/
+  val ledModule = dp(LEDOverlayKey).map(_.place(LEDDesignInput()).overlayOutput.led)
+
+  /*** Switch ***/
+  val switchModule = dp(SwitchOverlayKey).map(_.place(SwitchDesignInput()).overlayOutput.sw)
+
+  /*** Button ***/
+  val buttonModule = dp(ButtonOverlayKey).map(_.place(ButtonDesignInput()).overlayOutput.but)
+
   /*** JTAG ***/
   val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
   /*** UART ***/
+
+  // 1st UART goes to the VC707 dedicated UART
+
   val io_uart_bb = BundleBridgeSource(() => (new UARTPortIO(dp(PeripheryUARTKey).head)))
   dp(UARTOverlayKey).head.place(UARTDesignInput(io_uart_bb))
 
-  /*** GPIO ***/
-  val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
-    val maxGPIOSupport = 32 // max gpio per gpio chip
-    val names = VC707GPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
-    Overlay(GPIOOverlayKey, new CustomGPIOVC707ShellPlacer(this, GPIOShellInput(), names))
-  })
-
-  val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
-  (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
-    placer.place(GPIODesignInput(params, io_gpio_bb(i)))
-  }
-
   /*** SPI ***/
+
   // 1st SPI goes to the VC707 SDIO port
+
   val io_spi_bb = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
   dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   /*** DDR ***/
+
+  // Modify the last field of `DDRDesignInput` for 1GB RAM size
   val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",

@@ -1,13 +1,3 @@
-//#************************************************************************
-//# Copyright 2024 Massachusetts Institute of Technology
-//# SPDX short identifier: BSD-3-Clause
-//#
-//# File Name:      HarnessBinders.scala
-//# Program:        Common Evaluation Platform (CEP)
-//# Description:    Harness Binders file for VC707
-//# Notes:          
-//#************************************************************************
-
 package chipyard.fpga.vc707
 
 import chisel3._
@@ -18,10 +8,10 @@ import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
-import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
+import sifive.fpgashells.devices.xilinx.xilinxvc707pciex1.{HasSystemXilinxVC707PCIeX1ModuleImp, XilinxVC707PCIeX1IO}
 
-import chipyard._
-import chipyard.harness._
+import chipyard.{CanHaveMasterTLMemPort}
+import chipyard.harness.{HarnessBinder}
 import chipyard.iobinders._
 
 /*** UART ***/
@@ -35,17 +25,6 @@ class WithVC707UARTHarnessBinder extends HarnessBinder({
 class WithVC707SPISDCardHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
     th.vc707Outer.io_spi_bb.bundle <> port.io
-  }
-})
-
-/*** GPIO ***/
-class WithVC707GPIOHarnessBinder extends OverrideHarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule, ports: Seq[GPIOPortIO]) => {
-    th match { case vc707th: VC707FPGATestHarnessImp => {
-      (vc707th.vc707Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
-        bb_io.bundle <> dut_io
-      }
-    } }
   }
 })
 

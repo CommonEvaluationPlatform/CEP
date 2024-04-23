@@ -29,15 +29,15 @@ Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the clo
 
 ## Pre-requisites (validated test/build configurations):
 The following items describe the configuration of the system that CEP has been developed and tested on:
-* Ubuntu 18.04 or 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1 (for co-simulation)
-* Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001
+* Ubuntu 18.04 or 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1+ (for co-simulation)
+* (DEPRECATED) Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001.  RHEL8 support pennding
 * Xilinx Vivado 2020.1 (needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
   - *Note*: The sifive tcl scripts for running vivado are not currently compatible with later Vivado versions (2021.1 and 2022.1 tested)
 * Terminal emulator (such as `minicom` or `screen`)
 * bash
 
-Other configurations may work, but they have not been explicitly verified.
+Other configurations/versions may work, but they have not been explicitly verified.
 
 Instructions on how to modelsim, xcelium, and Vivado are beyond the scope of this README.
 

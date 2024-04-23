@@ -1,13 +1,3 @@
-//#************************************************************************
-//# Copyright 2024 Massachusetts Institute of Technology
-//# SPDX short identifier: BSD-3-Clause
-//#
-//# File Name:      HarnessBinders.scala
-//# Program:        Common Evaluation Platform (CEP)
-//# Description:    Harness Binders file for VCU118
-//# Notes:          
-//#************************************************************************
-
 package chipyard.fpga.vcu118
 
 import chisel3._
@@ -18,7 +8,6 @@ import freechips.rocketchip.tilelink.{TLBundle}
 
 import sifive.blocks.devices.uart.{UARTPortIO}
 import sifive.blocks.devices.spi.{HasPeripherySPI, SPIPortIO}
-import sifive.blocks.devices.gpio.{HasPeripheryGPIOModuleImp, GPIOPortIO}
 
 import chipyard._
 import chipyard.harness._
@@ -35,15 +24,6 @@ class WithUART extends HarnessBinder({
 class WithSPISDCard extends HarnessBinder({
   case (th: VCU118FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
     th.vcu118Outer.io_spi_bb.bundle <> port.io
-
-/*** GPIO ***/
-class WithGPIO extends HarnessBinder({
-  (system: HasPeripheryGPIOModuleImp, th: BaseModule, ports: Seq[GPIOPortIO]) => {
-    th match { case vcu118th: VCU118FPGATestHarnessImp => {
-      (vcu118th.vcu118Outer.io_gpio_bb zip ports).map { case (bb_io, dut_io) =>
-        bb_io.bundle <> dut_io
-      }
-    } }
   }
 })
 

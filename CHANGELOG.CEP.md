@@ -10,9 +10,10 @@
 
 ### Added
 ### Changed
-  - Chipyard upgraded to v1.11.0
+  - Chipyard upgraded to chipyard/main Apr 3 2024 Release
 ### Fixed
 ### Issues
+  - RHEL7 support deprecated
 
 ## [v4.50] - 2024-01-25
 
