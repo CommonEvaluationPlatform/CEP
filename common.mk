@@ -397,7 +397,9 @@ else
 	rm -f $@
 endif
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
+# CEP specific sorting script call
 ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
+	@echo "CEP: Running CEP sort script..."
 	@${SORT_SCRIPT} ${sim_common_files} $(SORT_FILE)
 endif
 	echo "$(TOP_SMEMS_FILE)" >> $@
