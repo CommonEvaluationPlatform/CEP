@@ -11,7 +11,7 @@ OBJCOPY 		=$(RISCV)/bin/riscv64-unknown-elf-objcopy
 OBJDUMP 		=$(RISCV)/bin/riscv64-unknown-elf-objdump
 CFLAGS 			=  -mcmodel=medany -O2 -Wall -fno-common -fno-builtin-printf -fno-builtin-puts
 CFLAGS 			+= -I $(ROOT_DIR)/include -I.
-CFLAGS 			+= -mabi=lp64 -march=rv64ima
+CFLAGS 			+= -mabi=lp64 -march=rv64ima_zicsr_zifencei
 CFLAGS 			+= -DENTROPY=0 -DNONSMP_HART=0
 LFLAGS 			=  -static -nostdlib -nostartfiles -T sdboot.elf.lds
 SDSOURCE		= ${REPO_ROOT_DIR}/sims/cep_cosim/bootrom/sd.c

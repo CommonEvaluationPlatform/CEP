@@ -18,6 +18,8 @@ import chipyard._
 import chipyard.harness._
 import chipyard.iobinders._
 import testchipip.serdes._
+import sifive.blocks.devices.spi._
+
 
 class WithArty100TUARTTSI extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: UARTTSIPort, chipId: Int) => {
@@ -145,3 +147,49 @@ class WithArty100TJTAG extends HarnessBinder({
     } }
   }
 })
+
+// // Maps SPI interface to SDIO/MMC Interface connected to PMOD JA
+// class WithArty100TSDIOPMOD extends HarnessBinder({
+//   case (th: HasHarnessInstantiators, port: SPIPort, chipId: Int) => {
+//     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+//     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("spi")
+//     harnessIO <> port.io
+
+//     ath.sdc.addClock("sck", IOPin(harnessIO.sck), 10)
+//     ath.sdc.addGroup(clocks = Seq("sck"))
+//     ath.xdc.clockDedicatedRouteFalse(IOPin(harnessIO.sck))
+    
+//     val packagePinsWithPackageIOs = Seq(
+//       ("D12", IOPin(harnessIO.sck)),
+//       ("B11", IOPin(harnessIO.cs(0))),
+//       ("A11", IOPin(harnessIO.dq(0))),
+//       ("D13", IOPin(harnessIO.dq(1))),
+//       ("B18", IOPin(harnessIO.dq(2))),
+//       ("G13", IOPin(harnessIO.dq(3))))
+    
+//     packagePinsWithPackageIOs foreach { case (pin, io) => {
+//       ath.xdc.addPackagePin(io, pin)
+//       ath.xdc.addIOStandard(io, "LVCMOS33")
+//       ath.xdc.addPullup(io)
+//     } }
+//   }
+// })
+
+class WithSPISDCardHarnessBinder extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: SPIPort, chipId: Int) => {
+    val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+    ath.io_spi_bb.bundle <> port.io
+  }
+})
+
+
+
+// class WithArty100TDDRTL extends HarnessBinder({
+//   case (th: HasHarnessInstantiators, port: TLMemPort, chipId: Int) => {
+//     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+//     val bundles = artyTh.ddrClient.out.map(_._1)
+//     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
+//     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+//     ddrClientBundle <> port.io
+//   }
+// })

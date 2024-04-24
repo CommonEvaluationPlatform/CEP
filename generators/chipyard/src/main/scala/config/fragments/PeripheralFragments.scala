@@ -19,6 +19,7 @@ import sifive.blocks.devices.i2c._
 import sifive.blocks.devices.timer._
 
 import testchipip._
+import testchipip.tsi._
 
 import chipyard.{ExtTLMem}
 

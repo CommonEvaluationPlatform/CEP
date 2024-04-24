@@ -1,6 +1,8 @@
 // See LICENSE for license details.
 package chipyard.fpga.arty100t
 
+import chisel3._ 
+
 import sys.process._
 
 import org.chipsalliance.cde.config._
@@ -9,21 +11,26 @@ import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.devices.tilelink._
 import org.chipsalliance.diplomacy._
 import org.chipsalliance.diplomacy.lazymodule._
+import freechips.rocketchip.diplomacy.{ResourceBinding, Resource, ResourceAddress}
 import freechips.rocketchip.system._
 import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.serdes.{SerialTLKey}
 
 import chipyard.{BuildSystem}
+import chipyard.iobinders._
+import chipyard.config.{WithSPI, WithUART}
 
 // don't use FPGAShell's DesignKey
 class WithNoDesignKey extends Config((site, here, up) => {
   case DesignKey => (p: Parameters) => new SimpleLazyRawModule()(p)
 })
 
+// Instantiate the CEP Bootroom
 class WithCEPBootrom extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     val freqMHz = (up(PeripheryBusKey).dtsFrequency.get).toLong
@@ -57,6 +64,27 @@ class WithArty100TTweaks(freqMHz: Double = 50) extends Config(
   new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
   new freechips.rocketchip.subsystem.WithoutTLMonitors)
 
+// By default, CEP does not use the TSI interface
+class WithArty100TCEPTweaks(freqMHz: Double = 50) extends Config(
+  new WithArty100TPMODUART ++
+  new WithArty100TUARTTSI ++
+  new WithArty100TDDRTL ++
+  new WithArty100TJTAG ++
+  new WithNoDesignKey ++
+  new chipyard.harness.WithSerialTLTiedOff ++
+  new chipyard.harness.WithHarnessBinderClockFreqMHz(freqMHz) ++
+  new chipyard.config.WithMemoryBusFrequency(freqMHz) ++
+  new chipyard.config.WithFrontBusFrequency(freqMHz) ++
+  new chipyard.config.WithSystemBusFrequency(freqMHz) ++
+  new chipyard.config.WithPeripheryBusFrequency(freqMHz) ++
+  new chipyard.config.WithControlBusFrequency(freqMHz) ++
+  new chipyard.config.WithOffchipBusFrequency(freqMHz) ++
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new chipyard.clocking.WithPassthroughClockGenerator ++
+  new chipyard.config.WithTLBackingMemory ++ // FPGA-shells converts the AXI to TL for us
+  new freechips.rocketchip.subsystem.WithExtMemSize(BigInt(256) << 20) ++ // 256mb on ARTY
+  new freechips.rocketchip.subsystem.WithoutTLMonitors)
+
 class RocketArty100TConfig extends Config(
   new WithArty100TTweaks ++
   new chipyard.config.WithBroadcastManager ++ // no l2
@@ -71,8 +99,15 @@ class RocketArty100TCEPConfig extends Config(
   new chipyard.config.WithMD5 ++
   new chipyard.config.WithSROTFPGAMD5Only ++
 
-  // Overide the chip info 
-  new WithDTS("mit-ll,cep-arty100t", Nil) ++
+  // Instantiate the UART
+  new WithArty100TUART ++
+  new chipyard.config.WithUART(address = 0x64000000L) ++
+  new chipyard.config.WithNoUART ++   // Disable the default UART
+
+  // Instantiate the SPI/MMIO int
+  new WithSPIIOPunchthrough ++
+  new WithSPISDCardHarnessBinder ++
+  new chipyard.config.WithSPI (address = 0x64001000L) ++
 
   // Insert with CEP bootrom
   new WithCEPBootrom ++
@@ -80,14 +115,15 @@ class RocketArty100TCEPConfig extends Config(
   // No L2 cache
   new chipyard.config.WithBroadcastManager ++ // no l2
 
-  // Add the Arty100TTweaks
-  new WithArty100TTweaks ++
+  // Overide the chip info 
+  new WithDTS("mit-ll,cep-arty100t", Nil) ++
+
+  // Add the Arty100TCEPTweaks
+  new WithArty100TCEPTweaks ++
 
   // Standard RocketConfig
-  new chipyard.RocketConfig)
-
-
-
+  new chipyard.RocketConfig
+)
 
 class NoCoresArty100TConfig extends Config(
   new WithArty100TTweaks ++

@@ -14,6 +14,7 @@ import sifive.fpgashells.clocks._
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 
 import sifive.blocks.devices.uart._
+import sifive.blocks.devices.spi._
 
 import chipyard._
 import chipyard.harness._
@@ -32,6 +33,9 @@ class Arty100THarness(override implicit val p: Parameters) extends Arty100TShell
   dutClock := dutWrangler.node := dutGroup := harnessSysPLLNode
 
   harnessSysPLLNode := clockOverlay.overlayOutput.node
+
+  val io_spi_bb   = BundleBridgeSource(() => (new SPIPortIO(dp(PeripherySPIKey).head)))
+  val spiOverlay = dp(SPIOverlayKey).head.place(SPIDesignInput(dp(PeripherySPIKey).head, io_spi_bb))
 
   val ddrOverlay = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLLNode)).asInstanceOf[DDRArtyPlacedOverlay]
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
