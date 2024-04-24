@@ -4,6 +4,7 @@ package chipyard.fpga.arty100t
 import chisel3._ 
 
 import sys.process._
+import math.min
 
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.subsystem._
@@ -17,6 +18,8 @@ import freechips.rocketchip.tile._
 
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
+import sifive.blocks.devices.gpio._
+
 import sifive.fpgashells.shell.{DesignKey}
 
 import testchipip.serdes.{SerialTLKey}
@@ -38,6 +41,22 @@ class WithCEPBootrom extends Config((site, here, up) => {
     val make = s"make -B -C fpga/src/main/resources/arty100t/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/arty100t/cep_sdboot/build/sdboot.bin")
+  }
+})
+
+class WithArty100TGPIO extends Config((site, here, up) => {
+  case PeripheryGPIOKey => {
+    if (Arty100TGPIOs.width > 0) {
+      require(Arty100TGPIOs.width <= 64) // currently only support 64 GPIOs (change addrs to get more)
+      val gpioAddrs = Seq(BigInt(0x64002000), BigInt(0x64007000))
+      val maxGPIOSupport = 32 // max gpios supported by SiFive driver (split by 32)
+      List.tabulate(((Arty100TGPIOs.width - 1)/maxGPIOSupport) + 1)(n => {
+        GPIOParams(address = gpioAddrs(n), width = min(Arty100TGPIOs.width - maxGPIOSupport*n, maxGPIOSupport))
+      })
+    }
+    else {
+      List.empty[GPIOParams]
+    }
   }
 })
 
@@ -108,6 +127,11 @@ class RocketArty100TCEPConfig extends Config(
   new WithSPIIOPunchthrough ++
   new WithSPISDCardHarnessBinder ++
   new chipyard.config.WithSPI (address = 0x64001000L) ++
+
+  // Instantiate the GPIO
+  new WithGPIOPunchthrough ++
+  new WithArty100TGPIOBinder ++
+  new WithArty100TGPIO ++
 
   // Insert with CEP bootrom
   new WithCEPBootrom ++

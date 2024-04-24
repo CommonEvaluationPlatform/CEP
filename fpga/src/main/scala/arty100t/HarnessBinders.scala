@@ -34,12 +34,6 @@ class WithArty100TUARTTSI extends HarnessBinder({
       ath.xdc.addIOStandard(io, "LVCMOS33")
       ath.xdc.addIOB(io)
     } }
-
-    ath.other_leds(1) := port.io.dropped
-    ath.other_leds(9) := port.io.tsi2tl_state(0)
-    ath.other_leds(10) := port.io.tsi2tl_state(1)
-    ath.other_leds(11) := port.io.tsi2tl_state(2)
-    ath.other_leds(12) := port.io.tsi2tl_state(3)
   }
 })
 
@@ -148,33 +142,6 @@ class WithArty100TJTAG extends HarnessBinder({
   }
 })
 
-// // Maps SPI interface to SDIO/MMC Interface connected to PMOD JA
-// class WithArty100TSDIOPMOD extends HarnessBinder({
-//   case (th: HasHarnessInstantiators, port: SPIPort, chipId: Int) => {
-//     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-//     val harnessIO = IO(chiselTypeOf(port.io)).suggestName("spi")
-//     harnessIO <> port.io
-
-//     ath.sdc.addClock("sck", IOPin(harnessIO.sck), 10)
-//     ath.sdc.addGroup(clocks = Seq("sck"))
-//     ath.xdc.clockDedicatedRouteFalse(IOPin(harnessIO.sck))
-    
-//     val packagePinsWithPackageIOs = Seq(
-//       ("D12", IOPin(harnessIO.sck)),
-//       ("B11", IOPin(harnessIO.cs(0))),
-//       ("A11", IOPin(harnessIO.dq(0))),
-//       ("D13", IOPin(harnessIO.dq(1))),
-//       ("B18", IOPin(harnessIO.dq(2))),
-//       ("G13", IOPin(harnessIO.dq(3))))
-    
-//     packagePinsWithPackageIOs foreach { case (pin, io) => {
-//       ath.xdc.addPackagePin(io, pin)
-//       ath.xdc.addIOStandard(io, "LVCMOS33")
-//       ath.xdc.addPullup(io)
-//     } }
-//   }
-// })
-
 class WithSPISDCardHarnessBinder extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: SPIPort, chipId: Int) => {
     val ath = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
@@ -182,14 +149,9 @@ class WithSPISDCardHarnessBinder extends HarnessBinder({
   }
 })
 
-
-
-// class WithArty100TDDRTL extends HarnessBinder({
-//   case (th: HasHarnessInstantiators, port: TLMemPort, chipId: Int) => {
-//     val artyTh = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-//     val bundles = artyTh.ddrClient.out.map(_._1)
-//     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
-//     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-//     ddrClientBundle <> port.io
-//   }
-// })
+class WithArty100TGPIOBinder extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: GPIOPinsPort, chipId: Int) => {
+    val ath   = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
+    (ath.io_gpio_bb zip port).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
+  }
+})
