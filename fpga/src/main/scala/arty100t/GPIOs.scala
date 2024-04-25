@@ -18,14 +18,14 @@ object Arty100TGPIOs {
     // map of the pin name (akin to die pin name) to (fpga package pin, IOSTANDARD, add pullup resistor?)
 
     val pinMapping = LinkedHashMap(
-        "gpio0" -> ("D4",  "LVCMOS33", false),  // Bit0  - PmodD Pin1
-        "gpio1" -> ("D3",  "LVCMOS33", false),  // Bit1  - PmodD Pin2
-        "gpio2" -> ("F4",  "LVCMOS33", false),  // Bit2  - PmodD Pin3
-        "gpio3" -> ("F3",  "LVCMOS33", false),  // Bit3  - PmodD Pin4
-        "gpio4" -> ("E2",  "LVCMOS33", false),  // Bit4  - PmodD Pin7
-        "gpio5" -> ("D2",  "LVCMOS33", false),  // Bit5  - PmodD Pin8
-        "gpio6" -> ("H2",  "LVCMOS33", false),  // Bit6  - PmodD Pin9
-        "gpio7" -> ("G2",  "LVCMOS33", false),  // Bit7  - PmodD Pin10
+        "gpio0" -> ("U12",  "LVCMOS33", false), // Bit0  - PmodC Pin1
+        "gpio1" -> ("V12",  "LVCMOS33", false), // Bit1  - PmodC Pin2
+        "gpio2" -> ("V10",  "LVCMOS33", false), // Bit2  - PmodC Pin3
+        "gpio3" -> ("V11",  "LVCMOS33", false), // Bit3  - PmodC Pin4
+        "gpio4" -> ("U14",  "LVCMOS33", false), // Bit4  - PmodC Pin7
+        "gpio5" -> ("V14",  "LVCMOS33", false), // Bit5  - PmodC Pin8
+        "gpio6" -> ("T13",  "LVCMOS33", false), // Bit6  - PmodC Pin9
+        "gpio7" -> ("U13",  "LVCMOS33", false), // Bit7  - PmodC Pin10
         "sw0"   -> ("A8",  "LVCMOS33", false),  // Bit8  - SW0
         "sw1"   -> ("C11", "LVCMOS33", false),  // Bit9  - SW1
         "sw2"   -> ("C10", "LVCMOS33", false),  // Bit10 - SW2
