@@ -313,10 +313,10 @@ int main(void)
   // Enable the welcome message if the two LSBits in CEP Scratch Register are NOT set
   if ((scratch_reg & 0x3) != 0x3) {
     printf("\n");
-    printf("---          Common Evaluation Platform v%x.%x            ---\n", major_version, minor_version);
-    printf("--- Based on the UCB Chipyard Framework (1.10.0 release) ---\n");
-    printf("--- Copyright 2024 Massachusetts Institute of Technology ---\n");
-    printf("---     BootRom Image built on %s %s      ---\n",__DATE__,__TIME__);
+    printf("---              Common Evaluation Platform v%x.%x                   ---\n", major_version, minor_version);
+    printf("--- Based on the UCB Chipyard Framework (commit 20de9a4, 3 Apr 24)  ---\n");
+    printf("--- Copyright 2024 Massachusetts Institute of Technology            ---\n");
+    printf("---          BootRom Image built on %s %s            ---\n",__DATE__,__TIME__);
     printf("\n");
   } // if ((scratch_reg & 0x3) != 0x3)
 
