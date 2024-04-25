@@ -130,7 +130,7 @@ class RocketArty100TCEPConfig extends Config(
 
   // Instantiate the GPIO
   new WithGPIOPunchthrough ++
-//  new WithArty100TGPIOBinder ++
+  new WithArty100TGPIOBinder ++
   new WithArty100TGPIO ++
 
   // Insert with CEP bootrom

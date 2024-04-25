@@ -149,11 +149,9 @@ class WithSPISDCardHarnessBinder extends HarnessBinder({
   }
 })
 
-/*
 class WithArty100TGPIOBinder extends HarnessBinder({
-  case (th: HasHarnessInstantiators, port: GPIOPinsPort, chipId: Int) => {
+  case (th: HasHarnessInstantiators, port: GPIOPort, chipId: Int) => {
     val ath   = th.asInstanceOf[LazyRawModuleImp].wrapper.asInstanceOf[Arty100THarness]
-    (ath.io_gpio_bb zip port).map { case (bb_io, dut_io) => bb_io.bundle <> dut_io}
+    ath.io_gpio_bb(port.pinId).bundle <> port.io
   }
 })
-*/
