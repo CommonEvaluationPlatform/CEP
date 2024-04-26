@@ -103,8 +103,8 @@ endif
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vc707)
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= VC707FPGATestHarness
-	VLOG_MODEL        ?= VC707FPGATestHarness
+	MODEL             ?= VC707CEPFPGATestHarness
+	VLOG_MODEL        ?= VC707CEPFPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc707
 	CONFIG            ?= RocketVC707CEPConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vc707
@@ -247,5 +247,3 @@ clean: cep_clean
 	rm -rf $(build_dir)
 	rm -f *.log
 	rm -f *.jou
-
-

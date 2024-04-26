@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2024 Massachusetts Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      HarnessBinders.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Harness Binders file for VC707
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vc707
 
 import chisel3._
@@ -20,17 +30,41 @@ class WithVC707UARTHarnessBinder extends HarnessBinder({
     th.vc707Outer.io_uart_bb.bundle <> port.io
   }
 })
-
+class WithVC707CEPUARTHarnessBinder extends HarnessBinder({
+  case (th: VC707CEPFPGATestHarnessImp, port: UARTPort, chipId: Int) => {
+    th.vc707Outer.io_uart_bb.bundle <> port.io
+  }
+})
 /*** SPI ***/
 class WithVC707SPISDCardHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
     th.vc707Outer.io_spi_bb.bundle <> port.io
   }
 })
+class WithVC707CEPSPISDCardHarnessBinder extends HarnessBinder({
+  case (th: VC707CEPFPGATestHarnessImp, port: SPIPort, chipId: Int) => {
+    th.vc707Outer.io_spi_bb.bundle <> port.io
+  }
+})
+
+/*** GPIO ***/
+class WithVC707CEPGPIOHarnessBinder extends HarnessBinder({
+  case (th: VC707CEPFPGATestHarnessImp, port: GPIOPinsPort, chipId: Int) => {
+    th.vc707Outer.io_gpio_bb(port.gpioId).bundle <> port.io
+  }
+})
 
 /*** Experimental DDR ***/
 class WithVC707DDRMemHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
+    val bundles = th.vc707Outer.ddrClient.out.map(_._1)
+    val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
+    bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
+    ddrClientBundle <> port.io
+  }
+})
+class WithVC707CEPDDRMemHarnessBinder extends HarnessBinder({
+  case (th: VC707CEPFPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
     val bundles = th.vc707Outer.ddrClient.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
