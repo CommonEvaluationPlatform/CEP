@@ -40,6 +40,7 @@ ifeq ($(SUB_PROJECT),vc707)
 	TOP               ?= ChipTop
 	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_TARGETS	  :=
 endif
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
@@ -113,7 +114,7 @@ ifeq ($(SUB_PROJECT),cep_vc707)
 	TOP               ?= ChipTop
 	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
-	SORT_SCRIPT		  	:= $(base_dir)/scripts/sort-blackbox.py
+	SORT_SCRIPT		  := $(base_dir)/scripts/sort-blackbox.py
 	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_TARGETS	  :=
 endif

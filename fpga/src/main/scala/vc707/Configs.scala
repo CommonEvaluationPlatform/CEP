@@ -67,10 +67,10 @@ class WithCEPDefaultPeripherals extends Config((site, here, up) => {
   
 class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt{(1e6).toLong}
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+  case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -B -C fpga/src/main/resources/vc707/sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/sdboot/build/sdboot.bin")
   }
@@ -83,7 +83,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vc707/cep_sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -B -C fpga/src/main/resources/vc707/cep_sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/cep_sdboot/build/sdboot.bin")
   }
@@ -112,6 +112,7 @@ class WithVC707Tweaks extends Config (
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new WithFPGAFrequency(50) ++ // default 50MHz freq
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
