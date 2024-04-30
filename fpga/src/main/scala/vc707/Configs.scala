@@ -135,7 +135,6 @@ class WithVC707CEPTweaks extends Config (
   new WithVC707UARTHarnessBinder ++
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
-
   // other configuration
   new WithCEPDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
@@ -229,8 +228,7 @@ class RocketVC707CEPConfig extends Config(
   new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vc707", Nil) ++
 
   // Include the VC707 Tweaks
-//  new WithVC707CEPTweaks ++
-  new WithVC707Tweaks ++
+  new WithVC707CEPTweaks ++
 
   // Instantiate four big cores
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++

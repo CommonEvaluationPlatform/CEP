@@ -62,15 +62,6 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   val dutGroup = ClockGroup()
   dutClock := dutWrangler.node := dutGroup := harnessSysPLL
 
-  /*** LED ***/
-  val ledModule = dp(LEDOverlayKey).map(_.place(LEDDesignInput()).overlayOutput.led)
-
-  /*** Switch ***/
-  val switchModule = dp(SwitchOverlayKey).map(_.place(SwitchDesignInput()).overlayOutput.sw)
-
-  /*** Button ***/
-  val buttonModule = dp(ButtonOverlayKey).map(_.place(ButtonDesignInput()).overlayOutput.but)
-
   /*** JTAG ***/
   val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
@@ -142,8 +133,6 @@ class VC707FPGATestHarnessImp(_outer: VC707FPGATestHarness) extends LazyRawModul
   }
 
   _outer.pllReset := (resetIBUF.io.O || powerOnReset || ereset)
-
-  _outer.ledModule.foreach(_ := DontCare)
 
   // reset setup
   val hReset = Wire(Reset())

@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2024 Massachusetts Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      Harness.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Harness for the Arty100T
+//# Notes:         
+//#************************************************************************
+
 package chipyard.fpga.arty100t
 
 import chisel3._

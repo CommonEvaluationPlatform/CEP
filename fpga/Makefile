@@ -214,6 +214,12 @@ all_vsrcs := \
 #########################################################################################
 # vivado rules
 #########################################################################################
+# the following is a temporary patch of the FPGA shells neede for the CEP vc707 build
+# (until it is fixed in the original repo)
+fpga_shells_patch:
+	@echo "CEP: Patching vc707mig.scala...."
+	@sed -i 's/vc707mig1gp/vc707mig1gb/g' $(base_dir)/fpga/fpga-shells/src/main/scala/ip/xilinx/vc707mig/vc707mig.scala
+
 # combine all sources into single .f
 synth_list_f := $(build_dir)/$(long_name).vsrcs.f
 $(synth_list_f): $(sim_common_files) $(all_vsrcs)
@@ -232,10 +238,10 @@ $(BIT_FILE): $(synth_list_f)
 			-ip-vivado-tcls "$(shell find '$(build_dir)' -name '*.vivado.tcl')"
 
 .PHONY: bitstream
-bitstream: cep_preprocessing $(BIT_FILE)
+bitstream: cep_preprocessing fpga_shells_patch $(BIT_FILE)
 
 .PHONY: debug-bitstream
-debug-bitstream: cep_preprocessing $(build_dir)/obj/post_synth.dcp
+debug-bitstream: cep_preprocessing fpga_shells_patch $(build_dir)/obj/post_synth.dcp
 	cd $(build_dir); vivado \
 		-nojournal -mode batch \
 		-source $(sim_dir)/scripts/run_impl_bitstream.tcl \
