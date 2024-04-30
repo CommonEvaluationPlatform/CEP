@@ -87,7 +87,7 @@ class WithCEPSystemModifications extends Config((site, here, up) => {
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vc707/cep_sdboot/build/sdboot.bin")
   }
-  case ExtMem => up(ExtMem).map(x => x.copy(master = x.master.copy(size = site(VC7074GDDRSize)))) // set extmem to DDR size (note the size)
+  case ExtMem => up(ExtMem).map(x => x.copy(master = x.master.copy(size = site(VC7071GDDRSize)))) // set extmem to DDR size (note the size)
   case SerialTLKey => Nil // remove serialized tl port
 })
 
@@ -229,7 +229,8 @@ class RocketVC707CEPConfig extends Config(
   new freechips.rocketchip.subsystem.WithDTS("mit-ll,cep-vc707", Nil) ++
 
   // Include the VC707 Tweaks
-  new WithVC707CEPTweaks ++
+//  new WithVC707CEPTweaks ++
+  new WithVC707Tweaks ++
 
   // Instantiate four big cores
   new freechips.rocketchip.subsystem.WithNBigCores(4) ++

@@ -5,7 +5,7 @@
 #// File Name:      Makefile
 #// Program:        Common Evaluation Platform (CEP)
 #// Description:    Chipyard makefile for building FPGA targets
-#// Notes:          
+#// Notes:          - SORT_SCRIPT for CEP targets to address compile order
 #//
 #//************************************************************************
 
@@ -36,9 +36,6 @@ $(info Vivado $(VIVADO_VERSION) detected.)
 endif
 endif
 
-# Set default SUB_PROJECT
-SUB_PROJECT ?= cep_arty100t
-
 ifeq ($(SUB_PROJECT),vc707)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VC707FPGATestHarness
@@ -53,6 +50,7 @@ ifeq ($(SUB_PROJECT),vc707)
 	FPGA_BRAND        ?= xilinx
 	BOOTROM_TARGETS	  :=
 endif
+
 ifeq ($(SUB_PROJECT),vcu118)
 	SBT_PROJECT       ?= fpga_platforms
 	MODEL             ?= VCU118FPGATestHarness
@@ -125,8 +123,11 @@ ifeq ($(SUB_PROJECT),cep_vc707)
 	TOP               ?= ChipTop
 	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
+	SORT_SCRIPT		  := $(base_dir)/scripts/sort-blackbox.py
+	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_TARGETS	  :=
 endif
+
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vcu118)
@@ -145,6 +146,7 @@ ifeq ($(SUB_PROJECT),cep_vcu118)
 	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_TARGETS	  :=
 endif
+
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_arty100t)
@@ -164,10 +166,12 @@ ifeq ($(SUB_PROJECT),cep_arty100t)
 	BOOTROM_TARGETS	  :=
 endif
 
+# If SBT_PROJECT is not defined, then none of the SUB_PROJECTS above were selected
+ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 ifeq ($(SBT_PROJECT),)
 $(error Invalid SUB_PROJECT)
 endif
-
+endif
 include $(base_dir)/variables.mk
 
 # default variables to build the arty example

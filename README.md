@@ -196,7 +196,7 @@ The (micro)SD card needs to be partitioned as described in (https://chipyard.rea
 
 In either case, it is important to note what device your (micro)SD card gets mapped to (e.g., `/dev/sdd`).
 
-Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
+Using `<CEP_ROOT>/sims/cep_cosim/testSuites/bareMetalTests/regTest` as an example, the following steps will build and load the executable onto the (micro)SD card.
 
 ```
 cd <CEP_ROOT>/sims/cep_cosim/testSuites/bareMetal/regTest

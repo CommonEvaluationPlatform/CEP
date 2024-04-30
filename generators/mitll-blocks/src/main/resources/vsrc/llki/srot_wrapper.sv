@@ -127,6 +127,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   //
   // DW/DBW (Data bus width) must be equal in both worlds
   
+  // Assertions to detect parameter mismatches.  Does NOT affect synthesis
   `ASSERT_INIT(srot_slaveTlSzw, top_pkg::TL_SZW >= SLAVE_TL_SZW)
   `ASSERT_INIT(srot_slaveTlAiw, top_pkg::TL_AIW >= SLAVE_TL_AIW)
   `ASSERT_INIT(srot_slaveTlAw, top_pkg::TL_AW >= SLAVE_TL_AW)
@@ -171,6 +172,7 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   assign slave_d_valid          = slave_tl_d2h.d_valid;
   assign slave_a_ready          = slave_tl_d2h.a_ready;
 
+  // Assertions to detect parameter mismatches.  Does NOT affect synthesis
   `ASSERT_INIT(srot_masterTlSzw, top_pkg::TL_SZW >= MASTER_TL_SZW)
   `ASSERT_INIT(srot_masterTlAiw, top_pkg::TL_AIW >= MASTER_TL_AIW)
   `ASSERT_INIT(srot_masterTlAw, top_pkg::TL_AW >= MASTER_TL_AW)
@@ -180,8 +182,11 @@ module srot_wrapper import tlul_pkg::*; import llki_pkg::*; #(
   // Make Master D channel connections
   always @*
   begin
+    master_a_size                               = '0;
     master_a_size                               = master_tl_h2d_o.a_size[MASTER_TL_SZW-1:0];
+    master_a_source                             = '0;
     master_a_source                             = master_tl_h2d_o.a_source[MASTER_TL_AIW-1:0];
+    master_a_address                            = '0;
     master_a_address                            = master_tl_h2d_o.a_address[MASTER_TL_AW-1:0];
 
     master_tl_d2h_i.d_size                      = '0;

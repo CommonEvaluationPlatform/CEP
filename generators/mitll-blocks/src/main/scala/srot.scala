@@ -65,6 +65,9 @@ trait CanHaveSROT { this: BaseSubsystem =>
       // Perform the master "attachments" to the front bus
       coreattachparams.master_bus.get.coupleFrom("srot_master") {
         _ := 
+        TLFilter(TLFilter.mSelectIntersect(AddressSet(
+          coreparams.cep_cores_base_addr,
+          coreparams.cep_cores_depth))) :=
         module.master_node  
       }
     } // coreDomain

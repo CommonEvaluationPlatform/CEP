@@ -10,7 +10,6 @@
 #//                 - Generation of CHIPYARD_BUILD_INFO for use by CEP CoSim
 #//                 - Pre-processing step for "swapping files" for CEP ASIC Targets
 #//                 - SORT_SCRIPT for CEP targets to address compile order
-#//                   requirements for CEP CoSim (due to System Verilog packages)
 #//************************************************************************
 
 SHELL=/bin/bash

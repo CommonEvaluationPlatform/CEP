@@ -21,6 +21,7 @@ import freechips.rocketchip.diplomacy.{IdRange, TransferSizes}
 import freechips.rocketchip.prci._
 
 import sifive.fpgashells.shell.xilinx.{VC707Shell, UARTVC707ShellPlacer, PCIeVC707ShellPlacer, ChipLinkVC707PlacedOverlay}
+import sifive.fpgashells.shell.xilinx.{VC7074GDDRSize, VC7071GDDRSize}
 import sifive.fpgashells.ip.xilinx.{IBUF, PowerOnResetFPGAOnly}
 import sifive.fpgashells.shell._
 import sifive.fpgashells.clocks.{PLLFactoryKey}
@@ -70,18 +71,6 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   /*** Button ***/
   val buttonModule = dp(ButtonOverlayKey).map(_.place(ButtonDesignInput()).overlayOutput.but)
 
-  /*** GPIO ***/
-  // val gpio = Seq.tabulate(dp(PeripheryGPIOKey).size)(i => {
-  //   val maxGPIOSupport = 32 // max gpio per gpio chip
-  //   val names = VC707GPIOs.names.slice(maxGPIOSupport*i, maxGPIOSupport*(i+1))
-  //   Overlay(GPIOOverlayKey, new CustomGPIOVC707ShellPlacer(this, GPIOShellInput(), names))
-  // })
-
-  // val io_gpio_bb = dp(PeripheryGPIOKey).map { p => BundleBridgeSource(() => (new GPIOPortIO(p))) }
-  // (dp(GPIOOverlayKey) zip dp(PeripheryGPIOKey)).zipWithIndex.map { case ((placer, params), i) =>
-  //   placer.place(GPIODesignInput(params, io_gpio_bb(i)))
-  // }
-
   /*** JTAG ***/
   val jtagModule = dp(JTAGDebugOverlayKey).head.place(JTAGDebugDesignInput()).overlayOutput.jtag
 
@@ -113,7 +102,14 @@ class VC707FPGATestHarness(override implicit val p: Parameters) extends VC707She
   /*** DDR ***/
 
   // Modify the last field of `DDRDesignInput` for 1GB RAM size
-  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, true)).overlayOutput.ddr
+  val ddrSize = dp(ExtTLMem).get.master.size
+  val ddrIs4GB = if(ddrSize == VC7074GDDRSize) {
+    true
+  } else {
+    false
+  }
+
+  val ddrNode = dp(DDROverlayKey).head.place(DDRDesignInput(dp(ExtTLMem).get.master.base, dutWrangler.node, harnessSysPLL, ddrIs4GB)).overlayOutput.ddr
   val ddrClient = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1(
     name = "chip_ddr",
     sourceId = IdRange(0, 1 << dp(ExtTLMem).get.master.idBits)
