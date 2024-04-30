@@ -1,3 +1,18 @@
+#//************************************************************************
+#// Copyright 2024 Massachusetts Institute of Technology
+#// SPDX short identifier: BSD-3-Clause
+#//
+#// File Name:      common.mk
+#// Program:        Common Evaluation Platform (CEP)
+#// Description:    Global chipyard makefile
+#// Notes:          Modifications from default chipyard common.mk:
+#//                 - Check for an undefined SUB_PROJECT
+#//                 - Generation of CHIPYARD_BUILD_INFO for use by CEP CoSim
+#//                 - Pre-processing step for "swapping files" for CEP ASIC Targets
+#//                 - SORT_SCRIPT for CEP targets to address compile order
+#//                   requirements for CEP CoSim (due to System Verilog packages)
+#//************************************************************************
+
 SHELL=/bin/bash
 SED ?= sed
 
@@ -397,10 +412,12 @@ else
 	rm -f $@
 endif
 	sort -u $(sim_files) $(ALL_MODS_FILELIST) | grep -v '.*\.\(svh\|h\)$$' >> $@
-# CEP specific sorting script call
+# CEP specific sorting script call (if the SORT_SCRIPT is define for the current SUB_PROJECT)
 ifeq "$(findstring cep,${SUB_PROJECT})" "cep"
+ifneq "${SORT_SCRIPT}" ""
 	@echo "CEP: Running CEP sort script..."
 	@${SORT_SCRIPT} ${sim_common_files} $(SORT_FILE)
+endif
 endif
 	echo "$(TOP_SMEMS_FILE)" >> $@
 	echo "$(MODEL_SMEMS_FILE)" >> $@

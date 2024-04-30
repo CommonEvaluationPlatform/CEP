@@ -1,3 +1,15 @@
+#//************************************************************************
+#// Copyright 2024 Massachusetts Institute of Technology
+#// SPDX short identifier: BSD-3-Clause
+#//
+#// File Name:      variables.mk
+#// Program:        Common Evaluation Platform (CEP)
+#// Description:    Variable definitions for Chipyard makefiles
+#// Notes:          - BOOTROM_SOURCES variable added to support CEP bootroms
+#//                 - PBUS_CLK, SORT_SCRIPT, SORT_FILE, and CHIPYARD_BUILD_INFO
+#//                   variables added
+#//************************************************************************
+
 #########################################################################################
 # makefile variables shared across multiple makefiles
 # - to use the help text, your Makefile should have a 'help' target that just
@@ -299,7 +311,7 @@ BOOTROM_TARGETS ?= $(addprefix $(build_dir)/, $(BOOTROM_FILES))
 BOOTROM_SOURCES ?= $(addprefix $(BOOTROM_SRC_DIR)/, $(BOOTROM_FILES))
 
 # files that contain lists of files needed for VCS or Verilator simulation
-SIM_FILE_REQS 			=
+SIM_FILE_REQS =
 sim_files              ?= $(build_dir)/sim_files.f
 # single file that contains all files needed for VCS or Verilator simulation (unique and without .h's)
 sim_common_files       ?= $(build_dir)/sim_files.common.f

@@ -112,7 +112,6 @@ class WithVC707Tweaks extends Config (
   new WithDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
-  new WithFPGAFrequency(50) ++ // default 50MHz freq
   new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
@@ -125,14 +124,17 @@ class WithVC707CEPTweaks extends Config (
   new chipyard.config.WithMemoryBusFrequency(75.0) ++
   new chipyard.config.WithSystemBusFrequency(75.0) ++
   new chipyard.config.WithPeripheryBusFrequency(75.0) ++
+  new chipyard.config.WithControlBusFrequency(75.0) ++
+  new chipyard.config.WithFrontBusFrequency(75.0) ++
+
   new chipyard.harness.WithHarnessBinderClockFreqMHz(75) ++
   new WithFPGAFrequency(75) ++
-
-  // harness binders
-  new WithVC707CEPGPIOHarnessBinder ++
-  new WithVC707CEPUARTHarnessBinder ++
-  new WithVC707CEPSPISDCardHarnessBinder ++
-  new WithVC707CEPDDRMemHarnessBinder ++
+  // harness binders  
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
+  new WithVC707GPIOHarnessBinder ++
+  new WithVC707UARTHarnessBinder ++
+  new WithVC707SPISDCardHarnessBinder ++
+  new WithVC707DDRMemHarnessBinder ++
 
   // other configuration
   new WithCEPDefaultPeripherals ++

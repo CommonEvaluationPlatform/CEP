@@ -30,26 +30,17 @@ class WithVC707UARTHarnessBinder extends HarnessBinder({
     th.vc707Outer.io_uart_bb.bundle <> port.io
   }
 })
-class WithVC707CEPUARTHarnessBinder extends HarnessBinder({
-  case (th: VC707CEPFPGATestHarnessImp, port: UARTPort, chipId: Int) => {
-    th.vc707Outer.io_uart_bb.bundle <> port.io
-  }
-})
+
 /*** SPI ***/
 class WithVC707SPISDCardHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: SPIPort, chipId: Int) => {
     th.vc707Outer.io_spi_bb.bundle <> port.io
   }
 })
-class WithVC707CEPSPISDCardHarnessBinder extends HarnessBinder({
-  case (th: VC707CEPFPGATestHarnessImp, port: SPIPort, chipId: Int) => {
-    th.vc707Outer.io_spi_bb.bundle <> port.io
-  }
-})
 
 /*** GPIO ***/
-class WithVC707CEPGPIOHarnessBinder extends HarnessBinder({
-  case (th: VC707CEPFPGATestHarnessImp, port: GPIOPinsPort, chipId: Int) => {
+class WithVC707GPIOHarnessBinder extends HarnessBinder({
+  case (th: VC707FPGATestHarnessImp, port: GPIOPinsPort, chipId: Int) => {
     th.vc707Outer.io_gpio_bb(port.gpioId).bundle <> port.io
   }
 })
@@ -57,14 +48,6 @@ class WithVC707CEPGPIOHarnessBinder extends HarnessBinder({
 /*** Experimental DDR ***/
 class WithVC707DDRMemHarnessBinder extends HarnessBinder({
   case (th: VC707FPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
-    val bundles = th.vc707Outer.ddrClient.out.map(_._1)
-    val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
-    bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }
-    ddrClientBundle <> port.io
-  }
-})
-class WithVC707CEPDDRMemHarnessBinder extends HarnessBinder({
-  case (th: VC707CEPFPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
     val bundles = th.vc707Outer.ddrClient.out.map(_._1)
     val ddrClientBundle = Wire(new HeterogeneousBag(bundles.map(_.cloneType)))
     bundles.zip(ddrClientBundle).foreach { case (bundle, io) => bundle <> io }

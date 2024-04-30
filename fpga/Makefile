@@ -1,3 +1,14 @@
+#//************************************************************************
+#// Copyright 2024 Massachusetts Institute of Technology
+#// SPDX short identifier: BSD-3-Clause
+#//
+#// File Name:      Makefile
+#// Program:        Common Evaluation Platform (CEP)
+#// Description:    Chipyard makefile for building FPGA targets
+#// Notes:          
+#//
+#//************************************************************************
+
 #########################################################################################
 # fpga prototype makefile
 #########################################################################################
@@ -104,8 +115,8 @@ endif
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vc707)
 	SBT_PROJECT       ?= fpga_platforms
-	MODEL             ?= VC707CEPFPGATestHarness
-	VLOG_MODEL        ?= VC707CEPFPGATestHarness
+	MODEL             ?= VC707FPGATestHarness
+	VLOG_MODEL        ?= VC707FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc707
 	CONFIG            ?= RocketVC707CEPConfig
 	CONFIG_PACKAGE    ?= chipyard.fpga.vc707
@@ -114,8 +125,6 @@ ifeq ($(SUB_PROJECT),cep_vc707)
 	TOP               ?= ChipTop
 	BOARD             ?= vc707
 	FPGA_BRAND        ?= xilinx
-	SORT_SCRIPT		  := $(base_dir)/scripts/sort-blackbox.py
-	SORT_FILE         := $(base_dir)/cep_sort.f
 	BOOTROM_TARGETS	  :=
 endif
 # Bootrom targets are "cleared" for CEP FPGA targets, since
