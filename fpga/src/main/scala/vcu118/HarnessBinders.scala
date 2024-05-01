@@ -27,6 +27,13 @@ class WithSPISDCard extends HarnessBinder({
   }
 })
 
+/*** GPIO ***/
+class WithGPIOHarnessBinder extends HarnessBinder({
+  case (th: VCU118FPGATestHarnessImp, port: GPIOPinsPort, chipId: Int) => {
+    th.vcu118Outer.io_gpio_bb(port.gpioId).bundle <> port.io
+  }
+})
+
 /*** Experimental DDR ***/
 class WithDDRMem extends HarnessBinder({
   case (th: VCU118FPGATestHarnessImp, port: TLMemPort, chipId: Int) => {
