@@ -155,7 +155,7 @@ RISCV_TEST_DIR 				:= ${REPO_TOP_DIR}/toolchains/riscv-tools/riscv-tests
 # binaries is needed until libcrypto++ can be installed via conda
 # g++ is taken from the conda environment
 ifneq (, $(shell hostnamectl | grep "Red Hat"))
-	DEVTOOLSET				= /opt/rh/devtoolset-7/root/usr/bin
+	DEVTOOLSET				= /opt/rh/gcc-toolset-13/root/usr/bin
 	GCC     				= ${DEVTOOLSET}/g++
 	AR 						= ${DEVTOOLSET}/ar
 	RANLIB  				= ${DEVTOOLSET}/ranlib

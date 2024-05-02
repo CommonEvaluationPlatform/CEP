@@ -253,6 +253,7 @@ COMMON_CFLAGS			+= 	${COMMON_INCLUDE_LIST} \
 							-g -std=gnu++11 \
 							-Wno-format -Wno-narrowing \
 							-DBIG_ENDIAN
+
 # The -B flag is to ensure g++ points to the correct version of LD (versus the one installed by conda)
 # Until libcrypto++ can be installed via conda, the g++ overrides are needed
 ifneq (, $(shell hostnamectl | grep "22.04"))

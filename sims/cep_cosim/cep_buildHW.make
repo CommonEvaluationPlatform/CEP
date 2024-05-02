@@ -120,7 +120,7 @@ COSIM_VLOG_ARGS				+= 	-sv \
 
 COSIM_INCDIR_LIST			:= 	${TEST_SUITE_DIR} \
 								${DVT_DIR} \
-								${GEN_COLLATERAL_DIR}
+								${CHIPYARD_COLLATERAL_DIR}
 								
 COSIM_BUILD_LIST 			:= ${TEST_SUITE_DIR}/.cosim_build_list
 
@@ -272,7 +272,7 @@ endif
 #--------------------------------------------------------------------------------------
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
-XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
+XCELIUM_VERSION					?= XCELIUM23.03
 VMGR_PATH 						?= /cad4/Cadence/${VMGR_VERSION}
 XCELIUM_INSTALL					?= /cad4/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
@@ -317,7 +317,7 @@ override COSIM_COVERAGE_PATH  	= ${TEST_SUITE_DIR}/cad_coverage
 
 # Cadence build target
 ${TEST_SUITE_DIR}/.cadenceBuild : ${CHIPYARD_TOP_SMEMS_FILE_sim} ${COSIM_BUILD_LIST} ${COSIM_BUILD_LIST_DEPENDENCIES} ${PERSUITE_CHECK}
-	${XRUN_CMD} -input ${COSIM_TOP_DIR}/vmanager/assertions.tcl ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -dpiimpheader imp.h -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE}
+	${XRUN_CMD} -input ${COSIM_TOP_DIR}/vmanager/assertions.tcl ${COSIM_VLOG_ARGS} -f ${COSIM_BUILD_LIST} -afile ${V2C_TAB_FILE} -loadpli1 ${VPP_LIB} -sv_lib ${VPP_LIB} -dpiimpheader imp.h -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -log ${COMPILE_LOGFILE} ${SAHANLDER_FILE}
 	touch $@
 
 # Dummy build target to ensure complete dependencies when simulating
@@ -325,7 +325,7 @@ ${TEST_SUITE_DIR}/_info: ${TEST_SUITE_DIR}/.cadenceBuild
 	touch $@
 
 # override the VPP command for Cadence tool
-override VSIM_CMD_LINE = "${XRUN_CMD} ${COSIM_VSIM_ARGS} -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${LIB_DIR}/libvpp.so -sv_lib ${LIB_DIR}/libvpp.so -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE}"
+override VSIM_CMD_LINE = "${XRUN_CMD} ${COSIM_VSIM_ARGS} -xmlibdirname ${TEST_SUITE_DIR}/xcelium.d -afile ${V2C_TAB_FILE} -loadpli1 ${VPP_LIB} -sv_lib ${VPP_LIB} -loadvpi ${TEST_SUITE_DIR}/xcelium.d/run.d/librun.so:boot -log ${SIMULATION_LOGFILE}"
 
 # NOTE: double :: rule!!
 merge::

@@ -48,20 +48,22 @@ First, the following items should be considered:
 
 * Ubuntu: Install `libcrypto++-dev`.  On 22.04, `libncurses5` will also be required to run Vivado 2020.1
 
-* RHEL7:   You need to ensure gcc 7.x.x+ is installed.  This can be found in the `rhel-workstation-rhscl-7-rpms`  or `rhel-server-rhscl-7-rpms` repos, whose available is RHEL subscription
-    dependent.  Once the repo is enabled, the appropriate gcc can be installed by running `sudo yum install devtoolset-7-gcc-c++ devtoolset-7-libstdc++-devel.i686`. 
+* RHEL8:
+  The following packages are required beyond the default RHEL8 install `sudo dnf install make git gcc-toolset-13-gcc-c++-13.1.1-4.3.el8.x86_64`
 
-    Once installed, you want to run `scl enable devtoolset-7 bash` to ensure g++ maps to the correct version within your currently active shell.  The CEP Co-Simulation makefile will
-    automatically look for g++ and related tools in /opt/rh/devtoolset-7/root/usr/bin.
-    
-    Libcrytpo++ will need to be built from source.  It can be downloaded from [here](https://www.cryptopp.com).  It is receommended you select a version >= 8.6.
+  Additionally, even though the Cadence `checkSysConf` doesn't report it, you'll need to `sudo dnf install glibc.i686`
 
-It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation and submodule initialization.
+  SELinux can interfere with the CEP CoSimulation.  Either it should be set to permissive or more carefully crafted rules would need to be crafted.
+
+  Libcrytpo++ will need to be built from source.  It can be downloaded from [here](https://www.cryptopp.com).  It is receommended you select a version >= 8.6.
+  The following commands allow you to build libcrypto++ : `make; sudo make install`
+
+It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation and submodule initialization.  Note the dependency on a specific version of conda-lock.
 
 Following the installation of conda, it is recommended you execute the following commands
 ```
-  conda config --set auto_activate_base false       <-- don't automatically run the base environent upon execution of .bashrc
-  conda init bash                                   <-- Be sure bash is correctly configured with conda (other base environ deactivation will hang)  
+  conda config --set auto_activate_base false                   <-- don't automatically run the base environent upon execution of .bashrc
+  conda init bash                                               <-- Be sure bash is correctly configured with conda (other base environ deactivation will hang)  
 ```
 
 ## Repository Directory Structure

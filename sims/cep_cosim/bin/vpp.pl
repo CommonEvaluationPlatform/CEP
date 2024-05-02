@@ -5,7 +5,7 @@
 #//
 #// File Name:      vpp.pl
 #// Program:        Common Evaluation Platform (CEP)
-#// Description:    
+#// Description:    Front end perl script for running the CEP CoSim
 #// Notes:          
 #//
 #//************************************************************************
