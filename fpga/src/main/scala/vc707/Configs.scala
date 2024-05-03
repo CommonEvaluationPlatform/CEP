@@ -136,6 +136,7 @@ class WithVC707CEPTweaks extends Config (
   new WithVC707SPISDCardHarnessBinder ++
   new WithVC707DDRMemHarnessBinder ++
   // other configuration
+  new chipyard.iobinders.WithGPIOPunchthrough ++
   new WithCEPDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithCEPSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size

@@ -9,11 +9,13 @@
 ## [v4.60] - 2024-XX-XX
 
 ### Added
+  - RHEL8 support added; XCELIUM 23.03 tested
 ### Changed
-  - Chipyard upgraded to chipyard/main Apr 3 2024 Release
+  - Chipyard upgraded to chipyard/main Apr 3 2024 commit
 ### Fixed
 ### Issues
   - RHEL7 support deprecated
+  - GPIO is not properly connecting on the VC707 and VCU118 FPGA targets
 
 ## [v4.50] - 2024-01-25
 
