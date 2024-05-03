@@ -51,7 +51,8 @@ First, the following items should be considered:
 * RHEL8:
   The following packages are required beyond the default RHEL8 install `sudo dnf install make git gcc-toolset-13-gcc-c++-13.1.1-4.3.el8.x86_64`
 
-  Additionally, even though the Cadence `checkSysConf` doesn't report it, you'll need to `sudo dnf install glibc.i686`
+  Additionally, even though the Cadence `checkSysConf` doesn't report it, you'll need to `sudo dnf install glibc.i686`.  If you plan on running graphical cadence tools (e.g, simvision), you'll also
+  need `sudo dnf install libXext.i686`.
 
   SELinux can interfere with the CEP CoSimulation.  Either it should be set to permissive or more carefully crafted rules would need to be crafted.
 

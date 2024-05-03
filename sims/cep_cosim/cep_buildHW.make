@@ -272,7 +272,7 @@ endif
 #--------------------------------------------------------------------------------------
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
-XCELIUM_VERSION					?= XCELIUM23.03
+XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
 VMGR_PATH 						?= /cad4/Cadence/${VMGR_VERSION}
 XCELIUM_INSTALL					?= /cad4/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
