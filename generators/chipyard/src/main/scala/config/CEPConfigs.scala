@@ -172,7 +172,7 @@ class CEPRocketConfig extends Config(
   new WithoutTLMonitors ++ 
 
   // The default CEP configuration has no external memory
-  //new freechips.rocketchip.subsystem.WithNoMemPort ++
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
 
   // Set the remainder of the configuration items
   new chipyard.config.AbstractCEPConfig
