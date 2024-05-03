@@ -214,7 +214,7 @@ sub run_caller_cmds {
     #
     # Check if test finish successfully
     #
-    printf("run_caller_cmds::Status return is %x\n",$stat);
+    printf("run_caller_cmds::Status return is $stat\n");
     if (($stat != 0xD) && ($stat)) {
 	$errCnt = 1;
     }
@@ -319,7 +319,7 @@ sub signalHandler {
 	    #
 	    # Check test.log for "ERROR" message
 	    #
-	    printf("run_caller_cmds::Status return is %x\n",$stat);
+	    printf("run_caller_cmds::Status return is $stat\n");
 	    open (TL,"grep ERROR $logFile");
 	    while (<TL>) {
 		print $_;
