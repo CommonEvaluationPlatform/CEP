@@ -17,7 +17,7 @@
 module tl_master_beh #(
   parameter CHIP_ID       = 0,
   parameter SRC_SIZE      = 2,
-  parameter SINK_SIZE     = 2,
+  parameter SINK_SIZE     = 3,
   parameter BUS_SIZE      = 8, 
   parameter ADR_WIDTH     = 32,
 
@@ -43,14 +43,11 @@ module tl_master_beh #(
   // Channel B
   output reg                  tl_master_b_ready = 1, 
   input                       tl_master_b_valid, 
-  input [2:0]                 tl_master_b_bits_opcode, 
   input [1:0]                 tl_master_b_bits_param, 
   input [TL_SIZE-1:0]         tl_master_b_bits_size, 
   input [SRC_SIZE-1:0]        tl_master_b_bits_source, 
   input [ADR_WIDTH-1:0]       tl_master_b_bits_address, 
-  input [BUS_SIZE-1:0]        tl_master_b_bits_mask, 
-  input                       tl_master_b_bits_corrupt,
- 
+  
   // Channel C    
   input                       tl_master_c_ready, 
   output reg                  tl_master_c_valid = 0, 
@@ -587,53 +584,6 @@ module tl_master_beh #(
       end
    endtask // checkReset
 
-   //
-   // =============================
-   // To handle cache coherency!!!
-   // =============================   
-   // If see PROBE on B, send and ProbeAck on C
-   integer t;
-   
-   always @(posedge clock) begin
-      if (tl_master_b_valid) begin
-     if (tl_master_b_bits_opcode == `TL_B_PROBE) begin
-        `logD("Got a PROBE from channel B src=0x%x adr=0x%x cap=0x%x.. Sending back probeACK on C",
-          tl_master_b_bits_source,tl_master_b_bits_address,tl_master_b_bits_param);
-        //
-        // copy before they go away
-        tl_master_c_bits_param   = tl_master_b_bits_param;
-        tl_master_c_bits_size    = tl_master_b_bits_size;
-        tl_master_c_bits_source  = tl_master_b_bits_source;
-        tl_master_c_bits_address = tl_master_b_bits_address;
-        tl_master_c_bits_data    = 0;
-        tl_master_c_bits_corrupt = 0;
-        // respond
-        @(negedge clock);
-        tl_master_b_ready = 0;
-        tl_master_c_valid = 1;
-        tl_master_c_bits_opcode  = `TL_C_PROBEACK;
-        // wait until slave took it
-        t = 0;
-        @(posedge clock);        
-        while (!tl_master_c_ready && (t < MAX_TIMEOUT)) begin
-           t = t + 1;               
-           @(posedge clock);
-           if (i >= MAX_TIMEOUT) begin
-          `logE("**ERROR** timeout while waiting for ready on channelB src=%d a=0x%x",tl_master_c_bits_source,tl_master_c_bits_address);
-          tl_err = 1;
-           end
-        end
-        @(negedge clock);
-        tl_master_c_valid = 0; // take it away
-        tl_master_b_ready = 1;
-     end // if (tl_master_b_bits_param == `CAP_toN)
-     else begin
-        `logE("ERROR:Got a PROBE from channel B src=0x%x adr=0x%x.. but don't  know how to repsond to OPCODE=0x%x PARAM=%d",
-          tl_master_b_bits_source,tl_master_b_bits_address,tl_master_b_bits_opcode,tl_master_b_bits_param);     
-     end
-      end
-   end // always @ (posedge clock)
-   
    //
    // some quick self-test (called from the top)
    //

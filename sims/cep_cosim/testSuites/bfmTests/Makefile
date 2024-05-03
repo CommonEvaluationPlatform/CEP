@@ -33,10 +33,8 @@ TEST_LIST = 		\
 	scratchpadTest	\
 	srotMemTest		\
 	srotBadKeys		\
+	srotErrorTest	\
 	srotKeyTest
-
-# Tests yet to run/fix/debug
-#	srotErrorTest
 
 runAll: cleanSuite
 	@for i in ${TEST_LIST}; do 									\

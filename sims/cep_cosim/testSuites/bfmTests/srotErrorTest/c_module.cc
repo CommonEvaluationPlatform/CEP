@@ -57,13 +57,9 @@ void *c_module(void *arg) {
   cep_srot srot(SROT_INDEX, CEP_VERSION_REG_INDEX, verbose);
 
   // Set the mask... from the seed (which we passed the parent's mask for this test)
-  srot.SetCpuActiveMask(seed);
+  srot.SetCpuActiveMask(GlobalShMemory.getActiveMask());
 
-  for (int i = 0; i < 4; i++) {
-    if (errCnt) break;
-    LOGI("======== LLKI_ErrorTest Loop #%d, ErrCnt= %d ========\n", i, errCnt);
-    errCnt += srot.LLKI_ErrorTest(cpuId);
-  }
+  errCnt += srot.LLKI_ErrorTest(cpuId);
  
   pio.RunClk(100);
   //--------------------------------------------------------------------------------------

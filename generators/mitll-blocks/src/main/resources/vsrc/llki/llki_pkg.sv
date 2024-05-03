@@ -127,6 +127,14 @@ package llki_pkg;
     // MSG LEN :
     //  - Should be 1 for all C2 RISCV -> SRoT Messages
     //
+    // LLKI C2 SRoT -> RISCV Message Format
+    //                                                                         Word#
+    // 63    56                 40 39   32 31             16 15     8 7      0  
+    // +-----+----------------------------+-----------------+--------+--------+ 
+    // |  00 |  Echoed Rsvd from Request  |     MSG LEN     | STATUS | MSG ID |  1
+    // +-----+----------------------------+-----------------+--------+--------+ 
+    //
+
     // Key Idx : Specifies the index of the key to be referenced by the request.  This
     //  becomes a direct index into the Key Index RAM, which contains all the key
     //  specific metadata.  See Key Index RAM format above for more information.

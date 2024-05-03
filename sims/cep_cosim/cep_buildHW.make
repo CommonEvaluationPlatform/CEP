@@ -272,7 +272,7 @@ endif
 #--------------------------------------------------------------------------------------
 ifeq (${CADENCE}, 1)
 VMGR_VERSION					?= VMANAGERAGILE20.06.001
-XCELIUM_VERSION					?= XCELIUMAGILE20.09.001
+XCELIUM_VERSION					?= XCELIUM23.03
 VMGR_PATH 						?= /cad4/Cadence/${VMGR_VERSION}
 XCELIUM_INSTALL					?= /cad4/Cadence/${XCELIUM_VERSION}
 IMC_INSTALL 					:= ${VMGR_PATH}
@@ -304,7 +304,7 @@ endif
 
 # Default parameters
 COSIM_VLOG_ARGS 				+= -64bit -elaborate -ALLOWREDEFINITION -smartorder +define+CADENCE -access +r -notimingchecks -nospecify +noassert -timescale '1ns/100ps'
-COSIM_VSIM_ARGS 				+= -64bit -R 
+COSIM_VSIM_ARGS 				+= -64bit -R
 
 # Enable coverage for Cadence
 ifeq (${COVERAGE},1)

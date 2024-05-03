@@ -206,10 +206,9 @@ int cep_srot::DisableLLKI (uint8_t KeyIndex)
   
   // Poll the response waiting bit
   cep_readNspin(SROT_CTRLSTS_ADDR, SROT_CTRLSTS_RESP_WAITING_MASK, SROT_CTRLSTS_RESP_WAITING_MASK, maxTO);
-  
+
   // Read and check the response
   status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
-
   CHECK_RESPONSE(status, LLKI_STATUS_GOOD, GetVerbose());
 
   // Return the error count
@@ -485,7 +484,7 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
 
     // Compare expected and received responses
     status = llkic2_extract_status(cep_readNcapture(SROT_LLKIC2_SENDRECV_ADDR));
-  CHECK_RESPONSE(status, LLKI_STATUS_KEY_INDEX_EXCEED, GetVerbose());
+    CHECK_RESPONSE(status, LLKI_STATUS_KEY_INDEX_EXCEED, GetVerbose());
     // --------------------------------------------------------------------------------------------------------
 
 
@@ -570,7 +569,12 @@ int cep_srot::LLKI_ErrorTest(int cpuId) {
     // Clear the AES core key to allow for multiple loops of this test
     errCnt += DisableLLKI (0);
 
+  } else {
+    if (GetVerbose()) {
+      LOGI("%s: cpu#%d will be the slave. mask=0x%x\n",__FUNCTION__,cpuId,GetCpuActiveMask());
+    }
   } // end if {iAMmaster)
+
 
   // Return the error count
   return errCnt;
