@@ -164,8 +164,8 @@ When a test is run, many files are generated.  Some are highlighted below:
 
 ### Tool Locations 
 The following variables can be overwritten (or changed in cep_buildHW.make).  They need to match the tool locations in your system.
-  XCELIUM_VERSION  ?= XCELIUMAGILE20.09.001
+  XCELIUM_VERSION  ?= XCELIUM22.03
   XCELIUM_INSTALL  ?= /brewhouse/cad4/x86_64/Cadence/${XCELIUM_VERSION}
-  QUESTASIM_PATH   ?= /opt/questa-2019.1/questasim/bin
+  QUESTASIM_PATH   ?= /opt/questa-2023.4/questasim/bin
 
 ### Return to the Root CEP [readme](../../README.md).

@@ -6,16 +6,17 @@
 
 # CEP Changelog
 
-## [v4.60] - 2024-XX-XX
+## [v4.60] - 2024-05-10
 
 ### Added
   - RHEL8 support added; XCELIUM 23.03 tested
 ### Changed
   - Chipyard upgraded to chipyard/main Apr 3 2024 commit
+  - RHEL7 support deprecated
 ### Fixed
 ### Issues
-  - RHEL7 support deprecated
-  - GPIO is not properly connecting on the VC707 and VCU118 FPGA targets
+  - Some SRoT based test fail in CEP Cosim on xcelium
+  - SDIO not functioning properly on VCU118
 
 ## [v4.50] - 2024-01-25
 

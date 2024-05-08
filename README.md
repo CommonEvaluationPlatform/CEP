@@ -29,11 +29,10 @@ Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the clo
 
 ## Pre-requisites (validated test/build configurations):
 The following items describe the configuration of the system that CEP has been developed and tested on:
-* Ubuntu 18.04 or 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2019.1+ (for co-simulation)
-* (DEPRECATED) Red Hat Enterprise Linux 7 with Cadence XCELIUMAGILE20.09.001, VMANAGERAGILE20.06.001.  RHEL8 support pennding
-* Xilinx Vivado 2020.1 (needed for building FPGA targets)
+* Ubuntu 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2023.4 (for co-simulation)
+* Red Hat Enterprise Linux 8 with Cadence XCELIUMAGILE23.03
+* Xilinx Vivado 2023.12(needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
-  - *Note*: The sifive tcl scripts for running vivado are not currently compatible with later Vivado versions (2021.1 and 2022.1 tested)
 * Terminal emulator (such as `minicom` or `screen`)
 * bash
 
@@ -54,7 +53,7 @@ First, the following items should be considered:
   Additionally, even though the Cadence `checkSysConf` doesn't report it, you'll need to `sudo dnf install glibc.i686`.  If you plan on running graphical cadence tools (e.g, simvision), you'll also
   need `sudo dnf install libXext.i686`.
 
-  SELinux can interfere with the CEP CoSimulation.  Either it should be set to permissive or more carefully crafted rules would need to be crafted.
+  SELinux can interfere with the CEP CoSimulation (due to the use of shared memory).  Either it should be set to permissive or more carefully crafted rules would need to be crafted.
 
   Libcrytpo++ will need to be built from source.  It can be downloaded from [here](https://www.cryptopp.com).  It is receommended you select a version >= 8.6.
   The following commands allow you to build libcrypto++ : `make; sudo make install`
@@ -96,7 +95,6 @@ These subprojects define the system configuration and are as follows:
 
 `cep_arty100t` - Arty100T Development Board 
 - 50 MHz Core Frequency
-- 78% LUT Utilization
 - 1x WithNBigCore
 - CEP Registers
 - MD5 Core
@@ -104,7 +102,6 @@ These subprojects define the system configuration and are as follows:
 
 `cep_vc707` - VC707 Development Board
 - 75 MHz Core Frequency
-- 75% LUT Utilization
 - 4x WithNBigCores
 - CEP Registers
 - AES Core
@@ -120,7 +117,20 @@ These subprojects define the system configuration and are as follows:
 - Surrogate Root of Trust
 
 `cep_vcu118` - 
-- TBD
+- 100 MHz Core Frequency
+- 4x WithNBigCores
+- CEP Registers
+- AES Core
+- DES3 Core
+- FIR Core
+- IIR Core
+- DFT Core
+- IDFT Core
+- MD5 Core
+- 4x GPS Cores
+- 4x SHA-256 Cores
+- RSA Core
+- Surrogate Root of Trust
 
 In order to target the Arty100T, the Digilent vivado-boards support needs to be installed.  Instructions can be found [here](https://digilent.com/reference/programmable-logic/guides/installing-vivado-and-vitis).
 
@@ -148,7 +158,7 @@ OR
 
 The Arty100T shares a single microUSB connector for JTAG and UART, while the VC707 and VCU118 have seperate ports for each.
 
-For the Arty100T, connect a Digilent SD or microSD PMOD board o connector JA.  For the VCU118, connect the same to the PMOD connector on the right side of the board.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
+For the Arty100T, connect a Digilent SD or microSD PMOD board to connector JA.  For the VCU118, connect the same to the PMOD connector on the right side of the board.  The PMOD connectors can be ordered from Digikey, Digilent, or other distributors.
 
 Additional information can be found here: (https://digilent.com/shop/pmod-sd-full-sized-sd-card-slot/ or https://digilent.com/shop/pmod-microsd-microsd-card-slot/).
 
