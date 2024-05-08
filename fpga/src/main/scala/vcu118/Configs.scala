@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2024 Massachusetts Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      Configs.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Configuration file for VCU118
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vcu118
 
 import sys.process._
@@ -52,10 +62,10 @@ class WithCEPDefaultPeripherals extends Config((site, here, up) => {
 
 class WithSystemModifications extends Config((site, here, up) => {
   case DTSTimebase => BigInt((1e6).toLong)
-  case BootROMLocated(x) => up(BootROMLocated(x), site).map { p =>
+  case BootROMLocated(x) => up(BootROMLocated(x)).map { p =>
     // invoke makefile for sdboot
     val freqMHz = (site(SystemBusKey).dtsFrequency.get / (1000 * 1000)).toLong
-    val make = s"make -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
+    val make = s"make -B -C fpga/src/main/resources/vcu118/sdboot PBUS_CLK=${freqMHz} bin"
     require (make.! == 0, "Failed to build bootrom")
     p.copy(hang = 0x10000, contentFileName = s"./fpga/src/main/resources/vcu118/sdboot/build/sdboot.bin")
   }
@@ -112,6 +122,7 @@ class WithVCU118CEPTweaks extends Config(
   new chipyard.config.WithControlBusFrequency(100) ++
   new WithFPGAFrequency(100) ++ // default 100MHz freq
   // harness binders
+  new chipyard.harness.WithAllClocksFromHarnessClockInstantiator ++
   new WithUART ++
   new WithSPISDCard ++
   new WithGPIOHarnessBinder ++
@@ -122,6 +133,7 @@ class WithVCU118CEPTweaks extends Config(
   new WithCEPDefaultPeripherals ++
   new chipyard.config.WithTLBackingMemory ++ // use TL backing memory
   new WithCEPSystemModifications ++ // setup busses, use sdboot bootrom, setup ext. mem. size
+  new chipyard.config.WithNoDebug ++ // remove debug module
   new freechips.rocketchip.subsystem.WithoutTLMonitors ++
   new freechips.rocketchip.subsystem.WithNMemoryChannels(1)
 )

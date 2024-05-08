@@ -148,6 +148,7 @@ ifeq ($(SUB_PROJECT),cep_verilator)
 	TOP               	?= ChipTop
 	SORT_SCRIPT       	:= $(base_dir)/scripts/sort-blackbox.py
 	SORT_FILE         	:= $(base_dir)/cep_sort.f
+	BOOTROM_SRC_DIR	  := $(base_dir)/generators/testchipip/src/main/resources/testchipip/bootrom
 endif
 
 # default chipyard build
@@ -161,6 +162,7 @@ ifeq ($(SUB_PROJECT),chipyard)
 	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
 	TB                ?= TestDriver
 	TOP               ?= ChipTop
+	BOOTROM_SRC_DIR	  := $(base_dir)/generators/testchipip/src/main/resources/testchipip/bootrom
 endif
 # for Hwacha developers
 ifeq ($(SUB_PROJECT),hwacha)
@@ -228,6 +230,7 @@ ifeq ($(SBT_PROJECT),)
 $(error Invalid SUB_PROJECT)
 endif
 
+
 #########################################################################################
 # path to rocket-chip and testchipip
 #########################################################################################
@@ -237,6 +240,8 @@ TESTCHIP_DIR         = $(base_dir)/generators/testchipip
 TESTCHIP_RSRCS_DIR   = $(TESTCHIP_DIR)/src/main/resources
 CHIPYARD_FIRRTL_DIR  = $(base_dir)/tools/firrtl
 CHIPYARD_RSRCS_DIR   = $(base_dir)/generators/chipyard/src/main/resources
+# Define the BOOTROM_SRC_DIR if it isn't defined by this point
+BOOTROM_SRC_DIR		?= ${TESTCHIP_DIR}/bootrom
 
 #########################################################################################
 # names of various files needed to compile and run things

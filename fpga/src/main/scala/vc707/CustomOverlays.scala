@@ -5,7 +5,7 @@
 //# File Name:      CustomOverlays.scala
 //# Program:        Common Evaluation Platform (CEP)
 //# Description:    Custom FPGA Shell overlays for VC707
-//# Notes:          Modified from the Chipyard VC707 CustomOverlays.scala
+//# Notes:          Modified from the Chipyard VCU118 CustomOverlays.scala
 //#************************************************************************
 
 package chipyard.fpga.vc707

@@ -1,3 +1,13 @@
+//#************************************************************************
+//# Copyright 2024 Massachusetts Institute of Technology
+//# SPDX short identifier: BSD-3-Clause
+//#
+//# File Name:      CustomOverlays.scala
+//# Program:        Common Evaluation Platform (CEP)
+//# Description:    Custom FPGA Shell overlays for VCU118
+//# Notes:          
+//#************************************************************************
+
 package chipyard.fpga.vcu118
 
 import chisel3._

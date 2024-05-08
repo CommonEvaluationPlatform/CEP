@@ -35,7 +35,7 @@ CFLAGS 			= -mcmodel=medany -O2 -fno-common -fno-builtin-printf -fno-builtin-put
 CFLAGS 			+= -DENTROPY=0 -DNONSMP_HART=0
 
 CFLAGS 			+= -I $(ROOT_DIR)/include -I ${ROOT_DIR}
-CFLAGS_RV64		+= -mabi=lp64 -march=rv64ima_zicsr_zifencei
+CFLAGS_RV64		= -mabi=lp64 -march=rv64ima_zicsr_zifencei
 LFLAGS 			= -static -nostdlib -nostartfiles -lgcc -T ${CEP_LDS_FILE}
 
 

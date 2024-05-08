@@ -63,6 +63,7 @@ ifeq ($(SUB_PROJECT),vcu118)
 	TOP               ?= ChipTop
 	BOARD             ?= vcu118
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_TARGETS	  :=
 endif
 
 ifeq ($(SUB_PROJECT),nexysvideo)
@@ -77,6 +78,7 @@ ifeq ($(SUB_PROJECT),nexysvideo)
 	TOP               ?= ChipTop
 	BOARD             ?= nexys_video
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_TARGETS	  :=
 endif
 
 ifeq ($(SUB_PROJECT),arty35t)
@@ -92,6 +94,7 @@ ifeq ($(SUB_PROJECT),arty35t)
 	TOP               ?= ChipTop
 	BOARD             ?= arty
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_TARGETS	  :=
 endif
 
 ifeq ($(SUB_PROJECT),arty100t)
@@ -107,6 +110,7 @@ ifeq ($(SUB_PROJECT),arty100t)
 	TOP               ?= ChipTop
 	BOARD             ?= arty_a7_100
 	FPGA_BRAND        ?= xilinx
+	BOOTROM_TARGETS	  :=
 endif
 
 # Bootrom targets are "cleared" for CEP FPGA targets, since

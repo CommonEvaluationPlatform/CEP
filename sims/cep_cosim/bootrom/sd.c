@@ -315,7 +315,7 @@ int main(void)
     printf("\n");
     printf("---              Common Evaluation Platform v%x.%x                   ---\n", major_version, minor_version);
     printf("--- Based on the UCB Chipyard Framework (commit 20de9a4, 3 Apr 24)  ---\n");
-    printf("--- Copyright 2024 Massachusetts Institute of Technology            ---\n");
+    printf("---      Copyright 2024 Massachusetts Institute of Technology       ---\n");
     printf("---          BootRom Image built on %s %s            ---\n",__DATE__,__TIME__);
     printf("\n");
   } // if ((scratch_reg & 0x3) != 0x3)

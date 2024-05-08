@@ -156,16 +156,6 @@ $(CHIPYARD_BUILD_INFO):
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
 
-$(build_dir): 
-	mkdir -p $@
-
-# Bootrom is forced to rebuild every time, in the event a different build target is selected
-$(BOOTROM_SOURCES):
-	make -B -C ${BOOTROM_SRC_DIR} PBUS_CLK=${PBUS_CLK}
-
-$(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
-	cp -f $(BOOTROM_SOURCES) $(build_dir)
-
 # The following make target will peform some scala file shuffling if we are building
 # the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
 # build to proceed *without* the CEP_Chipyard_ASIC submodule
@@ -208,6 +198,20 @@ cep_clean:
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/AbstractCEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/CEPASICConfig.scala
 	-rm -f $(base_dir)/generators/chipyard/src/main/scala/config/fragments/CEPASICConfigFragments.scala
+
+
+
+$(build_dir):
+	mkdir -p $@
+
+# The Bootrom build has been updated to support both the CEP Cosim and default testchip bootrom variants
+# For the FPGA builds, make is called from within Scala, so BOOTROM_TARGETS is set to NULL
+#
+# Flag overrides under BOOTROM_SOURCES ensures that the necessary updates to -march is included for the testchip bootrom build
+$(BOOTROM_SOURCES):
+	make -B CFLAGS_RV64="-mabi=lp64 -march=rv64ima_zicsr_zifencei" "CFLAGS_RV32=-mabi=ilp32 -march=rv32ima_zicsr_zifencei" -C ${BOOTROM_SRC_DIR} PBUS_CLK=${PBUS_CLK}
+$(BOOTROM_TARGETS): $(BOOTROM_SOURCES) | $(build_dir)
+	cp -f $(BOOTROM_SOURCES) $(build_dir)
 #########################################################################################
 
 
