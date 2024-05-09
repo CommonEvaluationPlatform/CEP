@@ -17,6 +17,7 @@
 ### Issues
   - Some SRoT based test fail in CEP Cosim on xcelium
   - SDIO not functioning properly on VCU118
+  - ISA Tests not functioning properly when built on Ubuntu 22.04
 
 ## [v4.50] - 2024-01-25
 
