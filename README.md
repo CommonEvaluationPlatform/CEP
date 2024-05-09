@@ -31,7 +31,7 @@ Throughout the CEP READMEs, `<CEP_ROOT>` refers to the root directory of the clo
 The following items describe the configuration of the system that CEP has been developed and tested on:
 * Ubuntu 22.04 LTS x86_64 with Modelsim Questa Sim-64 v2023.4 (for co-simulation)
 * Red Hat Enterprise Linux 8 with Cadence XCELIUMAGILE23.03
-* Xilinx Vivado 2023.12(needed for building FPGA targets)
+* Xilinx Vivado 2023.2(needed for building FPGA targets)
   - Plus Digilent Adept Drivers for programming the FPGA target, https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads)
 * Terminal emulator (such as `minicom` or `screen`)
 * bash
@@ -294,7 +294,7 @@ As the CEP has been developed with input from many sources, multiple licenses ap
 
 ## DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited.
 
-© 2023 Massachusetts Institute of Technology
+© 2024 Massachusetts Institute of Technology
 •   Subject to FAR 52.227-11 – Patent Rights – Ownership by the Contractor (May 2014)
 •   SPDX-License-Identifier: BSD-3-Clause
 
