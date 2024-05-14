@@ -1,6 +1,7 @@
 [//]: # (Copyright 2024 Massachusetts Institute of Technology)
 [//]: # (SPDX short identifier: BSD-3-Clause)
 
+# NON-RELEASABLE FRIED MIRROR of...
 # Common Evaluation Platform v4.6
 
 [![DOI](https://zenodo.org/badge/108179132.svg)](https://zenodo.org/badge/latestdoi/108179132)
