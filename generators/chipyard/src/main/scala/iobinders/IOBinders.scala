@@ -27,6 +27,8 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import tracegen.{TraceGenSystemModuleImp}
 
+import mitllBlocks.aes._
+
 import barstools.iocell.chisel._
 
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
@@ -195,6 +197,17 @@ class WithGPIOPunchthrough extends OverrideIOBinder({
       val io_gpio = IO(gpio.cloneType).suggestName(s"gpio_$i")
       io_gpio <> gpio
       GPIOPinsPort(() => io_gpio, i)
+    }
+    (ports, Nil)
+  }
+})
+
+class WithAESTopIOPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryAES) => {
+    val ports = system.node.zipWithIndex.map { case (n, i) => 
+      val io_aes = IO(new AESTopIO).suggestName(s"aes_$i")
+      io_aes := n
+      AESTopIOPort(() => io_aes)
     }
     (ports, Nil)
   }

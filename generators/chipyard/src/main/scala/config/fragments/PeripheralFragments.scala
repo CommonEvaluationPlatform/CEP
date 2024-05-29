@@ -175,3 +175,4 @@ class WithNoBusErrorDevices extends Config((site, here, up) => {
 class WithPeripheryTimer(timerParams: TimerParams = TimerParams(0x4000)) extends Config((site, here, up) => {
   case PeripheryTimerKey => Seq(timerParams)
 })
+

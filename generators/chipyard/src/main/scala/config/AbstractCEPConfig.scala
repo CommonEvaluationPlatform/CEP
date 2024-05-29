@@ -19,9 +19,11 @@ class AbstractCEPConfig extends Config(
   new chipyard.harness.WithClockFromHarness ++                     // all Clock I/O in ChipTop should be driven by harnessClockInstantiator
   new chipyard.harness.WithResetFromHarness ++                     // reset controlled by harness
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
+  //new chipyard.harness.WithAESTopIOTiedOff ++
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs
+  new chipyard.iobinders.WithAESTopIOPunchthrough ++
   new chipyard.iobinders.WithDebugIOCells(enableJtagGPIO = true) ++
   new chipyard.iobinders.WithUARTGPIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
