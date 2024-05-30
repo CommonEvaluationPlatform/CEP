@@ -54,10 +54,11 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
 
     // Generate the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
-    coreDomain.suggestName(coreparams.dev_name+"domain")
+    coreDomain.suggestName(coreparams.dev_name+"_domain_inst")
 
     // Instantiate the TL Module
     val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
+    module.suggestName(coreparams.dev_name + "_module_inst")
 
     // Define the Tilelink Connections to the module
     coreDomain {
@@ -105,6 +106,7 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
 class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+  override lazy val desiredName = coreparams.dev_name + "_module"
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
