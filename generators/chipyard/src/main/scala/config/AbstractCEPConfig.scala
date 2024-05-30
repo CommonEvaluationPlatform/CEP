@@ -12,28 +12,26 @@ import org.chipsalliance.cde.config.{Config}
 
 class AbstractCEPConfig extends Config(
   // The HarnessBinders control generation of hardware in the TestHarness
-  new chipyard.harness.WithBlackBoxSimMem ++                       // add SimDRAM DRAM model for axi4 backing memory, if axi4 mem is enabled
-  new chipyard.harness.WithTiedOffSPIGPIO ++
-  new chipyard.harness.WithUARTTiedOff ++
+  new chipyard.harness.WithUARTAdapter ++                          /** add UART adapter to display UART on stdout, if uart is present */
+  new chipyard.harness.WithSimJTAGDebug ++                         /** add SimJTAG if JTAG for debug exposed */
+  new chipyard.harness.WithGPIOTiedOff ++                          /** tie-off chiptop GPIOs, if GPIOs are present */
+  new chipyard.harness.WithSimSPIFlashModel ++                     /** add simulated SPI flash memory, if SPI is enabled */
   new chipyard.harness.WithClockFromHarness ++                     // all Clock I/O in ChipTop should be driven by harnessClockInstantiator
   new chipyard.harness.WithResetFromHarness ++                     // reset controlled by harness
   new chipyard.harness.WithAbsoluteFreqHarnessClockInstantiator ++ // generate clocks in harness with unsynthesizable ClockSourceAtFreqMHz
 
   // The IOBinders instantiate ChipTop IOs to match desired digital IOs
   // IOCells are generated for "Chip-like" IOs
-  new chipyard.iobinders.WithAESTopIOPunchthrough ++
-  new chipyard.iobinders.WithDebugIOCells(enableJtagGPIO = true) ++
-  new chipyard.iobinders.WithUARTGPIOCells ++
+  new chipyard.iobinders.WithDebugIOCells ++
+  new chipyard.iobinders.WithUARTIOCells ++
   new chipyard.iobinders.WithGPIOCells ++
-  new chipyard.iobinders.WithSDIOGPIOCells ++
-//  new chipyard.iobinders.WithTestIOStubs ++
-//  new chipyard.iobinders.WithTestJtagStubs ++
+  new chipyard.iobinders.WithSPIIOCells ++
   new chipyard.iobinders.WithExtInterruptIOCells ++
+
   // The "punchthrough" IOBInders below don't generate IOCells, as these interfaces shouldn't really be mapped to ASIC IO
   // Instead, they directly pass through the DigitalTop ports to ports in the ChipTop
-  //new chipyard.iobinders.WithAXI4MemPunchthrough ++
-  
-  new chipyard.clocking.WithClockTapIOCells ++                      // Default generate a clock tapio
+  new chipyard.iobinders.WithAESTopIOPunchthrough ++
+
   new chipyard.clocking.WithPassthroughClockGenerator ++            // Default punch out IOs to the Harness
   new chipyard.clocking.WithClockGroupsCombinedByName(("uncore",    // Default merge all the bus clocks
     Seq("sbus", "mbus", "pbus", "fbus", "cbus", "obus", "implicit", "clock_tap"), Seq("tile"))) ++

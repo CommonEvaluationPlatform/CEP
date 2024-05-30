@@ -23,6 +23,7 @@ import mitllBlocks.cep_addresses._
 
 class AESTopIO extends Bundle {
   val aes_valid = Output(Bool())
+  val aes_start = Output(Bool())
 }
 
 //--------------------------------------------------------------------------------------
@@ -370,6 +371,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
 
   // Connect top level IO
   io.aes_valid           := aes_192_inst.io.out_valid
+  io.aes_start           := start
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
