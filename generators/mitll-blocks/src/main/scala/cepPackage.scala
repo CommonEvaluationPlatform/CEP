@@ -2,9 +2,10 @@
 // Copyright 2024 Massachusetts Institute of Technology
 // SPDX short identifier: BSD-3-Clause
 //
-// File         : cep_addresses.scala
+// File         : cepPackages.scala
 // Project      : Common Evaluation Platform (CEP)
-// Description  : Defines the addresses used within CEP Cores
+// Description  : Defines various objects, values, types used within the CEP platform
+//
 //                Constants related to "Functional" register decode, which occurrs in 
 //                the Chisel world, can be found in this package.
 //                For each CEP core, there are the following two pairs of constants:
@@ -20,16 +21,10 @@
 //                functionality exists in the SystemVerilog world.
 //
 //--------------------------------------------------------------------------------------
-package mitllBlocks.cep_addresses
+package mitllBlocks.cepPackage
 
 import chisel3._
-import chisel3.util._
-import chisel3.experimental.{IntParam, BaseModule}
-import org.chipsalliance.cde.config.{Field, Parameters}
-import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.regmapper._
-import freechips.rocketchip.tilelink._
-import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tilelink.{TLBusWrapper}
 
 object CEPVersion {
   val CEP_MAJOR_VERSION             = 0x04

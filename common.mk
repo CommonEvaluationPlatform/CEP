@@ -20,7 +20,7 @@ SED ?= sed
 
 ifeq "$(findstring clean,${MAKECMDGOALS})" ""
 $(info )
-$(info ----------------------------------------------------------------------)
+$(info --------------------------------------------------------------------------------------------------------------------------------------------)
 ifndef RISCV
 $(error RISCV is unset. Did you source the Chipyard auto-generated env file (which activates the default conda environment)?)
 else
@@ -34,7 +34,7 @@ $(error SUB_PROJECT is unset.)
 else
 $(info Running with SUB_PROJECT = $(SUB_PROJECT))
 endif 
-$(info ----------------------------------------------------------------------)
+$(info --------------------------------------------------------------------------------------------------------------------------------------------)
 $(info )
 endif
 

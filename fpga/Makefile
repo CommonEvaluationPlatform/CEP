@@ -116,7 +116,7 @@ endif
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vc707)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= VC707FPGATestHarness
 	VLOG_MODEL        ?= VC707FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vc707
@@ -135,7 +135,7 @@ endif
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_vcu118)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= VCU118FPGATestHarness
 	VLOG_MODEL        ?= VCU118FPGATestHarness
 	MODEL_PACKAGE     ?= chipyard.fpga.vcu118
@@ -154,7 +154,7 @@ endif
 # Bootrom targets are "cleared" for CEP FPGA targets, since
 # build is controlled from within the chisel configuration
 ifeq ($(SUB_PROJECT),cep_arty100t)
-	SBT_PROJECT       ?= fpga_platforms
+	SBT_PROJECT       ?= chipyard_fpga
 	MODEL             ?= Arty100THarness
 	VLOG_MODEL        ?= Arty100THarness
 	MODEL_PACKAGE     ?= chipyard.fpga.arty100t

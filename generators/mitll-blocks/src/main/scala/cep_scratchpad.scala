@@ -19,7 +19,7 @@ import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.regmapper._
 import freechips.rocketchip.tilelink._
 
-import mitllBlocks.cep_addresses._
+import mitllBlocks.cepPackage._
 
 //--------------------------------------------------------------------------------------
 // BEGIN: Module "Periphery" connections

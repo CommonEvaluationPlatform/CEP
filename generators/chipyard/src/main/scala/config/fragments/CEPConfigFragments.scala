@@ -21,7 +21,7 @@ import testchipip._
 
 import chipyard.{ExtTLMem}
 
-import mitllBlocks.cep_addresses._
+import mitllBlocks.cepPackage._
 import mitllBlocks.aes._
 import mitllBlocks.des3._
 import mitllBlocks.iir._

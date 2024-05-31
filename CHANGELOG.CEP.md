@@ -6,6 +6,14 @@
 
 # CEP Changelog
 
+## [v4.70] - 2024-XX-XX
+### Added
+### Changed
+  - Chipyard updated to chipyard/main 30 May 2024 (eb6910a commit)
+    (https://github.com/ucb-bar/chipyard/commits/main/) for more info
+### Fixed
+### Issues
+
 ## [v4.60] - 2024-05-10
 
 ### Added

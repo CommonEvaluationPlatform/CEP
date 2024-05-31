@@ -19,7 +19,7 @@ import freechips.rocketchip.diplomacy.{SimpleDevice, IdRange, TransferSizes, Reg
 import freechips.rocketchip.regmapper.{HasRegMap, RegField, RegFieldGroup, RegFieldDesc}
 import freechips.rocketchip.tilelink._
 
-import mitllBlocks.cep_addresses._
+import mitllBlocks.cepPackage._
 
 class AESTopIO extends Bundle {
   val aes_valid = Output(Bool())

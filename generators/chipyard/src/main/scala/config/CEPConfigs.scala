@@ -14,7 +14,7 @@ import org.chipsalliance.cde.config.{Config}
 import freechips.rocketchip.diplomacy.{AsynchronousCrossing}
 import freechips.rocketchip.subsystem._
 
-import mitllBlocks.cep_addresses._
+import mitllBlocks.cepPackage._
 
 
 // Create a "mimic" of the Arty100T functionality
