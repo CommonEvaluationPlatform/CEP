@@ -213,7 +213,7 @@ lazy val fft_generator = (project in file("generators/fft-generator"))
   .dependsOn(rocketchip, rocket_dsp_utils)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
- 
+
 lazy val tracegen = (project in file("generators/tracegen"))
   .dependsOn(testchipip, rocketchip, rocketchip_inclusive_cache, boom)
   .settings(libraryDependencies ++= rocketLibDeps.value)
