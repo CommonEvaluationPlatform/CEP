@@ -14,10 +14,11 @@ package mitllBlocks.srot
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
-import org.chipsalliance.cde.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey, PBUS, MBUS, FBUS}
-import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.regmapper._
+import org.chipsalliance.diplomacy.lazymodule._
+import freechips.rocketchip.diplomacy.{SimpleDevice, IdRange, TransferSizes, RegionType, AddressSet}
+import freechips.rocketchip.regmapper.{HasRegMap, RegField, RegFieldGroup, RegFieldDesc}
 import freechips.rocketchip.tilelink._
 
 import mitllBlocks.cepPackage._
@@ -47,13 +48,15 @@ trait CanHaveSROT { this: BaseSubsystem =>
       master_bus  = Some(fbus)
     )
 
-    // Generate the clock domain for this module
-    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
+    // Generate (and name) the clock domain for this module
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
+
+    // Instantiate the TL Module
+    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
+    module.suggestName(coreparams.dev_name + "_module_inst")
 
     // Define the Tilelink module 
-    coreDomain.suggestName(coreparams.dev_name+"domain") {
-      // Define the SRoT Tilelink module
-      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
+    coreDomain {
 
       // Perform the slave "attachments" to the periphery bus
       coreattachparams.slave_bus.coupleTo("srot_slave") {
@@ -63,10 +66,10 @@ trait CanHaveSROT { this: BaseSubsystem =>
       }
 
       // Perform the master "attachments" to the front bus
+      // TLFilter explicitly added to limite the master node to 32-bits of addressing
       coreattachparams.master_bus.get.coupleFrom("srot_master") {
         _ := 
         TLFilter(TLFilter.mSelectIntersect(AddressSet(
-//          coreparams.cep_cores_base_addr, coreparams.cep_cores_depth))) :=
           0x00000000L, 0xFFFFFFFFL))) :=
         module.master_node  
       }

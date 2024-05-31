@@ -12,10 +12,11 @@ package mitllBlocks.md5
 import chisel3._
 import chisel3.util._
 import chisel3.experimental.{IntParam, BaseModule}
-import org.chipsalliance.cde.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters, Config}
 import freechips.rocketchip.subsystem.{BaseSubsystem, PeripheryBusKey, PBUS, MBUS, FBUS}
-import freechips.rocketchip.diplomacy._
-import freechips.rocketchip.regmapper._
+import org.chipsalliance.diplomacy.lazymodule._
+import freechips.rocketchip.diplomacy.{SimpleDevice, IdRange, TransferSizes, RegionType, AddressSet}
+import freechips.rocketchip.regmapper.{HasRegMap, RegField, RegFieldGroup, RegFieldDesc}
 import freechips.rocketchip.tilelink._
 
 import mitllBlocks.cepPackage._
@@ -47,13 +48,15 @@ trait CanHavePeripheryMD5 { this: BaseSubsystem =>
     )
 
     // Generate the clock domain for this module
-    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
+    // Generate (and name) the clock domain for this module
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
-    // Define the Tilelink module 
-    coreDomain.suggestName(coreparams.dev_name+"domain") {
-      // Instantiate the TL module.  Note: This name shows up in the generated verilog hiearchy
-      // and thus should be unique to this core and NOT a verilog reserved keyword
-      val module = LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")
+    // Instantiate the TL Module
+    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
+    module.suggestName(coreparams.dev_name + "_module_inst")
+
+    // Define the Tilelink Connections to the module
+    coreDomain {
 
       // Perform the slave "attachments" to the slave bus
       coreattachparams.slave_bus.coupleTo(coreparams.dev_name + "_slave") {
