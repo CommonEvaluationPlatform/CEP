@@ -51,8 +51,7 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
     // Instantiate the TL Module
-    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
-    module.suggestName(coreparams.dev_name + "_module_inst")
+    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"_module_inst")}
 
     // Define the Tilelink module 
     coreDomain {
@@ -76,6 +75,7 @@ trait CanHaveCEPScratchpad { this: BaseSubsystem =>
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
 class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+  override lazy val desiredName = coreparams.dev_name + "_module"
 
   // Create a Manager / Slave / Sink node
   // These parameters have been copied from SRAM.scala

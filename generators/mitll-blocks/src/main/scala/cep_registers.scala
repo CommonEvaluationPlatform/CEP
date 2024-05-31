@@ -50,7 +50,7 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
     // Instantiate the TL Module
-    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
+    val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"_module_inst")}
     module.suggestName(coreparams.dev_name + "_module_inst")
 
     // Define the Tilelink Connections to the module
@@ -75,6 +75,7 @@ trait CanHavePeripheryCEPRegisters { this: BaseSubsystem =>
 // BEGIN: TileLink Module
 //--------------------------------------------------------------------------------------
 class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(implicit p: Parameters) extends LazyModule {
+  override lazy val desiredName = coreparams.dev_name + "_module"
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
