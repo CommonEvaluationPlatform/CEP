@@ -33,7 +33,7 @@ import freechips.rocketchip.subsystem._
 
 object CEPVersion {
   val CEP_MAJOR_VERSION             = 0x04
-  val CEP_MINOR_VERSION             = 0x60
+  val CEP_MINOR_VERSION             = 0x70
 }
 
 object CEPBaseAddresses {  
