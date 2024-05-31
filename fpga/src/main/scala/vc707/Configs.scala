@@ -33,7 +33,7 @@ import chipyard.harness._
 
 import math.min
 
-import mitllBlocks.cep_addresses._
+import mitllBlocks.cepPackage._
 
 class WithDefaultPeripherals extends Config((site, here, up) => {
   case PeripheryUARTKey => List(UARTParams(address = BigInt(0x64000000L)))
