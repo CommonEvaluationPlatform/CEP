@@ -72,7 +72,6 @@ cd "$RDIR"
             generators/cva6 \
             generators/nvdla \
             toolchains/libgloss \
-            generators/sha3 \
             generators/gemmini \
             generators/rocket-chip \
             sims/firesim \
@@ -102,9 +101,6 @@ cd "$RDIR"
 )
 
 (
-    # Non-recursive clone to exclude riscv-linux
-    git submodule update --init generators/sha3
-
     # Non-recursive clone to exclude cva6 submods
     git submodule update --init generators/cva6
     git -C generators/cva6 submodule update --init src/main/resources/cva6/vsrc/cva6

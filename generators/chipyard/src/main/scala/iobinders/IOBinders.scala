@@ -27,9 +27,7 @@ import sifive.blocks.devices.spi._
 import sifive.blocks.devices.i2c._
 import tracegen.{TraceGenSystemModuleImp}
 
-import mitllBlocks.aes._
-
-import barstools.iocell.chisel._
+import chipyard.iocell._
 
 import testchipip.serdes.{CanHavePeripheryTLSerial, SerialTLKey}
 import testchipip.spi.{SPIChipIO}
@@ -41,6 +39,9 @@ import testchipip.cosim.{CanHaveTraceIO, TraceOutputTop, SpikeCosimConfig}
 import testchipip.tsi.{CanHavePeripheryUARTTSI, UARTTSIIO}
 import icenet.{CanHavePeripheryIceNIC, SimNetwork, NicLoopback, NICKey, NICIOvonly}
 import chipyard.{CanHaveMasterTLMemPort, ChipyardSystem, ChipyardSystemModule}
+import chipyard.example.{CanHavePeripheryGCD}
+
+import mitllBlocks.aes._
 
 import scala.reflect.{ClassTag}
 
@@ -862,6 +863,7 @@ class WithTLMemPunchthrough extends OverrideIOBinder({
   }
 })
 
+
 class WithDontTouchPorts extends OverrideIOBinder({
   (system: DontTouch) => system.dontTouchPorts(); (Nil, Nil)
 })
@@ -875,4 +877,12 @@ class WithNMITiedOff extends ComposeIOBinder({
     }
     (Nil, Nil)
   }
+})
+
+class WithGCDBusyPunchthrough extends OverrideIOBinder({
+  (system: CanHavePeripheryGCD) => system.gcd_busy.map { busy =>
+    val io_gcd_busy = IO(Output(Bool()))
+    io_gcd_busy := busy
+    (Seq(GCDBusyPort(() => io_gcd_busy)), Nil)
+  }.getOrElse((Nil, Nil))
 })
