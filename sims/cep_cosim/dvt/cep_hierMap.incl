@@ -39,25 +39,25 @@
 `endif 
 
 // Paths to CEP-specific modules
-`define SROT_PATH                 `DUT_TOP_LEVEL.system.srotdomain.srotmodule
-`define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256domain.sha256module
-`define RSA_PATH                  `DUT_TOP_LEVEL.system.rsadomain.rsamodule
-`define MD5_PATH                  `DUT_TOP_LEVEL.system.md5domain.md5module
-`define IIR_PATH                  `DUT_TOP_LEVEL.system.iirdomain.iirmodule
-`define IDFT_PATH                 `DUT_TOP_LEVEL.system.idftdomain.idftmodule
-`define GPS_PATH                  `DUT_TOP_LEVEL.system.gpsdomain.gpsmodule
-`define FIR_PATH                  `DUT_TOP_LEVEL.system.firdomain.firmodule
-`define DFT_PATH                  `DUT_TOP_LEVEL.system.dftdomain.dftmodule
-`define DES3_PATH                 `DUT_TOP_LEVEL.system.des3domain.des3module
-`define AES_PATH                  `DUT_TOP_LEVEL.system.aesdomain.aesmodule
+`define SROT_PATH                 `DUT_TOP_LEVEL.system.srot_ClockSinkDomain_inst.srot_module_inst
+`define SHA256_PATH               `DUT_TOP_LEVEL.system.sha256_ClockSinkDomain_inst.sha256_module_inst
+`define RSA_PATH                  `DUT_TOP_LEVEL.system.rsa_ClockSinkDomain_inst.rsa_module_inst
+`define MD5_PATH                  `DUT_TOP_LEVEL.system.md5_ClockSinkDomain_inst.md5_module_inst
+`define IIR_PATH                  `DUT_TOP_LEVEL.system.iir_ClockSinkDomain_inst.iir_module_inst
+`define IDFT_PATH                 `DUT_TOP_LEVEL.system.idft_ClockSinkDomain_inst.idft_module_inst
+`define GPS_PATH                  `DUT_TOP_LEVEL.system.gps_ClockSinkDomain_inst.gps_module_inst
+`define FIR_PATH                  `DUT_TOP_LEVEL.system.fir_ClockSinkDomain_inst.fir_module_inst
+`define DFT_PATH                  `DUT_TOP_LEVEL.system.dft_ClockSinkDomain_inst.dft_module_inst
+`define DES3_PATH                 `DUT_TOP_LEVEL.system.des3_ClockSinkDomain_inst.des3_module_inst
+`define AES_PATH                  `DUT_TOP_LEVEL.system.aes_ClockSinkDomain_inst.aes_module_inst
 `ifdef ASIC_MODE
-  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadasicdomain.scratchpadasicmodule
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpadasi_ClockSinkDomain_inst.scratchpadasic_module_inst
   `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_asic_wrapper_inst
 `else
-  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpaddomain.scratchpadmodule
+  `define SCRATCHPAD_PATH         `DUT_TOP_LEVEL.system.scratchpad_ClockSinkDomain_inst.scratchpad_module_inst
   `define SCRATCHPAD_WRAPPER_PATH `SCRATCHPAD_PATH.scratchpad_wrapper_inst
 `endif 
-`define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregsdomain.cepregsmodule
+`define CEPREGS_PATH              `DUT_TOP_LEVEL.system.cepregs_ClockSinkDomain_inst.cepregs_module_inst
 `define SDCARD_PATH               `COSIM_TB_TOP_MODULE.spi_sd_model_inst
 
 `define TILE0_PATH                `DUT_TOP_LEVEL.system.tile_prci_domain.element_reset_domain_rockettile

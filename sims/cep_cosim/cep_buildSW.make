@@ -129,7 +129,7 @@ ${OBJECT_DIR_LIST}:
 #--------------------------------------------------------------------------------------
 # Auto-extract the MAJOR/MINOR version from scala
 #--------------------------------------------------------------------------------------
-CEP_ADR_SCALA_FILE = ${REPO_TOP_DIR}/generators/mitll-blocks/src/main/scala/cep_addresses.scala
+CEP_ADR_SCALA_FILE = ${REPO_TOP_DIR}/generators/mitll-blocks/src/main/scala/cepPackage.scala
 CEP_VER_H_FILE     = ${DRIVERS_DIR}/cep_tests/cep_version.h
 
 ${CEP_VER_H_FILE} : ${CEP_ADR_SCALA_FILE}
