@@ -52,9 +52,8 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
       llki_bus    = Some(pbus)
     )
 
-    // Generate the clock domain for this module
-    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain
-    coreDomain.suggestName(coreparams.dev_name+"_domain_inst")
+    // Generate (and name) the clock domain for this module
+    val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
     // Instantiate the TL Module
     val module = coreDomain { LazyModule(new coreTLModule(coreparams, coreattachparams)(p)).suggestName(coreparams.dev_name+"module")}
