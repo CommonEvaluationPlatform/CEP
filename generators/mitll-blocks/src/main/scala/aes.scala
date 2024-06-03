@@ -184,7 +184,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     addResource("/vsrc/aes/round.v")
     addResource("/vsrc/aes/table.v")
 
-  } // aes_192_mock_tss()
+  } // aes_192_mock_tss
 
   // Define blackbox and its associated IO (without LLKI)
   class aes_192() extends BlackBox with HasBlackBoxResource {
@@ -210,29 +210,25 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     addResource("/vsrc/aes/round.v")
     addResource("/vsrc/aes/table.v")
 
-  } // aes_192_mock_tss()
+  } // aes_192
 
-  val aes_192_inst_io = {
-    val impl  = Module(new aes_192_mock_tss())
-    impl.suggestName(impl.desiredName+"_inst")
-
-    impl.io    
-  }
-
-  // val aes_192_inst_io = if (coreattachparams.llki_bus.isDefined) {
-  //   println("LLKI Defined for AES!")
-  //   val impl  = Module(new aes_192_mock_tss())
-  //   impl.io
-  // } else {
-  //   println("LLKI NOT Defined for AES!")
-  //   val impl  = Module(new aes_192())
-  //   impl.io
-  // }
-
+  // Instantiate registers for the blackbox inputs
+  val start               = RegInit(0.U(1.W))
+  val state0              = RegInit(0.U(64.W))
+  val state1              = RegInit(0.U(64.W))
+  val key0                = RegInit(0.U(64.W))
+  val key1                = RegInit(0.U(64.W))
+  val key2                = RegInit(0.U(64.W))
+  val out                 = Wire(UInt(128.W))
+  val out_valid           = Wire(Bool())
 
   // "Connect" to llki node's signals and parameters (if the LLKI is defined)
   if (coreattachparams.llki_bus.isDefined) {
     val (llki, llkiEdge)    = outer.llki_node.get.in(0)
+
+    // Instantiate the AES Mock TSS
+    val impl = Module(new aes_192_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
 
     // Define the LLKI Protocol Processing blackbox and its associated IO
     class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
@@ -337,36 +333,47 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     llki.d.valid                        := llki_pp_inst.io.slave_d_valid
     llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
-    aes_192_inst_io.llkid_key_data      := llki_pp_inst.io.llkid_key_data
-    aes_192_inst_io.llkid_key_valid     := llki_pp_inst.io.llkid_key_valid
-    llki_pp_inst.io.llkid_key_ready     := aes_192_inst_io.llkid_key_ready
-    llki_pp_inst.io.llkid_key_complete  := aes_192_inst_io.llkid_key_complete
-    aes_192_inst_io.llkid_clear_key     := llki_pp_inst.io.llkid_clear_key
-    llki_pp_inst.io.llkid_clear_key_ack := aes_192_inst_io.llkid_clear_key_ack
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
+
+    // Map the core specific blackbox IO
+    impl.io.clk                         := clock
+    impl.io.rst                         := reset
+    impl.io.start                       := start
+    impl.io.state                       := Cat(state0, state1)
+    impl.io.key                         := Cat(key0, key1, key2)
+    out                                 := impl.io.out
+    out_valid                           := impl.io.out_valid
+
+    // Connect top level IO
+    io.aes_valid                        := impl.io.out_valid
+    io.aes_start                        := start
+
+
+  } else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the AES Module
+    val impl = Module(new aes_192())
+    impl.suggestName(impl.desiredName+"_inst")
+
+    // Map the core specific blackbox IO
+    impl.io.clk                         := clock
+    impl.io.rst                         := reset
+    impl.io.start                       := start
+    impl.io.state                       := Cat(state0, state1)
+    impl.io.key                         := Cat(key0, key1, key2)
+    out                                 := impl.io.out
+    out_valid                           := impl.io.out_valid
+
+    // Connect top level IO
+    io.aes_valid                        := impl.io.out_valid
+    io.aes_start                        := start
+
   } // if (coreattachparams.llki_bus.isDefined)
-
-  // Instantiate registers for the blackbox inputs
-  val start               = RegInit(0.U(1.W))
-  val state0              = RegInit(0.U(64.W))
-  val state1              = RegInit(0.U(64.W))
-  val key0                = RegInit(0.U(64.W))
-  val key1                = RegInit(0.U(64.W))
-  val key2                = RegInit(0.U(64.W))
-  val out                 = Wire(UInt(128.W))
-  val out_valid           = Wire(Bool())
-
-  // Map the core specific blackbox IO
-  aes_192_inst_io.clk    := clock
-  aes_192_inst_io.rst    := reset
-  aes_192_inst_io.start  := start
-  aes_192_inst_io.state  := Cat(state0, state1)
-  aes_192_inst_io.key    := Cat(key0, key1, key2)
-  out                    := aes_192_inst_io.out
-  out_valid              := aes_192_inst_io.out_valid
-
-  // Connect top level IO
-  io.aes_valid           := aes_192_inst_io.out_valid
-  io.aes_start           := start
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
