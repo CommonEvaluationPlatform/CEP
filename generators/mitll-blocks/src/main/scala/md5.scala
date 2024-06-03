@@ -266,17 +266,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/md5/pancham.v")
     addResource("/vsrc/md5/pancham_round.v")
 
-	  // Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
   // Instantiate the blackbox
   val md5_inst   = Module(new md5_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  md5_inst.suggestName(md5_inst.desiredName()+"_inst")
+  md5_inst.suggestName(md5_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   md5_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data

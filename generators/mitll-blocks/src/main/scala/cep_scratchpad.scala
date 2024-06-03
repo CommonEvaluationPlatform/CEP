@@ -191,6 +191,7 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     slaveEdge.bundle.dataBits,
     slaveEdge.bundle.sinkBits
   ))
+  scratchpad_wrapper_inst.suggestName(scratchpad_wrapper_inst.desiredName+"_inst")
 
   // Connect the Clock and Reset
   scratchpad_wrapper_inst.io.clk                := clock

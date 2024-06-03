@@ -324,8 +324,7 @@ case class COREParams(
   llki_base_addr      : BigInt = 0,
   llki_depth          : BigInt = 0,
   llki_ctrlsts_addr   : BigInt = 0,
-  llki_sendrecv_addr  : BigInt = 0,
-  verilog_module_name : Option[String] = None	  // Allows for override of the Blackbox module & instantiation name
+  llki_sendrecv_addr  : BigInt = 0
 )
 
 // The following parameter pass attachment info to the lower level objects/classes/etc.

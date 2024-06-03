@@ -264,17 +264,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/dsp/IIR_filter_mock_tss.sv")
     addResource("/vsrc/dsp/IIR_filter.v")
 
-  	// Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
   // Instantiate the blackbox
   val IIR_filter_inst   = Module(new IIR_filter_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  IIR_filter_inst.suggestName(IIR_filter_inst.desiredName()+"_inst")
+  IIR_filter_inst.suggestName(IIR_filter_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   IIR_filter_inst.io.llkid_key_data    := llki_pp_inst.io.llkid_key_data

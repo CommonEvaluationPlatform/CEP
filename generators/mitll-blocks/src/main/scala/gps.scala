@@ -269,19 +269,13 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/gps/cacode.v")
     addResource("/vsrc/gps/pcode.v")
 
-  	// Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
  
   // Instantiate the blackbox
   val gps_inst   = Module(new gps_mock_tss())
+  gps_inst.suggestName(gps_inst.desiredName+"_inst")
 
-  // Provide an optional override of the Blackbox module instantiation name
-  gps_inst.suggestName(gps_inst.desiredName()+"_inst")
-
-    // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
+  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   gps_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data
   gps_inst.io.llkid_key_valid         := llki_pp_inst.io.llkid_key_valid
   llki_pp_inst.io.llkid_key_ready     := gps_inst.io.llkid_key_ready

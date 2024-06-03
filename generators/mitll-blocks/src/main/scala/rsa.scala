@@ -289,17 +289,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/rsa/rtl/shl.v")
     addResource("/vsrc/rsa/rtl/adder.v")
 
-  	// Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
   // Instantiate the blackbox
   val modexp_core_inst   = Module(new modexp_core_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  modexp_core_inst.suggestName(modexp_core_inst.desiredName()+"_inst")
+  modexp_core_inst.suggestName(modexp_core_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   modexp_core_inst.io.llkid_key_data   := llki_pp_inst.io.llkid_key_data

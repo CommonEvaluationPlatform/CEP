@@ -275,17 +275,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/des3/sbox7.v")
     addResource("/vsrc/des3/sbox8.v")
 
-	  // Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
-  // Instantiate the blackbox
+  // Instantiate the blackbox and override the instance name
   val des3_inst   = Module(new des3_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  des3_inst.suggestName(des3_inst.desiredName()+"_inst")
+  des3_inst.suggestName(des3_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   des3_inst.io.llkid_key_data         := llki_pp_inst.io.llkid_key_data

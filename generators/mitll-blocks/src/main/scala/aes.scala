@@ -184,11 +184,6 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     addResource("/vsrc/aes/round.v")
     addResource("/vsrc/aes/table.v")
 
-    // Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
-
   } // aes_192_mock_tss()
 
   // Define blackbox and its associated IO (without LLKI)
@@ -215,27 +210,27 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     addResource("/vsrc/aes/round.v")
     addResource("/vsrc/aes/table.v")
 
-    // Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
-
   } // aes_192_mock_tss()
 
-//  val aes_192_inst   = Module(new aes_192())
-  val aes_192_inst   = Module(new aes_192_mock_tss())
-  // val aes_192_inst   = Module(
-  //   if (coreattachparams.llki_bus.isDefined) {
-  //     new aes_192_mock_tss()
-  //   } else {
-  //     new aes_192()
-  //   }
-  // )
+  val aes_192_inst_io = {
+    val impl  = Module(new aes_192_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
 
-  // Provide an optional override of the Blackbox module instantiation name
-  aes_192_inst.suggestName(aes_192_inst.desiredName()+"_inst")
+    impl.io    
+  }
 
-  // "Connect" to llki node's signals and parameters
+  // val aes_192_inst_io = if (coreattachparams.llki_bus.isDefined) {
+  //   println("LLKI Defined for AES!")
+  //   val impl  = Module(new aes_192_mock_tss())
+  //   impl.io
+  // } else {
+  //   println("LLKI NOT Defined for AES!")
+  //   val impl  = Module(new aes_192())
+  //   impl.io
+  // }
+
+
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
   if (coreattachparams.llki_bus.isDefined) {
     val (llki, llkiEdge)    = outer.llki_node.get.in(0)
 
@@ -342,13 +337,13 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     llki.d.valid                        := llki_pp_inst.io.slave_d_valid
     llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
-    aes_192_inst.io.llkid_key_data      := llki_pp_inst.io.llkid_key_data
-    aes_192_inst.io.llkid_key_valid     := llki_pp_inst.io.llkid_key_valid
-    llki_pp_inst.io.llkid_key_ready     := aes_192_inst.io.llkid_key_ready
-    llki_pp_inst.io.llkid_key_complete  := aes_192_inst.io.llkid_key_complete
-    aes_192_inst.io.llkid_clear_key     := llki_pp_inst.io.llkid_clear_key
-    llki_pp_inst.io.llkid_clear_key_ack := aes_192_inst.io.llkid_clear_key_ack
-  }
+    aes_192_inst_io.llkid_key_data      := llki_pp_inst.io.llkid_key_data
+    aes_192_inst_io.llkid_key_valid     := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := aes_192_inst_io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := aes_192_inst_io.llkid_key_complete
+    aes_192_inst_io.llkid_clear_key     := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := aes_192_inst_io.llkid_clear_key_ack
+  } // if (coreattachparams.llki_bus.isDefined)
 
   // Instantiate registers for the blackbox inputs
   val start               = RegInit(0.U(1.W))
@@ -361,16 +356,16 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
   val out_valid           = Wire(Bool())
 
   // Map the core specific blackbox IO
-  aes_192_inst.io.clk    := clock
-  aes_192_inst.io.rst    := reset
-  aes_192_inst.io.start  := start
-  aes_192_inst.io.state  := Cat(state0, state1)
-  aes_192_inst.io.key    := Cat(key0, key1, key2)
-  out                    := aes_192_inst.io.out
-  out_valid              := aes_192_inst.io.out_valid
+  aes_192_inst_io.clk    := clock
+  aes_192_inst_io.rst    := reset
+  aes_192_inst_io.start  := start
+  aes_192_inst_io.state  := Cat(state0, state1)
+  aes_192_inst_io.key    := Cat(key0, key1, key2)
+  out                    := aes_192_inst_io.out
+  out_valid              := aes_192_inst_io.out_valid
 
   // Connect top level IO
-  io.aes_valid           := aes_192_inst.io.out_valid
+  io.aes_valid           := aes_192_inst_io.out_valid
   io.aes_start           := start
 
   // Define the register map

@@ -265,17 +265,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/sha256/sha256_k_constants.v")
     addResource("/vsrc/sha256/sha256_w_mem.v")
 
-    // Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
   // Instantiate the blackbox
   val sha256_inst   = Module(new sha256_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  sha256_inst.suggestName(sha256_inst.desiredName()+"_inst")
+  sha256_inst.suggestName(sha256_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   sha256_inst.io.llkid_key_data       := llki_pp_inst.io.llkid_key_data

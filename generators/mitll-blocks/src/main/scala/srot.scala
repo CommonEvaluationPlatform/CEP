@@ -264,6 +264,7 @@ class coreTLModuleImp(coreparams: SROTParams, outer: coreTLModule) extends LazyM
     num_cores                       = num_cores,
     core_index_array_packed         = core_index_array_packed
   ))
+  srot_wrapper_inst.suggestName(srot_wrapper_inst.desiredName+"_inst")
 
   // Connect the Clock and Reset
   srot_wrapper_inst.io.clk                := clock

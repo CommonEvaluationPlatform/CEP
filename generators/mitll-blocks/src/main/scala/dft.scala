@@ -271,17 +271,11 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
     addResource("/vsrc/dsp/dft_top_mock_tss.sv")
     addResource("/vsrc/dsp/dft_top.v")
 
-  	// Provide an optional override of the Blackbox module name
-    override def desiredName(): String = {
-      return coreparams.verilog_module_name.getOrElse(super.desiredName)
-    }
   }
 
   // Instantiate the blackbox
   val dft_inst   = Module(new dft_top_mock_tss())
-
-  // Provide an optional override of the Blackbox module instantiation name
-  dft_inst.suggestName(dft_inst.desiredName()+"_inst")
+  dft_inst.suggestName(dft_inst.desiredName+"_inst")
 
   // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
   dft_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data
