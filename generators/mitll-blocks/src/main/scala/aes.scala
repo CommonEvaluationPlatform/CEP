@@ -46,11 +46,19 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")

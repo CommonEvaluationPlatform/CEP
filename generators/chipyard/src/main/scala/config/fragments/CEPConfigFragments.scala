@@ -51,6 +51,14 @@ class WithAES ( params  : Seq[COREParams] = Seq(
   case PeripheryAESKey => params
 })
 
+class WithAESNoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.aes_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.aes_depth),
+    dev_name            = s"aes"))) extends Config((site, here, up) => {
+  case PeripheryAESKey => params
+})
+
 class WithDES3 ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.des3_base_addr),
