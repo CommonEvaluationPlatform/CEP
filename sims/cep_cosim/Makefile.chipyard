@@ -63,7 +63,7 @@ include $(base_dir)/common.mk
 # 2) Tweak the print routines to use the CEP cosim macros
 # 3) Create the TilePRCIDomain_bfm.sv file for Bus Functional Model simulations
 #########################################################################################
-cosim_postprocessing:
+cosim_postprocessing: ${CHIPYARD_BUILD_INFO}
 	@echo ""
 	@echo "CEP: ----------------------------------------------------------------------"
 	@echo "CEP:  Performing CEP Co-simulation post-processing step...."

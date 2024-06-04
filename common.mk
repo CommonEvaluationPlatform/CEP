@@ -52,7 +52,8 @@ HELP_COMPILATION_VARIABLES += \
 "   MFC_BASE_LOWERING_OPTIONS = override lowering options to pass to the MLIR FIRRTL compiler" \
 "   ASPECTS                   = comma separated list of Chisel aspect flows to run (e.x. chipyard.upf.ChipTopUPFAspect)"
 
-EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS) $(CHIPYARD_BUILD_INFO)
+#EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS) $(CHIPYARD_BUILD_INFO)
+EXTRA_GENERATOR_REQS ?= $(BOOTROM_TARGETS)
 EXTRA_SIM_CXXFLAGS   ?=
 EXTRA_SIM_LDFLAGS    ?=
 EXTRA_SIM_SOURCES    ?=
@@ -145,14 +146,19 @@ endif
 $(CHIPYARD_BUILD_INFO):
 	@# Save the name of some of the files needed by the CEP Cosimulation enviornment
 	@rm -f $@
+
+# count the number of CPUs
+	$(eval CHIPYARD_CPU_COUNT = $(shell ${sim_dir}/bin/parse-dts.py ${build_dir}/${long_name}.dts cpu@))
+
 	@echo "CHIPYARD_BLD_DIR = $(build_dir)"  >> $@
 	@echo "CHIPYARD_COLLATERAL_DIR = $(GEN_COLLATERAL_DIR)" >> $@
-	@echo "CHIPYARD_LONG_NAME = $(long_name).top" >> $@
+	@echo "CHIPYARD_LONG_NAME = $(long_name)" >> $@
 	@echo "CHIPYARD_TOP_SMEMS_FILE = $(TOP_SMEMS_FILE)" >> $@
 	@echo "CHIPYARD_SIM_FILES = ${sim_files}" >> $@
 	@echo "CHIPYARD_SIM_COMMON_FILES = ${sim_common_files}" >> $@
 	@echo "CHIPYARD_TOP_MODULE = ${TOP}" >> $@
 	@echo "CHIPYARD_SUB_PROJECT = ${SUB_PROJECT}" >> $@
+	@echo "CHIPYARD_CPU_COUNT = ${CHIPYARD_CPU_COUNT}" >> $@
 
 # The following make target will peform some scala file shuffling if we are building
 # the CEP ASIC target.  Otherwise, the chipyard will be "left alone" allowing a non-ASIC
