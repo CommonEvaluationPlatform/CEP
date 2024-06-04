@@ -307,7 +307,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
 
     // Map the blackbox inputs
     impl.io.clk      := clock                // Implicit module clock
-    impl.io.rst      := reset                // dft top has an active high reset 
+    impl.io.reset    := reset                // dft top has an active high reset 
     impl.io.X0       := Mux(datain_read_idx < 32.U, datain_read_data(63,48), 0.U) // Concatenating data into 64 bit blackbox input
     impl.io.X1       := Mux(datain_read_idx < 32.U, datain_read_data(47,32), 0.U) // Concatenating data into 64 bit blackbox input
     impl.io.X2       := Mux(datain_read_idx < 32.U, datain_read_data(31,16), 0.U) // Concatenating data into 64 bit blackbox input       

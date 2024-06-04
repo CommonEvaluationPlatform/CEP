@@ -328,8 +328,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     // The FIR needs to be reset in between test vectors, thus a second reset
     // has been added in order to allow for the LLKI keys to persist
     impl.io.clk             := clock
-    impl.io.rst             := reset
-    impl.io.rst_dut         := (reset.asBool || fir_reset).asAsyncReset 
+    impl.io.reset           := reset
                                                                      
     impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
     dataout_write_data      := impl.io.outData

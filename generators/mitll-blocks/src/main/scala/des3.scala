@@ -225,7 +225,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
 
     // Map the blackbox I/O 
     impl.io.clk                         := clock
-    impl.io.rst                         := reset
+    impl.io.reset                       := reset
     impl.io.start                       := start
     impl.io.decrypt                     := decrypt
     impl.io.desIn                       := desIn

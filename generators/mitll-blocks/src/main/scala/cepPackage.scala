@@ -684,7 +684,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock
       val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
+      val reset               = Input(Reset())
 
       // Inputs
       val start               = Input(Bool())
@@ -761,7 +761,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
+      val reset               = Input(Reset())
    
       // Inputs
       val next                = Input(Bool())            
@@ -823,8 +823,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
-      val rst_dut             = Input(Reset())
+      val reset               = Input(Reset())
    
       // Inputs
       val inData              = Input(UInt(32.W))
@@ -888,7 +887,6 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
       // Clock and Reset
       val sys_clk             = Input(Clock())
       val sync_rst_in         = Input(Reset())
-      val sync_rst_in_dut     = Input(Reset())
 
       // Inputs
       val startRound          = Input(Bool())
@@ -958,7 +956,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
+      val reset               = Input(Reset())
    
       // Inputs
       val next                = Input(Bool())            
@@ -1020,8 +1018,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
-      val rst_dut             = Input(Reset())
+      val reset               = Input(Reset())
    
       // Inputs
       val inData              = Input(UInt(32.W))
@@ -1169,7 +1166,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     val io = IO(new Bundle {
       // Clock and Reset
       val clk                           = Input(Clock())
-      val rst                           = Input(Reset())
+      val reset_n                       = Input(Reset())
 
       // Core I/O
       val start                         = Input(Bool())
@@ -1279,3 +1276,33 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     addResource("/vsrc/sha256/sha256_w_mem.v")
 
   } // end sha256_mock_tss
+
+  // The following class is used to import all the miscellaneous black-box resources
+  // that previously resided in srot.scala.  This effectively creates a dummy module with
+  // no IO or underlying logic (the module definition on the verilog side is contained
+  // in llki_pkg.sv... which is required otherwise the design won't full elaborate)
+  class import_resources extends BlackBox with HasBlackBoxResource {
+
+    val io = IO(new Bundle {})
+
+    // LLKI Resources
+    addResource("/vsrc/llki/llki_pp_wrapper.sv")
+    addResource("/vsrc/llki/mock_tss_fsm.sv")
+    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
+    addResource("/vsrc/llki/tlul_err.sv")
+    addResource("/vsrc/llki/tlul_adapter_reg.sv")
+    addResource("/vsrc/llki/tlul_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
+
+    // Packages and Supporting Files
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
+    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
+    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
+    addResource("/vsrc/llki/top_pkg.sv")
+    addResource("/vsrc/llki/llki_pkg.sv")
+
+  }

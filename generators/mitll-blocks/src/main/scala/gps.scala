@@ -249,8 +249,6 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     // Map the blackbox I/O 
     impl.io.sys_clk                     := clock                                      // Implicit module clock
     impl.io.sync_rst_in                 := reset
-    impl.io.sync_rst_in_dut             := (reset.asBool || gps_reset).asAsyncReset 
-                                                                                      // Implicit module reset
     impl.io.startRound                  := startRound                                 // Start bit
     impl.io.sv_num                      := sv_num                                     // GPS space vehicle number written by cepregression.cpp
     impl.io.aes_key                     := Cat(aes_key0, aes_key1, aes_key2)          // L code encryption key

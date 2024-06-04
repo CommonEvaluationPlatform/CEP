@@ -25,6 +25,11 @@ COMMON_CFLAGS	        += -DASICMODE
 RISCV_BARE_CFLAGS       += -DASICMODE
 endif
 
+ifeq (${NOLLKI_MODE},1)
+COMMON_CFLAGS	        += -DNOLLKI_MODE
+RISCV_BARE_CFLAGS       += -DNOLLKI_MODE
+endif
+
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #

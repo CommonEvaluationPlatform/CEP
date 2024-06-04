@@ -58,7 +58,7 @@
     // Array containing the base addresses and enable status of
     // all the CEP cores (index in array == core index)
     // cepMacroMix.cc implementation limits this to 32 total cores.
-#ifdef ASICMODE
+#if defined(ASICMODE)
     const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
         {"AES",         AES_CORE,         0x70000000, true, true,  0, 100 },     // 0 - AES
         {"MD5",         MD5_CORE,         0x70010000, true, true,  0,  32 },     // 1 - MD5
@@ -78,7 +78,27 @@
         {"GPS_3",       GPS_CORE,         0x70093000, true, true,  2,  38 },     // 15 - GPS_3
         {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true, false, 0,   0 },     // 16 - CEP Version Register
         {"SROT",        SROT_CORE,        0x70200000, true, false, 0,   0 }};    // 17 - SRoT
-#else
+#elif defined(NOLLKI_MODE)
+    const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
+        {"AES",         AES_CORE,         0x70000000, true, false,  0, 100 },     // 0 - AES
+        {"MD5",         MD5_CORE,         0x70010000, true, false,  0,  32 },     // 1 - MD5
+        {"SHA256_0",    SHA256_CORE,      0x70020000, true, false,  1,  32 },     // 2 - SHA256_0
+        {"SHA256_1",    SHA256_CORE,      0x70021000, true, false,  1,  32 },     // 3 - SHA256_1
+        {"SHA256_2",    SHA256_CORE,      0x70022000, true, false,  1,  32 },     // 4 - SHA256_2
+        {"SHA256_3",    SHA256_CORE,      0x70023000, true, false,  1,  32 },     // 5 - SHA256_3
+        {"RSA",         RSA_CORE,         0x70030000, true, false,  3,   4 },     // 6 - RSA
+        {"DES3",        DES3_CORE,        0x70040000, true, false,  0, 100 },     // 7 - DES3
+        {"DFT",         DFT_CORE,         0x70050000, true, false,  2,  10 },     // 8 - DFT
+        {"IDFT",        IDFT_CORE,        0x70060000, true, false,  2,  10 },     // 9 - IDFT
+        {"FIR",         FIR_CORE,         0x70070000, true, false,  2,  10 },     // 10 - FIR
+        {"IIR",         IIR_CORE,         0x70080000, true, false,  2,  10 },     // 11 - IIR
+        {"GPS_0",       GPS_CORE,         0x70090000, true, false,  2,  38 },     // 12 - GPS_0
+        {"GPS_1",       GPS_CORE,         0x70091000, true, false,  2,  38 },     // 13 - GPS_1
+        {"GPS_2",       GPS_CORE,         0x70092000, true, false,  2,  38 },     // 14 - GPS_2
+        {"GPS_3",       GPS_CORE,         0x70093000, true, false,  2,  38 },     // 15 - GPS_3
+        {"CEP Version", CEP_VERSION_CORE, 0x700F0000, true, false, 0,   0 },     // 16 - CEP Version Register
+        {"SROT",        SROT_CORE,        0x70200000, true, false, 0,   0 }};    // 17 - SRoT
+#else 
     const cep_core_info_t cep_core_info[CEP_TOTAL_CORES] = {
         {"AES",         AES_CORE,         0x70000000, true, true,  0, 100 },     // 0 - AES
         {"MD5",         MD5_CORE,         0x70010000, true, true,  0,  32 },     // 1 - MD5

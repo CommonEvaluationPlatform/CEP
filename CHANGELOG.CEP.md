@@ -8,6 +8,7 @@
 
 ## [v4.70] - 2024-XX-XX
 ### Added
+  - Optional inclusion of the LLKI have been added to all CEP modules.  Example CEPNoLLKIRocketConfig has been included.
 ### Changed
   - Chipyard updated to chipyard/main 30 May 2024 (eb6910a commit)
     (https://github.com/ucb-bar/chipyard/commits/main/) for more info

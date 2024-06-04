@@ -266,9 +266,13 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     val impl = Module(new modexp_core())
     impl.suggestName(impl.desiredName+"_inst")
 
+    // Create an inverted reset
+    val reset_n                         = Wire(Bool())
+    reset_n                             := ~reset.asBool
+
     // Connect the Clock and Reset
     impl.io.clk                         := clock
-    impl.io.rst                         := reset
+    impl.io.reset_n                     := reset_n.asAsyncReset
 
     // Connect the Core I/O
     impl.io.start                       := start;

@@ -47,6 +47,7 @@ BYPASS_PLL                  ?= 0
 DISABLE_CHISEL_PRINTF		?= 1
 BAREMETAL_PRINTF			?= none
 COVERAGE					?= 0
+NOLLKI_MODE 				?= 0
 
 # The following flags are defined here to support the eventual enablement of legacy functionality
 override PROFILE   			= 0
@@ -201,6 +202,7 @@ else ifeq (${CADENCE},1)
 	@echo "CEP_COSIM:   VMGR_PATH              = ${VMGR_PATH}"
 	@echo "CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL}"
 endif
+	@echo "CEP_COSIM:   CHIPYARD_SUB_PROJECT   = ${CHIPYARD_SUB_PROJECT}"
 	@echo "CEP_COSIM:   MODELSIM               = $(MODELSIM)"
 	@echo "CEP_COSIM:   CADENCE                = $(CADENCE)"
 	@echo "CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
@@ -215,6 +217,7 @@ endif
 	@echo "CEP_COSIM:   DISABLE_CHISEL_PRINTF  = ${DISABLE_CHISEL_PRINTF}"
 	@echo "CEP_COSIM:   BAREMETAL_PRINTF       = ${BAREMETAL_PRINTF}"
 	@echo "CEP_COSIM:   OPENOCD_ENABLE         = ${OPENOCD_ENABLE}"
+	@echo "CEP_COSIM:   NOLLKI_MODE            = ${NOLLKI_MODE}"
 ifeq (${OPENOCD_ENABLE},1)
 	@echo "CEP_COSIM:   OpenOCD Version        = $(OPENOCD_VERSION)"
 endif

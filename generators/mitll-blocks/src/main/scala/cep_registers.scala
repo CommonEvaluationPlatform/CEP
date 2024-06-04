@@ -101,37 +101,8 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
-  // The following class is used to import all the miscellaneous black-box resources
-  // that previously resided in srot.scala.  This effectively creates a dummy module with
-  // no IO or underlying logic (the module definition on the verilog side is contained
-  // in llki_pkg.sv... which is required otherwise the design won't full elaborate)
-  class import_resources extends BlackBox with HasBlackBoxResource {
-
-    val io = IO(new Bundle {})
-
-    // LLKI Resources
-    addResource("/vsrc/llki/llki_pp_wrapper.sv")
-    addResource("/vsrc/llki/mock_tss_fsm.sv")
-    addResource("/vsrc/llki/prim_generic_ram_1p.sv")
-    addResource("/vsrc/llki/tlul_err.sv")
-    addResource("/vsrc/llki/tlul_adapter_reg.sv")
-    addResource("/vsrc/llki/tlul_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_fifo_sync.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_adapter_host.sv")
-
-    // Packages and Supporting Files
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert.sv")
-    addResource("/vsrc/opentitan/hw/ip/tlul/rtl/tlul_pkg.sv")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_memload.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_dummy_macros.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_assert_standard_macros.svh")
-    addResource("/vsrc/opentitan/hw/ip/prim/rtl/prim_util_pkg.sv")
-    addResource("/vsrc/llki/top_pkg.sv")
-    addResource("/vsrc/llki/llki_pkg.sv")
-
-  }
+  // Import miscellaneous CEP SystemVerilog/Verilog modules (as the registers component should be in every CEP config)
   val import_resources_inst = Module(new import_resources)
-
 
   class Version_Class extends Bundle {
           val reserved            = UInt(48.W)
