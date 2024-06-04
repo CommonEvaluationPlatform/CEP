@@ -120,64 +120,6 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
   slave.c.ready   := true.B
   slave.e.ready   := true.B
 
-  // Define scratchpad_wrapper blackbox and its associated IO
-  class scratchpad_wrapper(   address           : BigInt, 
-                              depth             : BigInt,
-                              slave_tl_szw      : Int,
-                              slave_tl_aiw      : Int,
-                              slave_tl_aw       : Int,
-                              slave_tl_dbw      : Int,
-                              slave_tl_dw       : Int,
-                              slave_tl_diw      : Int) extends BlackBox (
-      Map(
-        "ADDRESS"                       -> IntParam(address),       // Base address of the TL slave
-        "DEPTH"                         -> IntParam(depth),         // Address depth of the TL slave
-        "SLAVE_TL_SZW"                  -> IntParam(slave_tl_szw),
-        "SLAVE_TL_AIW"                  -> IntParam(slave_tl_aiw),
-        "SLAVE_TL_AW"                   -> IntParam(slave_tl_aw),
-        "SLAVE_TL_DBW"                  -> IntParam(slave_tl_dbw),
-        "SLAVE_TL_DW"                   -> IntParam(slave_tl_dw),
-        "SLAVE_TL_DIW"                  -> IntParam(slave_tl_diw)
-      )
-  ) with HasBlackBoxResource {
-
-    val io = IO(new Bundle {
-      // Clock and Reset
-      val clk               = Input(Clock())
-      val rst               = Input(Reset())
-
-      // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_a_opcode    = Input(UInt(3.W))
-      val slave_a_param     = Input(UInt(3.W))
-      val slave_a_size      = Input(UInt(slave_tl_szw.W))
-      val slave_a_source    = Input(UInt(slave_tl_aiw.W))
-      val slave_a_address   = Input(UInt(slave_tl_aw.W))
-      val slave_a_mask      = Input(UInt(slave_tl_dbw.W))
-      val slave_a_data      = Input(UInt(slave_tl_dw.W))
-      val slave_a_corrupt   = Input(Bool())
-      val slave_a_valid     = Input(Bool())
-      val slave_a_ready     = Output(Bool())
-
-      // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_d_opcode    = Output(UInt(3.W))
-      val slave_d_param     = Output(UInt(3.W))
-      val slave_d_size      = Output(UInt(slave_tl_szw.W))
-      val slave_d_source    = Output(UInt(slave_tl_aiw.W))
-      val slave_d_sink      = Output(UInt(slave_tl_diw.W))
-      val slave_d_denied    = Output(Bool())
-      val slave_d_data      = Output(UInt(slave_tl_dw.W))
-      val slave_d_corrupt   = Output(Bool())
-      val slave_d_valid     = Output(Bool())
-      val slave_d_ready     = Input(Bool())
-
-    })
-
-    // Add the SystemVerilog/Verilog associated with the module
-    // Relative to /src/main/resources
-    addResource("/vsrc/llki/scratchpad_wrapper.sv")
-
-  } // end class scratchpad_wrapper
-
   // Instantiate the scratchpad_wrapper
   // As the depth parameter is being used to define the size of the instantiated memory, it must be incremented by +1 before
   // passing it down to the scratchpad_wrapper
