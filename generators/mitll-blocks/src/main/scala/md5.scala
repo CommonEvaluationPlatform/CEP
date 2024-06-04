@@ -41,13 +41,20 @@ trait CanHavePeripheryMD5 { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
-    // Generate the clock domain for this module
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
@@ -63,12 +70,14 @@ trait CanHavePeripheryMD5 { this: BaseSubsystem =>
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      // Attach the LLKI if it is defined
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
@@ -86,8 +95,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -101,6 +111,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -113,7 +124,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -124,62 +135,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
-
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Instantiate the blackbox
-  val md5_inst   = Module(new md5_mock_tss())
-  md5_inst.suggestName(md5_inst.desiredName+"_inst")
-
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  md5_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data
-  md5_inst.io.llkid_key_valid         := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready     := md5_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete  := md5_inst.io.llkid_key_complete
-  md5_inst.io.llkid_clear_key         := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack := md5_inst.io.llkid_clear_key_ack
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   val init                   = RegInit(false.B)
   val rst                    = RegInit(false.B)
@@ -196,17 +152,92 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
   val msg_out_valid          = Wire(Bool())
   val ready                  = Wire(Bool())
 
-  md5_inst.io.clk            := clock
-  md5_inst.io.rst            := (reset.asBool || rst).asAsyncReset
-  md5_inst.io.init           := init
-  md5_inst.io.msg_in_valid   := msg_in_valid
-  md5_inst.io.msg_padded     := Cat(msg_padded_w0, msg_padded_w1,
-                                    msg_padded_w2, msg_padded_w3,
-                                    msg_padded_w4, msg_padded_w5, 
-                                    msg_padded_w6, msg_padded_w7)
-  msg_output                 := md5_inst.io.msg_output
-  msg_out_valid              := md5_inst.io.msg_out_valid
-  ready                      := md5_inst.io.ready
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
+  if (coreattachparams.llki_bus.isDefined) {
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
+
+    // Instantiate the MD5 mock TSS
+    val impl = Module(new md5_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
+
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
+
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
+
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
+
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
+
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
+
+    impl.io.clk                         := clock
+    impl.io.rst                         := (reset.asBool || rst).asAsyncReset
+    impl.io.init                        := init
+    impl.io.msg_in_valid                := msg_in_valid
+    impl.io.msg_padded                  := Cat(msg_padded_w0, msg_padded_w1,
+                                              msg_padded_w2, msg_padded_w3,
+                                              msg_padded_w4, msg_padded_w5, 
+                                              msg_padded_w6, msg_padded_w7)
+    msg_output                          := impl.io.msg_output
+    msg_out_valid                       := impl.io.msg_out_valid
+    ready                               := impl.io.ready
+
+} else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the MD5 core
+    val impl = Module(new md5())
+    impl.suggestName(impl.desiredName+"_inst")
+
+    impl.io.clk                         := clock
+    impl.io.rst                         := (reset.asBool || rst).asAsyncReset
+    impl.io.init                        := init
+    impl.io.msg_in_valid                := msg_in_valid
+    impl.io.msg_padded                  := Cat(msg_padded_w0, msg_padded_w1,
+                                              msg_padded_w2, msg_padded_w3,
+                                              msg_padded_w4, msg_padded_w5, 
+                                              msg_padded_w6, msg_padded_w7)
+    msg_output                          := impl.io.msg_output
+    msg_out_valid                       := impl.io.msg_out_valid
+    ready                               := impl.io.ready
+
+  } // if (coreattachparams.llki_bus.isDefined)
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)

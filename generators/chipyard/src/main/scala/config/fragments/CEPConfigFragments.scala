@@ -91,6 +91,14 @@ class WithIIR ( params  : Seq[COREParams] = Seq(
   case PeripheryIIRKey => params
 })
 
+class WithIIRNoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.iir_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.iir_depth),
+    dev_name            = s"iir"))) extends Config((site, here, up) => {
+  case PeripheryIIRKey => params
+})
+
 class WithIDFT ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.idft_base_addr),
@@ -123,6 +131,14 @@ class WithGPS ( params  : Seq[COREParams] = Seq(
   case PeripheryGPSKey => params
 })
 
+class WithGPSNoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+    dev_name            = s"gps"))) extends Config((site, here, up) => {
+  case PeripheryGPSKey => params
+})
+
 class WithMD5 ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.md5_base_addr),
@@ -131,6 +147,14 @@ class WithMD5 ( params  : Seq[COREParams] = Seq(
     llki_depth          = BigInt(CEPBaseAddresses.md5_llki_depth),
     llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.md5_llki_ctrlsts_addr),
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.md5_llki_sendrecv_addr),
+    dev_name            = s"md5"))) extends Config((site, here, up) => {
+  case PeripheryMD5Key => params
+})
+
+class WithMD5NoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.md5_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.md5_depth),
     dev_name            = s"md5"))) extends Config((site, here, up) => {
   case PeripheryMD5Key => params
 })
@@ -187,6 +211,14 @@ class WithSHA256 ( params  : Seq[COREParams] = Seq(
   case PeripherySHA256Key => params
 })
 
+class WithSHA256NoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
+    dev_name            = s"sha256"))) extends Config((site, here, up) => {
+  case PeripherySHA256Key => params
+})
+
 class WithRSA ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
@@ -195,6 +227,14 @@ class WithRSA ( params  : Seq[COREParams] = Seq(
     llki_depth          = BigInt(CEPBaseAddresses.rsa_llki_depth),
     llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.rsa_llki_ctrlsts_addr),
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.rsa_llki_sendrecv_addr),
+    dev_name            = s"rsa"))) extends Config((site, here, up) => {
+  case PeripheryRSAKey => params
+})
+
+class WithRSANoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.rsa_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.rsa_depth),
     dev_name            = s"rsa"))) extends Config((site, here, up) => {
   case PeripheryRSAKey => params
 })

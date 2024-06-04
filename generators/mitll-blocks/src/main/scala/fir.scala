@@ -279,7 +279,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
 
   } else { // else if (coreattachparams.llki_bus.isDefined)
 
-    // Instantiate the DFT Top
+    // Instantiate the FIR Filter
     val impl = Module(new FIR_filter())
     impl.suggestName(impl.desiredName+"_inst")
 
@@ -335,9 +335,6 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     dataout_write_data      := impl.io.outData
 
   } // if (coreattachparams.llki_bus.isDefined)
-
-
-
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)

@@ -45,11 +45,19 @@ trait CanHavePeripheryIIR { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
@@ -66,12 +74,14 @@ trait CanHavePeripheryIIR { this: BaseSubsystem =>
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      // Attach the LLKI if it is defined
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
@@ -89,8 +99,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -104,6 +115,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -116,7 +128,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -127,62 +139,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
-
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Instantiate the blackbox
-  val IIR_filter_inst   = Module(new IIR_filter_mock_tss())
-  IIR_filter_inst.suggestName(IIR_filter_inst.desiredName+"_inst")
-
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  IIR_filter_inst.io.llkid_key_data    := llki_pp_inst.io.llkid_key_data
-  IIR_filter_inst.io.llkid_key_valid   := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready      := IIR_filter_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete   := IIR_filter_inst.io.llkid_key_complete
-  IIR_filter_inst.io.llkid_clear_key   := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack  := IIR_filter_inst.io.llkid_clear_key_ack
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // Macro definition for creating rising edge detectors
   def rising_edge(x: Bool)    = x && !RegNext(x)
@@ -214,57 +171,170 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   iir_reset_re                := rising_edge(iir_reset)
 
-  // Write to the input data memory when a rising edge is detected on the write enable
-  when (rising_edge(datain_we)) {
-    datain_mem.write(datain_write_idx, datain_write_data)
-  }
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
+  if (coreattachparams.llki_bus.isDefined) {
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
 
-  // Implement the read logic for the datain and data out memories
-  datain_read_data            := datain_mem(datain_read_idx)
-  dataout_read_data           := dataout_mem(dataout_read_idx)
+    // Instantiate the IIR Filter Mock TSS
+    val impl = Module(new IIR_filter_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
 
-  // Generate the read index for the data in memory
-  when (rising_edge(start)) {
-    datain_read_idx         := 0.U
-  } .elsewhen (datain_read_idx < 32.U) {
-    datain_read_idx         := datain_read_idx + 1.U
-  }
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
 
-  // The following counter "counts" the propagation through the IIR filter
-  when (rising_edge(start)) {
-    count                   := 0.U
-  } .elsewhen (datain_read_idx < 10.U) {
-    count                   := count + 1.U
-  }
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
 
-  // Assert next out when the count reaches the appropriate value
-  next_out                    := (count === 3.U)
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
 
-  // Generate the write index for the output data memory (and write)
-  when (rising_edge(next_out)) {
-    dataout_write_idx       := 0.U;
-  } .elsewhen (dataout_write_idx < 32.U) {
-    dataout_write_idx       := dataout_write_idx + 1.U
-    dataout_mem.write(dataout_write_idx, dataout_write_data)
-  }
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
 
-  // Generate the data valid signal
-  when (rising_edge(start)) {
-    dataout_valid           := 0.U
-  } .elsewhen (rising_edge(next_out)) {
-    dataout_valid           := 1.U
-  }
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
 
-  // Map the blackbox I/O
-  // The IIR needs to be reset in between test vectors, thus a second reset
-  // has been added in order to allow for the LLKI keys to persist
-  IIR_filter_inst.io.clk       := clock
-  IIR_filter_inst.io.rst       := reset
-//  IIR_filter_inst.io.rst_dut   := (reset.asBool || iir_reset_re).asAsyncReset 
-  IIR_filter_inst.io.rst_dut   := (reset.asBool || iir_reset).asAsyncReset 
-                                                                   
-  IIR_filter_inst.io.inData    := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
-  dataout_write_data           := IIR_filter_inst.io.outData
+    // Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data            := datain_mem(datain_read_idx)
+    dataout_read_data           := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx         := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx         := datain_read_idx + 1.U
+    }
+
+    // The following counter "counts" the propagation through the FIR filter
+    when (rising_edge(start)) {
+      count                   := 0.U
+    } .elsewhen (datain_read_idx < 10.U) {
+      count                   := count + 1.U
+    }
+
+    // Assert next out when the count reaches the appropriate value
+    next_out                    := (count === 3.U)
+
+    // Generate the write index for the output data memory (and write)
+    when (rising_edge(next_out)) {
+      dataout_write_idx       := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx       := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid           := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid           := 1.U
+    }
+
+    // Map the blackbox I/O
+    // The FIR needs to be reset in between test vectors, thus a second reset
+    // has been added in order to allow for the LLKI keys to persist
+    impl.io.clk             := clock
+    impl.io.rst             := reset
+    impl.io.rst_dut         := (reset.asBool || iir_reset).asAsyncReset 
+                                                                     
+    impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
+    dataout_write_data      := impl.io.outData
+
+  } else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the IIR Filter
+    val impl = Module(new IIR_filter())
+    impl.suggestName(impl.desiredName+"_inst")
+
+// Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data            := datain_mem(datain_read_idx)
+    dataout_read_data           := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx         := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx         := datain_read_idx + 1.U
+    }
+
+    // The following counter "counts" the propagation through the FIR filter
+    when (rising_edge(start)) {
+      count                   := 0.U
+    } .elsewhen (datain_read_idx < 10.U) {
+      count                   := count + 1.U
+    }
+
+    // Assert next out when the count reaches the appropriate value
+    next_out                    := (count === 3.U)
+
+    // Generate the write index for the output data memory (and write)
+    when (rising_edge(next_out)) {
+      dataout_write_idx       := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx       := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid           := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid           := 1.U
+    }
+
+    // Map the blackbox I/O
+    // The FIR needs to be reset in between test vectors, thus a second reset
+    // has been added in order to allow for the LLKI keys to persist
+    impl.io.clk             := clock
+    impl.io.rst             := reset
+    impl.io.rst_dut         := (reset.asBool || iir_reset).asAsyncReset 
+                                                                     
+    impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
+    dataout_write_data      := impl.io.outData
+
+  } // if (coreattachparams.llki_bus.isDefined)
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)

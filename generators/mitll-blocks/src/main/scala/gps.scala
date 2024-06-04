@@ -41,11 +41,19 @@ trait CanHavePeripheryGPS { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
@@ -62,19 +70,21 @@ trait CanHavePeripheryGPS { this: BaseSubsystem =>
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      // Attach the LLKI if it is defined
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
 //--------------------------------------------------------------------------------------
 // END: Module "Periphery" connections
 //--------------------------------------------------------------------------------------
- 
+
 
 
 //--------------------------------------------------------------------------------------
@@ -85,8 +95,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -100,6 +111,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -112,7 +124,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -123,62 +135,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
-
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Instantiate the blackbox
-  val gps_inst   = Module(new gps_mock_tss())
-  gps_inst.suggestName(gps_inst.desiredName+"_inst")
-
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  gps_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data
-  gps_inst.io.llkid_key_valid         := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready     := gps_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete  := gps_inst.io.llkid_key_complete
-  gps_inst.io.llkid_clear_key         := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack := gps_inst.io.llkid_clear_key_ack
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
   // Instantiate registers for the blackbox inputs
   val startRound                   = RegInit(0.U(1.W))
@@ -193,8 +150,6 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
   val pcode_ini_x2a                = RegInit(0x925.U(12.W)) // 12'b100100100101
   val pcode_ini_x2b                = RegInit(0x554.U(12.W)) // 12'b010101010100
   
-//
-// tony duong: 02/24/21: change default to true to support unit sim
   val gps_reset                    = RegInit(false.B)
 
   // Instantiate wires for the blackbox outputs
@@ -209,26 +164,110 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
   val l_code1_l                    = Wire(UInt(32.W))
   val l_code_valid                 = Wire(Bool())
 
-  // Map the blackbox I/O 
-  gps_inst.io.sys_clk            := clock                                      // Implicit module clock
-  gps_inst.io.sync_rst_in        := reset
-  gps_inst.io.sync_rst_in_dut    := (reset.asBool || gps_reset).asAsyncReset 
-                                                                                        // Implicit module reset
-  gps_inst.io.startRound         := startRound                                 // Start bit
-  gps_inst.io.sv_num             := sv_num                                     // GPS space vehicle number written by cepregression.cpp
-  gps_inst.io.aes_key            := Cat(aes_key0, aes_key1, aes_key2)          // L code encryption key
-  gps_inst.io.pcode_speeds       := Cat(pcode_z_cnt_speed, pcode_xn_cnt_speed) // PCode acceleration register
-  gps_inst.io.pcode_initializers := Cat(pcode_ini_x2b, pcode_ini_x2a, pcode_ini_x1b, pcode_ini_x1a) // Initializers for pcode shift registers
-  ca_code                                 := gps_inst.io.ca_code               // Output GPS CA code
-  p_code0_u                               := gps_inst.io.p_code(127,96)        // Output P Code bits 
-  p_code0_l                               := gps_inst.io.p_code(95,64)         // Output P Code bits      
-  p_code1_u                               := gps_inst.io.p_code(63,32)         // Output P Code bits          
-  p_code1_l                               := gps_inst.io.p_code(31,0)          // Output P Code bits
-  l_code0_u                               := gps_inst.io.l_code(127,96)        // Output L Code bits                        
-  l_code0_l                               := gps_inst.io.l_code(95,64)         // Output L Code bits
-  l_code1_u                               := gps_inst.io.l_code(63,32)         // Output L Code bits      
-  l_code1_l                               := gps_inst.io.l_code(31,0)          // Output L Code bits
-  l_code_valid                            := gps_inst.io.l_code_valid          // Out is valid until start is again asserted
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
+  if (coreattachparams.llki_bus.isDefined) {
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
+
+    // Instantiate the GPS mock TSS
+    val impl = Module(new gps_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
+
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
+
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
+
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
+
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
+
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
+
+    // Map the blackbox I/O 
+    impl.io.sys_clk                     := clock                                      // Implicit module clock
+    impl.io.sync_rst_in                 := reset
+    impl.io.sync_rst_in_dut             := (reset.asBool || gps_reset).asAsyncReset 
+                                                                                      // Implicit module reset
+    impl.io.startRound                  := startRound                                 // Start bit
+    impl.io.sv_num                      := sv_num                                     // GPS space vehicle number written by cepregression.cpp
+    impl.io.aes_key                     := Cat(aes_key0, aes_key1, aes_key2)          // L code encryption key
+    impl.io.pcode_speeds                := Cat(pcode_z_cnt_speed, pcode_xn_cnt_speed) // PCode acceleration register
+    impl.io.pcode_initializers          := Cat(pcode_ini_x2b, pcode_ini_x2a, pcode_ini_x1b, pcode_ini_x1a) // Initializers for pcode shift registers
+    ca_code                             := impl.io.ca_code               // Output GPS CA code
+    p_code0_u                           := impl.io.p_code(127,96)        // Output P Code bits 
+    p_code0_l                           := impl.io.p_code(95,64)         // Output P Code bits      
+    p_code1_u                           := impl.io.p_code(63,32)         // Output P Code bits          
+    p_code1_l                           := impl.io.p_code(31,0)          // Output P Code bits
+    l_code0_u                           := impl.io.l_code(127,96)        // Output L Code bits                        
+    l_code0_l                           := impl.io.l_code(95,64)         // Output L Code bits
+    l_code1_u                           := impl.io.l_code(63,32)         // Output L Code bits      
+    l_code1_l                           := impl.io.l_code(31,0)          // Output L Code bits
+    l_code_valid                        := impl.io.l_code_valid          // Out is valid until start is again asserted
+
+  } else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the GPS module
+    val impl = Module(new gps())
+    impl.suggestName(impl.desiredName+"_inst")
+
+    // Map the blackbox I/O 
+    impl.io.sys_clk                     := clock                                      // Implicit module clock
+    impl.io.sync_rst_in                 := reset
+    impl.io.sync_rst_in_dut             := (reset.asBool || gps_reset).asAsyncReset 
+                                                                                      // Implicit module reset
+    impl.io.startRound                  := startRound                                 // Start bit
+    impl.io.sv_num                      := sv_num                                     // GPS space vehicle number written by cepregression.cpp
+    impl.io.aes_key                     := Cat(aes_key0, aes_key1, aes_key2)          // L code encryption key
+    impl.io.pcode_speeds                := Cat(pcode_z_cnt_speed, pcode_xn_cnt_speed) // PCode acceleration register
+    impl.io.pcode_initializers          := Cat(pcode_ini_x2b, pcode_ini_x2a, pcode_ini_x1b, pcode_ini_x1a) // Initializers for pcode shift registers
+    ca_code                             := impl.io.ca_code               // Output GPS CA code
+    p_code0_u                           := impl.io.p_code(127,96)        // Output P Code bits 
+    p_code0_l                           := impl.io.p_code(95,64)         // Output P Code bits      
+    p_code1_u                           := impl.io.p_code(63,32)         // Output P Code bits          
+    p_code1_l                           := impl.io.p_code(31,0)          // Output P Code bits
+    l_code0_u                           := impl.io.l_code(127,96)        // Output L Code bits                        
+    l_code0_l                           := impl.io.l_code(95,64)         // Output L Code bits
+    l_code1_u                           := impl.io.l_code(63,32)         // Output L Code bits      
+    l_code1_l                           := impl.io.l_code(31,0)          // Output L Code bits
+    l_code_valid                        := impl.io.l_code_valid          // Out is valid until start is again asserted
+
+  } // if (coreattachparams.llki_bus.isDefined)
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
