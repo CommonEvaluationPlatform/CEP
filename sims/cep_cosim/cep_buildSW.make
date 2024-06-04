@@ -30,6 +30,10 @@ COMMON_CFLAGS	        += -DNOLLKI_MODE
 RISCV_BARE_CFLAGS       += -DNOLLKI_MODE
 endif
 
+COMMON_CFLAGS	        += -DCPU_COUNT=\"${CHIPYARD_CPU_COUNT}\"
+RISCV_BARE_CFLAGS       += -DCPU_COUNT=\"${CHIPYARD_CPU_COUNT}\"
+
+
 #--------------------------------------------------------------------------------------
 # Create lists of libraries, sources, and object files
 #

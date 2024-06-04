@@ -306,17 +306,20 @@ module `COSIM_TB_TOP_MODULE;
   //--------------------------------------------------------------------------------------
   // Instantiation of the System and CPU Drivers
   //--------------------------------------------------------------------------------------
-  reg [3:0]   enableMask = 0;
-  wire [3:0]  passMask;
+  reg   [`CPU_COUNT - 1:0]  enableMask = 0;
+  wire  [`CPU_COUNT - 1:0]  passMask;
 
   // Enable all the CPU Drivers
   initial begin
-    #1 enableMask = 'hF;
+    if (`CPU_COUNT > `MAX_CORES)
+        $fatal("CPU_COUNT exceeds MAX_CORES");
+  
+    #1 enableMask = '1;
   end
   
  genvar c;
   generate
-    for (c = 0; c < `MAX_CORES; c++) begin : cpuId
+    for (c = 0; c < `CPU_COUNT; c++) begin : cpuId
       cpu_driver #(
         .MY_SLOT_ID   (0),
         .MY_CPU_ID    (c)

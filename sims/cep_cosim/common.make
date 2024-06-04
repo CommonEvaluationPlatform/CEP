@@ -210,6 +210,7 @@ else ifeq (${CADENCE},1)
 	@echo "CEP_COSIM:   XCELIUM_INSTALL        = ${XCELIUM_INSTALL}"
 endif
 	@echo "CEP_COSIM:   CHIPYARD_SUB_PROJECT   = ${CHIPYARD_SUB_PROJECT}"
+	@echo "CEP_COSIM:   CHIPYARD_CPU_COUNT     = ${CHIPYARD_CPU_COUNT}"
 	@echo "CEP_COSIM:   MODELSIM               = $(MODELSIM)"
 	@echo "CEP_COSIM:   CADENCE                = $(CADENCE)"
 	@echo "CEP_COSIM:   DUT_SIM_MODE           = ${DUT_SIM_MODE}"
