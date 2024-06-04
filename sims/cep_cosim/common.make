@@ -105,6 +105,13 @@ ifneq (,$(wildcard $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make))
 include $(COSIM_TOP_DIR)/CHIPYARD_BUILD_INFO.make
 endif
 
+# Override the NOLLKI_MODE mode based on inferrence from the CHIPYARD_SUB_PROJECT
+ifeq "$(findstring nollki,${CHIPYARD_SUB_PROJECT})" "nollki"
+override NOLLKI_MODE 			= 1
+else
+override NOLLKI_MODE 			= 0
+endif	
+
 
 # Override the ASIC mode based on inferrence from the CHIPYARD_SUB_PROJECT
 ifeq "$(findstring asic,${CHIPYARD_SUB_PROJECT})" "asic"

@@ -283,7 +283,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     val impl = Module(new FIR_filter())
     impl.suggestName(impl.desiredName+"_inst")
 
-// Write to the input data memory when a rising edge is detected on the write enable
+    // Write to the input data memory when a rising edge is detected on the write enable
     when (rising_edge(datain_we)) {
       datain_mem.write(datain_write_idx, datain_write_data)
     }
@@ -327,8 +327,13 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     // Map the blackbox I/O
     // The FIR needs to be reset in between test vectors, thus a second reset
     // has been added in order to allow for the LLKI keys to persist
+
+    // Create an inverted reset
+    val reset_n             = Wire(Bool())
+    reset_n                 := ~reset.asBool
+
     impl.io.clk             := clock
-    impl.io.reset           := reset
+    impl.io.reset           := reset_n // turns out the IIR/FIR filter resets are active low
                                                                      
     impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
     dataout_write_data      := impl.io.outData

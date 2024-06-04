@@ -327,8 +327,12 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     // Map the blackbox I/O
     // The FIR needs to be reset in between test vectors, thus a second reset
     // has been added in order to allow for the LLKI keys to persist
+    // Create an inverted reset
+    val reset_n             = Wire(Bool())
+    reset_n                 := ~reset.asBool
+
     impl.io.clk             := clock
-    impl.io.reset           := reset
+    impl.io.reset           := reset_n // turns out the IIR/FIR filter resets are active low
                                                                      
     impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
     dataout_write_data      := impl.io.outData

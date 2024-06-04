@@ -55,6 +55,7 @@ void *c_module(void *arg) {
   pio.RunClk(500);
 
   int coreMask = 0xFFFFFFFF; // all cores
+
 //  int coreMask = 0x00000001;  // AES
 //  int coreMask = 0x00000002;  // MD5
 //  int coreMask = 0x00000004;  // SHA256.0
