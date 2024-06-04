@@ -903,14 +903,6 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
       val l_code              = Output(UInt(128.W))
       val l_code_valid        = Output(Bool())
 
-      // LLKI discrete interface
-      val llkid_key_data      = Input(UInt(64.W))
-      val llkid_key_valid     = Input(Bool())
-      val llkid_key_ready     = Output(Bool())
-      val llkid_key_complete  = Output(Bool())
-      val llkid_clear_key     = Input(Bool())
-      val llkid_clear_key_ack = Output(Bool())
-
     })
 
     // Add the SystemVerilog/Verilog associated with the module
@@ -990,7 +982,7 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
 
   } // end idft_top
 
- // Define blackbox and its associated IO
+  // Define blackbox and its associated IO
   class IIR_filter_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
@@ -1036,14 +1028,6 @@ class aes_192() extends BlackBox with HasBlackBoxResource {
     
       // Outputs
       val outData             = Output(UInt(32.W))
-
-      // LLKI discrete interface
-      val llkid_key_data      = Input(UInt(64.W))
-      val llkid_key_valid     = Input(Bool())
-      val llkid_key_ready     = Output(Bool())
-      val llkid_key_complete  = Output(Bool())
-      val llkid_clear_key     = Input(Bool())
-      val llkid_clear_key_ack = Output(Bool())
 
     })
 

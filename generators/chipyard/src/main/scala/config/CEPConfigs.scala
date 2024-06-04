@@ -179,6 +179,91 @@ class CEPRocketConfig extends Config(
 
 )
 
+// Chipyard Configuration for the non-ASIC simulation version of the CEP without the LLKI
+class CEPNoLLKIRocketConfig extends Config(
+  // Add the CEP Accelerator Cores
+  new chipyard.config.WithAESNoLLKI ++
+  new chipyard.config.WithDES3NoLLKI ++
+  new chipyard.config.WithFIRNoLLKI ++
+  new chipyard.config.WithIIRNoLLKI ++
+  new chipyard.config.WithDFTNoLLKI ++
+  new chipyard.config.WithIDFTNoLLKI ++
+  new chipyard.config.WithMD5NoLLKI ++
+  new chipyard.config.WithGPSNoLLKI(params = Seq(
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_0_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_0_depth),
+      dev_name            = s"gps_0"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_1_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_1_depth),
+      dev_name            = s"gps_1"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_2_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_2_depth),
+      dev_name            = s"gps_2"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.gps_3_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.gps_3_depth),
+      dev_name            = s"gps_3")
+    )) ++
+  new chipyard.config.WithSHA256NoLLKI(params = Seq(
+    COREParams( 
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_0_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_0_depth),
+      dev_name            = s"sha256_0"),
+    COREParams( 
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_1_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_1_depth),
+      dev_name            = s"sha256_1"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_2_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_2_depth),
+      dev_name            = s"sha256_2"),
+    COREParams(
+      slave_base_addr     = BigInt(CEPBaseAddresses.sha256_3_base_addr),
+      slave_depth         = BigInt(CEPBaseAddresses.sha256_3_depth),
+      dev_name            = s"sha256_3")
+    )) ++
+
+
+  // Instantiation of the CEP registers
+  new chipyard.config.WithCEPRegisters ++
+
+  // Instantiation of the RSA core with or w/o the ARM compiled memories
+  new chipyard.config.WithRSANoLLKI ++
+
+  // Instantiantion of the CEP BootROM with default parameter overrides
+  // The hang parameter sets the system-wide reset vector for ALL RocketTiles
+  new chipyard.config.WithCEPBootROM(address = 0x10000L, size = 0x8000, hang = 0x10000L) ++
+
+  // CEP Scratchpad memory @ the typical external memory base address
+  // Address & Size are in terms of *bytes* even though the memory is
+  // 64-bits wide.  
+  new chipyard.config.WithCEPScratchpad(address = 0x80000000L, size = 0x0FFFFFL) ++
+
+  // Moved IO declerations from AbstractCEPConfig to here for readability
+  new chipyard.config.WithUART(address = 0x64000000L) ++
+  new chipyard.config.WithGPIO(address = 0x64002000L, width = 8) ++
+  new chipyard.config.WithSPI (address = 0x64001000L) ++
+
+  // Four Big Rocket-Cores
+  new freechips.rocketchip.subsystem.WithNBigCores(4) ++
+
+  // Override the default device tree chip name
+  new WithDTS("mit-ll,rocketchip-cep", Nil) ++
+
+  // Do NOT instantiate the Tilelink monitors
+  new WithoutTLMonitors ++ 
+
+  // The default CEP configuration has no external memory
+  new freechips.rocketchip.subsystem.WithNoMemPort ++
+
+  // Set the remainder of the configuration items
+  new chipyard.config.AbstractCEPConfig
+
+)
+
 // CEP Chipyard Configuration for running with Verilator.  
 // Peripherals (UART, BootROM, etc.) are left @ chipyard default
 class CEPVerilatorRocketConfig extends Config(

@@ -283,7 +283,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
     val impl = Module(new IIR_filter())
     impl.suggestName(impl.desiredName+"_inst")
 
-// Write to the input data memory when a rising edge is detected on the write enable
+    // Write to the input data memory when a rising edge is detected on the write enable
     when (rising_edge(datain_we)) {
       datain_mem.write(datain_write_idx, datain_write_data)
     }

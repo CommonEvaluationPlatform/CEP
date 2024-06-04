@@ -220,7 +220,7 @@ class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams
   } else { // else if (coreattachparams.llki_bus.isDefined)
   
     // Instantiate the DES3 Mock TSS
-    val impl = Module(new des3_mock_tss())
+    val impl = Module(new des3())
     impl.suggestName(impl.desiredName+"_inst")
 
     // Map the blackbox I/O 
