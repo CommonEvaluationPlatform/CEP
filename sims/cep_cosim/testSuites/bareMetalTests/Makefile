@@ -17,9 +17,28 @@ REPO_TOP_DIR 		= $(strip $(shell cd ${COSIM_TOP_DIR}/../..; pwd))
 TEST_SUITE_DIR		= $(strip $(shell cd .; pwd))
 TEST_SUITE_NAME		= $(shell cd .; basename `pwd`)
 
+# Include current test suite common.make
+include ./common.make
+
 default: usage
 
-# List of tests to run
+ifeq (${NOLLKI_MODE},0)
+TEST_LIST 		= 		\
+	accessTest 			\
+	atomicOps			\
+	cacheCoherence		\
+	clintIntr 			\
+	clintTest 			\
+	csrTest 			\
+	idcache_smc 		\
+	lockfreeAtomic 		\
+	lockTest 			\
+	miscTests 			\
+	multiLock 			\
+	plicTest 			\
+	regTest 			\
+	fullBoot 			
+else
 TEST_LIST 		= 		\
 	accessTest 			\
 	atomicOps			\
@@ -40,12 +59,13 @@ TEST_LIST 		= 		\
 	regTest 			\
 	srotMemTest			\
 	fullBoot 			
+endif
+# List of tests to run
 
 # Tests yet to run/fix/debug
 #plicPrioIntr
 #extIntr
 #lsrcOps
-
 
 runAll: cleanSuite
 	@for i in ${TEST_LIST}; do 									\
@@ -58,7 +78,5 @@ summary:
 		cat ${TEST_SUITE_DIR}/$${i}/status | sort | tee -a testSuiteSummary;	\
 	done
 
-# Include current test suite common.make
-include ./common.make
 
 
