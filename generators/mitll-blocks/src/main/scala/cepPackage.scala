@@ -25,6 +25,7 @@ package mitllBlocks.cepPackage
 
 import chisel3._
 import freechips.rocketchip.tilelink.{TLBusWrapper}
+import chisel3.experimental.{IntParam, BaseModule}
 
 object CEPVersion {
   val CEP_MAJOR_VERSION             = 0x04
@@ -345,11 +346,3 @@ case class SROTParams(
   cep_cores_depth     : BigInt,
   llki_cores_array    : Array[BigInt]
 )
-
-// The following parameter pass attachment info to the lower level objects/classes/etc.
-case class SROTAttachParams(
-  srotparams          : SROTParams,
-  slave_bus           : TLBusWrapper,
-  master_bus          : TLBusWrapper
-)
-

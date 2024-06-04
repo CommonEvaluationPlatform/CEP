@@ -45,11 +45,19 @@ trait CanHavePeripheryDFT { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
@@ -66,12 +74,14 @@ trait CanHavePeripheryDFT { this: BaseSubsystem =>
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      // Attach the LLKI if it is defined
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
@@ -89,8 +99,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -104,6 +115,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -116,7 +128,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -127,114 +139,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Define the LLKI Protocol Processing blackbox and its associated IO
-  class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
-                          llki_sendrecv_addr    : BigInt,
-                          slave_tl_szw          : Int,
-                          slave_tl_aiw          : Int,
-                          slave_tl_aw           : Int,
-                          slave_tl_dbw          : Int,
-                          slave_tl_dw           : Int,
-                          slave_tl_diw          : Int) extends BlackBox (
-
-      Map(
-        "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
-        "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
-        "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
-        "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
-        "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
-        "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
-        "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
-        "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
-      )
-  ) {
-
-    val io = IO(new Bundle {
-      // Clock and Reset
-      val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
-
-      // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_a_opcode      = Input(UInt(3.W))
-      val slave_a_param       = Input(UInt(3.W))
-      val slave_a_size        = Input(UInt(slave_tl_szw.W))
-      val slave_a_source      = Input(UInt(slave_tl_aiw.W))
-      val slave_a_address     = Input(UInt(slave_tl_aw.W))
-      val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
-      val slave_a_data        = Input(UInt(slave_tl_dw.W))
-      val slave_a_corrupt     = Input(Bool())
-      val slave_a_valid       = Input(Bool())
-      val slave_a_ready       = Output(Bool())
-
-      // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_d_opcode      = Output(UInt(3.W))
-      val slave_d_param       = Output(UInt(3.W))
-      val slave_d_size        = Output(UInt(slave_tl_szw.W))
-      val slave_d_source      = Output(UInt(slave_tl_aiw.W))
-      val slave_d_sink        = Output(UInt(slave_tl_diw.W))
-      val slave_d_denied      = Output(Bool())
-      val slave_d_data        = Output(UInt(slave_tl_dw.W))
-      val slave_d_corrupt     = Output(Bool())
-      val slave_d_valid       = Output(Bool())
-      val slave_d_ready       = Input(Bool())
-
-      // LLKI discrete interface
-      val llkid_key_data      = Output(UInt(64.W))
-      val llkid_key_valid     = Output(Bool())
-      val llkid_key_ready     = Input(Bool())
-      val llkid_key_complete  = Input(Bool())
-      val llkid_clear_key     = Output(Bool())
-      val llkid_clear_key_ack = Input(Bool())
-
-    })
-  } // end class llki_pp_wrapper
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Define blackbox and its associated IO
+  // Define blackbox and its associated IO (with LLKI)
   class dft_top_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
@@ -273,17 +180,35 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   }
 
-  // Instantiate the blackbox
-  val dft_inst   = Module(new dft_top_mock_tss())
-  dft_inst.suggestName(dft_inst.desiredName+"_inst")
+  // Define blackbox and its associated IO (without LLKI)
+  class dft_top () extends BlackBox with HasBlackBoxResource {
 
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  dft_inst.io.llkid_key_data          := llki_pp_inst.io.llkid_key_data
-  dft_inst.io.llkid_key_valid         := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready     := dft_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete  := dft_inst.io.llkid_key_complete
-  dft_inst.io.llkid_clear_key         := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack := dft_inst.io.llkid_clear_key_ack
+    val io = IO(new Bundle {
+      // Clock and Reset
+      val clk                 = Input(Clock())
+      val rst                 = Input(Reset())
+   
+      // Inputs
+      val next                = Input(Bool())            
+      val X0                  = Input(UInt(16.W))
+      val X1                  = Input(UInt(16.W))
+      val X2                  = Input(UInt(16.W))
+      val X3                  = Input(UInt(16.W))
+    
+      // Outputs
+      val next_out            = Output(Bool())
+      val Y0                  = Output(UInt(16.W))
+      val Y1                  = Output(UInt(16.W))
+      val Y2                  = Output(UInt(16.W))
+      val Y3                  = Output(UInt(16.W))
+
+    })
+
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/dsp/dft_top.v")
+
+  }
 
   // Macro definition for creating rising edge detectors
   def rising_edge(x: Bool)    = x && !RegNext(x)
@@ -308,53 +233,228 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   val next_out                = RegInit(false.B)
 
-  // Write to the input data memory when a rising edge is detected on the write enable
-  when (rising_edge(datain_we)) {
-    datain_mem.write(datain_write_idx, datain_write_data)
-  }
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
+  if (coreattachparams.llki_bus.isDefined) {
 
-  // Implement the read logic for the datain and data out memories
-  datain_read_data              := datain_mem(datain_read_idx)
-  dataout_read_data             := dataout_mem(dataout_read_idx)
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
 
-  // Generate the read index for the data in memory
-  when (rising_edge(start)) {
-    datain_read_idx             := 0.U
-  } .elsewhen (datain_read_idx < 32.U) {
-    datain_read_idx             := datain_read_idx + 1.U
-  }
+    // Instantiate the DFT Mock TSS
+    val impl = Module(new dft_top_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
 
-  // Generate the write index for the output data memory (and write)
-  when (next_out){
-    dataout_write_idx           := 0.U;
-  } .elsewhen (dataout_write_idx < 32.U) {
-    dataout_write_idx           := dataout_write_idx + 1.U
-    dataout_mem.write(dataout_write_idx, dataout_write_data)
-  }
+    // Define the LLKI Protocol Processing blackbox and its associated IO
+    class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
+                            llki_sendrecv_addr    : BigInt,
+                            slave_tl_szw          : Int,
+                            slave_tl_aiw          : Int,
+                            slave_tl_aw           : Int,
+                            slave_tl_dbw          : Int,
+                            slave_tl_dw           : Int,
+                            slave_tl_diw          : Int) extends BlackBox (
 
-  // Generate the data valid signal
-  when (rising_edge(start)) {
-    dataout_valid               := 0.U
-  } .elsewhen (rising_edge(next_out)) {
-    dataout_valid               := 1.U
-  }
+        Map(
+          "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
+          "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
+          "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
+          "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
+          "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
+          "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
+          "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
+          "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
+        )
+    ) {
 
-  // Map the blackbox inputs
-  dft_inst.io.clk      := clock                // Implicit module clock
-  dft_inst.io.rst      := reset                // dft top has an active high reset 
-  dft_inst.io.X0       := Mux(datain_read_idx < 32.U, datain_read_data(63,48), 0.U) // Concatenating data into 64 bit blackbox input
-  dft_inst.io.X1       := Mux(datain_read_idx < 32.U, datain_read_data(47,32), 0.U) // Concatenating data into 64 bit blackbox input
-  dft_inst.io.X2       := Mux(datain_read_idx < 32.U, datain_read_data(31,16), 0.U) // Concatenating data into 64 bit blackbox input       
-  dft_inst.io.X3       := Mux(datain_read_idx < 32.U, datain_read_data(15,0),  0.U) // Concatenating data into 64 bit blackbox input
-  dft_inst.io.next     := rising_edge(start) 
+      val io = IO(new Bundle {
+
+        // Clock and Reset
+        val clk                 = Input(Clock())
+        val rst                 = Input(Reset())
+
+        // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_a_opcode      = Input(UInt(3.W))
+        val slave_a_param       = Input(UInt(3.W))
+        val slave_a_size        = Input(UInt(slave_tl_szw.W))
+        val slave_a_source      = Input(UInt(slave_tl_aiw.W))
+        val slave_a_address     = Input(UInt(slave_tl_aw.W))
+        val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
+        val slave_a_data        = Input(UInt(slave_tl_dw.W))
+        val slave_a_corrupt     = Input(Bool())
+        val slave_a_valid       = Input(Bool())
+        val slave_a_ready       = Output(Bool())
+
+        // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_d_opcode      = Output(UInt(3.W))
+        val slave_d_param       = Output(UInt(3.W))
+        val slave_d_size        = Output(UInt(slave_tl_szw.W))
+        val slave_d_source      = Output(UInt(slave_tl_aiw.W))
+        val slave_d_sink        = Output(UInt(slave_tl_diw.W))
+        val slave_d_denied      = Output(Bool())
+        val slave_d_data        = Output(UInt(slave_tl_dw.W))
+        val slave_d_corrupt     = Output(Bool())
+        val slave_d_valid       = Output(Bool())
+        val slave_d_ready       = Input(Bool())
+
+        // LLKI discrete interface
+        val llkid_key_data      = Output(UInt(64.W))
+        val llkid_key_valid     = Output(Bool())
+        val llkid_key_ready     = Input(Bool())
+        val llkid_key_complete  = Input(Bool())
+        val llkid_clear_key     = Output(Bool())
+        val llkid_clear_key_ack = Input(Bool())
+
+      })
+    } // end class llki_pp_wrapper
+
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
+
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
+
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
+
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
+
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
+
+    // Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data              := datain_mem(datain_read_idx)
+    dataout_read_data             := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx             := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx             := datain_read_idx + 1.U
+    }
+
+    // Generate the write index for the output data memory (and write)
+    when (next_out){
+      dataout_write_idx           := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx           := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid               := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid               := 1.U
+    }
+
+    // Map the blackbox inputs
+    impl.io.clk      := clock                // Implicit module clock
+    impl.io.rst      := reset                // dft top has an active high reset 
+    impl.io.X0       := Mux(datain_read_idx < 32.U, datain_read_data(63,48), 0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.X1       := Mux(datain_read_idx < 32.U, datain_read_data(47,32), 0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.X2       := Mux(datain_read_idx < 32.U, datain_read_data(31,16), 0.U) // Concatenating data into 64 bit blackbox input       
+    impl.io.X3       := Mux(datain_read_idx < 32.U, datain_read_data(15,0),  0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.next     := rising_edge(start) 
                                                             // Map the dft input data only when pointing to
                                                             // a valid memory location
-  // Map the blackbox outputs
-  dataout_write_data                := Cat(dft_inst.io.Y0,
-                                           dft_inst.io.Y1,
-                                           dft_inst.io.Y2,
-                                           dft_inst.io.Y3)      // dft output data
-  next_out                          := dft_inst.io.next_out
+    // Map the blackbox outputs
+    dataout_write_data                := Cat(impl.io.Y0,
+                                             impl.io.Y1,
+                                             impl.io.Y2,
+                                             impl.io.Y3)      // dft output data
+    next_out                            := impl.io.next_out
+
+  } else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the DFT Top
+    val impl = Module(new dft_top())
+    impl.suggestName(impl.desiredName+"_inst")
+
+  // Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data              := datain_mem(datain_read_idx)
+    dataout_read_data             := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx             := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx             := datain_read_idx + 1.U
+    }
+
+    // Generate the write index for the output data memory (and write)
+    when (next_out){
+      dataout_write_idx           := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx           := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid               := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid               := 1.U
+    }
+
+    // Map the blackbox inputs
+    impl.io.clk      := clock                // Implicit module clock
+    impl.io.rst      := reset                // dft top has an active high reset 
+    impl.io.X0       := Mux(datain_read_idx < 32.U, datain_read_data(63,48), 0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.X1       := Mux(datain_read_idx < 32.U, datain_read_data(47,32), 0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.X2       := Mux(datain_read_idx < 32.U, datain_read_data(31,16), 0.U) // Concatenating data into 64 bit blackbox input       
+    impl.io.X3       := Mux(datain_read_idx < 32.U, datain_read_data(15,0),  0.U) // Concatenating data into 64 bit blackbox input
+    impl.io.next     := rising_edge(start) 
+                                                            // Map the dft input data only when pointing to
+                                                            // a valid memory location
+    // Map the blackbox outputs
+    dataout_write_data                := Cat(impl.io.Y0,
+                                             impl.io.Y1,
+                                             impl.io.Y2,
+                                             impl.io.Y3)      // dft output data
+    next_out                            := impl.io.next_out
+
+  } // if (coreattachparams.llki_bus.isDefined)
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)

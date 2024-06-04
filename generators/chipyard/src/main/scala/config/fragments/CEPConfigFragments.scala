@@ -71,6 +71,14 @@ class WithDES3 ( params  : Seq[COREParams] = Seq(
   case PeripheryDES3Key => params
 })
 
+class WithDES3NoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.des3_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.des3_depth),
+    dev_name            = s"des3"))) extends Config((site, here, up) => {
+  case PeripheryDES3Key => params
+})
+
 class WithIIR ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.iir_base_addr),
@@ -91,6 +99,14 @@ class WithIDFT ( params  : Seq[COREParams] = Seq(
     llki_depth          = BigInt(CEPBaseAddresses.idft_llki_depth),
     llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.idft_llki_ctrlsts_addr),
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.idft_llki_sendrecv_addr),
+    dev_name            = s"idft"))) extends Config((site, here, up) => {
+  case PeripheryIDFTKey => params
+})
+
+class WithIDFTNoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.idft_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.idft_depth),
     dev_name            = s"idft"))) extends Config((site, here, up) => {
   case PeripheryIDFTKey => params
 })
@@ -131,6 +147,14 @@ class WithDFT ( params  : Seq[COREParams] = Seq(
   case PeripheryDFTKey => params
 })
 
+class WithDFTNoLLKI ( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.dft_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.dft_depth),
+    dev_name            = s"dft"))) extends Config((site, here, up) => {
+  case PeripheryDFTKey => params
+})
+
 class WithFIR ( params  : Seq[COREParams] = Seq(
   COREParams(
     slave_base_addr     = BigInt(CEPBaseAddresses.fir_base_addr),
@@ -139,6 +163,14 @@ class WithFIR ( params  : Seq[COREParams] = Seq(
     llki_depth          = BigInt(CEPBaseAddresses.fir_llki_depth),
     llki_ctrlsts_addr   = BigInt(CEPBaseAddresses.fir_llki_ctrlsts_addr),
     llki_sendrecv_addr  = BigInt(CEPBaseAddresses.fir_llki_sendrecv_addr),
+    dev_name            = s"fir"))) extends Config((site, here, up) => {
+  case PeripheryFIRKey => params
+})
+
+class WithFIRNoLLKI( params  : Seq[COREParams] = Seq(
+  COREParams(
+    slave_base_addr     = BigInt(CEPBaseAddresses.fir_base_addr),
+    slave_depth         = BigInt(CEPBaseAddresses.fir_depth),
     dev_name            = s"fir"))) extends Config((site, here, up) => {
   case PeripheryFIRKey => params
 })

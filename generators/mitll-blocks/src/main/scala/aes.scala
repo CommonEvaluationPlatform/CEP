@@ -36,7 +36,7 @@ case object PeripheryAESKey extends Field[Seq[COREParams]](Nil)
 // This trait "connects" the core to the Rocket Chip and passes the parameters down
 // to the instantiation
 trait CanHavePeripheryAES { this: BaseSubsystem =>
-  val node = p(PeripheryAESKey).map { params =>
+  val aesnode = p(PeripheryAESKey).map { params =>
 
     // Pull in the rocket-chip bus references
     val pbus = locateTLBusWrapper(PBUS)
@@ -46,7 +46,7 @@ trait CanHavePeripheryAES { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters (depending if the LLKI is non-zero)
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
     val coreattachparams = if (coreparams.llki_base_addr > 0) {
       val params = COREAttachParams(
         slave_bus   = pbus,

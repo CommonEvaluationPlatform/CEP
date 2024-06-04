@@ -205,7 +205,7 @@ class WithGPIOPunchthrough extends OverrideIOBinder({
 
 class WithAESTopIOPunchthrough extends OverrideIOBinder({
   (system: CanHavePeripheryAES) => {
-    val ports = system.node.zipWithIndex.map { case (n, i) => 
+    val ports = system.aesnode.zipWithIndex.map { case (n, i) => 
       val io_aes = IO(new AESTopIO).suggestName(s"aes_$i")
       io_aes := n
       AESTopIOPort(() => io_aes)

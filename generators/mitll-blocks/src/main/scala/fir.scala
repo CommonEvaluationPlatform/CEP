@@ -45,13 +45,20 @@ trait CanHavePeripheryFIR { this: BaseSubsystem =>
     // Map the core parameters
     val coreparams : COREParams = params
 
-    // Initialize the attachment parameters
-    val coreattachparams = COREAttachParams(
-      slave_bus   = pbus,
-      llki_bus    = Some(pbus)
-    )
+    // Initialize the attachment parameters (depending if the LLKI base address is non-zero)
+    val coreattachparams = if (coreparams.llki_base_addr > 0) {
+      val params = COREAttachParams(
+        slave_bus   = pbus,
+        llki_bus    = Some(pbus)
+      )
+      params
+    } else {
+      val params = COREAttachParams(
+        slave_bus   = pbus
+      )
+      params
+    }
 
-    // Generate the clock domain for this module
     // Generate (and name) the clock domain for this module
     val coreDomain = coreattachparams.slave_bus.generateSynchronousDomain(coreparams.dev_name + "_").suggestName(coreparams.dev_name+"_ClockSinkDomain_inst")
 
@@ -67,12 +74,14 @@ trait CanHavePeripheryFIR { this: BaseSubsystem =>
         TLFragmenter(coreattachparams.slave_bus) :*= _
       }
 
-      // Perform the slave "attachments" to the llki bus
-      coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
-        module.llki_node :*= 
-        TLSourceShrinker(16) :*=
-        TLFragmenter(coreattachparams.llki_bus.get) :*=_
-      }
+      // Attach the LLKI if it is defined
+      if (coreattachparams.llki_bus.isDefined) {
+        coreattachparams.llki_bus.get.coupleTo(coreparams.dev_name + "_llki_slave") {
+          module.llki_node.get :*= 
+          TLSourceShrinker(16) :*=
+          TLFragmenter(coreattachparams.llki_bus.get) :*=_
+        }
+      } // if (coreattachparams.llki_bus.isDefined)
     } // coreDomain
 
 }}
@@ -90,8 +99,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 
   // Create a Manager / Slave / Sink node
   // The OpenTitan-based Tilelink interfaces support 4 beatbytes only
-  val llki_node = TLManagerNode(Seq(TLSlavePortParameters.v1(
-    Seq(TLSlaveParameters.v1(
+  val llki_node = coreattachparams.llki_bus.map (_ =>  
+    TLManagerNode(Seq(TLSlavePortParameters.v1(
+      Seq(TLSlaveParameters.v1(
       address             = Seq(AddressSet(
                               coreparams.llki_base_addr, 
                               coreparams.llki_depth)),
@@ -105,6 +115,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
       supportsLogical     = TransferSizes.none,
       fifoId              = Some(0))), // requests are handled in order
     beatBytes = coreattachparams.llki_bus.get.beatBytes)))
+  )
 
   // Create the RegisterRouter node
   val slave_node = TLRegisterNode(
@@ -117,7 +128,7 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
   )
 
   // Instantiate the implementation
-  lazy val module = new coreTLModuleImp(coreparams, this)
+  lazy val module = new coreTLModuleImp(coreparams, coreattachparams, this)
 
 }
 //--------------------------------------------------------------------------------------
@@ -128,114 +139,9 @@ class coreTLModule(coreparams: COREParams, coreattachparams: COREAttachParams)(i
 //--------------------------------------------------------------------------------------
 // BEGIN: TileLink Module Implementation
 //--------------------------------------------------------------------------------------
-class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyModuleImp(outer) {
+class coreTLModuleImp(coreparams: COREParams, coreattachparams: COREAttachParams, outer: coreTLModule) extends LazyModuleImp(outer) {
 
-  // "Connect" to llki node's signals and parameters
-  val (llki, llkiEdge)    = outer.llki_node.in(0)
-
-  // Define the LLKI Protocol Processing blackbox and its associated IO
-  class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
-                          llki_sendrecv_addr    : BigInt,
-                          slave_tl_szw          : Int,
-                          slave_tl_aiw          : Int,
-                          slave_tl_aw           : Int,
-                          slave_tl_dbw          : Int,
-                          slave_tl_dw           : Int,
-                          slave_tl_diw          : Int) extends BlackBox (
-
-      Map(
-        "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
-        "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
-        "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
-        "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
-        "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
-        "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
-        "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
-        "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
-      )
-  ) {
-
-    val io = IO(new Bundle {
-      // Clock and Reset
-      val clk                 = Input(Clock())
-      val rst                 = Input(Reset())
-
-      // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_a_opcode      = Input(UInt(3.W))
-      val slave_a_param       = Input(UInt(3.W))
-      val slave_a_size        = Input(UInt(slave_tl_szw.W))
-      val slave_a_source      = Input(UInt(slave_tl_aiw.W))
-      val slave_a_address     = Input(UInt(slave_tl_aw.W))
-      val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
-      val slave_a_data        = Input(UInt(slave_tl_dw.W))
-      val slave_a_corrupt     = Input(Bool())
-      val slave_a_valid       = Input(Bool())
-      val slave_a_ready       = Output(Bool())
-
-      // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
-      val slave_d_opcode      = Output(UInt(3.W))
-      val slave_d_param       = Output(UInt(3.W))
-      val slave_d_size        = Output(UInt(slave_tl_szw.W))
-      val slave_d_source      = Output(UInt(slave_tl_aiw.W))
-      val slave_d_sink        = Output(UInt(slave_tl_diw.W))
-      val slave_d_denied      = Output(Bool())
-      val slave_d_data        = Output(UInt(slave_tl_dw.W))
-      val slave_d_corrupt     = Output(Bool())
-      val slave_d_valid       = Output(Bool())
-      val slave_d_ready       = Input(Bool())
-
-      // LLKI discrete interface
-      val llkid_key_data      = Output(UInt(64.W))
-      val llkid_key_valid     = Output(Bool())
-      val llkid_key_ready     = Input(Bool())
-      val llkid_key_complete  = Input(Bool())
-      val llkid_clear_key     = Output(Bool())
-      val llkid_clear_key_ack = Input(Bool())
-
-    })
-  } // end class llki_pp_wrapper
-
-  // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
-  val llki_pp_inst = Module(new llki_pp_wrapper(
-    coreparams.llki_ctrlsts_addr, 
-    coreparams.llki_sendrecv_addr,
-    llkiEdge.bundle.sizeBits,
-    llkiEdge.bundle.sourceBits,
-    llkiEdge.bundle.addressBits,
-    llkiEdge.bundle.dataBits / 8,
-    llkiEdge.bundle.dataBits,
-    llkiEdge.bundle.sinkBits
-  ))
-
-  // Connect the Clock and Reset
-  llki_pp_inst.io.clk                 := clock
-  llki_pp_inst.io.rst                 := reset
-
-  // Connect the Slave A Channel to the Black box IO
-  llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
-  llki_pp_inst.io.slave_a_param       := llki.a.bits.param
-  llki_pp_inst.io.slave_a_size        := llki.a.bits.size
-  llki_pp_inst.io.slave_a_source      := llki.a.bits.source
-  llki_pp_inst.io.slave_a_address     := llki.a.bits.address
-  llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
-  llki_pp_inst.io.slave_a_data        := llki.a.bits.data
-  llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
-  llki_pp_inst.io.slave_a_valid       := llki.a.valid
-  llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
-
-  // Connect the Slave D Channel to the Black Box IO    
-  llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
-  llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
-  llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
-  llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
-  llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
-  llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
-  llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
-  llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
-  llki.d.valid                        := llki_pp_inst.io.slave_d_valid
-  llki_pp_inst.io.slave_d_ready       := llki.d.ready
-
-  // Define blackbox and its associated IO
+  // Define blackbox and its associated IO (with LLKI)
   class FIR_filter_mock_tss () extends BlackBox with HasBlackBoxResource {
 
     val io = IO(new Bundle {
@@ -267,17 +173,28 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   }
 
-  // Instantiate the blackbox
-  val FIR_filter_inst   = Module(new FIR_filter_mock_tss())
-  FIR_filter_inst.suggestName(FIR_filter_inst.desiredName+"_inst")
+  // Define blackbox and its associated IO (without LLKI)
+  class FIR_filter () extends BlackBox with HasBlackBoxResource {
 
-  // Map the LLKI discrete blackbox IO between the core_inst and llki_pp_inst
-  FIR_filter_inst.io.llkid_key_data    := llki_pp_inst.io.llkid_key_data
-  FIR_filter_inst.io.llkid_key_valid   := llki_pp_inst.io.llkid_key_valid
-  llki_pp_inst.io.llkid_key_ready      := FIR_filter_inst.io.llkid_key_ready
-  llki_pp_inst.io.llkid_key_complete   := FIR_filter_inst.io.llkid_key_complete
-  FIR_filter_inst.io.llkid_clear_key   := llki_pp_inst.io.llkid_clear_key
-  llki_pp_inst.io.llkid_clear_key_ack  := FIR_filter_inst.io.llkid_clear_key_ack
+    val io = IO(new Bundle {
+      // Clock and Reset
+      val clk                 = Input(Clock())
+      val rst                 = Input(Reset())
+      val rst_dut             = Input(Reset())
+   
+      // Inputs
+      val inData              = Input(UInt(32.W))
+    
+      // Outputs
+      val outData             = Output(UInt(32.W))
+
+    })
+
+    // Add the SystemVerilog/Verilog associated with the module
+    // Relative to /src/main/resources
+    addResource("/vsrc/dsp/FIR_filter.v")
+
+  }
 
   // Macro definition for creating rising edge detectors
   def rising_edge(x: Bool)    = x && !RegNext(x)
@@ -288,8 +205,8 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   // Define registers / wires for interfacing to the FIR blackbox
   val start                   = RegInit(false.B)      // Start bit
-//  val fir_reset               = RegInit(false.B)      // Addressable reset
-// tony duong 2/23/21: need the core in reset while LLKI is running
+
+  // tony duong 2/23/21: need the core in reset while LLKI is running
   val fir_reset               = RegInit(true.B)      // Addressable reset
   val fir_reset_re            = RegInit(false.B)      // Rising edge detection for addressable reset   
   val datain_we               = RegInit(false.B)      // Controlled via register mappings
@@ -309,57 +226,236 @@ class coreTLModuleImp(coreparams: COREParams, outer: coreTLModule) extends LazyM
 
   fir_reset_re                := rising_edge(fir_reset)
 
-  // Write to the input data memory when a rising edge is detected on the write enable
-  when (rising_edge(datain_we)) {
-    datain_mem.write(datain_write_idx, datain_write_data)
-  }
+  // "Connect" to llki node's signals and parameters (if the LLKI is defined)
+  if (coreattachparams.llki_bus.isDefined) {
+    val (llki, llkiEdge)    = outer.llki_node.get.in(0)
 
-  // Implement the read logic for the datain and data out memories
-  datain_read_data            := datain_mem(datain_read_idx)
-  dataout_read_data           := dataout_mem(dataout_read_idx)
+    // Instantiate the FIR Filter Mock TSS
+    val impl = Module(new FIR_filter_mock_tss())
+    impl.suggestName(impl.desiredName+"_inst")
 
-  // Generate the read index for the data in memory
-  when (rising_edge(start)) {
-    datain_read_idx         := 0.U
-  } .elsewhen (datain_read_idx < 32.U) {
-    datain_read_idx         := datain_read_idx + 1.U
-  }
+    // Define the LLKI Protocol Processing blackbox and its associated IO
+    class llki_pp_wrapper(  llki_ctrlsts_addr     : BigInt, 
+                            llki_sendrecv_addr    : BigInt,
+                            slave_tl_szw          : Int,
+                            slave_tl_aiw          : Int,
+                            slave_tl_aw           : Int,
+                            slave_tl_dbw          : Int,
+                            slave_tl_dw           : Int,
+                            slave_tl_diw          : Int) extends BlackBox (
 
-  // The following counter "counts" the propagation through the FIR filter
-  when (rising_edge(start)) {
-    count                   := 0.U
-  } .elsewhen (datain_read_idx < 10.U) {
-    count                   := count + 1.U
-  }
+        Map(
+          "CTRLSTS_ADDR"    -> IntParam(llki_ctrlsts_addr),   // Address of the LLKI PP Control/Status Register
+          "SENDRECV_ADDR"   -> IntParam(llki_sendrecv_addr),  // Address of the LLKI PP Message Send/Receive interface
+          "SLAVE_TL_SZW"    -> IntParam(slave_tl_szw),
+          "SLAVE_TL_AIW"    -> IntParam(slave_tl_aiw),
+          "SLAVE_TL_AW"     -> IntParam(slave_tl_aw),
+          "SLAVE_TL_DBW"    -> IntParam(slave_tl_dbw),
+          "SLAVE_TL_DW"     -> IntParam(slave_tl_dw),
+          "SLAVE_TL_DIW"    -> IntParam(slave_tl_diw)
+        )
+    ) {
 
-  // Assert next out when the count reaches the appropriate value
-  next_out                    := (count === 3.U)
+      val io = IO(new Bundle {
 
-  // Generate the write index for the output data memory (and write)
-  when (rising_edge(next_out)) {
-    dataout_write_idx       := 0.U;
-  } .elsewhen (dataout_write_idx < 32.U) {
-    dataout_write_idx       := dataout_write_idx + 1.U
-    dataout_mem.write(dataout_write_idx, dataout_write_data)
-  }
+        // Clock and Reset
+        val clk                 = Input(Clock())
+        val rst                 = Input(Reset())
 
-  // Generate the data valid signal
-  when (rising_edge(start)) {
-    dataout_valid           := 0.U
-  } .elsewhen (rising_edge(next_out)) {
-    dataout_valid           := 1.U
-  }
+        // Slave - Tilelink A Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_a_opcode      = Input(UInt(3.W))
+        val slave_a_param       = Input(UInt(3.W))
+        val slave_a_size        = Input(UInt(slave_tl_szw.W))
+        val slave_a_source      = Input(UInt(slave_tl_aiw.W))
+        val slave_a_address     = Input(UInt(slave_tl_aw.W))
+        val slave_a_mask        = Input(UInt(slave_tl_dbw.W))
+        val slave_a_data        = Input(UInt(slave_tl_dw.W))
+        val slave_a_corrupt     = Input(Bool())
+        val slave_a_valid       = Input(Bool())
+        val slave_a_ready       = Output(Bool())
 
-  // Map the blackbox I/O
-  // The FIR needs to be reset in between test vectors, thus a second reset
-  // has been added in order to allow for the LLKI keys to persist
-  FIR_filter_inst.io.clk       := clock
-  FIR_filter_inst.io.rst       := reset
-//  FIR_filter_inst.io.rst_dut   := (reset.asBool || fir_reset_re).asAsyncReset 
-  FIR_filter_inst.io.rst_dut   := (reset.asBool || fir_reset).asAsyncReset 
+        // Slave - Tilelink D Channel (Signal order/names from Tilelink Specification v1.8.0)
+        val slave_d_opcode      = Output(UInt(3.W))
+        val slave_d_param       = Output(UInt(3.W))
+        val slave_d_size        = Output(UInt(slave_tl_szw.W))
+        val slave_d_source      = Output(UInt(slave_tl_aiw.W))
+        val slave_d_sink        = Output(UInt(slave_tl_diw.W))
+        val slave_d_denied      = Output(Bool())
+        val slave_d_data        = Output(UInt(slave_tl_dw.W))
+        val slave_d_corrupt     = Output(Bool())
+        val slave_d_valid       = Output(Bool())
+        val slave_d_ready       = Input(Bool())
+
+        // LLKI discrete interface
+        val llkid_key_data      = Output(UInt(64.W))
+        val llkid_key_valid     = Output(Bool())
+        val llkid_key_ready     = Input(Bool())
+        val llkid_key_complete  = Input(Bool())
+        val llkid_clear_key     = Output(Bool())
+        val llkid_clear_key_ack = Input(Bool())
+
+      })
+    } // end class llki_pp_wrapper
+
+    // Instantiate the LLKI Protocol Processing Block with CORE SPECIFIC decode constants
+    val llki_pp_inst = Module(new llki_pp_wrapper(
+      coreparams.llki_ctrlsts_addr, 
+      coreparams.llki_sendrecv_addr,
+      llkiEdge.bundle.sizeBits,
+      llkiEdge.bundle.sourceBits,
+      llkiEdge.bundle.addressBits,
+      llkiEdge.bundle.dataBits / 8,
+      llkiEdge.bundle.dataBits,
+      llkiEdge.bundle.sinkBits
+    ))
+
+    // Connect the Clock and Reset
+    llki_pp_inst.io.clk                 := clock
+    llki_pp_inst.io.rst                 := reset
+
+    // Connect the Slave A Channel to the Black box IO
+    llki_pp_inst.io.slave_a_opcode      := llki.a.bits.opcode
+    llki_pp_inst.io.slave_a_param       := llki.a.bits.param
+    llki_pp_inst.io.slave_a_size        := llki.a.bits.size
+    llki_pp_inst.io.slave_a_source      := llki.a.bits.source
+    llki_pp_inst.io.slave_a_address     := llki.a.bits.address
+    llki_pp_inst.io.slave_a_mask        := llki.a.bits.mask
+    llki_pp_inst.io.slave_a_data        := llki.a.bits.data
+    llki_pp_inst.io.slave_a_corrupt     := llki.a.bits.corrupt
+    llki_pp_inst.io.slave_a_valid       := llki.a.valid
+    llki.a.ready                        := llki_pp_inst.io.slave_a_ready  
+
+    // Connect the Slave D Channel to the Black Box IO    
+    llki.d.bits.opcode                  := llki_pp_inst.io.slave_d_opcode
+    llki.d.bits.param                   := llki_pp_inst.io.slave_d_param
+    llki.d.bits.size                    := llki_pp_inst.io.slave_d_size
+    llki.d.bits.source                  := llki_pp_inst.io.slave_d_source
+    llki.d.bits.sink                    := llki_pp_inst.io.slave_d_sink
+    llki.d.bits.denied                  := llki_pp_inst.io.slave_d_denied
+    llki.d.bits.data                    := llki_pp_inst.io.slave_d_data
+    llki.d.bits.corrupt                 := llki_pp_inst.io.slave_d_corrupt
+    llki.d.valid                        := llki_pp_inst.io.slave_d_valid
+    llki_pp_inst.io.slave_d_ready       := llki.d.ready
+
+    impl.io.llkid_key_data              := llki_pp_inst.io.llkid_key_data
+    impl.io.llkid_key_valid             := llki_pp_inst.io.llkid_key_valid
+    llki_pp_inst.io.llkid_key_ready     := impl.io.llkid_key_ready
+    llki_pp_inst.io.llkid_key_complete  := impl.io.llkid_key_complete
+    impl.io.llkid_clear_key             := llki_pp_inst.io.llkid_clear_key
+    llki_pp_inst.io.llkid_clear_key_ack := impl.io.llkid_clear_key_ack
+
+    // Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data            := datain_mem(datain_read_idx)
+    dataout_read_data           := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx         := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx         := datain_read_idx + 1.U
+    }
+
+    // The following counter "counts" the propagation through the FIR filter
+    when (rising_edge(start)) {
+      count                   := 0.U
+    } .elsewhen (datain_read_idx < 10.U) {
+      count                   := count + 1.U
+    }
+
+    // Assert next out when the count reaches the appropriate value
+    next_out                    := (count === 3.U)
+
+    // Generate the write index for the output data memory (and write)
+    when (rising_edge(next_out)) {
+      dataout_write_idx       := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx       := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid           := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid           := 1.U
+    }
+
+    // Map the blackbox I/O
+    // The FIR needs to be reset in between test vectors, thus a second reset
+    // has been added in order to allow for the LLKI keys to persist
+    impl.io.clk             := clock
+    impl.io.rst             := reset
+    impl.io.rst_dut         := (reset.asBool || fir_reset).asAsyncReset 
                                                                      
-  FIR_filter_inst.io.inData    := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
-  dataout_write_data                    := FIR_filter_inst.io.outData
+    impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
+    dataout_write_data      := impl.io.outData
+
+  } else { // else if (coreattachparams.llki_bus.isDefined)
+
+    // Instantiate the DFT Top
+    val impl = Module(new FIR_filter())
+    impl.suggestName(impl.desiredName+"_inst")
+
+// Write to the input data memory when a rising edge is detected on the write enable
+    when (rising_edge(datain_we)) {
+      datain_mem.write(datain_write_idx, datain_write_data)
+    }
+
+    // Implement the read logic for the datain and data out memories
+    datain_read_data            := datain_mem(datain_read_idx)
+    dataout_read_data           := dataout_mem(dataout_read_idx)
+
+    // Generate the read index for the data in memory
+    when (rising_edge(start)) {
+      datain_read_idx         := 0.U
+    } .elsewhen (datain_read_idx < 32.U) {
+      datain_read_idx         := datain_read_idx + 1.U
+    }
+
+    // The following counter "counts" the propagation through the FIR filter
+    when (rising_edge(start)) {
+      count                   := 0.U
+    } .elsewhen (datain_read_idx < 10.U) {
+      count                   := count + 1.U
+    }
+
+    // Assert next out when the count reaches the appropriate value
+    next_out                    := (count === 3.U)
+
+    // Generate the write index for the output data memory (and write)
+    when (rising_edge(next_out)) {
+      dataout_write_idx       := 0.U;
+    } .elsewhen (dataout_write_idx < 32.U) {
+      dataout_write_idx       := dataout_write_idx + 1.U
+      dataout_mem.write(dataout_write_idx, dataout_write_data)
+    }
+
+    // Generate the data valid signal
+    when (rising_edge(start)) {
+      dataout_valid           := 0.U
+    } .elsewhen (rising_edge(next_out)) {
+      dataout_valid           := 1.U
+    }
+
+    // Map the blackbox I/O
+    // The FIR needs to be reset in between test vectors, thus a second reset
+    // has been added in order to allow for the LLKI keys to persist
+    impl.io.clk             := clock
+    impl.io.rst             := reset
+    impl.io.rst_dut         := (reset.asBool || fir_reset).asAsyncReset 
+                                                                     
+    impl.io.inData          := Mux(datain_read_idx < 32.U, datain_read_data, 0.U)
+    dataout_write_data      := impl.io.outData
+
+  } // if (coreattachparams.llki_bus.isDefined)
+
+
+
 
   // Define the register map
   // Registers with .r suffix to RegField are Read Only (otherwise, Chisel will assume they are R/W)
