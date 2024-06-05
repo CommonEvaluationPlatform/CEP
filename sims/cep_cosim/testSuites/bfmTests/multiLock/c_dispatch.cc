@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
   //
   // max number of cores not include the system thread
   //
-  int maxHost = MAX_CORES; // number of cores/threads
+  int maxHost = CHIPYARD_CPU_COUNT; // number of cores/threads
   //
   // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
   //

@@ -6,7 +6,8 @@
 // Program:        Common Evaluation Platform (CEP)
 // Description:    Defines related to the design hiearchy that increase
 //                 readability
-// Notes:          
+// Notes:          This has had to be updated with various chipyard releases due 
+//                 to hiearchical name changes
 //
 //--------------------------------------------------------------------------------------
 

@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
   int errCnt              = 0;
   int verbose             = 0x1f;
   int activeSlot          = 0;          // only 1 board 
-  int maxHost             = MAX_CORES;  // number of cores/threads
+  int maxHost             = CHIPYARD_CPU_COUNT;  // number of cores/threads
   long unsigned int mask  = 0xf;        // each bit is to turn on the given core (bit0 = core0, bit1=core1, etc..)
   int done                = 0;
   shPthread               thr;

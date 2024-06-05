@@ -5,7 +5,8 @@
 // File Name:      bare_malloc.c
 // Program:        Common Evaluation Platform (CEP)
 // Description:    CEP malloc functionality for bare metal
-// Notes:          
+// Notes:          Memory is allocated assuming MAX_CORES are instantiated
+//                 Less cores will just result in some wasted memory
 //
 //************************************************************************
 

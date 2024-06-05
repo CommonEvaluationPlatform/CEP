@@ -8,8 +8,14 @@
 //                 CEP items that are not part of the accelerator cores
 //                 as defined in CEP.h.  Converted to cep_adrMap.h via
 //                 a PERL script
-// Notes:          
+// Notes:          Factors that constain the maximum number of cores
+//                  - Stack and thread storage in bare metal
+//                  - Available status registers in the cep register component
 //
+//                 The addresses present here are the default for Chipyard
+//                 builds.  Should items such as the UART or SPI be moved
+//                 in the address map, then these constants will need to be
+//                 updated
 //************************************************************************
 
 `ifndef CEP_ADRMAP_INCL
@@ -17,6 +23,11 @@
 
 // Maximum number of cores supports by co-simulation environment
 `define MAX_CORES                       4
+
+// Define the default number of cores if not otherwise specified
+`ifndef CHIPYARD_CPU_COUNT
+`define CHIPYARD_CPU_COUNT              4
+`endif
 
 // Values used with the CEP Core Status registers to indicate status
 `define CEP_GOOD_STATUS                 'h600D_BABE
@@ -26,7 +37,7 @@
 `define CEP_OK2RUN_SIGNATURE            'hAAAA_5555
 
 // The following constants define the base address and
-// size of the scratchpad memory (as defined in the 
+// size of the scratchpad (or main) memory (as defined in the 
 // selected configuration of CEPConfigs.scala)
 `define scratchpad_base_addr            'h8000_0000
 `define scratchpad_base_size            'h0010_0000
@@ -43,7 +54,7 @@
 //  2^15 - 32k
 //  2^16 - 64k
 //
-// Allocation works is peformed by crt.S in the
+// Allocation is peformed by crt.S in the
 // following fashion:
 //  Core 0 tp = _end
 //  Core 1 tp = _end + 1 << cep_stkshift (x 2^cep_stkshift)

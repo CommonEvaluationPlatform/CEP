@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   int errCnt                = 0;
   int verbose               = 0x1f;
   int activeSlot            = 0;          // only 1 board 
-  int maxHost               = MAX_CORES;  // number of cores/threads
+  int maxHost               = CHIPYARD_CPU_COUNT;  // number of cores/threads
 
   // Some ISA Tests only run on a single core with the other cores sitting in an infinite loop.
   // Behavior is unpredicable when only "some" cores are released from reset / threads spawned.

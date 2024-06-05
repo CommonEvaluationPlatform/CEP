@@ -95,7 +95,7 @@ COSIM_VLOG_ARGS				+= 	+define+RANDOMIZE_MEM_INIT \
 								+define+RANDOMIZE_GARBAGE_ASSIGN \
 								+define+RANDOMIZE_INVALID_ASSIGN \
 								+define+RANDOM="1'b0" \
-								+define+CPU_COUNT=${CHIPYARD_CPU_COUNT}
+								+define+CHIPYARD_CPU_COUNT=${CHIPYARD_CPU_COUNT}
 #--------------------------------------------------------------------------------------
 
 

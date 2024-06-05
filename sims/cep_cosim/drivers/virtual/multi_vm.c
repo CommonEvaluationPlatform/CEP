@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "cep_adrMap.h"
 #include "riscv_test.h"
 
 // SV39 ONLY!!!
@@ -29,7 +30,6 @@ extern uint64_t vm_flags;
 #define NPT 4
 #define kernel_l2pt pt[cid][2]
 #define user_llpt pt[cid][3]
-#define MAX_CORES 4
 //
 /*
 #define l1pt        pt[0]

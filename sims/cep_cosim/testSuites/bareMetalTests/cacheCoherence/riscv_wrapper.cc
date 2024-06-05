@@ -34,10 +34,10 @@
   int errCnt = 0,i,to,b;
     int testId[4] = {0x00,0x11,0x22,0x33};
     int coreId = read_csr(mhartid);
-    int partnerId = (coreId + 1) % MAX_CORES;
+    int partnerId = (coreId + 1) % CHIPYARD_CPU_COUNT;
   
     // upto 4 for now
-    uint64_t pattern[MAX_CORES] = {
+    uint64_t pattern[CHIPYARD_CPU_COUNT] = {
       0x0102030405060708LL,   
       0x1112131415161718LL,   
       0x2122232425262728LL,
