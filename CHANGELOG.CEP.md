@@ -6,15 +6,19 @@
 
 # CEP Changelog
 
-## [v4.70] - 2024-XX-XX
+## [v4.70] - 2024-06-06
 ### Added
   - Optional inclusion of the LLKI have been added to all CEP modules.  Example CEPNoLLKIRocketConfig has been included.
+    CEP Cosimulation tests run successfully without the LLKI (except those whose explicitly test the Surrogate Root of Trust)
   - Added initial cep_cosim support for fewer than four rocket-cores
 ### Changed
   - Chipyard updated to chipyard/main 30 May 2024 (eb6910a commit)
     (https://github.com/ucb-bar/chipyard/commits/main/) for more info
 ### Fixed
+  - ISA Test functionality partially restored
 ### Issues
+  - Some SRoT based test fail in CEP Cosim on xcelium
+  - SDIO not functioning properly on VCU118
 
 ## [v4.60] - 2024-05-10
 

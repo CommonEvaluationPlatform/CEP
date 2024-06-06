@@ -170,10 +170,10 @@ Once released from reset, the CEP's bootrom will read the baremetal executable f
 
 An example UART output for the baremetal gpiotest follows:
 ```
----          Common Evaluation Platform v4.50            ---
---- Based on the UCB Chipyard Framework (1.10.0 release) ---
---- Copyright 2024 Massachusetts Institute of Technology ---
----     BootRom Image built on Dec  4 2023 10:15:50      ---
+--              Common Evaluation Platform v4.70                   ---
+--- Based on the UCB Chipyard Framework (commit eb6910a, 30 May 24) ---
+---      Copyright 2024 Massachusetts Institute of Technology       ---
+---          BootRom Image built on May 31 2024 15:33:33            ---
 
 INIT
 CMD0
@@ -184,21 +184,17 @@ CMD16
 CMD18
 LOADING 128kB PAYLOAD
 ....
+BOOT
+
 
 --------------------------
      RISC-V GPIO Test     
 --------------------------
-     Built for VCU118
+    Built for Arty100T
    Console Echo Enabled   
 
 
-gpio = 00000010
-gpio = 00000000
-gpio = 00000020
-gpio = 00000000
-gpio = 00000080
-gpio = 00000000
-gpio = 00000040
+gpio = 00000100
 gpio = 00000000
 ...
 ```
