@@ -58,7 +58,7 @@ First, the following items should be considered:
   Libcrytpo++ will need to be built from source.  It can be downloaded from [here](https://www.cryptopp.com).  It is receommended you select a version >= 8.6.
   The following commands allow you to build libcrypto++ : `make; sudo make install`
 
-It is recommended you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation and submodule initialization.  Note the dependency on a specific version of conda-lock.
+It is required you follow the setup documentation provided by [Chipyard](https://chipyard.readthedocs.io/en/latest/Chipyard-Basics/Initial-Repo-Setup.html#prerequisites).  This includes conda installation and submodule initialization.  Note the dependency on a specific version of conda-lock.
 
 Following the installation of conda, it is recommended you execute the following commands
 ```
