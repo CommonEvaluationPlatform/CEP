@@ -42,7 +42,8 @@ HELP_SIMULATION_VARIABLES = \
 "   LOADMEM                = riscv elf binary that should be loaded directly into simulated DRAM. LOADMEM=1 will load the BINARY elf" \
 "   LOADARCH               = path to a architectural checkpoint directory that should end in .loadarch/, for restoring from a checkpoint" \
 "   VERBOSE_FLAGS          = flags used when doing verbose simulation [$(VERBOSE_FLAGS)]" \
-"   TIMEOUT_CYCLES         = number of clock cycles before simulator times out, defaults to 10000000"
+"   TIMEOUT_CYCLES         = number of clock cycles before simulator times out, defaults to 10000000" \
+"   DUMP_BINARY            = set to '1' to disassemble the target binary"
 
 # include default simulation rules
 HELP_COMMANDS = \
@@ -264,6 +265,7 @@ TAPEOUT_CLASSPATH ?= $(CLASSPATH_CACHE)/tapeout.jar
 FIRRTL_FILE ?= $(build_dir)/$(long_name).fir
 ANNO_FILE   ?= $(build_dir)/$(long_name).anno.json
 CHISEL_LOG_FILE ?= $(build_dir)/$(long_name).chisel.log
+FIRTOOL_LOG_FILE ?= $(build_dir)/$(long_name).firtool.log
 
 # chisel anno modification output
 MFC_EXTRA_ANNO_FILE ?= $(build_dir)/$(long_name).extrafirtool.anno.json
@@ -278,7 +280,6 @@ MFC_SMEMS_CONF ?= $(build_dir)/$(long_name).mems.conf
 MFC_FILELIST = $(GEN_COLLATERAL_DIR)/filelist.f
 MFC_BB_MODS_FILELIST = $(GEN_COLLATERAL_DIR)/firrtl_black_box_resource_files.f
 MFC_TOP_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/seq_mems.json
-MFC_MODEL_SMEMS_JSON = $(GEN_COLLATERAL_DIR)/metadata/tb_seq_mems.json
 
 # macrocompiler smems in/output
 TOP_SMEMS_CONF ?= $(build_dir)/$(long_name).top.mems.conf
@@ -371,6 +372,7 @@ VERBOSE_FLAGS ?= +verbose
 get_out_name = $(subst $() $(),_,$(notdir $(basename $(1))))
 LOADMEM ?=
 LOADARCH ?=
+DUMP_BINARY ?= 1
 
 ifneq ($(LOADARCH),)
 override BINARY = $(addsuffix /mem.elf,$(LOADARCH))

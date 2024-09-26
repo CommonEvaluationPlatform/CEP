@@ -23,6 +23,7 @@ so changes to the generators themselves will automatically be used when building
    BOOM
    Constellation
    Gemmini
+   Saturn
    IceNet
    TestChipIP
    Rocket-Chip-Generators
@@ -33,4 +34,6 @@ so changes to the generators themselves will automatically be used when building
    Sodor
    Shuttle
    Mempress
+   CompressAcc
    Prefetchers
+   Ara

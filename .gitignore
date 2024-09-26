@@ -27,6 +27,7 @@ v2c_cmds.h
 *.elf
 *.o
 .conda-env/
+.conda-lock-env/
 .#*
 first-clone-setup-fast-log
 .bloop/

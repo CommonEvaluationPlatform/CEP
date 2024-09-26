@@ -11,6 +11,8 @@
 import Tests._
 
 val chisel6 = sys.env.get("USE_CHISEL6").isDefined
+val chisel6Version = "6.5.0"
+val chisel3Version = "3.6.1"
 val chiselTestVersion = if (chisel6) "6.0.0" else "0.6.0"
 val scalaVersionFromChisel = if (chisel6) "2.13.12" else "2.13.10"
 
@@ -104,12 +106,12 @@ def isolateAllTests(tests: Seq[TestDefinition]) = tests map { test =>
 
 
 lazy val chisel6Settings = Seq(
-  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % "6.0.0"),
-  addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % "6.0.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % chisel6Version),
+  addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chisel6Version cross CrossVersion.full)
 )
 lazy val chisel3Settings = Seq(
-  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % "3.6.0"),
-  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.6.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chisel3Version),
+  addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chisel3Version cross CrossVersion.full)
 )
 
 lazy val chiselSettings = (if (chisel6) chisel6Settings else chisel3Settings) ++ Seq(
@@ -184,7 +186,8 @@ lazy val chipyard = (project in file("generators/chipyard"))
     dsptools, rocket_dsp_utils,
     mitllBlocks,
     gemmini, icenet, tracegen, cva6, nvdla, sodor, ibex, fft_generator,
-    constellation, mempress, barf, shuttle, caliptra_aes, rerocc)
+    constellation, mempress, barf, shuttle, caliptra_aes, rerocc,
+    compressacc, saturn, ara)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(
     libraryDependencies ++= Seq(
@@ -194,6 +197,11 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .settings(commonSettings)
   .settings(Compile / unmanagedSourceDirectories += file(stageDir))
 
+lazy val compressacc = (project in file("generators/compress-acc"))
+  .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val mempress = (project in file("generators/mempress"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -201,6 +209,11 @@ lazy val mempress = (project in file("generators/mempress"))
 
 lazy val barf = (project in file("generators/bar-fetchers"))
   .dependsOn(rocketchip)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
+lazy val saturn = (project in file("generators/saturn"))
+  .dependsOn(rocketchip, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -239,6 +252,11 @@ lazy val cva6 = (project in file("generators/cva6"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+lazy val ara = (project in file("generators/ara"))
+  .dependsOn(rocketchip, shuttle)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(commonSettings)
+
 lazy val ibex = (project in file("generators/ibex"))
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -265,7 +283,7 @@ lazy val caliptra_aes = (project in file("generators/caliptra-aes-acc"))
   .settings(commonSettings)
 
 lazy val rerocc = (project in file("generators/rerocc"))
-  .dependsOn(rocketchip, constellation, boom)
+  .dependsOn(rocketchip, constellation, boom, shuttle)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 

@@ -96,6 +96,7 @@ HELP_COMMANDS += \
 #########################################################################################
 include $(base_dir)/generators/cva6/cva6.mk
 include $(base_dir)/generators/ibex/ibex.mk
+include $(base_dir)/generators/ara/ara.mk
 include $(base_dir)/generators/tracegen/tracegen.mk
 include $(base_dir)/generators/nvdla/nvdla.mk
 include $(base_dir)/tools/torture.mk
@@ -125,19 +126,9 @@ TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)
 TAPEOUT_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(SCALA_EXT))
 TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(VLOG_EXT))
 # This assumes no SBT meta-build sources
-SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators sims/firesim/sim tools)
+SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
 SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
 
-#########################################################################################
-# SBT Server Setup (start server / rebuild proj. defs. if SBT_SOURCES change)
-#########################################################################################
-$(SBT_THIN_CLIENT_TIMESTAMP): $(SBT_SOURCES)
-ifneq (,$(wildcard $(SBT_THIN_CLIENT_TIMESTAMP)))
-	cd $(base_dir) && $(SBT) "reload"
-	touch $@
-else
-	cd $(base_dir) && $(SBT) "exit"
-endif
 
 #########################################################################################
 # CEP: The following targets perform custom steps for the CEP build
@@ -280,10 +271,10 @@ SFC_MFC_TARGETS = \
 	$(MFC_TOP_SMEMS_JSON) \
 	$(MFC_TOP_HRCHY_JSON) \
 	$(MFC_MODEL_HRCHY_JSON) \
-	$(MFC_MODEL_SMEMS_JSON) \
 	$(MFC_FILELIST) \
 	$(MFC_BB_MODS_FILELIST) \
-	$(GEN_COLLATERAL_DIR)
+	$(GEN_COLLATERAL_DIR) \
+	$(FIRTOOL_LOG_FILE)
 
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
@@ -298,7 +289,7 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	rm -rf $(GEN_COLLATERAL_DIR)
-	firtool \
+	(set -o pipefail && firtool \
 		--format=fir \
 		--export-module-hierarchy \
 		--verify-each=true \
@@ -312,7 +303,7 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 		--annotation-file=$(FINAL_ANNO_FILE) \
 		--split-verilog \
 		-o $(GEN_COLLATERAL_DIR) \
-		$(FIRRTL_FILE)
+		$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) -i 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
 	touch $(MFC_BB_MODS_FILELIST) # if there are no BB's then the file might not be generated, instead always generate it
 # DOC include end: FirrtlCompiler
@@ -322,6 +313,7 @@ $(TOP_MODS_FILELIST) $(MODEL_MODS_FILELIST) $(ALL_MODS_FILELIST) $(BB_MODS_FILEL
 		--model-hier-json $(MFC_MODEL_HRCHY_JSON) \
 		--top-hier-json $(MFC_TOP_HRCHY_JSON) \
 		--in-all-filelist $(MFC_FILELIST) \
+		--in-bb-filelist $(MFC_BB_MODS_FILELIST) \
 		--dut $(TOP) \
 		--model $(MODEL) \
 		--target-dir $(GEN_COLLATERAL_DIR) \
@@ -460,7 +452,9 @@ run-binary-debug: check-binary $(BINARY).run.debug
 run-binaries-debug: check-binaries $(addsuffix .run.debug,$(BINARIES))
 
 %.run.debug: %.check-exists $(SIM_DEBUG_PREREQ) | $(output_dir)
+ifeq (1,$(DUMP_BINARY))
 	if [ "$*" != "none" ]; then riscv64-unknown-elf-objdump -D -S $* > $(call get_sim_out_name,$*).dump ; fi
+endif
 	(set -o pipefail && $(NUMA_PREFIX) $(sim_debug) \
 		$(PERMISSIVE_ON) \
 		$(call get_common_sim_flags,$*) \
@@ -494,10 +488,10 @@ $(output_dir)/%: $(RISCV)/riscv64-unknown-elf/share/riscv-tests/isa/% | $(output
 	ln -sf $< $@
 
 $(output_dir)/%.run: $(output_dir)/% $(SIM_PREREQ)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(PERMISSIVE_OFF) $< </dev/null | tee $<.log) && touch $@
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$<) $(PERMISSIVE_OFF)  $< </dev/null | tee $<.log) && touch $@
 
 $(output_dir)/%.out: $(output_dir)/% $(SIM_PREREQ)
-	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(SIM_FLAGS) $(EXTRA_SIM_FLAGS) $(SEED_FLAG) $(VERBOSE_FLAGS) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
+	(set -o pipefail && $(NUMA_PREFIX) $(sim) $(PERMISSIVE_ON) $(call get_common_sim_flags,$<) $(PERMISSIVE_OFF) $< </dev/null 2> >(spike-dasm > $@) | tee $<.log)
 
 #########################################################################################
 # include build/project specific makefrags made from the generator
