@@ -30,7 +30,7 @@ import chisel3.experimental.{IntParam}
 
 object CEPVersion {
   val CEP_MAJOR_VERSION             = 0x04
-  val CEP_MINOR_VERSION             = 0x70
+  val CEP_MINOR_VERSION             = 0x80
 }
 
 object CEPBaseAddresses {  

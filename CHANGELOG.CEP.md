@@ -6,6 +6,14 @@
 
 # CEP Changelog
 
+## [v4.80] - 2024-09-27
+### Added
+  - Updated to Chipyard v1.12.3
+### Changed
+  - Updated to Chipyard v1.12.3
+### Fixed
+### Issues
+
 ## [v4.70] - 2024-06-06
 ### Added
   - Optional inclusion of the LLKI have been added to all CEP modules.  Example CEPNoLLKIRocketConfig has been included.
